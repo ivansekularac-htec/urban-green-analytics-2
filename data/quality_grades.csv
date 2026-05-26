@@ -1,0 +1,6 @@
+Quality Grade ID,Name,Description
+1,Grade A - Premium,"Highest quality produce with perfect appearance, optimal size, and superior taste - suitable for high-end retail and restaurants"
+2,Grade B - Standard,"Good quality produce with minor cosmetic imperfections but excellent nutritional value - ideal for general retail markets"
+3,Grade C - Commercial,"Acceptable quality with noticeable cosmetic flaws but good nutritional content - suitable for food service and wholesale"
+4,Grade D - Processing,"Lower grade produce with significant cosmetic issues but safe for consumption - used for processed foods, juices, and sauces"
+5,Grade E - Livestock Feed,"Produce not suitable for human consumption due to quality issues - repurposed as animal feed or compost material"

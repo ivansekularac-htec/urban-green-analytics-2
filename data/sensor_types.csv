@@ -1,0 +1,7 @@
+Sensor Type ID,Sensor Type Name,Unit,Description,Min Value,Max Value
+1,Temperature,°C,Ambient temperature measurement,18,25
+2,Humidity,%,Relative humidity percentage,50,70
+3,Light Intensity,PPFD,Photosynthetic photon flux density,200,800
+4,pH Level,pH,Acidity/alkalinity of water or soil,5,7
+5,Energy Usage,kWh,Total electrical energy consumed by the system,1,1000000
+6,CO2 Concentration,ppm,Carbon dioxide parts per million,400,1200

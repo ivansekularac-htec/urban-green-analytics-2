@@ -1,0 +1,76 @@
+Farm ID,Name,City,Size m2,Infrastructure Type,Growing System Type,No. of Growing Beds
+1,UG Farm 001,Berlin,265,Aeroponic,Tower Farming,93
+2,UG Farm 002,Munich,124,Aeroponic,Flat Bed Farming,22
+3,UG Farm 003,Hamburg,287,Aeroponic,Flat Bed Farming,37
+4,UG Farm 004,Frankfurt,119,Aeroponic,Tower Farming,63
+5,UG Farm 005,Cologne,135,Aeroponic,Vertical Farming,80
+6,UG Farm 006,Stuttgart,317,Aeroponic,Flat Bed Farming,25
+7,UG Farm 007,Düsseldorf,214,Aeroponic,Flat Bed Farming,84
+8,UG Farm 008,Berlin,303,Aeroponic,Vertical Farming,15
+9,UG Farm 009,Munich,385,Aeroponic,Tower Farming,63
+10,UG Farm 010,Hamburg,173,Aeroponic,Flat Bed Farming,49
+11,UG Farm 011,Frankfurt,386,Aeroponic,Vertical Farming,84
+12,UG Farm 012,Cologne,392,Aeroponic,Tower Farming,22
+13,UG Farm 013,Stuttgart,380,Aeroponic,Flat Bed Farming,17
+14,UG Farm 014,Düsseldorf,416,Aeroponic,Tower Farming,97
+15,UG Farm 015,Berlin,372,Hydroponic,Tower Farming,69
+16,UG Farm 016,Munich,399,Hydroponic,Tower Farming,48
+17,UG Farm 017,Hamburg,227,Aeroponic,Flat Bed Farming,41
+18,UG Farm 018,Frankfurt,141,Hydroponic,Flat Bed Farming,73
+19,UG Farm 019,Cologne,275,Hydroponic,Tower Farming,87
+20,UG Farm 020,Stuttgart,137,Aeroponic,Flat Bed Farming,63
+21,UG Farm 021,Düsseldorf,184,Hydroponic,Vertical Farming,72
+22,UG Farm 022,Berlin,315,Aeroponic,Flat Bed Farming,19
+23,UG Farm 023,Munich,491,Hydroponic,Tower Farming,98
+24,UG Farm 024,Hamburg,279,Hydroponic,Flat Bed Farming,68
+25,UG Farm 025,Frankfurt,135,Aeroponic,Tower Farming,70
+26,UG Farm 026,Cologne,456,Aeroponic,Vertical Farming,99
+27,UG Farm 027,Stuttgart,258,Hydroponic,Tower Farming,59
+28,UG Farm 028,Düsseldorf,442,Hydroponic,Vertical Farming,69
+29,UG Farm 029,Berlin,281,Aeroponic,Flat Bed Farming,24
+30,UG Farm 030,Munich,352,Aeroponic,Vertical Farming,46
+31,UG Farm 031,Hamburg,166,Aeroponic,Tower Farming,60
+32,UG Farm 032,Frankfurt,354,Aeroponic,Vertical Farming,67
+33,UG Farm 033,Cologne,305,Hydroponic,Vertical Farming,65
+34,UG Farm 034,Stuttgart,381,Hydroponic,Flat Bed Farming,63
+35,UG Farm 035,Düsseldorf,283,Hydroponic,Vertical Farming,29
+36,UG Farm 036,Berlin,142,Aeroponic,Vertical Farming,39
+37,UG Farm 037,Munich,437,Aeroponic,Vertical Farming,72
+38,UG Farm 038,Hamburg,401,Aeroponic,Tower Farming,46
+39,UG Farm 039,Frankfurt,102,Aeroponic,Tower Farming,78
+40,UG Farm 040,Cologne,289,Hydroponic,Vertical Farming,98
+41,UG Farm 041,Stuttgart,363,Aeroponic,Tower Farming,97
+42,UG Farm 042,Düsseldorf,386,Hydroponic,Tower Farming,61
+43,UG Farm 043,Berlin,301,Aeroponic,Tower Farming,91
+44,UG Farm 044,Munich,305,Aeroponic,Vertical Farming,18
+45,UG Farm 045,Hamburg,206,Hydroponic,Vertical Farming,24
+46,UG Farm 046,Frankfurt,274,Aeroponic,Vertical Farming,10
+47,UG Farm 047,Cologne,390,Aeroponic,Flat Bed Farming,22
+48,UG Farm 048,Stuttgart,286,Aeroponic,Vertical Farming,36
+49,UG Farm 049,Düsseldorf,414,Hydroponic,Vertical Farming,91
+50,UG Farm 050,Berlin,229,Hydroponic,Flat Bed Farming,56
+51,UG Farm 051,Munich,342,Aeroponic,Vertical Farming,72
+52,UG Farm 052,Hamburg,338,Hydroponic,Tower Farming,49
+53,UG Farm 053,Frankfurt,143,Aeroponic,Vertical Farming,53
+54,UG Farm 054,Cologne,479,Hydroponic,Tower Farming,98
+55,UG Farm 055,Stuttgart,182,Aeroponic,Vertical Farming,77
+56,UG Farm 056,Düsseldorf,285,Aeroponic,Flat Bed Farming,79
+57,UG Farm 057,Berlin,113,Hydroponic,Flat Bed Farming,21
+58,UG Farm 058,Munich,456,Hydroponic,Flat Bed Farming,56
+59,UG Farm 059,Hamburg,185,Hydroponic,Vertical Farming,78
+60,UG Farm 060,Frankfurt,377,Hydroponic,Flat Bed Farming,38
+61,UG Farm 061,Cologne,413,Aeroponic,Vertical Farming,61
+62,UG Farm 062,Stuttgart,478,Aeroponic,Vertical Farming,76
+63,UG Farm 063,Düsseldorf,352,Hydroponic,Flat Bed Farming,13
+64,UG Farm 064,Berlin,114,Hydroponic,Tower Farming,43
+65,UG Farm 065,Munich,199,Hydroponic,Tower Farming,54
+66,UG Farm 066,Hamburg,286,Aeroponic,Vertical Farming,23
+67,UG Farm 067,Frankfurt,216,Hydroponic,Vertical Farming,53
+68,UG Farm 068,Cologne,204,Hydroponic,Flat Bed Farming,88
+69,UG Farm 069,Stuttgart,100,Hydroponic,Flat Bed Farming,54
+70,UG Farm 070,Düsseldorf,429,Aeroponic,Flat Bed Farming,25
+71,UG Farm 071,Berlin,298,Aeroponic,Tower Farming,32
+72,UG Farm 072,Munich,322,Hydroponic,Vertical Farming,60
+73,UG Farm 073,Hamburg,337,Hydroponic,Flat Bed Farming,20
+74,UG Farm 074,Frankfurt,471,Aeroponic,Vertical Farming,26
+75,UG Farm 075,Cologne,114,Aeroponic,Flat Bed Farming,69

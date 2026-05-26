@@ -1,0 +1,110 @@
+# -----------------------
+# Python
+# -----------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+ENV/
+
+# Virtual environment names
+.venv*/
+venv*/
+env*/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# -----------------------
+# Spark / Hadoop
+# -----------------------
+spark-warehouse/
+.metastore_db/
+derby.log
+*.crc
+*.parquet
+*.orc
+*.avro
+*.log
+
+# -----------------------
+# Airflow
+# -----------------------
+airflow/logs/
+airflow/__pycache__/
+*.airflowdb
+*.pid
+
+# -----------------------
+# Docker
+# -----------------------
+# Local volumes & artifacts
+db_data/
+minio_data/
+clickhouse_data/
+superset_home/
+.docker/
+.dockerignore
+docker-compose.override.yml
+
+# -----------------------
+# Env & secrets
+# -----------------------
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+
+# -----------------------
+# Node / Superset
+# -----------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+
+# -----------------------
+# IDE & OS files
+# -----------------------
+# VSCode
+.vscode/
+.history/
+*.code-workspace
+
+# PyCharm / JetBrains
+.idea/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.nfs*
+
+# -----------------------
+# Logs & tmp
+# -----------------------
+*.log
+*.out
+*.tmp
+tmp/
+logs/
