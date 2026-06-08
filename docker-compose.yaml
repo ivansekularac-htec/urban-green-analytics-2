@@ -2,21 +2,15 @@ services:
   postgres:
     image: postgres:17
     container_name: urbangreen-postgres
-
     env_file:
       - .env
-
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
-
     volumes:
       - urbangreen-postgres-data:/var/lib/postgresql/data
-
     networks:
       - urbangreen-network
-
     restart: unless-stopped
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
