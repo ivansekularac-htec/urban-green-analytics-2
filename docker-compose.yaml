@@ -7,7 +7,7 @@ services:
       - .env
 
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
 
     volumes:
       - urbangreen-postgres-data:/var/lib/postgresql/data
@@ -17,8 +17,17 @@ services:
 
     restart: unless-stopped
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   urbangreen-postgres-data:
+    name: urbangreen-postgres-data
+    driver: local
 
 networks:
   urbangreen-network:
