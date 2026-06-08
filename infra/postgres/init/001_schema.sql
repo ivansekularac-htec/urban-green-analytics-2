@@ -72,7 +72,7 @@ CREATE TABLE farms (
      growing_system_type_id BIGINT NOT NULL,
      name VARCHAR(100) NOT NULL UNIQUE,
      city VARCHAR(100) NOT NULL,
-     size_m2 INTEGER NOT NULL,
+     size_m2 DECIMAL(10,3) NOT NULL,
      status FARM_STATUS NOT NULL,
      growing_beds_count INTEGER NOT NULL,
      created_at BIGINT,
