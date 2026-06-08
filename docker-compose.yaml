@@ -1,17 +1,17 @@
 services:
   postgres:
     image: postgres:17
-    container_name: urbangreen-postgres
+    container_name: urbangreen-db
     restart: unless-stopped
 
     env_file:
       - .env
 
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
 
     volumes:
-      - urbangreen-postgres-data:/var/lib/postgresql/data
+      - urbangreen-db-data:/var/lib/postgresql/data
       - ./infra/postgres:/docker-entrypoint-initdb.d:ro
 
     networks:
@@ -22,10 +22,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
 volumes:
-  urbangreen-postgres-data:
+  urbangreen-db-data:
 
 networks:
   urbangreen-network:
-    external: true
+    driver: bridge
+    
