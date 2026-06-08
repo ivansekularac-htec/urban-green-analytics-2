@@ -1,0 +1,180 @@
+CREATE TABLE users (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN NOT NULL,
+    created_at BIGINT,
+    updated_at BIGINT
+);
+
+CREATE TABLE roles (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(500),
+    created_at BIGINT,
+    updated_at BIGINT
+);
+
+CREATE TABLE infrastructure_types (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(500),
+    created_at BIGINT,
+    updated_at BIGINT
+);
+
+CREATE TABLE growing_system_types (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     name VARCHAR(100) NOT NULL UNIQUE,
+     description VARCHAR(500),
+     created_at BIGINT,
+     updated_at BIGINT
+);
+
+CREATE TABLE sensor_types (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    unit VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    optimal_min DECIMAL(10,3),
+    optimal_max DECIMAL(10,3),
+    created_at BIGINT,
+    updated_at BIGINT
+);
+
+CREATE TABLE crop_categories (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     name VARCHAR(100) NOT NULL UNIQUE,
+     description VARCHAR(500),
+     created_at BIGINT,
+     updated_at BIGINT
+);
+
+CREATE TABLE quality_grades (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     code VARCHAR(100) NOT NULL UNIQUE,
+     name VARCHAR(100) NOT NULL,
+     description VARCHAR(500),
+     created_at BIGINT,
+     updated_at BIGINT
+);
+
+CREATE TYPE FARM_STATUS AS ENUM (
+    'ACTIVE',
+    'INACTIVE',
+    'MAINTENANCE'
+);
+
+CREATE TABLE farms (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     farm_infrastructure_type_id BIGINT NOT NULL,
+     growing_system_type_id BIGINT NOT NULL,
+     name VARCHAR(100) NOT NULL UNIQUE,
+     city VARCHAR(100) NOT NULL,
+     size_m2 INTEGER NOT NULL,
+     status FARM_STATUS NOT NULL,
+     growing_beds_count INTEGER NOT NULL,
+     created_at BIGINT,
+     updated_at BIGINT,
+
+     CONSTRAINT fk_infrastructure_type
+        FOREIGN KEY (infrastructure_type_id)
+        REFERENCES infrastructure_types(id),
+
+     CONSTRAINT fk_growing_system_type
+        FOREIGN KEY (growing_system_type_id)
+        REFERENCES growing_system_types(id)
+);
+
+CREATE TABLE user_roles (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    farm_id BIGINT NOT NULL,
+    created_at BIGINT,
+    updated_at BIGINT,
+
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id),
+
+    CONSTRAINT fk_role
+        FOREIGN KEY (role_id)
+        REFERENCES roles(id),
+
+    CONSTRAINT fk_farm
+        FOREIGN KEY (farm_id)
+        REFERENCES farms(id)
+);
+
+CREATE TYPE SENSOR_STATUS AS ENUM (
+    'ACTIVE',
+    'OFFLINE',
+    'MAINTENANCE'
+);
+
+CREATE TABLE sensors (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    farm_id BIGINT NOT NULL,
+    sensor_type_id BIGINT NOT NULL,
+    serial_number VARCHAR(255) NOT NULL UNIQUE,
+    status SENSOR_STATUS NOT NULL,
+    installed_at BIGINT,
+    created_at BIGINT,
+    updated_at BIGINT
+);
+
+CREATE TABLE crops (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     category_id BIGINT NOT NULL,
+     name VARCHAR(100) NOT NULL UNIQUE,
+     description VARCHAR(500),
+     created_at BIGINT,
+     updated_at BIGINT,
+
+     CONSTRAINT fk_category
+        FOREIGN KEY (category_id)
+        REFERENCES crop_categories(id)
+);
+
+CREATE TABLE farm_crops (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     farm_id BIGINT NOT NULL,
+     crop_id BIGINT NOT NULL,
+     started_at BIGINT NOT NULL,
+     ended_at BIGINT,
+     created_at BIGINT,
+     updated_at BIGINT,
+
+     CONSTRAINT fk_farm
+        FOREIGN KEY (farm_id)
+        REFERENCES farms(id),
+
+     CONSTRAINT fk_crop
+        FOREIGN KEY (crop_id)
+        REFERENCES crops(id)
+)
+
+CREATE TABLE harvests (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    farm_id BIGINT NOT NULL,
+    crop_id BIGINT NOT NULL,
+    quality_grade_id BIGINT NOT NULL,
+    weight_kg DECIMAL(10,2) NOT NULL,
+    created_at BIGINT,
+    updated at BIGINT,
+
+    CONSTRAINT fk_farm
+        FOREIGN KEY (farm_id)
+        REFERENCES farms(id),
+
+    CONSTRAINT fk_crop
+        FOREIGN KEY (crop_id)
+        REFERENCES crops(id)
+
+    CONSTRAINT fk_quality_grade
+        FOREIGN KEY (quality_grade_id)
+        REFERENCES quality_grades(id)
+)
+
