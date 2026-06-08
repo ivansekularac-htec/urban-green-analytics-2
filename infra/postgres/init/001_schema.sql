@@ -60,7 +60,7 @@ CREATE TABLE quality_grades (
      updated_at BIGINT
 );
 
-CREATE TYPE FARM_STATUS AS ENUM (
+CREATE TYPE farm_status AS ENUM (
     'ACTIVE',
     'INACTIVE',
     'MAINTENANCE'
@@ -73,16 +73,16 @@ CREATE TABLE farms (
      name VARCHAR(100) NOT NULL UNIQUE,
      city VARCHAR(100) NOT NULL,
      size_m2 DECIMAL(10,3) NOT NULL,
-     status FARM_STATUS NOT NULL,
+     status farm_status NOT NULL,
      growing_beds_count INTEGER NOT NULL,
      created_at BIGINT,
      updated_at BIGINT,
 
-     CONSTRAINT fk_infrastructure_type
+     CONSTRAINT fk_farm_infrastructure_type
         FOREIGN KEY (infrastructure_type_id)
         REFERENCES infrastructure_types(id),
 
-     CONSTRAINT fk_growing_system_type
+     CONSTRAINT fk_farm_growing_system_type
         FOREIGN KEY (growing_system_type_id)
         REFERENCES growing_system_types(id)
 );
@@ -95,20 +95,20 @@ CREATE TABLE user_roles (
     created_at BIGINT,
     updated_at BIGINT,
 
-    CONSTRAINT fk_user
+    CONSTRAINT fk_user_role_user
         FOREIGN KEY (user_id)
         REFERENCES users(id),
 
-    CONSTRAINT fk_role
+    CONSTRAINT fk_user_role_role
         FOREIGN KEY (role_id)
         REFERENCES roles(id),
 
-    CONSTRAINT fk_farm
+    CONSTRAINT fk_user_role_farm
         FOREIGN KEY (farm_id)
         REFERENCES farms(id)
 );
 
-CREATE TYPE SENSOR_STATUS AS ENUM (
+CREATE TYPE sensor_status AS ENUM (
     'ACTIVE',
     'OFFLINE',
     'MAINTENANCE'
@@ -119,10 +119,18 @@ CREATE TABLE sensors (
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    status SENSOR_STATUS NOT NULL,
+    status sensor_status NOT NULL,
     installed_at BIGINT,
     created_at BIGINT,
-    updated_at BIGINT
+    updated_at BIGINT,
+
+    CONSTRAINT fk_sensor_farm
+        FOREIGN KEY (farm_id)
+        REFERENCES farms(id),
+
+    CONSTRAINT fk_sensor_sensor_type
+        FOREIGN KEY (sensor_type_id)
+        REFERENCES sensor_types(id)
 );
 
 CREATE TABLE crops (
@@ -133,7 +141,7 @@ CREATE TABLE crops (
      created_at BIGINT,
      updated_at BIGINT,
 
-     CONSTRAINT fk_category
+     CONSTRAINT fk_crop_category
         FOREIGN KEY (category_id)
         REFERENCES crop_categories(id)
 );
@@ -147,11 +155,11 @@ CREATE TABLE farm_crops (
      created_at BIGINT,
      updated_at BIGINT,
 
-     CONSTRAINT fk_farm
+     CONSTRAINT fk_farm_crops_farm
         FOREIGN KEY (farm_id)
         REFERENCES farms(id),
 
-     CONSTRAINT fk_crop
+     CONSTRAINT fk_farm_crops_crop
         FOREIGN KEY (crop_id)
         REFERENCES crops(id)
 );
@@ -165,15 +173,15 @@ CREATE TABLE harvests (
     created_at BIGINT,
     updated_at BIGINT,
 
-    CONSTRAINT fk_farm
+    CONSTRAINT fk_harvest_farm
         FOREIGN KEY (farm_id)
         REFERENCES farms(id),
 
-    CONSTRAINT fk_crop
+    CONSTRAINT fk_harvest_crop
         FOREIGN KEY (crop_id)
         REFERENCES crops(id),
 
-    CONSTRAINT fk_quality_grade
+    CONSTRAINT fk_harvest_quality_grade
         FOREIGN KEY (quality_grade_id)
         REFERENCES quality_grades(id)
 );
