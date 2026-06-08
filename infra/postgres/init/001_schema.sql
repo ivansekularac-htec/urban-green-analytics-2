@@ -68,7 +68,7 @@ CREATE TYPE FARM_STATUS AS ENUM (
 
 CREATE TABLE farms (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-     farm_infrastructure_type_id BIGINT NOT NULL,
+     infrastructure_type_id BIGINT NOT NULL,
      growing_system_type_id BIGINT NOT NULL,
      name VARCHAR(100) NOT NULL UNIQUE,
      city VARCHAR(100) NOT NULL,
@@ -154,7 +154,7 @@ CREATE TABLE farm_crops (
      CONSTRAINT fk_crop
         FOREIGN KEY (crop_id)
         REFERENCES crops(id)
-)
+);
 
 CREATE TABLE harvests (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -163,7 +163,7 @@ CREATE TABLE harvests (
     quality_grade_id BIGINT NOT NULL,
     weight_kg DECIMAL(10,2) NOT NULL,
     created_at BIGINT,
-    updated at BIGINT,
+    updated_at BIGINT,
 
     CONSTRAINT fk_farm
         FOREIGN KEY (farm_id)
@@ -171,10 +171,10 @@ CREATE TABLE harvests (
 
     CONSTRAINT fk_crop
         FOREIGN KEY (crop_id)
-        REFERENCES crops(id)
+        REFERENCES crops(id),
 
     CONSTRAINT fk_quality_grade
         FOREIGN KEY (quality_grade_id)
         REFERENCES quality_grades(id)
-)
+);
 
