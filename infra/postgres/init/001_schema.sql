@@ -4,32 +4,32 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     is_active BOOLEAN NOT NULL,
-    created_at BIGINT,
-    updated_at BIGINT
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE roles (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(500),
-    created_at BIGINT,
-    updated_at BIGINT
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE infrastructure_types (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(500),
-    created_at BIGINT,
-    updated_at BIGINT
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE growing_system_types (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      name VARCHAR(100) NOT NULL UNIQUE,
      description VARCHAR(500),
-     created_at BIGINT,
-     updated_at BIGINT
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE sensor_types (
@@ -39,16 +39,16 @@ CREATE TABLE sensor_types (
     description VARCHAR(500),
     optimal_min DECIMAL(10,3),
     optimal_max DECIMAL(10,3),
-    created_at BIGINT,
-    updated_at BIGINT
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE crop_categories (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      name VARCHAR(100) NOT NULL UNIQUE,
      description VARCHAR(500),
-     created_at BIGINT,
-     updated_at BIGINT
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TABLE quality_grades (
@@ -56,8 +56,8 @@ CREATE TABLE quality_grades (
      code VARCHAR(100) NOT NULL UNIQUE,
      name VARCHAR(100) NOT NULL,
      description VARCHAR(500),
-     created_at BIGINT,
-     updated_at BIGINT
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
 CREATE TYPE farm_status AS ENUM (
@@ -75,8 +75,8 @@ CREATE TABLE farms (
      size_m2 DECIMAL(10,3) NOT NULL,
      status farm_status NOT NULL,
      growing_beds_count INTEGER NOT NULL,
-     created_at BIGINT,
-     updated_at BIGINT,
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
      CONSTRAINT fk_farm_infrastructure_type
         FOREIGN KEY (infrastructure_type_id)
@@ -92,8 +92,8 @@ CREATE TABLE user_roles (
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
     farm_id BIGINT NOT NULL,
-    created_at BIGINT,
-    updated_at BIGINT,
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
     CONSTRAINT fk_user_role_user
         FOREIGN KEY (user_id)
@@ -108,21 +108,15 @@ CREATE TABLE user_roles (
         REFERENCES farms(id)
 );
 
-CREATE TYPE sensor_status AS ENUM (
-    'ACTIVE',
-    'OFFLINE',
-    'MAINTENANCE'
-);
-
 CREATE TABLE sensors (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    status sensor_status NOT NULL,
+    is_active BOOLEAN NOT NULL,
     installed_at BIGINT,
-    created_at BIGINT,
-    updated_at BIGINT,
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
     CONSTRAINT fk_sensor_farm
         FOREIGN KEY (farm_id)
@@ -138,8 +132,8 @@ CREATE TABLE crops (
      category_id BIGINT NOT NULL,
      name VARCHAR(100) NOT NULL UNIQUE,
      description VARCHAR(500),
-     created_at BIGINT,
-     updated_at BIGINT,
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
      CONSTRAINT fk_crop_category
         FOREIGN KEY (category_id)
@@ -152,8 +146,8 @@ CREATE TABLE farm_crops (
      crop_id BIGINT NOT NULL,
      started_at BIGINT NOT NULL,
      ended_at BIGINT,
-     created_at BIGINT,
-     updated_at BIGINT,
+     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
      CONSTRAINT fk_farm_crops_farm
         FOREIGN KEY (farm_id)
@@ -170,8 +164,8 @@ CREATE TABLE harvests (
     crop_id BIGINT NOT NULL,
     quality_grade_id BIGINT NOT NULL,
     weight_kg DECIMAL(10,2) NOT NULL,
-    created_at BIGINT,
-    updated_at BIGINT,
+    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
+    updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
     CONSTRAINT fk_harvest_farm
         FOREIGN KEY (farm_id)
