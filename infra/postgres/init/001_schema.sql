@@ -108,12 +108,18 @@ CREATE TABLE user_roles (
         REFERENCES farms(id)
 );
 
+CREATE TYPE sensor_status AS ENUM (
+    'ACTIVE',
+    'INACTIVE',
+    'MAINTENANCE'
+);
+
 CREATE TABLE sensors (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    is_active BOOLEAN NOT NULL,
+    status sensor_status NOT NULL,
     installed_at BIGINT,
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
