@@ -8,7 +8,6 @@ VALUES
     ('Admin', 'System administrator with full privileges')
 ON CONFLICT (name) DO NOTHING;
 
--- 1. ISPRAVLJENO: farm_infrastructure_types umesto infrastructure_types
 INSERT INTO farm_infrastructure_types (
     name,
     description
@@ -176,16 +175,15 @@ INSERT INTO farms (
     growing_beds_count
 )
 SELECT
-    -- 2. ISPRAVLJENO: farm_infrastructure_types umesto infrastructure_types
     farm_infrastructure_types.id,
     growing_system_types.id,
     farm_import.name,
     farm_import.city,
     farm_import.size_m2,
-    'active'::farm_status, -- 3. ISPRAVLJENO: mala slova 'active' da se poklopi sa ENUM-om u šemi
+    'ACTIVE'::farm_status,
     farm_import.growing_beds_count
 FROM farm_import
--- 4. ISPRAVLJENO: farm_infrastructure_types u JOIN-u
+
 JOIN farm_infrastructure_types
     ON farm_infrastructure_types.name = farm_import.infrastructure_type
 JOIN growing_system_types
@@ -220,7 +218,6 @@ COPY public.harvests (farm_id, crop_id, weight_kg, quality_grade_id, created_at,
 FROM PROGRAM 'gunzip -c /data/harvests.csv.gz'
 WITH (FORMAT csv, HEADER true, NULL '');
 
--- Reset sequence za harvests pošto punimo spolja
 SELECT setval('public.harvests_id_seq', (SELECT COALESCE(MAX(id), 1) FROM public.harvests));
 
 INSERT INTO public.sensors (farm_id, sensor_type_id, serial_number, status)
@@ -238,7 +235,7 @@ SELECT
     END,
     lpad(((f.id - 1) * 6 + s.id)::text, 3, '0')
   ) AS serial_number,
-  'active'::sensor_status AS status -- 5. ISPRAVLJENO: mala slova 'active'
+  'ACTIVE'::sensor_status AS status
 FROM generate_series(1, 75) AS f(id)
 CROSS JOIN generate_series(1, 6) AS s(id);
 

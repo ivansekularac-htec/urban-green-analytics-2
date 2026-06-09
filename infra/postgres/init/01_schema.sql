@@ -1,13 +1,13 @@
 CREATE TYPE farm_status AS ENUM (
-    'active',
-    'maintenance',
-    'inactive'
+    'ACTIVE',
+    'MAINTENANCE',
+    'INACTIVE'
 );
 
 CREATE TYPE sensor_status AS ENUM (
-    'active',
-    'maintenance',
-    'inactive'
+    'ACTIVE',
+    'MAINTENANCE',
+    'INACTIVE'
 );
 CREATE TABLE roles (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -59,8 +59,8 @@ CREATE TABLE sensor_types (
     name VARCHAR(100) NOT NULL UNIQUE,
     unit VARCHAR(100) NOT NULL,
     description VARCHAR(500),
-    optimal_min DECIMAL(15,5),
-    optimal_max DECIMAL(15,5),
+    optimal_min DECIMAL(10,3),
+    optimal_max DECIMAL(10,3),
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
