@@ -161,7 +161,10 @@ CREATE TABLE farm_crops (
 
      CONSTRAINT fk_farm_crops_crop
         FOREIGN KEY (crop_id)
-        REFERENCES crops(id)
+        REFERENCES crops(id),
+
+     CONSTRAINT uq_farm_crop
+        UNIQUE (farm_id, crop_id)
 );
 
 CREATE TABLE harvests (
