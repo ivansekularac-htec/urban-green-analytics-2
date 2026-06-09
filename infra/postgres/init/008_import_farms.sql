@@ -1,3 +1,18 @@
+CREATE TEMP TABLE farm_import (
+    farm_id INTEGER,
+    name VARCHAR(100),
+    city VARCHAR(100),
+    size_m2 DECIMAL(10,3),
+    infrastructure_type VARCHAR(100),
+    growing_system_type VARCHAR(100),
+    growing_beds_count INTEGER
+);
+
+COPY farm_import
+FROM '/data/farms.csv'
+DELIMITER ','
+CSV HEADER;
+
 INSERT INTO farms (
     infrastructure_type_id,
     growing_system_type_id,

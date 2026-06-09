@@ -1,3 +1,15 @@
+CREATE TEMP TABLE crop_import (
+    crop_id INTEGER,
+    crop_name VARCHAR(100),
+    crop_category VARCHAR(100),
+    description VARCHAR(500)
+);
+
+COPY crop_import
+FROM '/data/crops.csv'
+DELIMITER ','
+CSV HEADER;
+
 INSERT INTO crops (
     category_id,
     name,
