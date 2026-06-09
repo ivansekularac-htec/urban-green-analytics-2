@@ -3,15 +3,15 @@
 -- =========================
 
 CREATE TYPE farm_status AS ENUM (
-    'active',
-    'maintenance',
-    'inactive'
+    'ACTIVE',
+    'MAINTENANCE',
+    'INACTIVE'
 );
 
 CREATE TYPE sensor_status AS ENUM (
-    'active',
-    'offline',
-    'maintenance'
+    'ACTIVE',
+    'OFFLINE',
+    'MAINTENANCE'
 );
 
 -- =========================
@@ -21,7 +21,7 @@ CREATE TYPE sensor_status AS ENUM (
 CREATE TABLE roles (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    description VARCHAR(255),
+    description VARCHAR(500),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -30,7 +30,7 @@ CREATE TABLE quality_grades (
     id BIGSERIAL PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    description VARCHAR(255),
+    description VARCHAR(500),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -38,7 +38,7 @@ CREATE TABLE quality_grades (
 CREATE TABLE farm_infrastructure_types (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    description VARCHAR(255),
+    description VARCHAR(500),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -46,7 +46,7 @@ CREATE TABLE farm_infrastructure_types (
 CREATE TABLE growing_system_types (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    description VARCHAR(255),
+    description VARCHAR(500),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -54,7 +54,7 @@ CREATE TABLE growing_system_types (
 CREATE TABLE crop_categories (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    description VARCHAR(255),
+    description VARCHAR(500),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -63,9 +63,9 @@ CREATE TABLE sensor_types (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     unit VARCHAR(50) NOT NULL,
-    description VARCHAR(255),
-    optimal_min DECIMAL(15,5),
-    optimal_max DECIMAL(15,5),
+    description VARCHAR(500),
+    optimal_min DECIMAL(10,3),
+    optimal_max DECIMAL(10,3),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
 );
@@ -82,7 +82,7 @@ CREATE TABLE farms (
     name VARCHAR(255) NOT NULL,
     city VARCHAR(255),
     size_m2 decimal(10,3),
-    status farm_status NOT NULL DEFAULT 'active',
+    status farm_status NOT NULL DEFAULT 'ACTIVE',
     growing_beds_count INTEGER,
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
@@ -103,7 +103,7 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_ACTIVE BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
@@ -115,7 +115,7 @@ CREATE TABLE crops (
     category_id BIGINT NOT NULL,
 
     name VARCHAR(255) NOT NULL,
-    description TEXT,
+    description VARCHAR(500),
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
@@ -134,7 +134,7 @@ CREATE TABLE user_roles (
 
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
-    farm_id BIGINT NOT NULL,
+    farm_id BIGINT,
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
@@ -191,7 +191,7 @@ CREATE TABLE sensors (
     sensor_type_id BIGINT NOT NULL,
 
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    status sensor_status NOT NULL DEFAULT 'active',
+    status sensor_status NOT NULL DEFAULT 'ACTIVE',
     installed_at BIGINT,
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
@@ -218,7 +218,7 @@ CREATE TABLE harvests (
     crop_id BIGINT NOT NULL,
     quality_grade_id BIGINT,
 
-    weight_kg DECIMAL(12,3) NOT NULL,
+    weight_kg DECIMAL(10,3) NOT NULL,
 
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
