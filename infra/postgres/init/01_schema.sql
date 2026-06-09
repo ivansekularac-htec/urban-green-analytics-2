@@ -1,3 +1,6 @@
+CREATE SCHEMA IF NOT EXISTS app;
+SET search_path TO app;
+
 -- FARMS
 
 CREATE TYPE farm_status AS ENUM (
@@ -189,8 +192,8 @@ CREATE TABLE sensor_types (
     name VARCHAR(255) NOT NULL UNIQUE,
     unit VARCHAR(100) NOT NULL,
     description VARCHAR(255),
-    optimal_min NUMERIC(12, 5),
-    optimal_max NUMERIC(12, 5),
+    optimal_min DECIMAL(10,3),
+    optimal_max DECIMAL(10,3),
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)
 );

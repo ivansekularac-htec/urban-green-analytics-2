@@ -1,3 +1,5 @@
+SET search_path TO app;
+
 -- ROLES
 
 INSERT INTO roles (name, description)
