@@ -186,3 +186,12 @@ CREATE TABLE harvests (
         REFERENCES quality_grades(id)
 );
 
+CREATE INDEX idx_harvests_farm_id
+    ON harvests(farm_id);
+
+CREATE INDEX idx_harvests_crop_id
+    ON harvests(crop_id);
+
+CREATE INDEX idx_harvests_created_at
+    ON harvests(created_at);
+
