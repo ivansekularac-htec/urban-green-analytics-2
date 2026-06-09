@@ -1,16 +1,16 @@
 CREATE SCHEMA IF NOT EXISTS app;
 SET search_path TO app;
 
-CREATE TYPE FARM_STATUS AS ENUM (
-    'active',
-    'maintenance',
-    'inactive'
+CREATE TYPE farm_status AS ENUM (
+    'ACTIVE',
+    'MAINTENANCE',
+    'INACTIVE'
 );
 
-CREATE TYPE SENSOR_STATUS AS ENUM (
-    'active',
-    'offline',
-    'maintenance'
+CREATE TYPE sensor_status AS ENUM (
+    'ACTIVE',
+    'OFFLINE',
+    'MAINTENANCE'
 );
 
 CREATE TABLE roles (
