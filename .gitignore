@@ -110,5 +110,6 @@ tmp/
 logs/
 
 # Bruno / local API collection files
+Urban Green API/
 Urban Green API/opencollection.yml
 Urban Green API/Testing API.yml
