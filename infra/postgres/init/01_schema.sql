@@ -150,9 +150,6 @@ CREATE TABLE quality_grades (
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)
 );
 
-
--- HARVESTS
-
 CREATE TABLE harvests (
     id BIGSERIAL PRIMARY KEY,
 
@@ -192,8 +189,8 @@ CREATE TABLE sensor_types (
     name VARCHAR(255) NOT NULL UNIQUE,
     unit VARCHAR(100) NOT NULL,
     description VARCHAR(255),
-    optimal_min DOUBLE PRECISION,
-    optimal_max DOUBLE PRECISION,
+    optimal_min NUMERIC(12, 5),
+    optimal_max NUMERIC(12, 5),
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)
 );

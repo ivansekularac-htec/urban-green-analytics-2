@@ -45,7 +45,9 @@ VALUES
 ('D', 'Processing', 'Lower grade produce with significant cosmetic issues but safe for consumption - used for processed foods, juices, and sauces'),
 ('E', 'Livestock Feed', 'Produce not suitable for human consumption due to quality issues - repurposed as animal feed or compost material');
 
+
 -- SENSOR TYPE
+
 INSERT INTO sensor_types (name, unit, description, optimal_min, optimal_max)
 VALUES
 ('Temperature', '°C', 'Ambient temperature measurement', 18, 25),
@@ -59,7 +61,7 @@ VALUES
 
 -- FARMS
 
-CREATE TABLE farms_staging (
+CREATE TEMP TABLE farms_staging (
     farm_id BIGINT,
     name VARCHAR(255),
     city VARCHAR(255),
@@ -104,12 +106,10 @@ JOIN infrastructure_types it
 JOIN growing_system_types gst
     ON gst.name = fs.growing_system_type;
 
-DROP TABLE farms_staging;
-
 
 -- CROPS
 
-CREATE TABLE crops_staging (
+CREATE TEMP TABLE crops_staging (
     crop_id BIGINT,
     crop_name VARCHAR(255),
     crop_category VARCHAR(255),
@@ -138,12 +138,10 @@ FROM crops_staging cs
 JOIN crop_categories cc
     ON cc.name = cs.crop_category;
 
-DROP TABLE crops_staging;
-
 
 -- HARVESTS
 
-CREATE TABLE harvests_staging (
+CREATE TEMP TABLE harvests_staging (
     farm_id BIGINT,
     crop_id BIGINT,
     weight_kg DECIMAL(10,3),
@@ -172,15 +170,19 @@ INSERT INTO harvests (
     updated_at
 )
 SELECT
-    farm_id,
-    crop_id,
-    grade_id AS quality_grade_id,
-    weight_kg,
-    created_at,
-    updated_at
-FROM harvests_staging;
-
-DROP TABLE harvests_staging;
+    hs.farm_id,
+    hs.crop_id,
+    hs.grade_id,
+    hs.weight_kg,
+    hs.created_at,
+    hs.updated_at
+FROM harvests_staging hs
+JOIN farms f
+    ON f.id = hs.farm_id
+JOIN crops c
+    ON c.id = hs.crop_id
+JOIN quality_grades qg
+    ON qg.id = hs.grade_id;
 
 
 -- SENSORS
@@ -198,16 +200,14 @@ SELECT
 
     CONCAT(
         CASE st.id
-            WHEN 1 THEN 'TEMP-'
-            WHEN 2 THEN 'HUM-'
-            WHEN 3 THEN 'LIGHT-'
-            WHEN 4 THEN 'PH-'
-            WHEN 5 THEN 'ENER-'
-            WHEN 6 THEN 'CO2-'
+            WHEN 1 THEN 'TEMP-20240315-'
+            WHEN 2 THEN 'HUM-20240322-'
+            WHEN 3 THEN 'LIGHT-20240320-'
+            WHEN 4 THEN 'PH-20240318-'
+            WHEN 5 THEN 'ENER-20240325-'
+            WHEN 6 THEN 'CO2-20240319-'
         END,
-        TO_CHAR(NOW(), 'YYYYMMDD'),
-        '-',
-        LPAD(((f.id - 1) * 6 + st.id)::TEXT, 5, '0')
+        LPAD(((f.id - 1) * 6 + st.id)::text, 3, '0')
     ) AS serial_number,
 
     'ACTIVE'::sensor_status AS status,
