@@ -274,3 +274,17 @@ SELECT setval(
     pg_get_serial_sequence('sensors', 'id'),
     (SELECT MAX(id) FROM sensors)
 );
+
+-- FARM_CROPS
+
+INSERT INTO farm_crops (farm_id, crop_id)
+SELECT
+    f.id,
+    c.id
+FROM farms f
+CROSS JOIN crops c;
+
+SELECT setval(
+    pg_get_serial_sequence('farm_crops', 'id'),
+    (SELECT MAX(id) FROM farm_crops)
+);
