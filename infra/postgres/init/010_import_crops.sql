@@ -4,9 +4,9 @@ INSERT INTO crops (
     description
 )
 SELECT
-    cc.id,
-    ci.crop_name,
-    ci.description
-FROM crop_import ci
-JOIN crop_categories cc
-    ON cc.name = ci.crop_category;
+    crop_categories.id,
+    crop_import.crop_name,
+    crop_import.description
+FROM crop_import
+JOIN crop_categories
+    ON crop_categories.name = crop_import.crop_category;

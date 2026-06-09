@@ -8,15 +8,15 @@ INSERT INTO farms (
     growing_beds_count
 )
 SELECT
-    it.id,
-    gst.id,
-    fi.name,
-    fi.city,
-    fi.size_m2,
+    infrastructure_types.id,
+    growing_system_types.id,
+    farm_import.name,
+    farm_import.city,
+    farm_import.size_m2,
     'ACTIVE',
-    fi.growing_beds_count
-FROM farm_import fi
-JOIN infrastructure_types it
-    ON it.name = fi.infrastructure_type
-JOIN growing_system_types gst
-    ON gst.name = fi.growing_system_type;
+    farm_import.growing_beds_count
+FROM farm_import
+JOIN infrastructure_types
+    ON infrastructure_types.name = farm_import.infrastructure_type
+JOIN growing_system_types
+    ON growing_system_types.name = farm_import.growing_system_type;

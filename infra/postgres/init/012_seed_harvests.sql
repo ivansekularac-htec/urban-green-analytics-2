@@ -1,5 +1,5 @@
 COPY public.harvests (farm_id, crop_id, weight_kg, quality_grade_id, created_at, updated_at)
-FROM PROGRAM 'gunzip -c /seed-data/harvests.csv.gz'
+FROM PROGRAM 'gunzip -c /data/harvests.csv.gz'
 WITH (FORMAT csv, HEADER true, NULL '');
 
 -- Reset sequence so new inserts continue after loaded data

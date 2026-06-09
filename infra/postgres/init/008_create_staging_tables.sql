@@ -9,7 +9,7 @@ CREATE TABLE farm_import (
 );
 
 COPY farm_import
-FROM '/seed-data/farms.csv'
+FROM '/data/farms.csv'
 DELIMITER ','
 CSV HEADER;
 
@@ -21,6 +21,6 @@ CREATE TABLE crop_import (
 );
 
 COPY crop_import
-FROM '/seed-data/crops.csv'
+FROM '/data/crops.csv'
 DELIMITER ','
 CSV HEADER;
