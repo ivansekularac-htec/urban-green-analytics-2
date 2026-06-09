@@ -1,4 +1,4 @@
-INSERT INTO quality_grades (
+INSERT INTO urbangreen.quality_grades (
     code,
     name,
     description

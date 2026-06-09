@@ -1,4 +1,4 @@
-INSERT INTO sensor_types (
+INSERT INTO urbangreen.sensor_types (
     name,
     unit,
     description,

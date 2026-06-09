@@ -1,4 +1,6 @@
-CREATE TABLE users (
+CREATE SCHEMA IF NOT EXISTS urbangreen;
+
+CREATE TABLE urbangreen.users (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -8,7 +10,7 @@ CREATE TABLE users (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE roles (
+CREATE TABLE urbangreen.roles (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(500),
@@ -16,7 +18,7 @@ CREATE TABLE roles (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE infrastructure_types (
+CREATE TABLE urbangreen.infrastructure_types (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(500),
@@ -24,7 +26,7 @@ CREATE TABLE infrastructure_types (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE growing_system_types (
+CREATE TABLE urbangreen.growing_system_types (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      name VARCHAR(100) NOT NULL UNIQUE,
      description VARCHAR(500),
@@ -32,7 +34,7 @@ CREATE TABLE growing_system_types (
      updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE sensor_types (
+CREATE TABLE urbangreen.sensor_types (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     unit VARCHAR(100) NOT NULL,
@@ -43,7 +45,7 @@ CREATE TABLE sensor_types (
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE crop_categories (
+CREATE TABLE urbangreen.crop_categories (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      name VARCHAR(100) NOT NULL UNIQUE,
      description VARCHAR(500),
@@ -51,7 +53,7 @@ CREATE TABLE crop_categories (
      updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TABLE quality_grades (
+CREATE TABLE urbangreen.quality_grades (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      code VARCHAR(100) NOT NULL UNIQUE,
      name VARCHAR(100) NOT NULL,
@@ -60,34 +62,34 @@ CREATE TABLE quality_grades (
      updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
 );
 
-CREATE TYPE farm_status AS ENUM (
+CREATE TYPE urbangreen.farm_status AS ENUM (
     'ACTIVE',
     'INACTIVE',
     'MAINTENANCE'
 );
 
-CREATE TABLE farms (
+CREATE TABLE urbangreen.farms (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      infrastructure_type_id BIGINT NOT NULL,
      growing_system_type_id BIGINT NOT NULL,
      name VARCHAR(100) NOT NULL UNIQUE,
      city VARCHAR(100) NOT NULL,
      size_m2 DECIMAL(10,3) NOT NULL,
-     status farm_status NOT NULL,
+     status urbangreen.farm_status NOT NULL,
      growing_beds_count INTEGER NOT NULL,
      created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
      updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
      CONSTRAINT fk_farm_infrastructure_type
         FOREIGN KEY (infrastructure_type_id)
-        REFERENCES infrastructure_types(id),
+        REFERENCES urbangreen.infrastructure_types(id),
 
      CONSTRAINT fk_farm_growing_system_type
         FOREIGN KEY (growing_system_type_id)
-        REFERENCES growing_system_types(id)
+        REFERENCES urbangreen.growing_system_types(id)
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE urbangreen.user_roles (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
@@ -97,43 +99,43 @@ CREATE TABLE user_roles (
 
     CONSTRAINT fk_user_role_user
         FOREIGN KEY (user_id)
-        REFERENCES users(id),
+        REFERENCES urbangreen.users(id),
 
     CONSTRAINT fk_user_role_role
         FOREIGN KEY (role_id)
-        REFERENCES roles(id),
+        REFERENCES urbangreen.roles(id),
 
     CONSTRAINT fk_user_role_farm
         FOREIGN KEY (farm_id)
-        REFERENCES farms(id)
+        REFERENCES urbangreen.farms(id)
 );
 
-CREATE TYPE sensor_status AS ENUM (
+CREATE TYPE urbangreen.sensor_status AS ENUM (
     'ACTIVE',
     'INACTIVE',
     'MAINTENANCE'
 );
 
-CREATE TABLE sensors (
+CREATE TABLE urbangreen.sensors (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    status sensor_status NOT NULL,
+    status urbangreen.sensor_status NOT NULL,
     installed_at BIGINT,
     created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
     updated_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT,
 
     CONSTRAINT fk_sensor_farm
         FOREIGN KEY (farm_id)
-        REFERENCES farms(id),
+        REFERENCES urbangreen.farms(id),
 
     CONSTRAINT fk_sensor_sensor_type
         FOREIGN KEY (sensor_type_id)
-        REFERENCES sensor_types(id)
+        REFERENCES urbangreen.sensor_types(id)
 );
 
-CREATE TABLE crops (
+CREATE TABLE urbangreen.crops (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      category_id BIGINT NOT NULL,
      name VARCHAR(100) NOT NULL UNIQUE,
@@ -143,10 +145,10 @@ CREATE TABLE crops (
 
      CONSTRAINT fk_crop_category
         FOREIGN KEY (category_id)
-        REFERENCES crop_categories(id)
+        REFERENCES urbangreen.crop_categories(id)
 );
 
-CREATE TABLE farm_crops (
+CREATE TABLE urbangreen.farm_crops (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      farm_id BIGINT NOT NULL,
      crop_id BIGINT NOT NULL,
@@ -157,17 +159,17 @@ CREATE TABLE farm_crops (
 
      CONSTRAINT fk_farm_crops_farm
         FOREIGN KEY (farm_id)
-        REFERENCES farms(id),
+        REFERENCES urbangreen.farms(id),
 
      CONSTRAINT fk_farm_crops_crop
         FOREIGN KEY (crop_id)
-        REFERENCES crops(id),
+        REFERENCES urbangreen.crops(id),
 
      CONSTRAINT uq_farm_crop
         UNIQUE (farm_id, crop_id)
 );
 
-CREATE TABLE harvests (
+CREATE TABLE urbangreen.harvests (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     farm_id BIGINT NOT NULL,
     crop_id BIGINT NOT NULL,
@@ -178,23 +180,23 @@ CREATE TABLE harvests (
 
     CONSTRAINT fk_harvest_farm
         FOREIGN KEY (farm_id)
-        REFERENCES farms(id),
+        REFERENCES urbangreen.farms(id),
 
     CONSTRAINT fk_harvest_crop
         FOREIGN KEY (crop_id)
-        REFERENCES crops(id),
+        REFERENCES urbangreen.crops(id),
 
     CONSTRAINT fk_harvest_quality_grade
         FOREIGN KEY (quality_grade_id)
-        REFERENCES quality_grades(id)
+        REFERENCES urbangreen.quality_grades(id)
 );
 
 CREATE INDEX idx_harvests_farm_id
-    ON harvests(farm_id);
+    ON urbangreen.harvests(farm_id);
 
 CREATE INDEX idx_harvests_crop_id
-    ON harvests(crop_id);
+    ON urbangreen.harvests(crop_id);
 
 CREATE INDEX idx_harvests_updated_at
-    ON harvests(updated_at);
+    ON urbangreen.harvests(updated_at);
 

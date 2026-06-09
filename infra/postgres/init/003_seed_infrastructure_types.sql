@@ -1,4 +1,4 @@
-INSERT INTO infrastructure_types (
+INSERT INTO urbangreen.infrastructure_types (
     name,
     description
 )

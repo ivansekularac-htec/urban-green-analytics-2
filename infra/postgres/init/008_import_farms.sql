@@ -13,7 +13,7 @@ FROM '/data/farms.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO farms (
+INSERT INTO urbangreen.farms (
     infrastructure_type_id,
     growing_system_type_id,
     name,
@@ -31,7 +31,7 @@ SELECT
     'ACTIVE',
     farm_import.growing_beds_count
 FROM farm_import
-JOIN infrastructure_types
+JOIN urbangreen.infrastructure_types
     ON infrastructure_types.name = farm_import.infrastructure_type
-JOIN growing_system_types
+JOIN urbangreen.growing_system_types
     ON growing_system_types.name = farm_import.growing_system_type;

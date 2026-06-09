@@ -1,4 +1,4 @@
-INSERT INTO roles (
+INSERT INTO urbangreen.roles (
     name,
     description
 )

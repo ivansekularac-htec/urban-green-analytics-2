@@ -1,4 +1,4 @@
-INSERT INTO growing_system_types (
+INSERT INTO urbangreen.growing_system_types (
     name,
     description
 )

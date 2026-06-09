@@ -1,4 +1,4 @@
-INSERT INTO public.sensors (farm_id, sensor_type_id, serial_number, status)
+INSERT INTO urbangreen.sensors (farm_id, sensor_type_id, serial_number, status)
 SELECT
   f.id AS farm_id,
   s.id AS sensor_type_id,
@@ -13,6 +13,6 @@ SELECT
     END,
     lpad(((f.id - 1) * 6 + s.id)::text, 3, '0')
   ) AS serial_number,
-  'ACTIVE'::sensor_status AS status
+  'ACTIVE'::urbangreen.sensor_status AS status
 FROM generate_series(1, 75) AS f(id)
 CROSS JOIN generate_series(1, 6) AS s(id);

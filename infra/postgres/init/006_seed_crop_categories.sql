@@ -1,4 +1,4 @@
-INSERT INTO crop_categories (
+INSERT INTO urbangreen.crop_categories (
     name,
     description
 )
