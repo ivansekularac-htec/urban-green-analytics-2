@@ -216,3 +216,22 @@ SELECT
 
 FROM farms f
 CROSS JOIN sensor_types st;
+
+
+-- FARM CROPS
+
+INSERT INTO farm_crops (
+    farm_id,
+    crop_id,
+    started_at,
+    ended_at
+)
+SELECT
+    f.id,
+    c.id,
+    EXTRACT(
+        EPOCH FROM NOW() - (random() * 180 || ' days')::INTERVAL
+    )::BIGINT,
+    NULL
+FROM farms f
+CROSS JOIN crops c;
