@@ -15,6 +15,7 @@ services:
     volumes:
       - urbangreen-postgres-data:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d
+      - ./data:/var/lib/postgresql/data_import
 
     networks:
       - urbangreen-network
