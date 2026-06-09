@@ -146,14 +146,8 @@ CREATE TABLE urbangreen.harvests (
 CREATE INDEX idx_harvests_farm_id
 ON urbangreen.harvests(farm_id);
 
-CREATE INDEX idx_harvests_crop_id
-ON urbangreen.harvests(crop_id);
-
 CREATE INDEX idx_harvests_created_at
 ON urbangreen.harvests(created_at);
-
-CREATE INDEX idx_harvests_updated_at
-ON urbangreen.harvests(updated_at);
 
 CREATE INDEX idx_harvests_farm_created_at
 ON urbangreen.harvests(farm_id, created_at);

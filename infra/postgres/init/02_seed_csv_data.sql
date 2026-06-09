@@ -171,8 +171,8 @@ CREATE TEMP TABLE staging_harvests (
     crop_id BIGINT,
     weight_kg DECIMAL(10,3),
     quality_grade_id BIGINT,
-    created_at NUMERIC,     -- we use NUMERIC, and not BIGINT, because in the .csv we have "1.71E+09" value
-    updated_at NUMERIC
+    created_at BIGINT,
+    updated_at BIGINT
 );
 
 COPY staging_harvests (
@@ -199,8 +199,8 @@ SELECT
     crop_id,
     quality_grade_id,
     weight_kg,
-    created_at::BIGINT,
-    updated_at::BIGINT
+    created_at,
+    updated_at
 FROM staging_harvests;
 
 
