@@ -1,10 +1,13 @@
-CREATE TYPE farm_status AS ENUM (
+CREATE SCHEMA IF NOT EXISTS app;
+SET search_path TO app;
+
+CREATE TYPE FARM_STATUS AS ENUM (
     'active',
     'maintenance',
     'inactive'
 );
 
-CREATE TYPE sensor_status AS ENUM (
+CREATE TYPE SENSOR_STATUS AS ENUM (
     'active',
     'offline',
     'maintenance'
@@ -79,7 +82,7 @@ CREATE TABLE farms (
     name VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
     size_m2 DECIMAL(10, 3) NOT NULL,
-    status farm_status NOT NULL,
+    status FARM_STATUS NOT NULL,
     growing_beds_count INTEGER NOT NULL,
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
@@ -150,7 +153,7 @@ CREATE TABLE sensors (
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    status sensor_status NOT NULL,
+    status SENSOR_STATUS NOT NULL,
     installed_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     created_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
     updated_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT),
