@@ -1,4 +1,4 @@
-INSERT INTO roles (
+INSERT INTO urbangreen.roles (
     name,
     description
 )
@@ -8,7 +8,7 @@ VALUES
     ('Admin', 'System administrator with full privileges')
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO farm_infrastructure_types (
+INSERT INTO urbangreen.farm_infrastructure_types (
     name,
     description
 )
@@ -23,7 +23,7 @@ VALUES
 )
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO growing_system_types (
+INSERT INTO urbangreen.growing_system_types (
     name,
     description
 )
@@ -42,7 +42,7 @@ VALUES
 )
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO sensor_types (
+INSERT INTO urbangreen.sensor_types (
     name,
     unit,
     description,
@@ -94,7 +94,7 @@ VALUES
 )
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO crop_categories (
+INSERT INTO urbangreen.crop_categories (
     name,
     description
 )
@@ -117,7 +117,7 @@ VALUES
 )
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO quality_grades (
+INSERT INTO urbangreen.quality_grades (
     code,
     name,
     description
@@ -165,7 +165,7 @@ FROM '/data/farms.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO farms (
+INSERT INTO urbangreen.farms (
     infrastructure_type_id,
     growing_system_type_id,
     name,
@@ -180,13 +180,13 @@ SELECT
     farm_import.name,
     farm_import.city,
     farm_import.size_m2,
-    'ACTIVE'::farm_status,
+    'ACTIVE'::urbangreen.farm_status,
     farm_import.growing_beds_count
-FROM farm_import
+  FROM farm_import
 
-JOIN farm_infrastructure_types
+  JOIN urbangreen.farm_infrastructure_types
     ON farm_infrastructure_types.name = farm_import.infrastructure_type
-JOIN growing_system_types
+  JOIN urbangreen.growing_system_types
     ON growing_system_types.name = farm_import.growing_system_type;
 
 CREATE TEMP TABLE crop_import (
@@ -201,7 +201,7 @@ FROM '/data/crops.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO crops (
+INSERT INTO urbangreen.crops (
     category_id,
     name,
     description
@@ -210,17 +210,17 @@ SELECT
     crop_categories.id,
     crop_import.crop_name,
     crop_import.description
-FROM crop_import
-JOIN crop_categories
+  FROM crop_import
+  JOIN urbangreen.crop_categories
     ON crop_categories.name = crop_import.crop_category;
 
-COPY public.harvests (farm_id, crop_id, weight_kg, quality_grade_id, created_at, updated_at)
+COPY urbangreen.harvests (farm_id, crop_id, weight_kg, quality_grade_id, created_at, updated_at)
 FROM PROGRAM 'gunzip -c /data/harvests.csv.gz'
 WITH (FORMAT csv, HEADER true, NULL '');
 
-SELECT setval('public.harvests_id_seq', (SELECT COALESCE(MAX(id), 1) FROM public.harvests));
+SELECT setval('urbangreen.harvests_id_seq', (SELECT COALESCE(MAX(id), 1) FROM urbangreen.harvests));
 
-INSERT INTO public.sensors (farm_id, sensor_type_id, serial_number, status)
+INSERT INTO urbangreen.sensors (farm_id, sensor_type_id, serial_number, status)
 SELECT
   f.id AS farm_id,
   s.id AS sensor_type_id,
@@ -235,14 +235,14 @@ SELECT
     END,
     lpad(((f.id - 1) * 6 + s.id)::text, 3, '0')
   ) AS serial_number,
-  'ACTIVE'::sensor_status AS status
+  'ACTIVE'::urbangreen.sensor_status AS status
 FROM generate_series(1, 75) AS f(id)
 CROSS JOIN generate_series(1, 6) AS s(id);
 
-INSERT INTO farm_crops (farm_id, crop_id, started_at)
+INSERT INTO urbangreen.farm_crops (farm_id, crop_id, started_at)
 SELECT
     farms.id,
     crops.id,
     EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT
-FROM farms
-CROSS JOIN crops;
+FROM urbangreen.farms
+CROSS JOIN urbangreen.crops;
