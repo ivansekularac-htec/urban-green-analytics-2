@@ -4,7 +4,9 @@ version = "1.0.0"
 description = "FastAPI application for Urban Green Farms"
 requires-python = ">=3.10.0"
 
-dependencies = ["fastapi>=0.115"] # Add more dependencies
+dependencies = [
+    "fastapi[standard]>=0.115",
+] # Add more dependencies
 
 # Optional
 [project.optional-dependencies]
@@ -19,15 +21,15 @@ extend-exclude = [".venv", "build", "dist", "migrations"]
 [tool.ruff.lint]
 # A reasonable starter set
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort (import sorting)
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort (import sorting)
+    "B", # flake8-bugbear
+    "UP", # pyupgrade
     "SIM", # flake8-simplify
-    "C4",  # flake8-comprehensions
-    "N",   # pep8-naming
+    "C4", # flake8-comprehensions
+    "N", # pep8-naming
 ]
 ignore = [
     "E501", # line length handled by formatter
