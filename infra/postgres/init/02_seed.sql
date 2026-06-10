@@ -48,7 +48,7 @@ VALUES
 (2, 'B', 'Standard', 'Good quality produce with minor cosmetic imperfections but excellent nutritional value - ideal for general retail markets'),
 (3, 'C', 'Commercial', 'Acceptable quality with noticeable cosmetic flaws but good nutritional content - suitable for food service and wholesale'),
 (4, 'D', 'Processing', 'Lower grade produce with significant cosmetic issues but safe for consumption - used for processed foods, juices, and sauces'),
-(5, 'F', 'Livestock Feed', 'Produce not suitable for human consumption due to quality issues - repurposed as animal feed or compost material');
+(5, 'E', 'Livestock Feed', 'Produce not suitable for human consumption due to quality issues - repurposed as animal feed or compost material');
 
 SELECT setval(
     'quality_grades_id_seq',
