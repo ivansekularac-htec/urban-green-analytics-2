@@ -29,15 +29,11 @@ CREATE TABLE farms (
     id BIGSERIAL PRIMARY KEY,
     infrastructure_type_id BIGINT NOT NULL,
     growing_system_type_id BIGINT NOT NULL,
-
     name VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
-
     size_m2 DECIMAL(10,3) NOT NULL,
     status farm_status NOT NULL,
-
     growing_beds_count INTEGER NOT NULL,
-
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     
@@ -72,11 +68,9 @@ CREATE TABLE roles (
 
 CREATE TABLE user_roles (
     id BIGSERIAL PRIMARY KEY,
-
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
     farm_id BIGINT,
-
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
 
@@ -106,12 +100,9 @@ CREATE TABLE crop_categories (
 
 CREATE TABLE crops (
     id BIGSERIAL PRIMARY KEY,
-
     category_id BIGINT NOT NULL,
-
     name VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(255),
-
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
 
@@ -122,13 +113,10 @@ CREATE TABLE crops (
 
 CREATE TABLE farm_crops (
     id BIGSERIAL PRIMARY KEY,
-
     farm_id BIGINT NOT NULL,
     crop_id BIGINT NOT NULL,
-
     started_at BIGINT NOT NULL,
     ended_at BIGINT,
-
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
 
@@ -155,13 +143,10 @@ CREATE TABLE quality_grades (
 
 CREATE TABLE harvests (
     id BIGSERIAL PRIMARY KEY,
-
     farm_id BIGINT NOT NULL,
     crop_id BIGINT NOT NULL,
     quality_grade_id BIGINT NOT NULL,
-
     weight_kg DECIMAL(10,3) NOT NULL,
-
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
 
@@ -184,7 +169,7 @@ CREATE TABLE harvests (
 CREATE TYPE sensor_status AS ENUM (
     'ACTIVE',
     'OFFLINE',
-    'FAULTY'
+    'MAINTENANCE'
 );
 
 CREATE TABLE sensor_types (
@@ -200,14 +185,10 @@ CREATE TABLE sensor_types (
 
 CREATE TABLE sensors (
     id BIGSERIAL PRIMARY KEY,
-
     farm_id BIGINT NOT NULL,
     sensor_type_id BIGINT NOT NULL,
-
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-
     status sensor_status NOT NULL,
-
     installed_at BIGINT,
     created_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
     updated_at BIGINT NOT NULL DEFAULT CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT),
