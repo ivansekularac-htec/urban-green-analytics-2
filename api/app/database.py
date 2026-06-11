@@ -7,50 +7,29 @@ This module creates the SQLAlchemy engine, session factory,
 and verifies database connectivity.
 """
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
-import os
 
-load_dotenv()
+from app.settings import settings
+
 
 # Base class for all ORM models.
 Base = declarative_base()
 
 
 def get_database_url() -> str:
-    """Build the PostgreSQL connection URL from environment variables.
+    """Build the PostgreSQL connection URL from application settings.
 
     Returns:
         str: Database connection URL.
-
-    Raises:
-        ValueError: If required environment variables are missing.
     """
 
-    postgres_user = os.getenv("POSTGRES_USER")
-    postgres_password = os.getenv("POSTGRES_PASSWORD")
-    postgres_db = os.getenv("POSTGRES_DB")
-    postgres_port = os.getenv("POSTGRES_PORT", "5432")
-    postgres_host = os.getenv("POSTGRES_HOST", "localhost")
-
-    required_vars = {
-        "POSTGRES_USER": postgres_user,
-        "POSTGRES_DB": postgres_db,
-        "POSTGRES_PORT": postgres_port,
-    }
-
-    # Check for missing required environment variables.
-    missing_vars = [key for key, value in required_vars.items() if not value]
-
-    if missing_vars:
-        raise ValueError(
-            f"Missing required environment variables: {', '.join(missing_vars)}"
-        )
-
     return (
-        f"postgresql://{postgres_user}:{postgres_password}"
-        f"@{postgres_host}:{postgres_port}/{postgres_db}"
+        f"postgresql://{settings.postgres_user}:"
+        f"{settings.postgres_password}@"
+        f"{settings.postgres_host}:"
+        f"{settings.postgres_port}/"
+        f"{settings.postgres_db}"
     )
 
 
@@ -61,8 +40,7 @@ def create_db_engine():
         Engine: Configured SQLAlchemy engine.
     """
 
-    database_url = get_database_url()
-    return create_engine(database_url)
+    return create_engine(get_database_url())
 
 
 def verify_connection(engine) -> None:
@@ -96,4 +74,5 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
+# Verify database connection on startup.
 verify_connection(engine)
