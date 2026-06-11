@@ -5,12 +5,12 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import settings
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
 engine = create_engine(
-    settings.database_url,
+    get_settings().database_url,
     pool_pre_ping=True,
 )
 
