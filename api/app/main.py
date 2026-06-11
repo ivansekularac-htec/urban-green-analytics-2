@@ -8,6 +8,8 @@ root health-check endpoint.
 
 from fastapi import FastAPI
 
+from app.database import engine
+
 app = FastAPI(
     title="Urban Green Analytics API",
     description="Backend API for the Urban Green Analytics platform.",
