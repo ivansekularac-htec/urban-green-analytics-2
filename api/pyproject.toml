@@ -6,7 +6,9 @@ requires-python = ">=3.10.0"
 
 dependencies = [
     "fastapi[standard]>=0.115",
+    "pydantic-settings>=2.14.1",
     "sqlalchemy>=2.0.50",
+    "psycopg[binary]",
 ] # Add more dependencies
 
 # Optional
