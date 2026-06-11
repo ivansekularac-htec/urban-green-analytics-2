@@ -1,5 +1,4 @@
 """
-@File: database.py
 Database configuration for the Urban Green Analytics API.
 
 This module configures the SQLAlchemy engine, session factory, ORM base class,
@@ -13,13 +12,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.core.config import settings
+from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 class Base(DeclarativeBase):
-    """Base class for all SQLAlchemy ORM models"""
+    """Base class for all SQLAlchemy ORM models."""
 
     pass
 

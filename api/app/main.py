@@ -1,5 +1,4 @@
 """
-@File: main.py
 Application entry point for the Urban Green Analytics API.
 
 This module creates the FastAPI application instance, verifies the database

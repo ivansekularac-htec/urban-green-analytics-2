@@ -1,9 +1,8 @@
 """
-@File: config.py
 Application configuration for the Urban Green Analytics API.
 
 This module loads environment variables from the local .env file and exposes
-a cached settings instance for use across the application.
+a cached settings function for use across the application.
 """
 
 from functools import lru_cache
@@ -36,15 +35,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return the cached application settings instance.
-
-    The settings object is cached so environment variables are parsed only once
-    during the application lifecycle.
-
-    Returns:
-        Settings: The application settings loaded from environment variables.
-    """
+    """Return the cached application settings instance."""
     return Settings()
-
-
-settings = get_settings()
