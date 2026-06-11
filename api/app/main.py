@@ -6,18 +6,37 @@ This module creates the FastAPI application instance and defines the
 root health-check endpoint.
 """
 
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+from app.database import verify_database_connection
+
+logging.basicConfig(level=logging.INFO)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage application startup and shutdown events.
+    """
+    verify_database_connection()
+    yield
+
 
 app = FastAPI(
     title="Urban Green Analytics API",
     description="Backend API for the Urban Green Analytics platform.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
 @app.get("/")
 def root() -> dict[str, str]:
-    """Return a basic API status message.
+    """
+    Return a basic API status message.
 
     This endpoint can be used as a simple health check to verify that the
     application is running.
