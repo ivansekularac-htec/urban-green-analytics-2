@@ -58,7 +58,7 @@ def verify_database_connection() -> None:
     during application startup to confirm that the connection is working.
 
     Raises:
-        RuntimeError: If the database connection check fails.
+        SQLAlchemyError: If the database connection check fails.
     """
     try:
         with engine.connect() as connection:
