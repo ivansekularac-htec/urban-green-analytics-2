@@ -2,7 +2,7 @@
 Application configuration for the Urban Green Analytics API.
 
 This module loads environment variables from the local .env file and exposes
-a cached settings function for use across the application.
+a cached settings factory for use across the application.
 """
 
 from functools import lru_cache
@@ -19,6 +19,9 @@ class Settings(BaseSettings):
         postgres_user (str): PostgreSQL username.
         postgres_password (str): PostgreSQL password.
         postgres_db (str): PostgreSQL database name.
+
+    The database_url property builds the SQLAlchemy PostgreSQL connection URL
+    from the individual PostgreSQL settings.
     """
 
     postgres_host: str
@@ -31,6 +34,17 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
     )
+
+    @property
+    def database_url(self) -> str:
+        """Return the SQLAlchemy PostgreSQL database URL."""
+        return (
+            f"postgresql+psycopg2://{self.postgres_user}:"
+            f"{self.postgres_password}@"
+            f"{self.postgres_host}:"
+            f"{self.postgres_port}"
+            f"/{self.postgres_db}"
+        )
 
 
 @lru_cache

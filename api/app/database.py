@@ -24,15 +24,7 @@ class Base(DeclarativeBase):
     pass
 
 
-DATABASE_URL = (
-    f"postgresql+psycopg2://{settings.postgres_user}:"
-    f"{settings.postgres_password}@"
-    f"{settings.postgres_host}:"
-    f"{settings.postgres_port}"
-    f"/{settings.postgres_db}"
-)
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+engine = create_engine(settings.database_url, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
