@@ -5,10 +5,9 @@ description = "FastAPI application for Urban Green Farms"
 requires-python = ">=3.10.0"
 
 dependencies = [
-    "fastapi-users[sqlalchemy]>=15.0.5",
     "fastapi[standard]>=0.115",
     "psycopg2-binary>=2.9.12",
-    "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
 # Optional

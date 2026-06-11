@@ -10,27 +10,20 @@ database session management and connection verification.
 import logging
 from collections.abc import Generator
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import settings
-
-load_dotenv()
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = (
-    f"postgresql+psycopg2://"
-    f"{settings.postgres_user}:"
-    f"{settings.postgres_password}@"
-    f"{settings.postgres_host}:"
-    f"{settings.postgres_port}/"
-    f"{settings.postgres_db}"
-)
+settings = get_settings()
 
 engine = create_engine(
-    DATABASE_URL, pool_pre_ping=True, connect_args={"options": "-csearch_path=app"}
+    settings.database_url,
+    pool_pre_ping=True,
+    connect_args={"options": f"-csearch_path={settings.postgres_schema}"},
 )
 
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False, autocommit=False)
@@ -73,6 +66,6 @@ def verify_database_connection() -> None:
 
         logger.info("Database connection successful.")
 
-    except Exception as e:
+    except SQLAlchemyError:
         logger.exception("Database connection failed.")
-        raise RuntimeError(f"Database connection failed: {e}") from e
+        raise
