@@ -66,6 +66,6 @@ def verify_database_connection() -> None:
 
         logger.info("Database connection successful.")
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as exc:
         logger.exception("Database connection failed.")
-        raise
+        raise exc
