@@ -2,8 +2,8 @@
 Database configuration module.
 
 Handles PostgreSQL connection setup using SQLAlchemy, manages
-database sessions, loads credentials from environment variables,
-and verifies database connectivity on application startup.
+database sessionsand verifies database connectivity on application
+startup.
 """
 
 import logging
