@@ -6,42 +6,52 @@ This module creates the FastAPI application instance and defines the
 root health-check endpoint.
 """
 
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI
 from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import engine, get_db
 from app.models import Crop
 
-app = FastAPI(
-    title="Urban Green Analytics API",
-    description="Backend API for the Urban Green Analytics platform.",
-    version="0.1.0",
-)
+logger = logging.getLogger(__name__)
 
 
-@app.on_event("startup")
-def startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Verify database connectivity when the application starts.
+    Verify database connectivity during application startup.
 
-    Returns:
+    Yields:
         None
     """
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
 
-        print("Database connection successful")
+        logger.info("Database connection successful")
 
-    except Exception as error:
-        print(f"Database connection failed: {error}")
-        raise RuntimeError("Failed to connect to the database") from error
+    except SQLAlchemyError as error:
+        logger.error("Database connection failed: %s", error)
+        raise
+
+    yield
+
+
+app = FastAPI(
+    title="Urban Green Analytics API",
+    description="Backend API for the Urban Green Analytics platform.",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 
 
 @app.get("/")
 def root() -> dict[str, str]:
-    """Return a basic API status message.
+    """
+    Return a basic API status message.
 
     This endpoint can be used as a simple health check to verify that the
     application is running.

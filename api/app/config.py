@@ -13,5 +13,19 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
 
+    @property
+    def database_url(self) -> str:
+        """
+        Build the PostgreSQL connection URL.
+        """
+        return (
+            f"postgresql+psycopg://"
+            f"{self.postgres_user}:"
+            f"{self.postgres_password}@"
+            f"{self.postgres_host}:"
+            f"{self.postgres_port}/"
+            f"{self.postgres_db}"
+        )
+
 
 settings = Settings()

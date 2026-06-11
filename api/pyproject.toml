@@ -8,7 +8,6 @@ dependencies = [
     "fastapi[standard]>=0.115",
     "psycopg[binary]>=3.3.4",
     "sqlalchemy>=2.0.50",
-    "sqlalchemy-orm>=1.2.10",
 ] # Add more dependencies
 
 # Optional
