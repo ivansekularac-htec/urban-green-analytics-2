@@ -7,44 +7,22 @@ and verifies database connectivity on application startup.
 """
 
 import logging
-import os
 from collections.abc import Generator
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
-
-# Database configuration
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-
-# Validate required variables
-required_vars = {
-    "POSTGRES_HOST": POSTGRES_HOST,
-    "POSTGRES_PORT": POSTGRES_PORT,
-    "POSTGRES_USER": POSTGRES_USER,
-    "POSTGRES_PASSWORD": POSTGRES_PASSWORD,
-    "POSTGRES_DB": POSTGRES_DB,
-}
-
-missing = [key for key, value in required_vars.items() if not value]
-
-if missing:
-    raise ValueError(f"Missing required database environment variables: {', '.join(missing)}")
 
 DATABASE_URL = (
     f"postgresql+psycopg2://"
-    f"{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    f"{settings.postgres_user}:{settings.postgres_password}"
+    f"@{settings.postgres_host}:{settings.postgres_port}"
+    f"/{settings.postgres_db}"
 )
 
 # SQLAlchemy Engine
