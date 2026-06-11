@@ -7,40 +7,20 @@ This module creates the SQLAlchemy engine, session factory,
 and verifies database connectivity.
 """
 
+from collections.abc import Iterator
+
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import declarative_base, sessionmaker
-
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from app.settings import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-# Base class for all ORM models.
-Base = declarative_base()
-
-
-def get_database_url() -> str:
-    """Build the PostgreSQL connection URL from application settings.
-
-    Returns:
-        str: Database connection URL.
-    """
-
-    return (
-        f"postgresql://{settings.postgres_user}:"
-        f"{settings.postgres_password}@"
-        f"{settings.postgres_host}:"
-        f"{settings.postgres_port}/"
-        f"{settings.postgres_db}"
-    )
-
-
-def create_db_engine():
-    """Create the SQLAlchemy database engine.
-
-    Returns:
-        Engine: Configured SQLAlchemy engine.
-    """
-
-    return create_engine(get_database_url())
+class Base(DeclarativeBase):
+    """Base class for all ORM models."""
+    pass
 
 
 def verify_connection(engine) -> None:
@@ -50,22 +30,26 @@ def verify_connection(engine) -> None:
         engine: SQLAlchemy engine instance.
 
     Raises:
-        Exception: If the connection fails.
+        SQLAlchemyError: If the connection fails.
     """
 
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
 
-        print("Database connection successful")
+        logger.info("Database connection successful")
 
-    except Exception as error:
-        print(f"Database connection failed: {error}")
+    except SQLAlchemyError:
+        logger.exception("Database connection failed")
         raise
+        
 
 
 # SQLAlchemy engine instance.
-engine = create_db_engine()
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,
+)
 
 # Factory for creating database sessions.
 SessionLocal = sessionmaker(
@@ -74,5 +58,7 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
-# Verify database connection on startup.
-verify_connection(engine)
+def get_db() -> Iterator[Session]:
+    """Yield a database session for a single request."""
+    with SessionLocal() as session:
+        yield session

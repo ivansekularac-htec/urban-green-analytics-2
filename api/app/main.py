@@ -7,13 +7,25 @@ root health-check endpoint.
 """
 
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.database import engine, verify_connection
+import logging
 
-from app.database import engine
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    verify_connection(engine)
+    yield
 
 app = FastAPI(
     title="Urban Green Analytics API",
     description="Backend API for the Urban Green Analytics platform.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
