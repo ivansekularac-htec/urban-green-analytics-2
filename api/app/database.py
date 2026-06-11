@@ -11,23 +11,18 @@ from collections.abc import Generator
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import settings
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-
-DATABASE_URL = (
-    f"postgresql+psycopg2://"
-    f"{settings.postgres_user}:{settings.postgres_password}"
-    f"@{settings.postgres_host}:{settings.postgres_port}"
-    f"/{settings.postgres_db}"
-)
+# Enviroments
+settings = get_settings()
 
 # SQLAlchemy Engine
 engine = create_engine(
-    DATABASE_URL,
+    settings.database_url,
     pool_pre_ping=True,
     future=True,
 )
@@ -39,14 +34,21 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
+
 # Declarative Base
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """
+    Base class for all SQLAlchemy models.
+    """
+
+    pass
 
 
 def verify_database_connection() -> None:
     """
     Verify PostgreSQL connectivity during application startup.
     """
+
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
@@ -60,6 +62,7 @@ def get_db() -> Generator[Session, None, None]:
     """
     FastAPI dependency for database sessions.
     """
+
     db = SessionLocal()
     try:
         yield db

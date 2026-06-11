@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     """
     Manage application startup and shutdown events.
     """
+
     verify_database_connection()
     yield
 
@@ -44,4 +45,5 @@ def root() -> dict[str, str]:
     Returns:
         dict[str, str]: A response containing the API status message.
     """
+
     return {"message": "Urban Green API is running"}
