@@ -1,3 +1,5 @@
+from functools import cached_property
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -9,7 +11,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = Field(..., description="Database password")
     POSTGRES_DB: str = Field(..., description="Database name")
 
-    @property
+    @cached_property
     def database_url(self) -> str:
         return (
             f"postgresql+psycopg://{self.POSTGRES_USER}:"
