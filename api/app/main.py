@@ -9,13 +9,11 @@ root health-check endpoint.
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
-from app.database import engine, get_db
-from app.models import Crop
+from app.database import engine
 
 logger = logging.getLogger(__name__)
 
@@ -61,14 +59,3 @@ def root() -> dict[str, str]:
         dict[str, str]: A response containing the API status message.
     """
     return {"message": "Urban Green API is running"}
-
-
-@app.get("/crops")
-def get_crops(db: Session = Depends(get_db)):
-    """
-    Retrieve all crops from the database.
-
-    Returns:
-        list[Crop]: A list of crop records.
-    """
-    return db.query(Crop).all()
