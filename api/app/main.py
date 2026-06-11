@@ -12,41 +12,42 @@ configured PostgreSQL database. This helps detect configuration or
 infrastructure issues early and prevents the application from running
 without database access.
 """
-from contextlib import asynccontextmanager
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import engine
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("STARTUP FUNCTION EXECUTED")
-
+    """Verify database connectivity during application startup."""
     try:
         with engine.connect() as connection:
-            print("CONNECTED TO ENGINE")
-
             connection.execute(text("SELECT 1"))
 
-            print("QUERY EXECUTED")
+        logger.info("Database connection successful.")
 
-    except Exception as exc:
-        print(f"DATABASE ERROR: {exc}")
+    except SQLAlchemyError:
+        logger.exception("Database connection failed.")
         raise
 
     yield
+
 
 app = FastAPI(
     title="Urban Green Analytics API",
     description="Backend API for the Urban Green Analytics platform.",
     version="0.1.0",
-     lifespan=lifespan,
+    lifespan=lifespan,
 )
+
 
 @app.get("/")
 def root() -> dict[str, str]:

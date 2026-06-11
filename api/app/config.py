@@ -12,7 +12,6 @@ settings used by the API to establish database connectivity.
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from functools import lru_cache
 
 class Settings(BaseSettings):
     """
@@ -54,19 +53,28 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @property
+    def database_url(self) -> str:
+        return (
+            f"postgresql+psycopg://"
+            f"{self.postgres_user}:"
+            f"{self.postgres_password}@"
+            f"{self.postgres_host}:"
+            f"{self.postgres_port}/"
+            f"{self.postgres_db}"
+        )
 
-# Shared application settings instance.
-#
-# Import this object wherever configuration values are needed:
-#
-#     from app.config import settings
-#
-# Example:
-#
-#     settings.postgres_host
-#
-@lru_cache
-def get_settings() -> Settings:
-    return Settings()
 
-settings = get_settings()
+"""
+Shared application settings instance.
+
+Import this object wherever configuration values are needed:
+
+    from app.config import settings
+
+Example:
+
+    settings.postgres_host
+"""
+
+settings = Settings()

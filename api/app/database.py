@@ -18,24 +18,19 @@ These objects are intended to be imported and reused across the
 application to ensure consistent database access and session handling.
 """
 
+from collections.abc import Iterator
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import settings
 
-# SQLAlchemy connection URL constructed from application settings.
-DATABASE_URL = (
-    f"postgresql+psycopg://"
-    f"{settings.postgres_user}:"
-    f"{settings.postgres_password}@"
-    f"{settings.postgres_host}:"
-    f"{settings.postgres_port}/"
-    f"{settings.postgres_db}"
-)
-
 # SQLAlchemy engine responsible for managing database connections
 # and connection pooling.
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,
+)
 
 # Session factory used to create database sessions.
 #
@@ -46,6 +41,19 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine,
 )
+
+
+def get_db() -> Iterator[Session]:
+    """Yield a SQLAlchemy session scoped to a single request.
+
+    Designed for use with `fastapi.Depends`. The session is closed
+    automatically when the request finishes.
+
+    Yields:
+        A `sqlalchemy.orm.Session` bound to the configured engine.
+    """
+    with SessionLocal() as session:
+        yield session
 
 
 class Base(DeclarativeBase):
