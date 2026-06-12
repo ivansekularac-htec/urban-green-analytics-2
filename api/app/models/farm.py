@@ -8,6 +8,7 @@ harvests, crops, and user assignments.
 """
 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
@@ -22,12 +23,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.enums import FarmStatus
 from app.mixins import TimestampMixin
-from app.models.farm_crop import FarmCrop
-from app.models.farm_infrastructure_type import FarmInfrastructureType
-from app.models.growing_system_type import GrowingSystemType
-from app.models.harvest import Harvest
-from app.models.sensor import Sensor
-from app.models.user_role import UserRole
+
+if TYPE_CHECKING:
+    from app.models.farm_crop import FarmCrop
+    from app.models.farm_infrastructure_type import FarmInfrastructureType
+    from app.models.growing_system_type import GrowingSystemType
+    from app.models.harvest import Harvest
+    from app.models.sensor import Sensor
+    from app.models.user_role import UserRole
 
 
 class Farm(TimestampMixin, Base):

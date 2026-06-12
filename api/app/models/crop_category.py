@@ -6,6 +6,8 @@ This module defines the CropCategory lookup entity used
 to classify crops into predefined categories.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -14,7 +16,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.crop import Crop
+
+if TYPE_CHECKING:
+    from app.models.crop import Crop
 
 
 class CropCategory(TimestampMixin, Base):

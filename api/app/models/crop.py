@@ -6,6 +6,8 @@ This module defines the Crop entity and its relationship
 to crop categories, harvests, and farm crop assignments.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -15,9 +17,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.crop_category import CropCategory
-from app.models.farm_crop import FarmCrop
-from app.models.harvest import Harvest
+
+if TYPE_CHECKING:
+    from app.models.crop_category import CropCategory
+    from app.models.farm_crop import FarmCrop
+    from app.models.harvest import Harvest
 
 
 class Crop(TimestampMixin, Base):

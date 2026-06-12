@@ -7,6 +7,7 @@ to classify sensors and their measurement characteristics.
 """
 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
@@ -17,7 +18,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.sensor import Sensor
+
+if TYPE_CHECKING:
+    from app.models.sensor import Sensor
 
 
 class SensorType(TimestampMixin, Base):

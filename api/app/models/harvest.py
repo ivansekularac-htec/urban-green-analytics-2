@@ -7,6 +7,7 @@ crop harvest records, quality grades, and yield quantities.
 """
 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
@@ -17,9 +18,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.crop import Crop
-from app.models.farm import Farm
-from app.models.quality_grade import QualityGrade
+
+if TYPE_CHECKING:
+    from app.models.crop import Crop
+    from app.models.farm import Farm
+    from app.models.quality_grade import QualityGrade
 
 
 class Harvest(TimestampMixin, Base):

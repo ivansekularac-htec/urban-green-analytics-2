@@ -19,7 +19,7 @@ class UserCreate(UserBase):
     )
 
 
-class Userupdate(BaseModel):
+class UserUpdate(BaseModel):
     email: EmailStr | None = None
     full_name: str | None = Field(
         default=None,

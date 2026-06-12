@@ -6,6 +6,8 @@ This module defines the UserRole association entity used
 to assign roles to users globally or within specific farms.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -15,9 +17,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.farm import Farm
-from app.models.role import Role
-from app.models.user import User
+
+if TYPE_CHECKING:
+    from app.models.farm import Farm
+    from app.models.role import Role
+    from app.models.user import User
 
 
 class UserRole(TimestampMixin, Base):

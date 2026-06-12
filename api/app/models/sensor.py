@@ -6,6 +6,8 @@ This module defines the Sensor entity and its relationships
 to farms and sensor types.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     Enum,
@@ -17,8 +19,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.enums import SensorStatus
 from app.mixins import TimestampMixin
-from app.models.farm import Farm
-from app.models.sensor_type import SensorType
+
+if TYPE_CHECKING:
+    from app.models.farm import Farm
+    from app.models.sensor_type import SensorType
 
 
 class Sensor(TimestampMixin, Base):

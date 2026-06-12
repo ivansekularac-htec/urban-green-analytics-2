@@ -6,6 +6,8 @@ This module defines the Role entity used to manage user roles
 within the Urban Green Analytics platform.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -14,7 +16,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.mixins import TimestampMixin
-from app.models.user_role import UserRole
+
+if TYPE_CHECKING:
+    from app.models.user_role import UserRole
 
 
 class Role(TimestampMixin, Base):
