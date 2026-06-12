@@ -312,7 +312,7 @@ class UserRole(TimestampMixin, Base):
         back_populates="user_roles",
     )
 
-    farm: Mapped["Farm" | None] = relationship(
+    farm: Mapped["Farm"] = relationship(
         back_populates="user_roles",
     )
 

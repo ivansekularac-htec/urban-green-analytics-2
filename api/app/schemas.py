@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.enums import FarmStatus, SensorStatus
 
@@ -22,8 +22,14 @@ Lookup Tables
 # Role
 ##########################
 class RoleBase(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class RoleCreate(RoleBase):
@@ -38,9 +44,18 @@ class RoleResponse(RoleBase, BaseResponse):
 # Quality Grade
 ##########################
 class QualityGradeBase(BaseModel):
-    code: str
-    name: str
-    description: str | None = None
+    code: str = Field(
+        min_length=1,
+        max_length=50,
+    )
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class QualityGradeCreate(QualityGradeBase):
@@ -55,8 +70,14 @@ class QualityGradeResponse(QualityGradeBase, BaseResponse):
 # Farm Infrastructure Type
 ##########################
 class FarmInfrastructureTypeBase(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class FarmInfrastructureTypeCreate(FarmInfrastructureTypeBase):
@@ -71,8 +92,14 @@ class FarmInfrastructureTypeResponse(FarmInfrastructureTypeBase, BaseResponse):
 # Growing System Type
 ##########################
 class GrowingSystemTypeBase(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class GrowingSystemTypeCreate(GrowingSystemTypeBase):
@@ -87,8 +114,14 @@ class GrowingSystemTypeResponse(GrowingSystemTypeBase, BaseResponse):
 # Crop Category
 ##########################
 class CropCategoryBase(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class CropCategoryCreate(CropCategoryBase):
@@ -103,9 +136,18 @@ class CropCategoryResponse(CropCategoryBase, BaseResponse):
 # Sensor Type
 ##########################
 class SensorTypeBase(BaseModel):
-    name: str
-    unit: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=100,
+    )
+    unit: str = Field(
+        min_length=1,
+        max_length=50,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
     optimal_min: Decimal | None = None
     optimal_max: Decimal | None = None
 
@@ -130,8 +172,14 @@ class FarmBase(BaseModel):
     infrastructure_type_id: int
     growing_system_type_id: int
 
-    name: str
-    city: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=255,
+    )
+    city: str | None = Field(
+        min_length=1,
+        max_length=255,
+    )
 
     size_m2: Decimal | None = None
     status: FarmStatus = FarmStatus.ACTIVE
@@ -151,12 +199,18 @@ class FarmResponse(FarmBase, BaseResponse):
 ##########################
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: str
+    full_name: str = Field(
+        min_length=1,
+        max_length=255,
+    )
     is_active: bool = True
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(
+        min_length=8,
+        max_length=255,
+    )
 
 
 class UserResponse(UserBase, BaseResponse):
@@ -168,8 +222,14 @@ class UserResponse(UserBase, BaseResponse):
 ##########################
 class CropBase(BaseModel):
     category_id: int
-    name: str
-    description: str | None = None
+    name: str = Field(
+        min_length=1,
+        max_length=255,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
 
 
 class CropCreate(CropBase):
@@ -187,7 +247,10 @@ class SensorBase(BaseModel):
     farm_id: int
     sensor_type_id: int
 
-    serial_number: str
+    serial_number: str = Field(
+        min_length=1,
+        max_length=255,
+    )
     status: SensorStatus = SensorStatus.ACTIVE
     installed_at: int | None = None
 
