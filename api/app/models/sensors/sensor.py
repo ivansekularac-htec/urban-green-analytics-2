@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from api.app.models.sensors.sensor_status import SensorStatus
 from sqlalchemy import BigInteger, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.audit import AuditMixin
+from app.models.sensors.sensor_status import SensorStatus
 
 if TYPE_CHECKING:
     from app.models.farms.farm import Farm
