@@ -1,5 +1,6 @@
-from api.app.schemas.audit import AuditSchema
 from pydantic import BaseModel, EmailStr
+
+from app.schemas.audit import AuditSchema
 
 # ------------------------------------------------------
 # Base

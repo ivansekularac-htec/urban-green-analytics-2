@@ -1,5 +1,7 @@
-from api.app.schemas.audit import AuditSchema
 from pydantic import BaseModel
+
+from app.models.farms.farm_status import FarmStatus
+from app.schemas.audit import AuditSchema
 
 # ------------------------------------------------------
 # Base
@@ -46,7 +48,7 @@ class FarmUpdate(BaseModel):
     name: str | None = None
     city: str | None = None
     size_m2: float | None = None
-    status: str | None = None
+    status: FarmStatus | None = None
     growing_beds_count: int | None = None
 
     infrastructure_type_id: int | None = None
@@ -64,7 +66,7 @@ class FarmResponse(FarmBase, AuditSchema):
     """
 
     id: int
-    status: str
+    status: FarmStatus
 
     class Config:
         from_attributes = True
