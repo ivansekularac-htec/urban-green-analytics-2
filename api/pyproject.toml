@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[standard]>=0.115",
     "psycopg2-binary>=2.9.12",
     "pydantic-settings>=2.14.1",
+    "pytest>=9.0.3",
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
