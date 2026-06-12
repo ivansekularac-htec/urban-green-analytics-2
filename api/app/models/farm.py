@@ -14,7 +14,7 @@ from sqlalchemy import BigInteger, Enum, ForeignKey, Integer, Numeric, String, t
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 from app.models.enums import FarmStatus
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from app.models.user_role import UserRole
 
 
-class Farm(Base):
+class Farm(Base, TimestampMixin):
     """ORM model for the farms table."""
 
     __tablename__ = "farms"
@@ -46,21 +46,11 @@ class Farm(Base):
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
     size_m2: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
     status: Mapped[FarmStatus] = mapped_column(
-        Enum(FarmStatus, name="farm_status", create_type=False),
+        Enum(FarmStatus, name="farm_status"),
         nullable=False,
         server_default=text("'ACTIVE'"),
     )
     growing_beds_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
 
     sensors: Mapped[list["Sensor"]] = relationship(back_populates="farm")
     harvests: Mapped[list["Harvest"]] = relationship(back_populates="farm")

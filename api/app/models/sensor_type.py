@@ -13,13 +13,13 @@ from sqlalchemy import BigInteger, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.sensor import Sensor
 
 
-class SensorType(Base):
+class SensorType(Base, TimestampMixin):
     """ORM model for the sensor_types table."""
 
     __tablename__ = "sensor_types"
@@ -30,11 +30,5 @@ class SensorType(Base):
     description: Mapped[str | None] = mapped_column(String(500))
     optimal_min: Mapped[Decimal | None] = mapped_column(Numeric(10, 3))
     optimal_max: Mapped[Decimal | None] = mapped_column(Numeric(10, 3))
-    created_at: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default=TIMESTAMP_DEFAULT
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default=TIMESTAMP_DEFAULT
-    )
 
     sensors: Mapped[list["Sensor"]] = relationship(back_populates="sensor_type")

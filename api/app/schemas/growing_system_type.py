@@ -17,9 +17,13 @@ class GrowingSystemTypeCreate(GrowingSystemTypeBase):
 
 
 class GrowingSystemTypeUpdate(BaseModel):
+    """Schema used for partial growing system type updates."""
+
     name: str | None = Field(default=None, max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 
 class GrowingSystemTypeResponse(GrowingSystemTypeBase, TimestampResponse):
+    """Schema returned when retrieving growing system type information."""
+
     pass

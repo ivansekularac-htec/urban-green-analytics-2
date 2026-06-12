@@ -12,7 +12,7 @@ from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.crop_category import CropCategory
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from app.models.harvest import Harvest
 
 
-class Crop(Base):
+class Crop(Base, TimestampMixin):
     """ORM model for the crops table."""
 
     __tablename__ = "crops"
@@ -33,16 +33,6 @@ class Crop(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
 
     category: Mapped["CropCategory"] = relationship(back_populates="crops")
     harvests: Mapped[list["Harvest"]] = relationship(back_populates="crop")

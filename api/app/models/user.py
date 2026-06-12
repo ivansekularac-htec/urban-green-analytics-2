@@ -12,13 +12,13 @@ from sqlalchemy import BigInteger, Boolean, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.user_role import UserRole
 
 
-class User(Base):
+class User(Base, TimestampMixin):
     """ORM model for the users table."""
 
     __tablename__ = "users"
@@ -31,16 +31,6 @@ class User(Base):
         Boolean,
         nullable=False,
         server_default=text("TRUE"),
-    )
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
     )
 
     user_roles: Mapped[list["UserRole"]] = relationship(back_populates="user")

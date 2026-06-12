@@ -13,7 +13,7 @@ from sqlalchemy import BigInteger, ForeignKey, Index, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.crop import Crop
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from app.models.quality_grade import QualityGrade
 
 
-class Harvest(Base):
+class Harvest(Base, TimestampMixin):
     """ORM model for the harvests table."""
 
     __tablename__ = "harvests"
@@ -31,12 +31,12 @@ class Harvest(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     farm_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey("farms.id"),
+        ForeignKey("farms.id", ondelete="CASCADE"),
         nullable=False,
     )
     crop_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey("crops.id"),
+        ForeignKey("crops.id", ondelete="CASCADE"),
         nullable=False,
     )
     quality_grade_id: Mapped[int] = mapped_column(
@@ -45,16 +45,6 @@ class Harvest(Base):
         nullable=False,
     )
     weight_kg: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
 
     farm: Mapped["Farm"] = relationship(back_populates="harvests")
     crop: Mapped["Crop"] = relationship(back_populates="harvests")

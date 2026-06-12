@@ -12,14 +12,14 @@ from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.crop import Crop
     from app.models.farm import Farm
 
 
-class FarmCrop(Base):
+class FarmCrop(Base, TimestampMixin):
     """ORM model for the farm_crops table."""
 
     __tablename__ = "farm_crops"
@@ -37,16 +37,6 @@ class FarmCrop(Base):
     )
     started_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
     ended_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
 
     farm: Mapped["Farm"] = relationship(back_populates="farm_crops")
     crop: Mapped["Crop"] = relationship(back_populates="farm_crops")

@@ -12,7 +12,7 @@ from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.farm import Farm
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class UserRole(Base):
+class UserRole(Base, TimestampMixin):
     """ORM model for the user_roles table."""
 
     __tablename__ = "user_roles"
@@ -42,16 +42,6 @@ class UserRole(Base):
         BigInteger,
         ForeignKey("farms.id", ondelete="CASCADE"),
         nullable=True,
-    )
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=TIMESTAMP_DEFAULT,
     )
 
     user: Mapped["User"] = relationship(back_populates="user_roles")

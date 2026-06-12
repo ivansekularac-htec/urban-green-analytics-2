@@ -12,13 +12,13 @@ from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.common import TIMESTAMP_DEFAULT
+from app.models.common import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.farm import Farm
 
 
-class FarmInfrastructureType(Base):
+class FarmInfrastructureType(Base, TimestampMixin):
     """ORM model for the farm_infrastructure_types table."""
 
     __tablename__ = "farm_infrastructure_types"
@@ -26,11 +26,5 @@ class FarmInfrastructureType(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column(String(500))
-    created_at: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default=TIMESTAMP_DEFAULT
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default=TIMESTAMP_DEFAULT
-    )
 
     farms: Mapped[list["Farm"]] = relationship(back_populates="infrastructure_type")
