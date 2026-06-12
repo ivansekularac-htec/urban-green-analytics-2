@@ -1,3 +1,11 @@
+"""
+role.py
+SQLAlchemy ORM model for the roles table.
+
+This module defines the Role entity used to manage user roles
+within the Urban Green Analytics platform.
+"""
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -10,6 +18,8 @@ from app.models.user_role import UserRole
 
 
 class Role(TimestampMixin, Base):
+    """ORM model for the roles table."""
+
     __tablename__ = "roles"
     __table_args__ = {"schema": "app"}
 

@@ -1,3 +1,11 @@
+"""
+quality_grade.py
+SQLAlchemy ORM model for the quality_grades table.
+
+This module defines the QualityGrade lookup entity used
+to classify harvested crops by quality.
+"""
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -10,6 +18,8 @@ from app.models.harvest import Harvest
 
 
 class QualityGrade(TimestampMixin, Base):
+    """ORM model for the quality_grades table."""
+
     __tablename__ = "quality_grades"
     __table_args__ = {"schema": "app"}
 

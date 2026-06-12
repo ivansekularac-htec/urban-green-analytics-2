@@ -1,3 +1,11 @@
+"""
+user.py
+SQLAlchemy ORM model for the users table.
+
+This module defines the User entity used for application
+authentication and authorization.
+"""
+
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -11,6 +19,8 @@ from app.models.user_role import UserRole
 
 
 class User(TimestampMixin, Base):
+    """ORM model for the users table."""
+
     __tablename__ = "users"
     __table_args__ = {"schema": "app"}
 

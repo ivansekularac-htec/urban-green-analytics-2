@@ -15,6 +15,7 @@ class FarmBase(BaseModel):
         max_length=255,
     )
     city: str | None = Field(
+        default=None,
         min_length=1,
         max_length=255,
     )
@@ -26,6 +27,26 @@ class FarmBase(BaseModel):
 
 class FarmCreate(FarmBase):
     pass
+
+
+class FarmUpdate(BaseModel):
+    infrastructure_type_id: int | None
+    growing_system_type_id: int | None
+
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+    city: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+
+    size_m2: Decimal | None = None
+    status: FarmStatus | None = None
+    growing_beds_count: int | None = None
 
 
 class FarmResponse(FarmBase, BaseResponse):

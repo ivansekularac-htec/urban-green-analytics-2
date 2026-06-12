@@ -1,3 +1,11 @@
+"""
+sensor.py
+SQLAlchemy ORM model for the sensors table.
+
+This module defines the Sensor entity and its relationships
+to farms and sensor types.
+"""
+
 from sqlalchemy import (
     BigInteger,
     Enum,
@@ -14,6 +22,8 @@ from app.models.sensor_type import SensorType
 
 
 class Sensor(TimestampMixin, Base):
+    """ORM model for the sensors table."""
+
     __tablename__ = "sensors"
     __table_args__ = {"schema": "app"}
 

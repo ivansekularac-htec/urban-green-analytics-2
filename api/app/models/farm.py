@@ -1,3 +1,12 @@
+"""
+farm.py
+SQLAlchemy ORM model for the farms table.
+
+This module defines the Farm entity and its relationships
+to infrastructure types, growing systems, sensors,
+harvests, crops, and user assignments.
+"""
+
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -22,6 +31,8 @@ from app.models.user_role import UserRole
 
 
 class Farm(TimestampMixin, Base):
+    """ORM model for the farms table."""
+
     __tablename__ = "farms"
     __table_args__ = {"schema": "app"}
 

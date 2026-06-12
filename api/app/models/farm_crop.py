@@ -1,3 +1,11 @@
+"""
+farm_crop.py
+SQLAlchemy ORM model for the farm_crops table.
+
+This module defines the FarmCrop association entity used
+to track crop cultivation periods on individual farms.
+"""
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -11,6 +19,8 @@ from app.models.farm import Farm
 
 
 class FarmCrop(TimestampMixin, Base):
+    """ORM model for the farm_crops table."""
+
     __tablename__ = "farm_crops"
     __table_args__ = {"schema": "app"}
 

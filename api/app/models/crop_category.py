@@ -1,3 +1,11 @@
+"""
+crop_category.py
+SQLAlchemy ORM model for the crop_categories table.
+
+This module defines the CropCategory lookup entity used
+to classify crops into predefined categories.
+"""
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -10,6 +18,8 @@ from app.models.crop import Crop
 
 
 class CropCategory(TimestampMixin, Base):
+    """ORM model for the crop_categories table."""
+
     __tablename__ = "crop_categories"
     __table_args__ = {"schema": "app"}
 

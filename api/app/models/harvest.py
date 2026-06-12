@@ -1,3 +1,11 @@
+"""
+harvest.py
+SQLAlchemy ORM model for the harvests table.
+
+This module defines the Harvest entity used to track
+crop harvest records, quality grades, and yield quantities.
+"""
+
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -15,6 +23,8 @@ from app.models.quality_grade import QualityGrade
 
 
 class Harvest(TimestampMixin, Base):
+    """ORM model for the harvests table."""
+
     __tablename__ = "harvests"
     __table_args__ = {"schema": "app"}
 

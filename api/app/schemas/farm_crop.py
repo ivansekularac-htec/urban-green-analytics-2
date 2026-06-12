@@ -14,5 +14,12 @@ class FarmCropCreate(FarmCropBase):
     pass
 
 
+class FarmCropUpdate(BaseModel):
+    farm_id: int | None = None
+    crop_id: int | None = None
+    started_at: int | None = None
+    ended_at: int | None = None
+
+
 class FarmCropResponse(FarmCropBase, BaseResponse):
     pass

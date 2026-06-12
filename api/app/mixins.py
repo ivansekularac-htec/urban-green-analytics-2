@@ -1,18 +1,19 @@
-from sqlalchemy import BigInteger, text
+from time import time
+
+from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
 
 class TimestampMixin:
-    """Common timestamp fields for database entities."""
-
     created_at: Mapped[int] = mapped_column(
         BigInteger,
         nullable=False,
-        server_default=text("(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT)"),
+        default=lambda: int(time()),
     )
 
     updated_at: Mapped[int] = mapped_column(
         BigInteger,
         nullable=False,
-        server_default=text("(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT)"),
+        default=lambda: int(time()),
+        onupdate=lambda: int(time()),
     )

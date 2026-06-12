@@ -17,5 +17,12 @@ class HarvestCreate(HarvestBase):
     pass
 
 
+class HarvestUpdate(BaseModel):
+    farm_id: int | None = None
+    crop_id: int | None = None
+    quality_grade_id: int | None = None
+    weight_kg: Decimal | None = None
+
+
 class HarvestResponse(HarvestBase, BaseResponse):
     pass

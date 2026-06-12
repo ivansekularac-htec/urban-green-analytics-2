@@ -1,3 +1,11 @@
+"""
+user_role.py
+SQLAlchemy ORM model for the user_roles table.
+
+This module defines the UserRole association entity used
+to assign roles to users globally or within specific farms.
+"""
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -13,6 +21,8 @@ from app.models.user import User
 
 
 class UserRole(TimestampMixin, Base):
+    """ORM model for the user_roles table."""
+
     __tablename__ = "user_roles"
     __table_args__ = (
         UniqueConstraint(

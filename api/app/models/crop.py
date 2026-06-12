@@ -1,3 +1,11 @@
+"""
+crop.py
+SQLAlchemy ORM model for the crops table.
+
+This module defines the Crop entity and its relationship
+to crop categories, harvests, and farm crop assignments.
+"""
+
 from sqlalchemy import (
     BigInteger,
     ForeignKey,
@@ -13,6 +21,8 @@ from app.models.harvest import Harvest
 
 
 class Crop(TimestampMixin, Base):
+    """ORM model for the crops table."""
+
     __tablename__ = "crops"
     __table_args__ = {"schema": "app"}
 

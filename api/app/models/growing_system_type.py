@@ -1,3 +1,11 @@
+"""
+growing_system_type.py
+SQLAlchemy ORM model for the growing_system_types table.
+
+This module defines the GrowingSystemType lookup entity
+used to categorize farm growing systems.
+"""
+
 from sqlalchemy import (
     BigInteger,
     String,
@@ -10,6 +18,8 @@ from app.models.farm import Farm
 
 
 class GrowingSystemType(TimestampMixin, Base):
+    """ORM model for the growing_system_types table."""
+
     __tablename__ = "growing_system_types"
     __table_args__ = {"schema": "app"}
 

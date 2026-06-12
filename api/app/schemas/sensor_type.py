@@ -26,5 +26,24 @@ class SensorTypeCreate(SensorTypeBase):
     pass
 
 
+class SensorTypeUpdate(BaseModel):
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+    )
+    unit: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=500,
+    )
+    optimal_min: Decimal | None = None
+    optimal_max: Decimal | None = None
+
+
 class SensorTypeResponse(SensorTypeBase, BaseResponse):
     pass

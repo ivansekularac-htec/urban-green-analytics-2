@@ -1,3 +1,11 @@
+"""
+sensor_type.py
+SQLAlchemy ORM model for the sensor_types table.
+
+This module defines the SensorType lookup entity used
+to classify sensors and their measurement characteristics.
+"""
+
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -13,6 +21,8 @@ from app.models.sensor import Sensor
 
 
 class SensorType(TimestampMixin, Base):
+    """ORM model for the sensor_types table."""
+
     __tablename__ = "sensor_types"
     __table_args__ = {"schema": "app"}
 
