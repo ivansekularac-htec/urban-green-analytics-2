@@ -15,6 +15,7 @@ build/
 venv/
 env/
 ENV/
+.pytest_cache/
 
 # Virtual environment names
 .venv*/
