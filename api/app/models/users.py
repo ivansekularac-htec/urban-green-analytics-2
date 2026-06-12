@@ -1,10 +1,16 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
-from app.helpers import get_current_timestamp
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.user_roles import UserRole
 
 
-class User(Base):
+class User(Base, TimestampMixin):
     """User model representing a user in the system."""
 
     __tablename__ = "users"
@@ -34,19 +40,6 @@ class User(Base):
         Boolean,
         nullable=False,
         default=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     user_roles: Mapped[list["UserRole"]] = relationship(

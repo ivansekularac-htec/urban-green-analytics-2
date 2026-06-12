@@ -1,13 +1,21 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
-from app.helpers import get_current_timestamp
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.crop import Crop
+    from app.models.farm import Farm
+    from app.models.quality_grade import QualityGrade
 
 
-class Harvest(Base):
+class Harvest(Base, TimestampMixin):
     """Model representing a harvest record."""
-    
+
     __tablename__ = "harvests"
 
     id: Mapped[int] = mapped_column(
@@ -33,19 +41,6 @@ class Harvest(Base):
     weight_kg: Mapped[Decimal] = mapped_column(
         Numeric(10, 3),
         nullable=False,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     farm: Mapped["Farm"] = relationship(

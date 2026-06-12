@@ -1,11 +1,17 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
-from app.helpers import get_current_timestamp
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.sensors import Sensor
 
 
-class SensorType(Base):
+class SensorType(Base, TimestampMixin):
     """Model representing a type of sensor, including its name, unit of measurement, and optimal value range."""
 
     __tablename__ = "sensor_types"
@@ -39,19 +45,6 @@ class SensorType(Base):
     optimal_max: Mapped[Decimal | None] = mapped_column(
         Numeric(10, 3),
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     sensors: Mapped[list["Sensor"]] = relationship(

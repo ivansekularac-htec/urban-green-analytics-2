@@ -1,9 +1,18 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database import Base
-from app.helpers import get_current_timestamp
 
-class UserRole(Base):
+from app.database import Base
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.farm import Farm
+    from app.models.role import Role
+    from app.models.user import User
+
+
+class UserRole(Base, TimestampMixin):
     """Association table for users and roles, with an optional farm association."""
 
     __tablename__ = "user_roles"
@@ -35,19 +44,6 @@ class UserRole(Base):
     farm_id: Mapped[int | None] = mapped_column(
         ForeignKey("farms.id", ondelete="CASCADE"),
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     user: Mapped["User"] = relationship(

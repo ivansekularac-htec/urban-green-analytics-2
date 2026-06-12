@@ -1,11 +1,19 @@
-from sqlalchemy import BigInteger, Enum as SqlEnum, ForeignKey, String
+from typing import TYPE_CHECKING
+
+from sqlalchemy import BigInteger, ForeignKey, String
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models.enums import SensorStatus
+
 from app.database import Base
-from app.helpers import get_current_timestamp
+from app.models.enums import SensorStatus
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.farm import Farm
+    from app.models.sensor_type import SensorType
 
 
-class Sensor(Base):
+class Sensor(Base, TimestampMixin):
     """Model representing a sensor installed on a farm."""
 
     __tablename__ = "sensors"
@@ -39,19 +47,6 @@ class Sensor(Base):
     installed_at: Mapped[int | None] = mapped_column(
         BigInteger,
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     farm: Mapped["Farm"] = relationship(

@@ -1,14 +1,25 @@
 from decimal import Decimal
-from sqlalchemy import BigInteger, Enum as SqlEnum, ForeignKey, Integer, Numeric, String
+from typing import TYPE_CHECKING
+
+from sqlalchemy import BigInteger, ForeignKey, Integer, Numeric, String
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
 from app.models.enums import FarmStatus
-from app.helpers import get_current_timestamp
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.farm import Farm
+    from app.models.farm_crops import FarmCrop
+    from app.models.farm_infrastructure_types import FarmInfrastructureType
+    from app.models.growing_system_types import GrowingSystemType
+    from app.models.harvests import Harvest
+    from app.models.sensors import Sensor
+    from app.models.user_roles import UserRole
 
 
-
-
-class Farm(Base):
+class Farm(Base, TimestampMixin):
     """Model representing a farm entity in the database."""
 
     __tablename__ = "farms"
@@ -51,19 +62,6 @@ class Farm(Base):
     growing_beds_count: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     infrastructure_type: Mapped["FarmInfrastructureType"] = relationship(

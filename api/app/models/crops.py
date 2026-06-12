@@ -1,9 +1,19 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
-from app.helpers import get_current_timestamp
-    
-class Crop(Base):
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.crop import Crop
+    from app.models.crop_category import CropCategory
+    from app.models.farm_crop import FarmCrop
+    from app.models.harvest import Harvest
+
+
+class Crop(Base, TimestampMixin):
     """Model representing a crop."""
 
     __tablename__ = "crops"
@@ -26,20 +36,6 @@ class Crop(Base):
     description: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     category: Mapped["CropCategory"] = relationship(

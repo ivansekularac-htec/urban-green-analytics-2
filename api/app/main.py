@@ -10,11 +10,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from app.database import Base, verify_database_connection
 
+import app.models  # noqa: F401 - Ensure models are registered with SQLAlchemy
+from app.database import verify_database_connection
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

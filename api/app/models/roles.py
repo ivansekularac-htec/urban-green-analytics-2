@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database import Base
-from app.helpers import get_current_timestamp
 
-class Role(Base):
+from app.database import Base
+from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models import UserRole
+
+
+class Role(Base, TimestampMixin):
     """Model representing a user role in the system."""
 
     __tablename__ = "roles"
@@ -22,19 +29,6 @@ class Role(Base):
     description: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
-    )
-
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-    )
-
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
     )
 
     user_roles: Mapped[list["UserRole"]] = relationship(
