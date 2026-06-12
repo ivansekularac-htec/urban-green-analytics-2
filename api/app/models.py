@@ -201,55 +201,6 @@ class Crop(TimestampMixin, Base):
     )
 
 
-"""
-Join Tables
-"""
-
-
-class UserRole(TimestampMixin, Base):
-    __tablename__ = "user_roles"
-    __table_args__ = {"schema": "app"}
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("app.users.id"), nullable=False)
-    role_id: Mapped[int] = mapped_column(ForeignKey("app.roles.id"), nullable=False)
-    farm_id: Mapped[int | None] = mapped_column(ForeignKey("app.farms.id"), nullable=True)
-
-    user: Mapped["User"] = relationship(
-        back_populates="user_roles",
-    )
-
-    role: Mapped["Role"] = relationship(
-        back_populates="user_roles",
-    )
-
-    farm: Mapped["Farm | None"] = relationship(
-        back_populates="user_roles",
-    )
-
-
-class FarmCrop(TimestampMixin, Base):
-    __tablename__ = "farm_crops"
-    __table_args__ = {"schema": "app"}
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-
-    farm_id: Mapped[int] = mapped_column(ForeignKey("app.farms.id"), nullable=False)
-    crop_id: Mapped[int] = mapped_column(ForeignKey("app.crops.id"), nullable=False)
-
-    started_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    ended_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-
-    farm: Mapped["Farm"] = relationship(
-        back_populates="farm_crops",
-    )
-
-    crop: Mapped["Crop"] = relationship(
-        back_populates="farm_crops",
-    )
-
-
 class Sensor(TimestampMixin, Base):
     __tablename__ = "sensors"
     __table_args__ = {"schema": "app"}
@@ -309,4 +260,53 @@ class Harvest(TimestampMixin, Base):
 
     quality_grade: Mapped["QualityGrade"] = relationship(
         back_populates="harvests",
+    )
+
+
+"""
+Many-to-Many Tables
+"""
+
+
+class UserRole(TimestampMixin, Base):
+    __tablename__ = "user_roles"
+    __table_args__ = {"schema": "app"}
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("app.users.id"), nullable=False)
+    role_id: Mapped[int] = mapped_column(ForeignKey("app.roles.id"), nullable=False)
+    farm_id: Mapped[int | None] = mapped_column(ForeignKey("app.farms.id"), nullable=True)
+
+    user: Mapped["User"] = relationship(
+        back_populates="user_roles",
+    )
+
+    role: Mapped["Role"] = relationship(
+        back_populates="user_roles",
+    )
+
+    farm: Mapped["Farm | None"] = relationship(
+        back_populates="user_roles",
+    )
+
+
+class FarmCrop(TimestampMixin, Base):
+    __tablename__ = "farm_crops"
+    __table_args__ = {"schema": "app"}
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    farm_id: Mapped[int] = mapped_column(ForeignKey("app.farms.id"), nullable=False)
+    crop_id: Mapped[int] = mapped_column(ForeignKey("app.crops.id"), nullable=False)
+
+    started_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    ended_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+
+    farm: Mapped["Farm"] = relationship(
+        back_populates="farm_crops",
+    )
+
+    crop: Mapped["Crop"] = relationship(
+        back_populates="farm_crops",
     )
