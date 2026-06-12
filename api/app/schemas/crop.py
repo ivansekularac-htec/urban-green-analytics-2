@@ -1,9 +1,9 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CropBase(BaseModel):
     category_id: int
-    name: str
+    name: str = Field(max_length=100)
     description: str | None = None
 
 
@@ -17,3 +17,9 @@ class CropResponse(CropBase):
     updated_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CropUpdate(BaseModel):
+    category_id: int | None = None
+    name: str | None = None
+    description: str | None = None

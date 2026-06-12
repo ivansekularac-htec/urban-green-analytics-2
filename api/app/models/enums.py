@@ -1,13 +1,13 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class FarmStatus(str, Enum):
+class FarmStatus(StrEnum):
     ACTIVE = "ACTIVE"
     MAINTENANCE = "MAINTENANCE"
     INACTIVE = "INACTIVE"
 
 
-class SensorStatus(str, Enum):
+class SensorStatus(StrEnum):
     ACTIVE = "ACTIVE"
     OFFLINE = "OFFLINE"
     MAINTENANCE = "MAINTENANCE"

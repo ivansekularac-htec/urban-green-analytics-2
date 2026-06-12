@@ -20,3 +20,10 @@ class HarvestResponse(HarvestBase):
     updated_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class HarvestUpdate(BaseModel):
+    farm_id: int | None = None
+    crop_id: int | None = None
+    quality_grade_id: int | None = None
+    weight_kg: Decimal | None = None

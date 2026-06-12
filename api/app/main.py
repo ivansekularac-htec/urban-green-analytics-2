@@ -8,9 +8,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app import models, schemas  # noqa: F401
 from app.database import verify_database_connection
-from app.models import *
-from app.schemas import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

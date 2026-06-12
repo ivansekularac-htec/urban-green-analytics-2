@@ -1,9 +1,9 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class GrowingSystemTypeBase(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 class GrowingSystemTypeCreate(GrowingSystemTypeBase):
@@ -16,3 +16,8 @@ class GrowingSystemTypeResponse(GrowingSystemTypeBase):
     updated_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class GrowingSystemTypeUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None

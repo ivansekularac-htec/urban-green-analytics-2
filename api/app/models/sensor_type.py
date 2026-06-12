@@ -4,9 +4,10 @@ from sqlalchemy import BigInteger, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.mixins import TimestampMixin
 
 
-class SensorType(Base):
+class SensorType(Base, TimestampMixin):
     __tablename__ = "sensor_types"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -36,8 +37,5 @@ class SensorType(Base):
         Numeric(10, 3),
         nullable=True,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     sensors: Mapped[list["Sensor"]] = relationship(back_populates="sensor_type")

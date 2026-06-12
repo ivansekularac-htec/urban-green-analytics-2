@@ -2,9 +2,10 @@ from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.mixins import TimestampMixin
 
 
-class FarmCrop(Base):
+class FarmCrop(Base, TimestampMixin):
     __tablename__ = "farm_crops"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -28,9 +29,6 @@ class FarmCrop(Base):
         BigInteger,
         nullable=True,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     farm: Mapped["Farm"] = relationship(back_populates="farm_crops")
     crop: Mapped["Crop"] = relationship(back_populates="farm_crops")

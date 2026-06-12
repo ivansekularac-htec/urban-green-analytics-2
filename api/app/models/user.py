@@ -2,9 +2,10 @@ from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.mixins import TimestampMixin
 
 
-class User(Base):
+class User(Base, TimestampMixin):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -29,8 +30,5 @@ class User(Base):
         Boolean,
         nullable=False,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     user_roles: Mapped[list["UserRole"]] = relationship(back_populates="user")

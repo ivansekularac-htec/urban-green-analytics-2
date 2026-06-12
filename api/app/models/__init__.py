@@ -1,6 +1,5 @@
 from app.models.crop import Crop
 from app.models.crop_category import CropCategory
-from app.models.enums import FarmStatus, SensorStatus
 from app.models.farm import Farm
 from app.models.farm_crop import FarmCrop
 from app.models.farm_infrastructure_type import FarmInfrastructureType
@@ -27,6 +26,4 @@ __all__ = [
     "SensorType",
     "User",
     "UserRole",
-    "FarmStatus",
-    "SensorStatus",
 ]

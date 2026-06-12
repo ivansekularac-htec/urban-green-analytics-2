@@ -2,9 +2,10 @@ from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.mixins import TimestampMixin
 
 
-class CropCategory(Base):
+class CropCategory(Base, TimestampMixin):
     __tablename__ = "crop_categories"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -19,8 +20,5 @@ class CropCategory(Base):
         String(500),
         nullable=True,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     crops: Mapped[list["Crop"]] = relationship(back_populates="category")

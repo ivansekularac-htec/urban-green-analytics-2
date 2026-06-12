@@ -1,14 +1,14 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
-    email: str
-    full_name: str
+    email: EmailStr
+    full_name: str = Field(max_length=255)
     is_active: bool
 
 
 class UserCreate(UserBase):
-    password_hash: str
+    password: str
 
 
 class UserResponse(UserBase):
@@ -17,3 +17,10 @@ class UserResponse(UserBase):
     updated_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdate(BaseModel):
+    email: EmailStr | None = None
+    full_name: str | None = None
+    is_active: bool | None = None
+    password: str | None = None

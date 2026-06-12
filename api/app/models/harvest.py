@@ -4,9 +4,10 @@ from sqlalchemy import BigInteger, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.mixins import TimestampMixin
 
 
-class Harvest(Base):
+class Harvest(Base, TimestampMixin):
     __tablename__ = "harvests"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -30,9 +31,6 @@ class Harvest(Base):
         Numeric(10, 3),
         nullable=False,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     farm: Mapped["Farm"] = relationship(back_populates="harvests")
     crop: Mapped["Crop"] = relationship(back_populates="harvests")

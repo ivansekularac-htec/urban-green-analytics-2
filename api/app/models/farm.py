@@ -5,10 +5,11 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models import FarmStatus
+from app.models.enums import FarmStatus
+from app.models.mixins import TimestampMixin
 
 
-class Farm(Base):
+class Farm(Base, TimestampMixin):
     __tablename__ = "farms"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -44,9 +45,6 @@ class Farm(Base):
         Integer,
         nullable=True,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     infrastructure_type: Mapped["FarmInfrastructureType"] = relationship(back_populates="farms")
     growing_system_type: Mapped["GrowingSystemType"] = relationship(back_populates="farms")

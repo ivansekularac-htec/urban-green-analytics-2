@@ -3,16 +3,23 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models import SensorStatus
+from app.models.enums import SensorStatus
+from app.models.mixins import TimestampMixin
 
 
-class Sensor(Base):
+class Sensor(Base, TimestampMixin):
     __tablename__ = "sensors"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
     farm_id: Mapped[int] = mapped_column(
         ForeignKey("farms.id"),
+        nullable=False,
+    )
+
+    serial_number: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
         nullable=False,
     )
 
@@ -26,17 +33,9 @@ class Sensor(Base):
         nullable=False,
     )
 
-    status: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-    )
-
     installed_at: Mapped[int | None] = mapped_column(
         BigInteger,
         nullable=True,
     )
-
-    created_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     sensor_type: Mapped["SensorType"] = relationship(back_populates="sensors")

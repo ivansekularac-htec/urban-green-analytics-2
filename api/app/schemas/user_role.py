@@ -17,3 +17,9 @@ class UserRoleResponse(UserRoleBase):
     updated_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserRoleUpdate(BaseModel):
+    user_id: int | None = None
+    role_id: int | None = None
+    farm_id: int | None = None
