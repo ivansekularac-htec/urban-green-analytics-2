@@ -9,6 +9,8 @@ from app.helpers import get_current_timestamp
 
 
 class Farm(Base):
+    """Model representing a farm entity in the database."""
+
     __tablename__ = "farms"
 
     id: Mapped[int] = mapped_column(

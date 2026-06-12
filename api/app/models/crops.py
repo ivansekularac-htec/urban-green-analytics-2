@@ -4,6 +4,8 @@ from app.database import Base
 from app.helpers import get_current_timestamp
     
 class Crop(Base):
+    """Model representing a crop."""
+
     __tablename__ = "crops"
 
     id: Mapped[int] = mapped_column(

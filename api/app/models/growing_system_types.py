@@ -4,6 +4,8 @@ from app.database import Base
 from app.helpers import get_current_timestamp
 
 class GrowingSystemType(Base):
+    """Model representing a type of growing system used in farming operations."""
+
     __tablename__ = "growing_system_types"
 
     id: Mapped[int] = mapped_column(

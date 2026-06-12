@@ -5,6 +5,8 @@ from app.helpers import get_current_timestamp
 
 
 class User(Base):
+    """User model representing a user in the system."""
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(

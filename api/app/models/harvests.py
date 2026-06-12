@@ -6,6 +6,8 @@ from app.helpers import get_current_timestamp
 
 
 class Harvest(Base):
+    """Model representing a harvest record."""
+    
     __tablename__ = "harvests"
 
     id: Mapped[int] = mapped_column(

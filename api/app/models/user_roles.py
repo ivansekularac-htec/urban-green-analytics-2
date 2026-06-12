@@ -4,6 +4,8 @@ from app.database import Base
 from app.helpers import get_current_timestamp
 
 class UserRole(Base):
+    """Association table for users and roles, with an optional farm association."""
+
     __tablename__ = "user_roles"
 
     __table_args__ = (

@@ -4,6 +4,8 @@ from app.database import Base
 from app.helpers import get_current_timestamp
 
 class QualityGrade(Base):
+    """Model representing a quality grade for harvested crops."""
+
     __tablename__ = "quality_grades"
 
     id: Mapped[int] = mapped_column(

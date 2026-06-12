@@ -5,6 +5,8 @@ from app.helpers import get_current_timestamp
 
 
 class FarmInfrastructureType(Base):
+    """Model representing types of farm infrastructure."""
+    
     __tablename__ = "farm_infrastructure_types"
 
     id: Mapped[int] = mapped_column(

@@ -4,6 +4,8 @@ from app.database import Base
 from app.helpers import get_current_timestamp
 
 class Role(Base):
+    """Model representing a user role in the system."""
+
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(

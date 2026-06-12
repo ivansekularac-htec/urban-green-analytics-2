@@ -1,5 +1,7 @@
 from enum import Enum
 
+"""This module defines the enumeration classes for sensor and farm statuses."""
+
 
 class SensorStatus(str, Enum):
     ACTIVE = "ACTIVE"

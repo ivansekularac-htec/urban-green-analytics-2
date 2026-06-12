@@ -1,4 +1,5 @@
 # models/__init__.py
+"""Import all models to make them available when importing the models package."""
 from .crops import Crop
 from .crop_categories import CropCategory
 from .farms import Farm

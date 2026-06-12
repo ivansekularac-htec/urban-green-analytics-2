@@ -1,3 +1,5 @@
+"Schemas for the API models."
+
 from .base import AuditModelBase
 from .crop_categories import CropCategoryBase, CropCategoryCreate, CropCategoryResponse
 from .crops import CropBase, CropCreate, CropResponse

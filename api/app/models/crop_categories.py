@@ -4,6 +4,8 @@ from app.database import Base
 
 
 class CropCategory(Base):
+    """Model representing a crop category."""
+    
     __tablename__ = "crop_categories"
 
     id: Mapped[int] = mapped_column(

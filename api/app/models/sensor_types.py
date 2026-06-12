@@ -6,6 +6,8 @@ from app.helpers import get_current_timestamp
 
 
 class SensorType(Base):
+    """Model representing a type of sensor, including its name, unit of measurement, and optimal value range."""
+
     __tablename__ = "sensor_types"
 
     id: Mapped[int] = mapped_column(
