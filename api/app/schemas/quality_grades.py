@@ -10,9 +10,7 @@ class QualityGradeBase(BaseModel):
 
 
 class QualityGradeCreate(QualityGradeBase):
-    code: str = Field(max_length=50)
-    name: str = Field(max_length=100)
-    description: str | None = Field(default=None, max_length=500)
+    pass
 
 
 class QualityGradeUpdate(BaseModel):
