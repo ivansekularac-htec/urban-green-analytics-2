@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+import app.models  # noqa: F401 - Ensure models are registered with SQLAlchemy
 from app.database import verify_database_connection
 
 logging.basicConfig(level=logging.INFO)
