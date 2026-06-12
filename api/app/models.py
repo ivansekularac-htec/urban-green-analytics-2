@@ -1,6 +1,15 @@
 from decimal import Decimal
 
-from sqlalchemy import BigInteger, Boolean, Enum, ForeignKey, Integer, Numeric, String
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -121,7 +130,10 @@ class Farm(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     city: Mapped[str | None] = mapped_column(String(255))
 
-    size_m2 = mapped_column(Numeric(10, 3))
+    size_m2: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 3),
+        nullable=True,
+    )
 
     status: Mapped[FarmStatus] = mapped_column(
         Enum(FarmStatus, name="farm_status"),
@@ -207,7 +219,9 @@ class Sensor(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    farm_id: Mapped[int] = mapped_column(ForeignKey("app.farms.id"), nullable=False)
+    farm_id: Mapped[int] = mapped_column(
+        ForeignKey("app.farms.id", ondelete="CASCADE"), nullable=False
+    )
     sensor_type_id: Mapped[int] = mapped_column(ForeignKey("app.sensor_types.id"), nullable=False)
 
     serial_number: Mapped[str] = mapped_column(
@@ -270,13 +284,25 @@ Many-to-Many Tables
 
 class UserRole(TimestampMixin, Base):
     __tablename__ = "user_roles"
-    __table_args__ = {"schema": "app"}
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "role_id",
+            "farm_id",
+            name="uq_user_role_farm",
+        ),
+        {"schema": "app"},
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("app.users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("app.users.id", ondelete="CASCADE"), nullable=False
+    )
     role_id: Mapped[int] = mapped_column(ForeignKey("app.roles.id"), nullable=False)
-    farm_id: Mapped[int | None] = mapped_column(ForeignKey("app.farms.id"), nullable=True)
+    farm_id: Mapped[int | None] = mapped_column(
+        ForeignKey("app.farms.id", ondelete="CASCADE"), nullable=True
+    )
 
     user: Mapped["User"] = relationship(
         back_populates="user_roles",
@@ -286,7 +312,7 @@ class UserRole(TimestampMixin, Base):
         back_populates="user_roles",
     )
 
-    farm: Mapped["Farm | None"] = relationship(
+    farm: Mapped["Farm" | None] = relationship(
         back_populates="user_roles",
     )
 
@@ -297,8 +323,12 @@ class FarmCrop(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    farm_id: Mapped[int] = mapped_column(ForeignKey("app.farms.id"), nullable=False)
-    crop_id: Mapped[int] = mapped_column(ForeignKey("app.crops.id"), nullable=False)
+    farm_id: Mapped[int] = mapped_column(
+        ForeignKey("app.farms.id", ondelete="CASCADE"), nullable=False
+    )
+    crop_id: Mapped[int] = mapped_column(
+        ForeignKey("app.crops.id", ondelete="CASCADE"), nullable=False
+    )
 
     started_at: Mapped[int] = mapped_column(BigInteger, nullable=False)
     ended_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)

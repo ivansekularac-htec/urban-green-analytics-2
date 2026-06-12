@@ -1,8 +1,17 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 from app.enums import FarmStatus, SensorStatus
+
+
+class BaseResponse(BaseModel):
+    id: int
+    created_at: int
+    updated_at: int
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 """
 Lookup Tables
@@ -21,12 +30,8 @@ class RoleCreate(RoleBase):
     pass
 
 
-class RoleResponse(RoleBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class RoleResponse(RoleBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -42,12 +47,8 @@ class QualityGradeCreate(QualityGradeBase):
     pass
 
 
-class QualityGradeResponse(QualityGradeBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class QualityGradeResponse(QualityGradeBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -62,12 +63,8 @@ class FarmInfrastructureTypeCreate(FarmInfrastructureTypeBase):
     pass
 
 
-class FarmInfrastructureTypeResponse(FarmInfrastructureTypeBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class FarmInfrastructureTypeResponse(FarmInfrastructureTypeBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -82,12 +79,8 @@ class GrowingSystemTypeCreate(GrowingSystemTypeBase):
     pass
 
 
-class GrowingSystemTypeResponse(GrowingSystemTypeBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class GrowingSystemTypeResponse(GrowingSystemTypeBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -102,12 +95,8 @@ class CropCategoryCreate(CropCategoryBase):
     pass
 
 
-class CropCategoryResponse(CropCategoryBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class CropCategoryResponse(CropCategoryBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -125,12 +114,8 @@ class SensorTypeCreate(SensorTypeBase):
     pass
 
 
-class SensorTypeResponse(SensorTypeBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class SensorTypeResponse(SensorTypeBase, BaseResponse):
+    pass
 
 
 """
@@ -148,8 +133,8 @@ class FarmBase(BaseModel):
     name: str
     city: str | None = None
 
-    size_m2: float | None = None
-    status: FarmStatus
+    size_m2: Decimal | None = None
+    status: FarmStatus = FarmStatus.ACTIVE
     growing_beds_count: int | None = None
 
 
@@ -157,33 +142,25 @@ class FarmCreate(FarmBase):
     pass
 
 
-class FarmResponse(FarmBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class FarmResponse(FarmBase, BaseResponse):
+    pass
 
 
 ##########################
 # User
 ##########################
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     full_name: str
     is_active: bool = True
 
 
 class UserCreate(UserBase):
-    password_hash: str
+    password: str
 
 
-class UserResponse(UserBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class UserResponse(UserBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -199,12 +176,8 @@ class CropCreate(CropBase):
     pass
 
 
-class CropResponse(CropBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class CropResponse(CropBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -215,7 +188,7 @@ class SensorBase(BaseModel):
     sensor_type_id: int
 
     serial_number: str
-    status: SensorStatus
+    status: SensorStatus = SensorStatus.ACTIVE
     installed_at: int | None = None
 
 
@@ -223,12 +196,8 @@ class SensorCreate(SensorBase):
     pass
 
 
-class SensorResponse(SensorBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class SensorResponse(SensorBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -246,12 +215,8 @@ class HarvestCreate(HarvestBase):
     pass
 
 
-class HarvestResponse(HarvestBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class HarvestResponse(HarvestBase, BaseResponse):
+    pass
 
 
 """
@@ -272,12 +237,8 @@ class UserRoleCreate(UserRoleBase):
     pass
 
 
-class UserRoleResponse(UserRoleBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class UserRoleResponse(UserRoleBase, BaseResponse):
+    pass
 
 
 ##########################
@@ -294,9 +255,5 @@ class FarmCropCreate(FarmCropBase):
     pass
 
 
-class FarmCropResponse(FarmCropBase):
-    id: int
-    created_at: int
-    updated_at: int
-
-    model_config = ConfigDict(from_attributes=True)
+class FarmCropResponse(FarmCropBase, BaseResponse):
+    pass
