@@ -1,7 +1,7 @@
-from api.app.schemas.audit import AuditSchema
 from pydantic import BaseModel
 
 from app.models.sensors.sensor_status import SensorStatus
+from app.schemas.audit import AuditSchema
 
 # ------------------------------------------------------
 # Base
