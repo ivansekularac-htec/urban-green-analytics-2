@@ -39,10 +39,10 @@ jobs:
 
       # 5. Execute test or linters using uv run
       - name: Run ruff check
-      - run: uvx ruff check api/app api/tests
+        run: uvx ruff check api/app api/tests
 
       - name: Run ruff format
-      - run: uvx ruff format --check api/app api/tests
+        run: uvx ruff format --check api/app api/tests
       
       - name: Run tests
         run: uv run pytest
