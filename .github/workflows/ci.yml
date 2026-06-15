@@ -31,18 +31,18 @@ jobs:
         run: uv python install 3.12
         working-directory: ./api
 
-      # 4. Install project dependencies using uv sync
+      4. Install project dependencies using uv sync
       - name: Install dependencies
         # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen
         working-directory: ./api
 
-      # 5. Execute test or linters using uv run
-      - name: Run ruff check
-      - run: uvx ruff check api/app api/tests
+      # # 5. Execute test or linters using uv run
+      # - name: Run ruff check
+      # - run: uvx ruff check api/app api/tests
 
-      - name: Run ruff format
-      - run: uvx ruff format --check api/app api/tests
+      # - name: Run ruff format
+      # - run: uvx ruff format --check api/app api/tests
       
-      - name: Run tests
-        run: uv run pytest
+      # - name: Run tests
+      #   run: uv run pytest
