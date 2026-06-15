@@ -39,11 +39,11 @@ jobs:
 
       # 5. Execute test or linters using uv run
       - name: Run ruff check
-        run: uv ruff check app tests
+        run: uv run ruff check app tests
         working-directory: ./api
 
       - name: Run ruff format
-        run: uv ruff format --check app tests
+        run: uv run ruff format --check app tests
         working-directory: ./api
       
       - name: Run tests
