@@ -1,18 +1,26 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QualityGradeBase(BaseModel):
     """Base schema for quality grade data."""
 
-    code: str
-    name: str
-    description: str | None = None
+    code: str = Field(max_length=50)
+    name: str = Field(max_length=100)
+    description: str | None = Field(max_length=500)
 
 
 class QualityGradeCreate(QualityGradeBase):
     """Schema for creating a quality grade."""
 
     pass
+
+
+class QualityGradeUpdate(BaseModel):
+    """Schema for updating quality grade data."""
+
+    code: str | None = Field(default=None, max_length=50)
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 class QualityGradeResponse(QualityGradeBase):

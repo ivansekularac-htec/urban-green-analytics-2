@@ -10,6 +10,7 @@ from app.models.quality_grade import QualityGrade
 from app.models.role import Role
 from app.models.sensor import Sensor
 from app.models.sensor_type import SensorType
+from app.models.timestamp_mixin import TimestampMixin
 from app.models.user import User
 from app.models.user_role import UserRole
 
@@ -29,4 +30,5 @@ __all__ = [
     "SensorType",
     "User",
     "UserRole",
+    "TimestampMixin",
 ]

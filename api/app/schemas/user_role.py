@@ -15,6 +15,14 @@ class UserRoleCreate(UserRoleBase):
     pass
 
 
+class UserRoleUpdate(BaseModel):
+    """Schema for updating user role assignment data."""
+
+    user_id: int | None = None
+    role_id: int | None = None
+    farm_id: int | None = None
+
+
 class UserRoleResponse(UserRoleBase):
     """Schema for returning user role assignment data from the API."""
 

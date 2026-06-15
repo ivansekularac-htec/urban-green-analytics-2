@@ -16,6 +16,15 @@ class FarmCropCreate(FarmCropBase):
     pass
 
 
+class FarmCropUpdate(BaseModel):
+    """Schema for updating farm crop assignment data."""
+
+    farm_id: int | None = None
+    crop_id: int | None = None
+    started_at: int | None = None
+    ended_at: int | None = None
+
+
 class FarmCropResponse(FarmCropBase):
     """Schema for returning farm crop assignment data from the API."""
 

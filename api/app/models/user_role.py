@@ -6,7 +6,7 @@ from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.utils import get_current_timestamp
+from app.models import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.farm import Farm
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class UserRole(Base):
+class UserRole(TimestampMixin, Base):
     """ORM model representing a user's assigned role, optionally scoped to a farm."""
 
     __tablename__ = "user_roles"
@@ -29,16 +29,6 @@ class UserRole(Base):
     farm_id: Mapped[int | None] = mapped_column(
         ForeignKey("farms.id", ondelete="CASCADE"),
         nullable=True,
-    )
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
     )
 
     user: Mapped[User] = relationship(back_populates="user_roles")

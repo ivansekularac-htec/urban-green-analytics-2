@@ -7,13 +7,13 @@ from sqlalchemy import BigInteger, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.utils import get_current_timestamp
+from app.models import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.sensor import Sensor
 
 
-class SensorType(Base):
+class SensorType(TimestampMixin, Base):
     """ORM model representing a sensor measurement type."""
 
     __tablename__ = "sensor_types"
@@ -24,15 +24,5 @@ class SensorType(Base):
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     optimal_min: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
     optimal_max: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
-    )
 
     sensors: Mapped[list[Sensor]] = relationship(back_populates="sensor_type")

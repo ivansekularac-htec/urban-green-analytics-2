@@ -1,17 +1,24 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CropCategoryBase(BaseModel):
     """Base schema for crop category data."""
 
-    name: str
-    description: str | None = None
+    name: str = Field(max_length=100)
+    description: str | None = Field(max_length=500)
 
 
 class CropCategoryCreate(CropCategoryBase):
     """Schema for creating a crop category."""
 
     pass
+
+
+class CropCategoryUpdate(BaseModel):
+    """Schema for updating crop category data."""
+
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 class CropCategoryResponse(CropCategoryBase):

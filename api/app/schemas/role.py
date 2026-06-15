@@ -1,17 +1,24 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RoleBase(BaseModel):
     """Base schema for role data."""
 
-    name: str
-    description: str | None = None
+    name: str = Field(max_length=100)
+    description: str | None = Field(max_length=500)
 
 
 class RoleCreate(RoleBase):
     """Schema for creating a role."""
 
     pass
+
+
+class RoleUpdate(BaseModel):
+    """Schema for updating role data."""
+
+    name: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 class RoleResponse(RoleBase):

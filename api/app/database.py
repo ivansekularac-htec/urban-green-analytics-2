@@ -10,7 +10,7 @@ database session management and connection verification.
 import logging
 from collections.abc import Generator
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -30,7 +30,7 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False
 
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData(schema=settings.postgres_schema)
 
 
 def get_db() -> Generator[Session, None, None]:

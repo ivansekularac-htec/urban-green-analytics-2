@@ -8,8 +8,8 @@ from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models import TimestampMixin
 from app.models.enums import FarmStatus
-from app.models.utils import get_current_timestamp
 
 if TYPE_CHECKING:
     from app.models.farm_crop import FarmCrop
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from app.models.user_role import UserRole
 
 
-class Farm(Base):
+class Farm(TimestampMixin, Base):
     """ORM model representing an urban farm."""
 
     __tablename__ = "farms"
@@ -38,21 +38,11 @@ class Farm(Base):
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
     size_m2: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
     status: Mapped[FarmStatus] = mapped_column(
-        ENUM(FarmStatus, name="farm_status", create_type=False),
+        ENUM(FarmStatus, name="farm_status"),
         nullable=False,
         server_default=text("'ACTIVE'"),
     )
     growing_beds_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
-    )
-    updated_at: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-        server_default=get_current_timestamp(),
-    )
 
     infrastructure_type: Mapped[FarmInfrastructureType] = relationship(
         back_populates="farms",
