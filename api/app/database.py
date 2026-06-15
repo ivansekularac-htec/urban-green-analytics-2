@@ -30,7 +30,7 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False
 
 
 class Base(DeclarativeBase):
-    metadata = MetaData(schema="app")
+    metadata = MetaData(schema=settings.postgres_schema)
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -66,6 +66,6 @@ def verify_database_connection() -> None:
 
         logger.info("Database connection successful.")
 
-    except SQLAlchemyError as exc:
+    except SQLAlchemyError:
         logger.exception("Database connection failed.")
-        raise exc
+        raise
