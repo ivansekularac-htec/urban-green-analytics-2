@@ -31,7 +31,7 @@ jobs:
         run: uv python install 3.12
         working-directory: ./api
 
-      4. Install project dependencies using uv sync
+      # 4. Install project dependencies using uv sync
       - name: Install dependencies
         # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen
