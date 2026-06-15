@@ -1,0 +1,47 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+
+name: Urban Green Analytics
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install uv and enable automatic caching
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "api/uv.lock"
+
+      # 3. Install project dependencies using uv sync
+      - name: Install dependencies
+        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
+        run: uv sync --frozen --extra dev
+        working-directory: ./api
+
+      # 4. Execute test or linters using uv run
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./api
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./api
+      
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./api
