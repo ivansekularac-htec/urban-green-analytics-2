@@ -16,6 +16,7 @@ def test_sensor_model_creation1():
     assert sensor.serial_number == "SN-001"
     assert sensor.status == SensorStatus.ACTIVE
 
+
 def test_sensor_model_creation2():
     sensor = Sensor(
         farm_id=2,
