@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -12,8 +12,8 @@ class RoleBase(BaseModel):
     Shared fields for Role entity.
     """
 
-    name: str
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------
@@ -39,8 +39,8 @@ class RoleUpdate(BaseModel):
     Schema used for updating Role.
     """
 
-    name: str | None = None
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------

@@ -6,11 +6,18 @@ and profile information, and serves as the base entity for role
 and permission assignment within the system.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.audit import AuditMixin
+
+if TYPE_CHECKING:
+    from app.models.users.user_roles import UserRole
 
 
 class User(Base, AuditMixin):
@@ -47,7 +54,6 @@ class User(Base, AuditMixin):
     # Relationships
     # ------------------------------------------------------
 
-    user_roles = relationship(
-        "UserRole",
+    user_roles: Mapped[list[UserRole]] = relationship(
         back_populates="user",
     )

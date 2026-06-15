@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -12,9 +12,9 @@ class QualityGradeBase(BaseModel):
     Shared fields for QualityGrade entity.
     """
 
-    code: str
-    name: str
-    description: str | None = None
+    code: str = Field(default=None, max_length=50)
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------
@@ -40,9 +40,9 @@ class QualityGradeUpdate(BaseModel):
     Schema used for updating QualityGrade.
     """
 
-    code: str | None = None
-    name: str | None = None
-    description: str | None = None
+    code: str = Field(default=None, max_length=50)
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------

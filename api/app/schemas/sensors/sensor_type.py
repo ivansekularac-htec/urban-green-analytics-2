@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -14,10 +14,9 @@ class SensorTypeBase(BaseModel):
     Shared fields for SensorType entity.
     """
 
-    name: str
-    unit: str
-
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    unit: str = Field(default=None, max_length=50)
+    description: str | None = Field(default=None, max_length=500)
 
     optimal_min: Decimal | None = None
     optimal_max: Decimal | None = None
@@ -46,10 +45,9 @@ class SensorTypeUpdate(BaseModel):
     Schema used for updating SensorType.
     """
 
-    name: str | None = None
-    unit: str | None = None
-
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    unit: str = Field(default=None, max_length=50)
+    description: str | None = Field(default=None, max_length=500)
 
     optimal_min: Decimal | None = None
     optimal_max: Decimal | None = None

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -12,8 +12,8 @@ class GrowingSystemTypeBase(BaseModel):
     Shared fields for GrowingSystemType.
     """
 
-    name: str
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------
@@ -39,8 +39,8 @@ class GrowingSystemTypeUpdate(BaseModel):
     Schema used for updating GrowingSystemType.
     """
 
-    name: str | None = None
-    description: str | None = None
+    name: str = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
 
 
 # ------------------------------------------------------

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from decimal import Decimal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.farms.farm_status import FarmStatus
 from app.schemas.audit import AuditSchema
@@ -16,10 +18,11 @@ class FarmBase(BaseModel):
     infrastructure_type_id: int
     growing_system_type_id: int
 
-    name: str
-    city: str | None = None
-    size_m2: float | None = None
-    growing_beds_count: int | None = None
+    name: str = Field(default=None, max_length=255)
+    status: FarmStatus = FarmStatus.ACTIVE
+    city: str | None = Field(default=None, max_length=255)
+    size_m2: Decimal | None = Field(default=None, gt=0)
+    growing_beds_count: int | None = Field(default=None, ge=0)
 
 
 # ------------------------------------------------------
@@ -45,11 +48,11 @@ class FarmUpdate(BaseModel):
     Schema used for updating Farm.
     """
 
-    name: str | None = None
-    city: str | None = None
-    size_m2: float | None = None
+    name: str = Field(default=None, max_length=255)
+    city: str | None = Field(default=None, max_length=255)
+    size_m2: Decimal | None = Field(default=None, gt=0)
     status: FarmStatus | None = None
-    growing_beds_count: int | None = None
+    growing_beds_count: int | None = Field(default=None, ge=0)
 
     infrastructure_type_id: int | None = None
     growing_system_type_id: int | None = None

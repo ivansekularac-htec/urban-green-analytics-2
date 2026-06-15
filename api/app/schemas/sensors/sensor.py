@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.sensors.sensor_status import SensorStatus
 from app.schemas.audit import AuditSchema
@@ -16,10 +16,8 @@ class SensorBase(BaseModel):
     farm_id: int
     sensor_type_id: int
 
-    serial_number: str
-
-    status: SensorStatus
-
+    serial_number: str = Field(default=None, max_length=255)
+    status: SensorStatus = SensorStatus.ACTIVE
     installed_at: int | None = None
 
 
@@ -50,9 +48,7 @@ class SensorUpdate(BaseModel):
     sensor_type_id: int | None = None
 
     serial_number: str | None = None
-
     status: SensorStatus | None = None
-
     installed_at: int | None = None
 
 

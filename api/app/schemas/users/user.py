@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -12,8 +12,8 @@ class UserBase(BaseModel):
     Shared fields for User entity.
     """
 
-    email: EmailStr
-    full_name: str
+    email: EmailStr | None = None
+    full_name: str | None = Field(default=None, max_length=255)
     is_active: bool = True
 
 
@@ -27,7 +27,7 @@ class UserCreate(UserBase):
     Schema used for creating User.
     """
 
-    password_hash: str
+    password: str = Field(min_length=8, max_length=255)
 
 
 # ------------------------------------------------------
@@ -41,7 +41,7 @@ class UserUpdate(BaseModel):
     """
 
     email: EmailStr | None = None
-    full_name: str | None = None
+    full_name: str | None = Field(default=None, max_length=255)
     is_active: bool | None = None
 
 
@@ -55,7 +55,7 @@ class UserPasswordUpdate(BaseModel):
     Schema used for changing user password.
     """
 
-    password_hash: str
+    password: str = Field(min_length=8, max_length=255)
 
 
 # ------------------------------------------------------
