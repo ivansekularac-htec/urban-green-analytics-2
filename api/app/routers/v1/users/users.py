@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, status
-from passlib.context import CryptContext
 from sqlalchemy import select
 
 from app.database import DbSession
@@ -9,11 +8,7 @@ from app.schemas.users.user import (
     UserResponse,
     UserUpdate,
 )
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-)
+from app.security.hashing import hash_password
 
 users_router = APIRouter(prefix="/users", tags=["users"])
 
@@ -31,7 +26,7 @@ def create_user(
         email=payload.email,
         full_name=payload.full_name,
         is_active=payload.is_active,
-        password_hash=pwd_context.hash(payload.password),
+        password_hash=hash_password(payload.password),
     )
 
     db.add(user)
