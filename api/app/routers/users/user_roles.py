@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.crud.users import role as user_role_crud
+from app.crud.users import user_roles as user_role_crud
 from app.database import get_db
 from app.schemas.users.user_roles import UserRoleCreate, UserRoleResponse, UserRoleUpdate
 

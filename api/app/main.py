@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.config import get_settings
 from app.database import verify_database_connection
 from app.routers.crops.crop import router as crop_router
 from app.routers.crops.crop_category import router as crop_category_router
@@ -29,7 +30,6 @@ from app.routers.users.user_roles import router as user_role_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from app.config import get_settings
 
 settings = get_settings()
 
