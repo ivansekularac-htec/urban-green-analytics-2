@@ -3,6 +3,7 @@ Shared router test fixtures.
 """
 
 import sqlite3
+from contextlib import asynccontextmanager
 
 import pytest
 from sqlalchemy import BigInteger, Integer, create_engine, event
@@ -13,6 +14,20 @@ from starlette.testclient import TestClient
 import app.models  # noqa: F401
 from app.database import Base, get_db
 from app.main import app
+
+
+@asynccontextmanager
+async def test_lifespan(_app):
+    """
+    Disable production startup checks for router tests.
+
+    Router tests use an isolated SQLite database through dependency overrides,
+    so the production PostgreSQL connection check must not run here.
+    """
+    yield
+
+
+app.router.lifespan_context = test_lifespan
 
 
 def patch_sqlite_column_types():
