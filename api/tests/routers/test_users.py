@@ -1,5 +1,10 @@
 """Tests for /users/ endpoints."""
 
+import bcrypt
+
+from app.services.users import user as user_service
+from tests.conftest import TestingSessionLocal
+
 USER_PAYLOAD = {
     "email": "test@example.com",
     "full_name": "Test User",
@@ -55,11 +60,6 @@ def test_update(client):
 
 
 def test_update_password(client):
-    import bcrypt
-
-    from app.services.users import user as user_service
-    from tests.conftest import TestingSessionLocal
-
     created = client.post("/api/v1/users/", json=USER_PAYLOAD).json()
     r = client.put(f"/api/v1/users/{created['id']}", json={"password": "newpassword123"})
     assert r.status_code == 200
