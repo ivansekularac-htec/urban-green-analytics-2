@@ -1,5 +1,4 @@
-import hashlib
-
+import bcrypt
 from sqlalchemy.orm import Session
 
 from app.models.users.user import User
@@ -7,7 +6,8 @@ from app.schemas.users.user import UserCreate, UserUpdate
 
 
 def _hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash a plaintext password using bcrypt (salted, work-factor hardened)."""
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def get_users(db: Session) -> list[User]:
@@ -33,7 +33,10 @@ def create_user(db: Session, payload: UserCreate) -> User:
 
 def update_user(db: Session, user: User, payload: UserUpdate) -> User:
     """Apply partial field updates to an existing user and return it."""
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    if "password" in data:
+        user.password_hash = _hash_password(data.pop("password"))
+    for field, value in data.items():
         setattr(user, field, value)
     db.commit()
     db.refresh(user)

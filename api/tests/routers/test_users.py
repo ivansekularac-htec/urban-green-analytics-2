@@ -54,6 +54,26 @@ def test_update(client):
     assert r.json()["full_name"] == "Updated Name"
 
 
+def test_update_password(client):
+    import bcrypt
+
+    from app.services.users import user as user_service
+    from tests.conftest import TestingSessionLocal
+
+    created = client.post("/api/v1/users/", json=USER_PAYLOAD).json()
+    r = client.put(f"/api/v1/users/{created['id']}", json={"password": "newpassword123"})
+    assert r.status_code == 200
+    assert "password" not in r.json()
+    assert "password_hash" not in r.json()
+    # verify the stored hash verifies against the new password
+    db = TestingSessionLocal()
+    try:
+        user = user_service.get_user(db, created["id"])
+        assert bcrypt.checkpw(b"newpassword123", user.password_hash.encode())
+    finally:
+        db.close()
+
+
 def test_update_not_found(client):
     r = client.put("/api/v1/users/999", json={"full_name": "X"})
     assert r.status_code == 404
