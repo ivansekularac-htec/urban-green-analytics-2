@@ -16,7 +16,9 @@ def prereqs(client):
         },
     ).json()
     category = client.post("/api/v1/crop-categories/", json={"name": "Herbs"}).json()
-    crop = client.post("/api/v1/crops/", json={"name": "Basil", "category_id": category["id"]}).json()
+    crop = client.post(
+        "/api/v1/crops/", json={"name": "Basil", "category_id": category["id"]}
+    ).json()
     grade = client.post("/api/v1/quality-grades/", json={"code": "A", "name": "Premium"}).json()
     return {"farm_id": farm["id"], "crop_id": crop["id"], "quality_grade_id": grade["id"]}
 

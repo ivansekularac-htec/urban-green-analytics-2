@@ -15,7 +15,9 @@ def prereqs(client):
             "growing_system_type_id": growing["id"],
         },
     ).json()
-    sensor_type = client.post("/api/v1/sensor-types/", json={"name": "Temperature", "unit": "°C"}).json()
+    sensor_type = client.post(
+        "/api/v1/sensor-types/", json={"name": "Temperature", "unit": "°C"}
+    ).json()
     return {"farm_id": farm["id"], "sensor_type_id": sensor_type["id"]}
 
 
@@ -50,7 +52,9 @@ def test_create_missing_serial_number(client, prereqs):
 
 
 def test_get(client, prereqs):
-    created = client.post("/api/v1/sensors/", json=sensor_payload(prereqs, serial_number="SN-ABC")).json()
+    created = client.post(
+        "/api/v1/sensors/", json=sensor_payload(prereqs, serial_number="SN-ABC")
+    ).json()
     r = client.get(f"/api/v1/sensors/{created['id']}")
     assert r.status_code == 200
     assert r.json()["serial_number"] == "SN-ABC"

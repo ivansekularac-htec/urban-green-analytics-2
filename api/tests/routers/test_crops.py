@@ -26,7 +26,9 @@ def test_create_missing_name(client, category):
 
 
 def test_get(client, category):
-    created = client.post("/api/v1/crops/", json={"name": "Basil", "category_id": category["id"]}).json()
+    created = client.post(
+        "/api/v1/crops/", json={"name": "Basil", "category_id": category["id"]}
+    ).json()
     r = client.get(f"/api/v1/crops/{created['id']}")
     assert r.status_code == 200
     assert r.json()["name"] == "Basil"
@@ -38,7 +40,9 @@ def test_get_not_found(client):
 
 
 def test_update(client, category):
-    created = client.post("/api/v1/crops/", json={"name": "Old", "category_id": category["id"]}).json()
+    created = client.post(
+        "/api/v1/crops/", json={"name": "Old", "category_id": category["id"]}
+    ).json()
     r = client.put(f"/api/v1/crops/{created['id']}", json={"name": "New"})
     assert r.status_code == 200
     assert r.json()["name"] == "New"
@@ -50,7 +54,9 @@ def test_update_not_found(client):
 
 
 def test_delete(client, category):
-    created = client.post("/api/v1/crops/", json={"name": "Mint", "category_id": category["id"]}).json()
+    created = client.post(
+        "/api/v1/crops/", json={"name": "Mint", "category_id": category["id"]}
+    ).json()
     r = client.delete(f"/api/v1/crops/{created['id']}")
     assert r.status_code == 204
     assert client.get(f"/api/v1/crops/{created['id']}").status_code == 404
