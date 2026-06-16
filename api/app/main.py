@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
+from app.routers import v1_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,14 +35,10 @@ app = FastAPI(
 )
 
 
+app.include_router(v1_router)
+
+
 @app.get("/")
 def root() -> dict[str, str]:
-    """Return a basic API status message.
-
-    This endpoint can be used as a simple health check to verify that the
-    application is running.
-
-    Returns:
-        dict[str, str]: A response containing the API status message.
-    """
+    """Return a basic API status message."""
     return {"message": "Urban Green API is running"}

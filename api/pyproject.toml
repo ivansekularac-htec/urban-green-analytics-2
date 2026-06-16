@@ -40,10 +40,16 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"] # allow unused imports for re-exports
+"__init__.py" = ["F401"]          # allow unused imports for re-exports
+"tests/conftest.py" = ["E402"]   # sys.path + env must be set before app imports
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.4.0",
+]
