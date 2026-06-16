@@ -48,7 +48,7 @@ class FarmUpdate(BaseModel):
     Schema used for updating Farm.
     """
 
-    name: str = Field(default=None, max_length=255)
+    name: str | None = Field(default=None, max_length=255)
     city: str | None = Field(default=None, max_length=255)
     size_m2: Decimal | None = Field(default=None, gt=0)
     status: FarmStatus | None = None

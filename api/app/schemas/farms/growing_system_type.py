@@ -39,7 +39,7 @@ class GrowingSystemTypeUpdate(BaseModel):
     Schema used for updating GrowingSystemType.
     """
 
-    name: str = Field(default=None, max_length=100)
+    name: str | None = Field(default=None, max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 

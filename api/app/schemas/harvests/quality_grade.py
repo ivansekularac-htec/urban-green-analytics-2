@@ -12,7 +12,7 @@ class QualityGradeBase(BaseModel):
     Shared fields for QualityGrade entity.
     """
 
-    code: str = Field(default=None, max_length=50)
+    code: str = Field(max_length=50)
     name: str = Field(max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
@@ -40,8 +40,8 @@ class QualityGradeUpdate(BaseModel):
     Schema used for updating QualityGrade.
     """
 
-    code: str = Field(default=None, max_length=50)
-    name: str = Field(default=None, max_length=100)
+    code: str | None = Field(default=None, max_length=50)
+    name: str | None = Field(default=None, max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 
