@@ -9,6 +9,8 @@ dependencies = [
     "fastapi[standard]>=0.115",
     "psycopg2-binary>=2.9.12",
     "pydantic-settings>=2.14.1",
+    "pytest>=9.0.3",
+    "ruff>=0.15.16",
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
@@ -48,3 +50,10 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "httpx2>=2.4.0",
+    "pytest>=9.0.3",
+]

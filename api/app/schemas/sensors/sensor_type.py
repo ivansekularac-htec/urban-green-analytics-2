@@ -14,7 +14,7 @@ class SensorTypeBase(BaseModel):
     Shared fields for SensorType entity.
     """
 
-    name: str = Field(default=None, max_length=100)
+    name: str = Field(max_length=100)
     unit: str = Field(default=None, max_length=50)
     description: str | None = Field(default=None, max_length=500)
 

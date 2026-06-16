@@ -23,11 +23,13 @@ from app.schemas.crops.crop_category import (
     CropCategoryBase,
     CropCategoryCreate,
     CropCategoryResponse,
+    CropCategoryUpdate,
 )
 from app.schemas.crops.farm_crop import (
     FarmCropBase,
     FarmCropCreate,
     FarmCropResponse,
+    FarmCropUpdate,
 )
 
 # -------------------------
@@ -57,11 +59,13 @@ from app.schemas.harvests.harvest import (
     HarvestBase,
     HarvestCreate,
     HarvestResponse,
+    HarvestUpdate,
 )
 from app.schemas.harvests.quality_grade import (
     QualityGradeBase,
     QualityGradeCreate,
     QualityGradeResponse,
+    QualityGradeUpdate,
 )
 
 # -------------------------
@@ -82,6 +86,7 @@ from app.schemas.users.role import (
     RoleBase,
     RoleCreate,
     RoleResponse,
+    RoleUpdate,
 )
 
 # -------------------------
@@ -97,6 +102,7 @@ from app.schemas.users.user_roles import (
     UserRoleBase,
     UserRoleCreate,
     UserRoleResponse,
+    UserRoleUpdate,
 )
 
 # -------------------------

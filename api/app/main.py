@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
+from app.routers.api import api_v1_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,3 +46,6 @@ def root() -> dict[str, str]:
         dict[str, str]: A response containing the API status message.
     """
     return {"message": "Urban Green API is running"}
+
+
+app.include_router(api_v1_router)
