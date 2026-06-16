@@ -12,6 +12,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
+from app.routers.crops.crop import router as crop_router
+from app.routers.crops.crop_category import router as crop_category_router
+from app.routers.crops.farm_crop import router as farm_role_router
 from app.routers.farms.farm import router as farms_router
 from app.routers.farms.growing_system_type import router as growing_system_type_router
 from app.routers.farms.infrastructure_type import router as infrastructure_type_router
@@ -53,6 +56,9 @@ app.include_router(quality_grade_router)
 app.include_router(farms_router)
 app.include_router(growing_system_type_router)
 app.include_router(infrastructure_type_router)
+app.include_router(crop_router)
+app.include_router(crop_category_router)
+app.include_router(farm_role_router)
 
 
 @app.get("/")
