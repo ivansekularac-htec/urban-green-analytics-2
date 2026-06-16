@@ -8,6 +8,7 @@ dependencies = [
     "email-validator>=2.3.0",
     "fastapi[standard]>=0.115",
     "psycopg2-binary>=2.9.12",
+    "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.14.1",
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies

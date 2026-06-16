@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.users import user as user_crud
 from app.database import get_db
-from app.schemas.users.user import UserCreate, UserResponse
+from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/v1/user", tags=["User"])
 
@@ -48,3 +48,58 @@ def get_users(
     db: DBSession,
 ) -> list[UserResponse]:
     return user_crud.get_all(db)
+
+
+@router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+)
+def update_user(
+    user_id: int,
+    payload: UserUpdate,
+    db: DBSession,
+) -> UserResponse:
+
+    user = user_crud.get(
+        db=db,
+        user_id=user_id,
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    return user_crud.update(
+        db=db,
+        user=user,
+        payload=payload,
+    )
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_user(
+    user_id: int,
+    db: DBSession,
+) -> None:
+    """Delete a user."""
+
+    user = user_crud.get(
+        db=db,
+        user_id=user_id,
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user_crud.delete(
+        db=db,
+        user=user,
+    )
