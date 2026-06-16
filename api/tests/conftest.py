@@ -6,6 +6,7 @@ Sets up an in-memory SQLite database and a FastAPI TestClient that
 uses that database instead of the real PostgreSQL instance.
 """
 
+import os
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -22,6 +23,9 @@ from app.main import app
 # Keep existing sys.path fix
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+# Set default api version for testing
+os.environ.setdefault("API_VERSION_V1", "/api/v1")
 
 
 # ---------------------------------------------------------------------------
