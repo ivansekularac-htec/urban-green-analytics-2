@@ -12,7 +12,7 @@ class CropBase(BaseModel):
     Shared fields for Crop entity.
     """
 
-    name: str = Field(default=None, max_length=100)
+    name: str = Field(max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 

@@ -12,8 +12,8 @@ class UserBase(BaseModel):
     Shared fields for User entity.
     """
 
-    email: EmailStr | None = None
-    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr
+    full_name: str = Field(max_length=255)
     is_active: bool = True
 
 
