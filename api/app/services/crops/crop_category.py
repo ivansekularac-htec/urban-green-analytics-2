@@ -36,4 +36,4 @@ def update_crop_category(
 def delete_crop_category(db: Session, category: CropCategory) -> None:
     """Delete a crop category from the database."""
     db.delete(category)
-    db.com
+    db.commit()

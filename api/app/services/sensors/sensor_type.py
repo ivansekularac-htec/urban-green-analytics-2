@@ -38,4 +38,4 @@ def update_sensor_type(
 def delete_sensor_type(db: Session, sensor_type: SensorType) -> None:
     """Delete a sensor type from the database."""
     db.delete(sensor_type)
-    db.com
+    db.commit()

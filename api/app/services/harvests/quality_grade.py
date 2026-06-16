@@ -36,4 +36,4 @@ def update_quality_grade(
 def delete_quality_grade(db: Session, quality_grade: QualityGrade) -> None:
     """Delete a quality grade from the database."""
     db.delete(quality_grade)
-    db.com
+    db.commit()
