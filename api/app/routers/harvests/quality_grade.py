@@ -7,7 +7,7 @@ from app.crud.harvests import quality_grade as quality_grade_crud
 from app.database import get_db
 from app.schemas.harvests.quality_grade import QualityGradeCreate, QualityGradeResponse
 
-router = APIRouter(prefix="/v1/quality_grade", tags=["Quality Grade"])
+router = APIRouter(prefix="/quality_grade", tags=["Quality Grade"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

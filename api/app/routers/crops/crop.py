@@ -7,7 +7,7 @@ from app.crud.crops import crop as crop_crud
 from app.database import get_db
 from app.schemas.crops.crop import CropCreate, CropResponse
 
-router = APIRouter(prefix="/v1/crop", tags=["Crop"])
+router = APIRouter(prefix="/crop", tags=["Crop"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

@@ -7,7 +7,7 @@ from app.crud.crops import farm_crop as farm_crop_crud
 from app.database import get_db
 from app.schemas.crops.farm_crop import FarmCropCreate, FarmCropResponse
 
-router = APIRouter(prefix="/v1/farm_crop", tags=["FarmCrop"])
+router = APIRouter(prefix="/farm_crop", tags=["FarmCrop"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

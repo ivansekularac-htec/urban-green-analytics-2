@@ -7,7 +7,7 @@ from app.crud.harvests import harvest as harvest_crud
 from app.database import get_db
 from app.schemas.harvests.harvest import HarvestCreate, HarvestResponse
 
-router = APIRouter(prefix="/v1/harvest", tags=["Harvest"])
+router = APIRouter(prefix="/harvest", tags=["Harvest"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

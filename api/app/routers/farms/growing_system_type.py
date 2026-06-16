@@ -7,7 +7,7 @@ from app.crud.farms import growing_system_type as growing_system_type_crud
 from app.database import get_db
 from app.schemas.farms.growing_system_type import GrowingSystemTypeCreate, GrowingSystemTypeResponse
 
-router = APIRouter(prefix="/v1/growing_system_type", tags=["Growing System Type"])
+router = APIRouter(prefix="/growing_system_type", tags=["Growing System Type"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

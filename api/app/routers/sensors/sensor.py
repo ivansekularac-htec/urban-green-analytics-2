@@ -7,7 +7,7 @@ from app.crud.sensors import sensor as sensor_crud
 from app.database import get_db
 from app.schemas.sensors.sensor import SensorCreate, SensorResponse
 
-router = APIRouter(prefix="/v1/sensor", tags=["Sensor"])
+router = APIRouter(prefix="/sensor", tags=["Sensor"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

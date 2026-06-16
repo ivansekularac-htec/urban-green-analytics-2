@@ -7,7 +7,7 @@ from app.crud.users import user as user_crud
 from app.database import get_db
 from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
 
-router = APIRouter(prefix="/v1/user", tags=["User"])
+router = APIRouter(prefix="/user", tags=["User"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 

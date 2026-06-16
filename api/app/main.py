@@ -29,6 +29,10 @@ from app.routers.users.user_roles import router as user_role_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+from app.config import get_settings
+
+settings = get_settings()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,19 +50,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(role_router)
-app.include_router(user_router)
-app.include_router(user_role_router)
-app.include_router(sensor_router)
-app.include_router(sensor_type_router)
-app.include_router(harvest_router)
-app.include_router(quality_grade_router)
-app.include_router(farms_router)
-app.include_router(growing_system_type_router)
-app.include_router(infrastructure_type_router)
-app.include_router(crop_router)
-app.include_router(crop_category_router)
-app.include_router(farm_role_router)
+app.include_router(role_router, prefix=settings.api_version_v1)
+app.include_router(user_router, prefix=settings.api_version_v1)
+app.include_router(user_role_router, prefix=settings.api_version_v1)
+app.include_router(sensor_router, prefix=settings.api_version_v1)
+app.include_router(sensor_type_router, prefix=settings.api_version_v1)
+app.include_router(harvest_router, prefix=settings.api_version_v1)
+app.include_router(quality_grade_router, prefix=settings.api_version_v1)
+app.include_router(farms_router, prefix=settings.api_version_v1)
+app.include_router(growing_system_type_router, prefix=settings.api_version_v1)
+app.include_router(infrastructure_type_router, prefix=settings.api_version_v1)
+app.include_router(crop_router, prefix=settings.api_version_v1)
+app.include_router(crop_category_router, prefix=settings.api_version_v1)
+app.include_router(farm_role_router, prefix=settings.api_version_v1)
 
 
 @app.get("/")

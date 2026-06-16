@@ -7,7 +7,7 @@ from app.crud.users import role as role_crud
 from app.database import get_db
 from app.schemas.users.role import RoleCreate, RoleResponse
 
-router = APIRouter(prefix="/v1/role", tags=["Role"])
+router = APIRouter(prefix="/role", tags=["Role"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 
