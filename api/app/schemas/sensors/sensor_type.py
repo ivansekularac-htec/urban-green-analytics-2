@@ -14,8 +14,8 @@ class SensorTypeBase(BaseModel):
     Shared fields for SensorType entity.
     """
 
-    name: str = Field(default=None, max_length=100)
-    unit: str = Field(default=None, max_length=50)
+    name: str = Field(max_length=100)
+    unit: str = Field(max_length=50)
     description: str | None = Field(default=None, max_length=500)
 
     optimal_min: Decimal | None = None
@@ -45,8 +45,8 @@ class SensorTypeUpdate(BaseModel):
     Schema used for updating SensorType.
     """
 
-    name: str = Field(default=None, max_length=100)
-    unit: str = Field(default=None, max_length=50)
+    name: str | None = Field(default=None, max_length=100)
+    unit: str | None = Field(default=None, max_length=50)
     description: str | None = Field(default=None, max_length=500)
 
     optimal_min: Decimal | None = None
