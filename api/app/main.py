@@ -12,6 +12,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
+from app.routers.sensors.sensor import router as sensor_router
+from app.routers.sensors.sensor_type import router as sensor_type_router
 from app.routers.users.role import router as role_router
 from app.routers.users.user import router as user_router
 from app.routers.users.user_roles import router as user_roles_router
@@ -39,6 +41,8 @@ app = FastAPI(
 app.include_router(role_router)
 app.include_router(user_router)
 app.include_router(user_roles_router)
+app.include_router(sensor_router)
+app.include_router(sensor_type_router)
 
 
 @app.get("/")
