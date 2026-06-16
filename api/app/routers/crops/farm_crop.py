@@ -21,6 +21,16 @@ def create_farm_crop(
     payload: FarmCropCreate,
     db: DBSession,
 ) -> FarmCropResponse:
+    """
+    Create a new farm crop assignment.
+
+    Args:
+        payload: Farm crop assignment data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created farm crop assignment.
+    """
     return farm_crop_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_farm_crop(
     farm_crop_id: int,
     db: DBSession,
 ) -> FarmCropResponse:
+    """
+    Retrieve a farm crop assignment by its ID.
+
+    Args:
+        farm_crop_id: Unique identifier of the farm crop assignment.
+        db: Active database session.
+
+    Returns:
+        The requested farm crop assignment.
+
+    Raises:
+        HTTPException: If the farm crop assignment does not exist.
+    """
     farm_crop = farm_crop_crud.get(db, farm_crop_id)
 
     if farm_crop is None:
@@ -50,6 +73,15 @@ def get_farm_crop(
 def get_farm_crops(
     db: DBSession,
 ) -> list[FarmCropResponse]:
+    """
+    Retrieve all farm crop assignments.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all farm crop assignments.
+    """
     return farm_crop_crud.get_all(db)
 
 
@@ -62,8 +94,20 @@ def update_farm_crop(
     payload: FarmCropUpdate,
     db: DBSession,
 ) -> FarmCropResponse:
-    """Update an existing farm crop assignment."""
+    """
+    Update an existing farm crop assignment.
 
+    Args:
+        farm_crop_id: Unique identifier of the farm crop assignment.
+        payload: Updated farm crop assignment data.
+        db: Active database session.
+
+    Returns:
+        The updated farm crop assignment.
+
+    Raises:
+        HTTPException: If the farm crop assignment does not exist.
+    """
     farm_crop = farm_crop_crud.get(
         db=db,
         farm_crop_id=farm_crop_id,
@@ -90,8 +134,16 @@ def delete_farm_crop(
     farm_crop_id: int,
     db: DBSession,
 ) -> None:
-    """Delete a farm crop assignment."""
+    """
+    Delete a farm crop assignment.
 
+    Args:
+        farm_crop_id: Unique identifier of the farm crop assignment.
+        db: Active database session.
+
+    Raises:
+        HTTPException: If the farm crop assignment does not exist.
+    """
     farm_crop = farm_crop_crud.get(
         db=db,
         farm_crop_id=farm_crop_id,

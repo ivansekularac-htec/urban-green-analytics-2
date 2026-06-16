@@ -21,6 +21,16 @@ def create_role(
     payload: RoleCreate,
     db: DBSession,
 ) -> RoleResponse:
+    """
+    Create a new role.
+
+    Args:
+        payload: Role data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created role.
+    """
     return role_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_role(
     role_id: int,
     db: DBSession,
 ) -> RoleResponse:
+    """
+    Retrieve a role by its ID.
+
+    Args:
+        role_id: Unique identifier of the role.
+        db: Active database session.
+
+    Returns:
+        The requested role.
+
+    Raises:
+        HTTPException: If the role does not exist.
+    """
     role = role_crud.get(db, role_id)
 
     if role is None:
@@ -50,6 +73,15 @@ def get_role(
 def get_roles(
     db: DBSession,
 ) -> list[RoleResponse]:
+    """
+    Retrieve all roles.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all roles.
+    """
     return role_crud.get_all(db)
 
 
@@ -62,7 +94,20 @@ def update_role(
     payload: RoleUpdate,
     db: DBSession,
 ) -> RoleResponse:
+    """
+    Update an existing role.
 
+    Args:
+        role_id: Unique identifier of the role.
+        payload: Updated role data.
+        db: Active database session.
+
+    Returns:
+        The updated role.
+
+    Raises:
+        HTTPException: If the role does not exist.
+    """
     role = role_crud.get(
         db=db,
         role_id=role_id,
@@ -89,7 +134,16 @@ def delete_role(
     role_id: int,
     db: DBSession,
 ) -> None:
+    """
+    Delete a role.
 
+    Args:
+        role_id: Unique identifier of the role.
+        db: Active database session.
+
+    Raises:
+        HTTPException: If the role does not exist.
+    """
     role = role_crud.get(
         db=db,
         role_id=role_id,

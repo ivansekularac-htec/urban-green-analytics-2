@@ -21,6 +21,16 @@ def create_crop_category(
     payload: CropCategoryCreate,
     db: DBSession,
 ) -> CropCategoryResponse:
+    """
+    Create a new crop category.
+
+    Args:
+        payload: Crop category data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created crop category.
+    """
     return crop_category_crud.create(db, payload)
 
 
@@ -29,10 +39,23 @@ def create_crop_category(
     response_model=CropCategoryResponse,
 )
 def get_crop_category(
-    crop_id: int,
+    crop_category_id: int,
     db: DBSession,
 ) -> CropCategoryResponse:
-    crop_category = crop_category_crud.get(db, crop_id)
+    """
+    Retrieve a crop category by its ID.
+
+    Args:
+        crop_id: Unique identifier of the crop category.
+        db: Active database session.
+
+    Returns:
+        The requested crop category.
+
+    Raises:
+        HTTPException: If the crop category does not exist.
+    """
+    crop_category = crop_category_crud.get(db, crop_category_id)
 
     if crop_category is None:
         raise HTTPException(
@@ -50,4 +73,13 @@ def get_crop_category(
 def get_crop_categories(
     db: DBSession,
 ) -> list[CropCategoryResponse]:
+    """
+    Retrieve all crop categories.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all crop categories.
+    """
     return crop_category_crud.get_all(db)

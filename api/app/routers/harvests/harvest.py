@@ -21,6 +21,16 @@ def create_harvest(
     payload: HarvestCreate,
     db: DBSession,
 ) -> HarvestResponse:
+    """
+    Create a new harvest.
+
+    Args:
+        payload: Harvest data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created harvest.
+    """
     return harvest_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_harvest(
     harvest_id: int,
     db: DBSession,
 ) -> HarvestResponse:
+    """
+    Retrieve a harvest by its ID.
+
+    Args:
+        harvest_id: Unique identifier of the harvest.
+        db: Active database session.
+
+    Returns:
+        The requested harvest.
+
+    Raises:
+        HTTPException: If the harvest does not exist.
+    """
     harvest = harvest_crud.get(db, harvest_id)
 
     if harvest is None:
@@ -50,6 +73,15 @@ def get_harvest(
 def get_harvests(
     db: DBSession,
 ) -> list[HarvestResponse]:
+    """
+    Retrieve all harvests.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all harvests.
+    """
     return harvest_crud.get_all(db)
 
 
@@ -62,8 +94,20 @@ def update_harvest(
     payload: HarvestUpdate,
     db: DBSession,
 ) -> HarvestResponse:
-    """Update an existing harvest."""
+    """
+    Update an existing harvest.
 
+    Args:
+        harvest_id: Unique identifier of the harvest.
+        payload: Updated harvest data.
+        db: Active database session.
+
+    Returns:
+        The updated harvest.
+
+    Raises:
+        HTTPException: If the harvest does not exist.
+    """
     harvest = harvest_crud.get(
         db=db,
         harvest_id=harvest_id,
@@ -90,8 +134,16 @@ def delete_harvest(
     harvest_id: int,
     db: DBSession,
 ) -> None:
-    """Delete a harvest."""
+    """
+    Delete a harvest.
 
+    Args:
+        harvest_id: Unique identifier of the harvest.
+        db: Active database session.
+
+    Raises:
+        HTTPException: If the harvest does not exist.
+    """
     harvest = harvest_crud.get(
         db=db,
         harvest_id=harvest_id,

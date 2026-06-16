@@ -21,6 +21,16 @@ def create_crop(
     payload: CropCreate,
     db: DBSession,
 ) -> CropResponse:
+    """
+    Create a new crop.
+
+    Args:
+        payload: Crop data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created crop.
+    """
     return crop_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_crop(
     crop_id: int,
     db: DBSession,
 ) -> CropResponse:
+    """
+    Retrieve a crop by its ID.
+
+    Args:
+        crop_id: Unique identifier of the crop.
+        db: Active database session.
+
+    Returns:
+        The requested crop.
+
+    Raises:
+        HTTPException: If the crop does not exist.
+    """
     crop = crop_crud.get(db, crop_id)
 
     if crop is None:
@@ -50,4 +73,13 @@ def get_crop(
 def get_crops(
     db: DBSession,
 ) -> list[CropResponse]:
+    """
+    Retrieve all crops.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all crops.
+    """
     return crop_crud.get_all(db)

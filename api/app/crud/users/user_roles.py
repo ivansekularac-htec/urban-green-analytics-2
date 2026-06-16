@@ -1,3 +1,10 @@
+"""
+CRUD operations for user role assignments.
+
+This module provides functions for creating, retrieving,
+updating, and deleting user role assignment records in the database.
+"""
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,6 +16,16 @@ def create(
     db: Session,
     payload: UserRoleCreate,
 ) -> UserRole:
+    """
+    Create a new user role assignment.
+
+    Args:
+        db: Active database session.
+        payload: User role assignment data used to create the record.
+
+    Returns:
+        The newly created user role assignment instance.
+    """
 
     obj = UserRole(**payload.model_dump())
 
@@ -23,6 +40,16 @@ def get(
     db: Session,
     user_role_id: int,
 ) -> UserRole | None:
+    """
+    Retrieve a user role assignment by its ID.
+
+    Args:
+        db: Active database session.
+        user_role_id: Unique identifier of the user role assignment.
+
+    Returns:
+        The user role assignment instance if found, otherwise None.
+    """
 
     return db.get(UserRole, user_role_id)
 
@@ -30,6 +57,15 @@ def get(
 def get_all(
     db: Session,
 ) -> list[UserRole]:
+    """
+    Retrieve all user role assignments.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all user role assignment records.
+    """
 
     return list(db.scalars(select(UserRole)).all())
 
@@ -39,7 +75,17 @@ def update(
     user_role: UserRole,
     payload: UserRoleUpdate,
 ) -> UserRole:
-    """Update an existing user role assignment."""
+    """
+    Update an existing user role assignment.
+
+    Args:
+        db: Active database session.
+        user_role: Existing user role assignment instance to update.
+        payload: Data containing the fields to be updated.
+
+    Returns:
+        The updated user role assignment instance.
+    """
 
     for field, value in payload.model_dump(
         exclude_unset=True,
@@ -56,7 +102,16 @@ def delete(
     db: Session,
     user_role: UserRole,
 ) -> None:
-    """Delete a user role assignment."""
+    """
+    Delete an existing user role assignment.
+
+    Args:
+        db: Active database session.
+        user_role: User role assignment instance to delete.
+
+    Returns:
+        None.
+    """
 
     db.delete(user_role)
     db.commit()

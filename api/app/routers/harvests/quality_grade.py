@@ -21,6 +21,16 @@ def create_quality_grade(
     payload: QualityGradeCreate,
     db: DBSession,
 ) -> QualityGradeResponse:
+    """
+    Create a new quality grade.
+
+    Args:
+        payload: Quality grade data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created quality grade.
+    """
     return quality_grade_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_quality_grade(
     quality_grade_id: int,
     db: DBSession,
 ) -> QualityGradeResponse:
+    """
+    Retrieve a quality grade by its ID.
+
+    Args:
+        quality_grade_id: Unique identifier of the quality grade.
+        db: Active database session.
+
+    Returns:
+        The requested quality grade.
+
+    Raises:
+        HTTPException: If the quality grade does not exist.
+    """
     quality_grade = quality_grade_crud.get(db, quality_grade_id)
 
     if quality_grade is None:
@@ -50,4 +73,13 @@ def get_quality_grade(
 def get_quality_grades(
     db: DBSession,
 ) -> list[QualityGradeResponse]:
+    """
+    Retrieve all quality grades.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all quality grades.
+    """
     return quality_grade_crud.get_all(db)

@@ -21,14 +21,40 @@ def create_sensor_type(
     payload: SensorTypeCreate,
     db: DBSession,
 ) -> SensorTypeResponse:
+    """
+    Create a new sensor type.
+
+    Args:
+        payload: Sensor type data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created sensor type.
+    """
     return sensor_type_crud.create(db, payload)
 
 
-@router.get("/{sensor_type_id}", response_model=SensorTypeResponse)
+@router.get(
+    "/{sensor_type_id}",
+    response_model=SensorTypeResponse,
+)
 def get_sensor_type(
     sensor_type_id: int,
     db: DBSession,
 ) -> SensorTypeResponse:
+    """
+    Retrieve a sensor type by its ID.
+
+    Args:
+        sensor_type_id: Unique identifier of the sensor type.
+        db: Active database session.
+
+    Returns:
+        The requested sensor type.
+
+    Raises:
+        HTTPException: If the sensor type does not exist.
+    """
     sensor_type = sensor_type_crud.get(db, sensor_type_id)
 
     if sensor_type is None:
@@ -47,4 +73,13 @@ def get_sensor_type(
 def get_sensor_types(
     db: DBSession,
 ) -> list[SensorTypeResponse]:
+    """
+    Retrieve all sensor types.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all sensor types.
+    """
     return sensor_type_crud.get_all(db)

@@ -9,6 +9,16 @@ def create(
     db: Session,
     payload: CropCategoryCreate,
 ) -> CropCategory:
+    """
+    Create a new crop category.
+
+    Args:
+        db: Active database session.
+        payload: Crop category data used to create the record.
+
+    Returns:
+        The newly created crop category instance.
+    """
 
     obj = CropCategory(**payload.model_dump())
 
@@ -23,6 +33,16 @@ def get(
     db: Session,
     crop_category_id: int,
 ) -> CropCategory | None:
+    """
+    Retrieve a crop category by its ID.
+
+    Args:
+        db: Active database session.
+        crop_category_id: Unique identifier of the crop category.
+
+    Returns:
+        The crop category instance if found, otherwise None.
+    """
 
     return db.get(CropCategory, crop_category_id)
 
@@ -30,5 +50,14 @@ def get(
 def get_all(
     db: Session,
 ) -> list[CropCategory]:
+    """
+    Retrieve all crop categories.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all crop category records.
+    """
 
     return list(db.scalars(select(CropCategory)).all())

@@ -21,6 +21,16 @@ def create_farm(
     payload: FarmCreate,
     db: DBSession,
 ) -> FarmResponse:
+    """
+    Create a new farm.
+
+    Args:
+        payload: Farm data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created farm.
+    """
     return farm_crud.create(db, payload)
 
 
@@ -32,6 +42,19 @@ def get_farm(
     farm_id: int,
     db: DBSession,
 ) -> FarmResponse:
+    """
+    Retrieve a farm by its ID.
+
+    Args:
+        farm_id: Unique identifier of the farm.
+        db: Active database session.
+
+    Returns:
+        The requested farm.
+
+    Raises:
+        HTTPException: If the farm does not exist.
+    """
     farm = farm_crud.get(db, farm_id)
 
     if farm is None:
@@ -50,6 +73,15 @@ def get_farm(
 def get_farms(
     db: DBSession,
 ) -> list[FarmResponse]:
+    """
+    Retrieve all farms.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all farms.
+    """
     return farm_crud.get_all(db)
 
 
@@ -62,8 +94,20 @@ def update_farm(
     payload: FarmUpdate,
     db: DBSession,
 ) -> FarmResponse:
-    """Update an existing farm."""
+    """
+    Update an existing farm.
 
+    Args:
+        farm_id: Unique identifier of the farm.
+        payload: Updated farm data.
+        db: Active database session.
+
+    Returns:
+        The updated farm.
+
+    Raises:
+        HTTPException: If the farm does not exist.
+    """
     farm = farm_crud.get(
         db=db,
         farm_id=farm_id,
@@ -90,8 +134,16 @@ def delete_farm(
     farm_id: int,
     db: DBSession,
 ) -> None:
-    """Delete a farm."""
+    """
+    Delete a farm.
 
+    Args:
+        farm_id: Unique identifier of the farm.
+        db: Active database session.
+
+    Raises:
+        HTTPException: If the farm does not exist.
+    """
     farm = farm_crud.get(
         db=db,
         farm_id=farm_id,

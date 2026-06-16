@@ -1,16 +1,8 @@
 """
-roles.py
-CRUD operations for Role entities.
+CRUD operations for roles.
 
-This module provides database access functions for creating and retrieving
-role records. It encapsulates SQLAlchemy queries and session interactions,
-allowing API routes and services to work with Role objects without directly
-managing database operations.
-
-Functions:
-    create: Create and persist a new role in the database.
-    get: Retrieve a role by its primary key.
-    get_all: Retrieve all roles from the database.
+This module provides functions for creating, retrieving,
+updating, and deleting role records in the database.
 """
 
 from sqlalchemy import select
@@ -25,15 +17,16 @@ def create(
     payload: RoleCreate,
 ) -> Role:
     """
-    Create and persist a new role.
+    Create a new role.
 
     Args:
         db: Active database session.
-        payload: Data used to create the role.
+        payload: Role data used to create the record.
 
     Returns:
-        The newly created Role instance.
+        The newly created role instance.
     """
+
     obj = Role(**payload.model_dump())
 
     db.add(obj)
@@ -52,11 +45,12 @@ def get(
 
     Args:
         db: Active database session.
-        role_id: Primary key of the role.
+        role_id: Unique identifier of the role.
 
     Returns:
-        The matching Role instance if found, otherwise None.
+        The role instance if found, otherwise None.
     """
+
     return db.get(Role, role_id)
 
 
@@ -64,14 +58,15 @@ def get_all(
     db: Session,
 ) -> list[Role]:
     """
-    Retrieve all roles from the database.
+    Retrieve all roles.
 
     Args:
         db: Active database session.
 
     Returns:
-        A list containing all Role records.
+        A list of all role records.
     """
+
     return list(db.scalars(select(Role)).all())
 
 
@@ -80,6 +75,17 @@ def update(
     role: Role,
     payload: RoleUpdate,
 ) -> Role:
+    """
+    Update an existing role.
+
+    Args:
+        db: Active database session.
+        role: Existing role instance to update.
+        payload: Data containing the fields to be updated.
+
+    Returns:
+        The updated role instance.
+    """
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(role, field, value)
@@ -94,6 +100,16 @@ def delete(
     db: Session,
     role: Role,
 ) -> None:
+    """
+    Delete an existing role.
+
+    Args:
+        db: Active database session.
+        role: Role instance to delete.
+
+    Returns:
+        None.
+    """
 
     db.delete(role)
     db.commit()

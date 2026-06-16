@@ -21,14 +21,40 @@ def create_sensor(
     payload: SensorCreate,
     db: DBSession,
 ) -> SensorResponse:
+    """
+    Create a new sensor.
+
+    Args:
+        payload: Sensor data to create.
+        db: Active database session.
+
+    Returns:
+        The newly created sensor.
+    """
     return sensor_crud.create(db, payload)
 
 
-@router.get("/{sensor_id}", response_model=SensorResponse)
+@router.get(
+    "/{sensor_id}",
+    response_model=SensorResponse,
+)
 def get_sensor(
     sensor_id: int,
     db: DBSession,
 ) -> SensorResponse:
+    """
+    Retrieve a sensor by its ID.
+
+    Args:
+        sensor_id: Unique identifier of the sensor.
+        db: Active database session.
+
+    Returns:
+        The requested sensor.
+
+    Raises:
+        HTTPException: If the sensor does not exist.
+    """
     sensor = sensor_crud.get(db, sensor_id)
 
     if sensor is None:
@@ -47,4 +73,13 @@ def get_sensor(
 def get_sensors(
     db: DBSession,
 ) -> list[SensorResponse]:
+    """
+    Retrieve all sensors.
+
+    Args:
+        db: Active database session.
+
+    Returns:
+        A list of all sensors.
+    """
     return sensor_crud.get_all(db)
