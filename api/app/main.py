@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.config import get_settings
 from app.database import verify_database_connection
 from app.routers.v1.api import api_v1_router
 
@@ -20,9 +21,10 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Run application startup and shutdown logic."""
+    settings = get_settings()
 
-    verify_database_connection()
+    if not settings.testing:
+        verify_database_connection()
 
     yield
 

@@ -3,6 +3,10 @@ conftest.py
 Shared pytest fixtures for API tests.
 """
 
+import os
+
+os.environ["TESTING"] = "true"
+
 from collections.abc import Generator
 
 import pytest

@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     postgres_schema: str
 
     api_app_v1_prefix: str = "/api/v1"
+    testing: bool
 
     @property
     def database_url(self) -> str:
@@ -42,6 +43,7 @@ class Settings(BaseSettings):
             f"{self.postgres_host}:"
             f"{self.postgres_port}/"
             f"{self.postgres_db}"
+            f"{self.testing}"
         )
 
     model_config = SettingsConfigDict(env_file=".env")
