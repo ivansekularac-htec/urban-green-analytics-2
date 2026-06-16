@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.audit import AuditSchema
 
@@ -17,7 +17,7 @@ class HarvestBase(BaseModel):
     farm_id: int
     crop_id: int
     quality_grade_id: int
-    weight_kg: Decimal
+    weight_kg: Decimal = Field(gt=0)
 
 
 # ------------------------------------------------------
@@ -41,7 +41,7 @@ class HarvestUpdate(BaseModel):
     Schema used for updating Harvest record.
     """
 
-    weight_kg: Decimal | None = None
+    weight_kg: Decimal | None = Field(gt=0, default=None)
     quality_grade_id: int | None = None
 
 

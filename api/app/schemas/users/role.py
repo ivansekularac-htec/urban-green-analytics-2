@@ -12,7 +12,7 @@ class RoleBase(BaseModel):
     Shared fields for Role entity.
     """
 
-    name: str = Field(default=None, max_length=100)
+    name: str = Field(max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 
@@ -39,7 +39,7 @@ class RoleUpdate(BaseModel):
     Schema used for updating Role.
     """
 
-    name: str = Field(default=None, max_length=100)
+    name: str | None = Field(default=None, max_length=100)
     description: str | None = Field(default=None, max_length=500)
 
 

@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_schema: str
 
+    api_v1_prefix: str = "/api/v1"
+
     @property
     def database_url(self) -> str:
         """Build the PostgreSQL database connection URL.
@@ -42,7 +44,7 @@ class Settings(BaseSettings):
             f"{self.postgres_db}"
         )
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 @lru_cache

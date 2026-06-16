@@ -16,7 +16,7 @@ class SensorBase(BaseModel):
     farm_id: int
     sensor_type_id: int
 
-    serial_number: str = Field(default=None, max_length=255)
+    serial_number: str = Field(max_length=255)
     status: SensorStatus = SensorStatus.ACTIVE
     installed_at: int | None = None
 
