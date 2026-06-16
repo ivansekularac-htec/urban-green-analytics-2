@@ -18,7 +18,7 @@ class FarmBase(BaseModel):
     infrastructure_type_id: int
     growing_system_type_id: int
 
-    name: str = Field(default=None, max_length=255)
+    name: str = Field(max_length=255)
     status: FarmStatus = FarmStatus.ACTIVE
     city: str | None = Field(default=None, max_length=255)
     size_m2: Decimal | None = Field(default=None, gt=0)

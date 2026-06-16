@@ -12,7 +12,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
-from app.routers.users import router as role_router
+from app.routers.users.role import router as role_router
+from app.routers.users.user import router as user_router
+from app.routers.users.user_roles import router as user_roles_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,6 +37,8 @@ app = FastAPI(
 )
 
 app.include_router(role_router)
+app.include_router(user_router)
+app.include_router(user_roles_router)
 
 
 @app.get("/")
