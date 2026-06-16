@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str
     postgres_schema: str
-    api_version_v1: str
+    api_version_v1: str = "/api/v1"
 
     @property
     def database_url(self) -> str:
