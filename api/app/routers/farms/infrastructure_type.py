@@ -10,7 +10,7 @@ from app.schemas.farms.infrastructure_type import (
     InfrastructureTypeResponse,
 )
 
-router = APIRouter(prefix="/infrastructure_type", tags=["infrastructure Type"])
+router = APIRouter(prefix="/infrastructure_type", tags=["Infrastructure Type"])
 
 DBSession = Annotated[Session, Depends(get_db)]
 
