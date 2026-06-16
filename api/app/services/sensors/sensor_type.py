@@ -2,12 +2,18 @@ from sqlalchemy.orm import Session
 
 from app.models.sensors.sensor_type import SensorType
 from app.schemas.sensors.sensor_type import SensorTypeCreate, SensorTypeUpdate
+
+
 def get_sensor_types(db: Session) -> list[SensorType]:
     """Query and return all sensor types from the database."""
     return db.query(SensorType).all()
+
+
 def get_sensor_type(db: Session, sensor_type_id: int) -> SensorType | None:
     """Return a single sensor type by ID, or None if not found."""
     return db.query(SensorType).filter(SensorType.id == sensor_type_id).first()
+
+
 def create_sensor_type(db: Session, payload: SensorTypeCreate) -> SensorType:
     """Persist a new sensor type to the database and return it."""
     sensor_type = SensorType(**payload.model_dump())
@@ -15,6 +21,8 @@ def create_sensor_type(db: Session, payload: SensorTypeCreate) -> SensorType:
     db.commit()
     db.refresh(sensor_type)
     return sensor_type
+
+
 def update_sensor_type(
     db: Session, sensor_type: SensorType, payload: SensorTypeUpdate
 ) -> SensorType:
@@ -23,6 +31,8 @@ def update_sensor_type(
     db.commit()
     db.refresh(sensor_type)
     return sensor_type
+
+
 def delete_sensor_type(db: Session, sensor_type: SensorType) -> None:
     """Delete a sensor type from the database."""
     db.delete(sensor_type)
