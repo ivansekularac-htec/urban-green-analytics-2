@@ -17,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.users.role import Role
-from app.schemas.users.role import RoleCreate
+from app.schemas.users.role import RoleCreate, RoleUpdate
 
 
 def create(
@@ -73,3 +73,27 @@ def get_all(
         A list containing all Role records.
     """
     return list(db.scalars(select(Role)).all())
+
+
+def update(
+    db: Session,
+    role: Role,
+    payload: RoleUpdate,
+) -> Role:
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(role, field, value)
+
+    db.commit()
+    db.refresh(role)
+
+    return role
+
+
+def delete(
+    db: Session,
+    role: Role,
+) -> None:
+
+    db.delete(role)
+    db.commit()

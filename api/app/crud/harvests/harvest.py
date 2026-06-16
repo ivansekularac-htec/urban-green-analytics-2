@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.harvests.harvest import Harvest
-from app.schemas.harvests.harvest import HarvestCreate
+from app.schemas.harvests.harvest import HarvestCreate, HarvestUpdate
 
 
 def create(
@@ -32,3 +32,31 @@ def get_all(
 ) -> list[Harvest]:
 
     return list(db.scalars(select(Harvest)).all())
+
+
+def update(
+    db: Session,
+    harvest: Harvest,
+    payload: HarvestUpdate,
+) -> Harvest:
+    """Update an existing harvest."""
+
+    for field, value in payload.model_dump(
+        exclude_unset=True,
+    ).items():
+        setattr(harvest, field, value)
+
+    db.commit()
+    db.refresh(harvest)
+
+    return harvest
+
+
+def delete(
+    db: Session,
+    harvest: Harvest,
+) -> None:
+    """Delete a harvest."""
+
+    db.delete(harvest)
+    db.commit()

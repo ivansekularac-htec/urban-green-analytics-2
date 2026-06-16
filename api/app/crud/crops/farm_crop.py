@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.crops.farm_crop import FarmCrop
-from app.schemas.crops.farm_crop import FarmCropCreate
+from app.schemas.crops.farm_crop import FarmCropCreate, FarmCropUpdate
 
 
 def create(
@@ -32,3 +32,31 @@ def get_all(
 ) -> list[FarmCrop]:
 
     return list(db.scalars(select(FarmCrop)).all())
+
+
+def update(
+    db: Session,
+    farm_crop: FarmCrop,
+    payload: FarmCropUpdate,
+) -> FarmCrop:
+    """Update an existing farm crop assignment."""
+
+    for field, value in payload.model_dump(
+        exclude_unset=True,
+    ).items():
+        setattr(farm_crop, field, value)
+
+    db.commit()
+    db.refresh(farm_crop)
+
+    return farm_crop
+
+
+def delete(
+    db: Session,
+    farm_crop: FarmCrop,
+) -> None:
+    """Delete a farm crop assignment."""
+
+    db.delete(farm_crop)
+    db.commit()
