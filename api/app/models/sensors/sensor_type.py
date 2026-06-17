@@ -14,7 +14,7 @@ from sqlalchemy import BigInteger, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.audit import AuditMixin
+from app.models.common.audit import AuditMixin
 
 if TYPE_CHECKING:
     from app.models.sensors.sensor import Sensor
