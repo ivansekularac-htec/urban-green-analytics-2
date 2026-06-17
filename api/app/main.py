@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import verify_database_connection
-from app.routers.api import v1_router
+from app.routers import v1_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

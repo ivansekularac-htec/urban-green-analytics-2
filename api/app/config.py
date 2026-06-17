@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_schema: str
 
+    api_app_v1_prefix: str = "/api/v1"
+
     @property
     def database_url(self) -> str:
         """Build the PostgreSQL database connection URL.

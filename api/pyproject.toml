@@ -11,6 +11,7 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.12",
     "pydantic-settings>=2.14.1",
+    "ruff>=0.15.16",
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
@@ -44,9 +45,16 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]     # allow asserts in tests
 "__init__.py" = ["F401"] # allow unused imports for re-exports
+"tests/conftest.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.4.0",
+    "pytest>=9.0.3",
+]
