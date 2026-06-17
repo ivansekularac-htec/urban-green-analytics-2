@@ -2,6 +2,8 @@
 User service.
 """
 
+from sqlalchemy.exc import IntegrityError
+
 from app.models.users.user import User
 from app.repositories.users.user import UserRepository
 from app.schemas.users.user import UserCreate, UserUpdate
@@ -26,7 +28,12 @@ class UserService(BaseService[User, UserCreate, UserUpdate]):
 
         data["password_hash"] = hash_password(password)
 
-        return self.repository.create(data)
+        try:
+            user = self.repository.create(data)
+            self.repository.commit()
+            return user
+        except IntegrityError as exc:
+            self._raise_integrity_conflict(exc)
 
     def update(self, item_id: int, payload: UserUpdate) -> User:
         """
@@ -44,4 +51,9 @@ class UserService(BaseService[User, UserCreate, UserUpdate]):
         if password is not None:
             data["password_hash"] = hash_password(password)
 
-        return self.repository.update(item, data)
+        try:
+            user = self.repository.update(item, data)
+            self.repository.commit()
+            return user
+        except IntegrityError as exc:
+            self._raise_integrity_conflict(exc)
