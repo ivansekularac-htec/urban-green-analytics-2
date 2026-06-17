@@ -66,6 +66,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[User]:
     """
     Retrieve all users.
@@ -77,7 +79,9 @@ def get_all(
         A list of all user records.
     """
 
-    return list(db.scalars(select(User)).all())
+    stmt = select(User).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 
 def update(

@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[UserRole]:
     """
     Retrieve all user role assignments.
@@ -68,7 +70,9 @@ def get_all(
         A list of all user role assignment records.
     """
 
-    return list(db.scalars(select(UserRole)).all())
+    stmt = select(UserRole).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 
 def update(

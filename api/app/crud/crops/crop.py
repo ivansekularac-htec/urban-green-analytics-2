@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[Crop]:
     """
     Retrieve all crops.
@@ -68,4 +70,6 @@ def get_all(
         A list of all crop records.
     """
 
-    return list(db.scalars(select(Crop)).all())
+    stmt = select(Crop).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

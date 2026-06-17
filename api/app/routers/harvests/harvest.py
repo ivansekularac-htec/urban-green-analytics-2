@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.harvests import harvest as harvest_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.harvests.harvest import HarvestCreate, HarvestResponse, HarvestUpdate
 
 router = APIRouter(prefix="/harvest", tags=["Harvest"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_harvest(
 )
 def get_harvests(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[HarvestResponse]:
     """
     Retrieve all harvests.
@@ -82,7 +78,11 @@ def get_harvests(
     Returns:
         A list of all harvests.
     """
-    return harvest_crud.get_all(db)
+    return harvest_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
 
 
 @router.put(

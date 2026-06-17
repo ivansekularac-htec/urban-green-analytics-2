@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[Harvest]:
     """
     Retrieve all harvests.
@@ -68,7 +70,9 @@ def get_all(
         A list of all harvest records.
     """
 
-    return list(db.scalars(select(Harvest)).all())
+    stmt = select(Harvest).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 
 def update(

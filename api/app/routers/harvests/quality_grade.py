@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.harvests import quality_grade as quality_grade_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.harvests.quality_grade import QualityGradeCreate, QualityGradeResponse
 
 router = APIRouter(prefix="/quality_grade", tags=["Quality Grade"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_quality_grade(
 )
 def get_quality_grades(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[QualityGradeResponse]:
     """
     Retrieve all quality grades.
@@ -82,4 +78,8 @@ def get_quality_grades(
     Returns:
         A list of all quality grades.
     """
-    return quality_grade_crud.get_all(db)
+    return quality_grade_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )

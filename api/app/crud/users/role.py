@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[Role]:
     """
     Retrieve all roles.
@@ -68,7 +70,9 @@ def get_all(
         A list of all role records.
     """
 
-    return list(db.scalars(select(Role)).all())
+    stmt = select(Role).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 
 def update(

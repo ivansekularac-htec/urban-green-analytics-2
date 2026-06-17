@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.users import user as user_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/user", tags=["User"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_user(
 )
 def get_users(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[UserResponse]:
     """
     Retrieve all users.
@@ -82,7 +78,11 @@ def get_users(
     Returns:
         A list of all users.
     """
-    return user_crud.get_all(db)
+    return user_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
 
 
 @router.put(

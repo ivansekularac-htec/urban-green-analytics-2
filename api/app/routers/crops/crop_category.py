@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.crops import crop_category as crop_category_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.crops.crop_category import CropCategoryCreate, CropCategoryResponse
 
 router = APIRouter(prefix="/crop_category", tags=["Crop Category"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_crop_category(
 )
 def get_crop_categories(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[CropCategoryResponse]:
     """
     Retrieve all crop categories.
@@ -82,4 +78,8 @@ def get_crop_categories(
     Returns:
         A list of all crop categories.
     """
-    return crop_category_crud.get_all(db)
+    return crop_category_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )

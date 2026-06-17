@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[InfrastructureType]:
     """
     Retrieve all infrastructure types.
@@ -68,4 +70,6 @@ def get_all(
         A list of all infrastructure type records.
     """
 
-    return list(db.scalars(select(InfrastructureType)).all())
+    stmt = select(InfrastructureType).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

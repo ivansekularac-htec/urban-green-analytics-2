@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.users import user_roles as user_role_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.users.user_roles import UserRoleCreate, UserRoleResponse, UserRoleUpdate
 
 router = APIRouter(prefix="/user_role", tags=["User Role"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_user_role(
 )
 def get_user_roles(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[UserRoleResponse]:
     """
     Retrieve all user role assignments.
@@ -82,7 +78,11 @@ def get_user_roles(
     Returns:
         A list of all user role assignments.
     """
-    return user_role_crud.get_all(db)
+    return user_role_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
 
 
 @router.put(

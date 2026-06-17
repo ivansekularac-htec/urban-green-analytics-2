@@ -50,6 +50,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[CropCategory]:
     """
     Retrieve all crop categories.
@@ -61,4 +63,6 @@ def get_all(
         A list of all crop category records.
     """
 
-    return list(db.scalars(select(CropCategory)).all())
+    stmt = select(CropCategory).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.crops import farm_crop as farm_crop_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.crops.farm_crop import FarmCropCreate, FarmCropResponse, FarmCropUpdate
 
 router = APIRouter(prefix="/farm_crop", tags=["FarmCrop"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_farm_crop(
 )
 def get_farm_crops(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[FarmCropResponse]:
     """
     Retrieve all farm crop assignments.
@@ -82,7 +78,11 @@ def get_farm_crops(
     Returns:
         A list of all farm crop assignments.
     """
-    return farm_crop_crud.get_all(db)
+    return farm_crop_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
 
 
 @router.put(

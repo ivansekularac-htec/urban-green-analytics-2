@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[Sensor]:
     """
     Retrieve all sensors.
@@ -68,4 +70,6 @@ def get_all(
         A list of all sensor records.
     """
 
-    return list(db.scalars(select(Sensor)).all())
+    stmt = select(Sensor).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

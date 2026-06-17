@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[Farm]:
     """
     Retrieve all farms.
@@ -68,7 +70,9 @@ def get_all(
         A list of all farm records.
     """
 
-    return list(db.scalars(select(Farm)).all())
+    stmt = select(Farm).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 
 def update(

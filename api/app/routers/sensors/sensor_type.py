@@ -1,15 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.sensors import sensor_type as sensor_type_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.sensors.sensor_type import SensorTypeCreate, SensorTypeResponse
 
 router = APIRouter(prefix="/sensor_type", tags=["Sensor Type"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -72,6 +67,7 @@ def get_sensor_type(
 )
 def get_sensor_types(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[SensorTypeResponse]:
     """
     Retrieve all sensor types.
@@ -82,4 +78,8 @@ def get_sensor_types(
     Returns:
         A list of all sensor types.
     """
-    return sensor_type_crud.get_all(db)
+    return sensor_type_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )

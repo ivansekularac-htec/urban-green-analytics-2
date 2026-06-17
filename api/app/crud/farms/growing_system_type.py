@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[GrowingSystemType]:
     """
     Retrieve all growing system types.
@@ -68,4 +70,6 @@ def get_all(
         A list of all growing system type records.
     """
 
-    return list(db.scalars(select(GrowingSystemType)).all())
+    stmt = select(GrowingSystemType).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

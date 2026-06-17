@@ -57,6 +57,8 @@ def get(
 
 def get_all(
     db: Session,
+    skip: int,
+    limit: int,
 ) -> list[QualityGrade]:
     """
     Retrieve all quality grades.
@@ -68,4 +70,6 @@ def get_all(
         A list of all quality grade records.
     """
 
-    return list(db.scalars(select(QualityGrade)).all())
+    stmt = select(QualityGrade).offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()

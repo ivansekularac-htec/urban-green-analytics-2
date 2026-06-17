@@ -1,18 +1,13 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from app.crud.farms import infrastructure_type as infrastructure_type_crud
-from app.database import get_db
+from app.routers.helpers import DBSession, PaginationDep
 from app.schemas.farms.infrastructure_type import (
     InfrastructureTypeCreate,
     InfrastructureTypeResponse,
 )
 
 router = APIRouter(prefix="/infrastructure_type", tags=["Infrastructure Type"])
-
-DBSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post(
@@ -78,6 +73,7 @@ def get_infrastructure_type(
 )
 def get_infrastructure_types(
     db: DBSession,
+    pagination: PaginationDep,
 ) -> list[InfrastructureTypeResponse]:
     """
     Retrieve all infrastructure types.
@@ -88,4 +84,8 @@ def get_infrastructure_types(
     Returns:
         A list of all infrastructure types.
     """
-    return infrastructure_type_crud.get_all(db)
+    return infrastructure_type_crud.get_all(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
