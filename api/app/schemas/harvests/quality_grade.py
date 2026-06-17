@@ -35,21 +35,6 @@ class QualityGradeCreate(QualityGradeBase):
 # ------------------------------------------------------
 
 
-class QualityGradeUpdate(BaseModel):
-    """
-    Schema used for updating QualityGrade.
-    """
-
-    code: str | None = Field(default=None, max_length=50)
-    name: str | None = Field(default=None, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-
-
-# ------------------------------------------------------
-# Response
-# ------------------------------------------------------
-
-
 class QualityGradeResponse(QualityGradeBase, AuditSchema):
     """
     API response schema for QualityGrade.

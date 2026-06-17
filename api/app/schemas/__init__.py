@@ -17,7 +17,6 @@ from app.schemas.crops.crop import (
     CropBase,
     CropCreate,
     CropResponse,
-    CropUpdate,
 )
 from app.schemas.crops.crop_category import (
     CropCategoryBase,
@@ -53,11 +52,7 @@ from app.schemas.farms.infrastructure_type import (
 # -------------------------
 # HARVESTS
 # -------------------------
-from app.schemas.harvests.harvest import (
-    HarvestBase,
-    HarvestCreate,
-    HarvestResponse,
-)
+from app.schemas.harvests.harvest import HarvestBase, HarvestCreate, HarvestResponse, HarvestUpdate
 from app.schemas.harvests.quality_grade import (
     QualityGradeBase,
     QualityGradeCreate,
@@ -71,7 +66,6 @@ from app.schemas.sensors.sensor import (
     SensorBase,
     SensorCreate,
     SensorResponse,
-    SensorUpdate,
 )
 from app.schemas.sensors.sensor_type import (
     SensorTypeBase,
@@ -112,20 +106,16 @@ __all__ = [
     "FarmResponse",
     "InfrastructureTypeBase",
     "InfrastructureTypeCreate",
-    "InfrastructureTypeUpdate",
     "InfrastructureTypeResponse",
     "GrowingSystemTypeBase",
     "GrowingSystemTypeCreate",
-    "GrowingSystemTypeUpdate",
     "GrowingSystemTypeResponse",
     # crops
     "CropBase",
     "CropCreate",
-    "CropUpdate",
     "CropResponse",
     "CropCategoryBase",
     "CropCategoryCreate",
-    "CropCategoryUpdate",
     "CropCategoryResponse",
     "FarmCropBase",
     "FarmCropCreate",
@@ -134,11 +124,9 @@ __all__ = [
     # sensors
     "SensorBase",
     "SensorCreate",
-    "SensorUpdate",
     "SensorResponse",
     "SensorTypeBase",
     "SensorTypeCreate",
-    "SensorTypeUpdate",
     "SensorTypeResponse",
     # users
     "UserBase",
@@ -160,6 +148,5 @@ __all__ = [
     "HarvestResponse",
     "QualityGradeBase",
     "QualityGradeCreate",
-    "QualityGradeUpdate",
     "QualityGradeResponse",
 ]

@@ -15,6 +15,7 @@ build/
 venv/
 env/
 ENV/
+.coverage
 
 # Virtual environment names
 .venv*/

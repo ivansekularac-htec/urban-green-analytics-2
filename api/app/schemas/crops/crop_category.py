@@ -30,20 +30,6 @@ class CropCategoryCreate(CropCategoryBase):
 
 
 # ------------------------------------------------------
-# Update
-# ------------------------------------------------------
-
-
-class CropCategoryUpdate(BaseModel):
-    """
-    Schema used for updating CropCategory.
-    """
-
-    name: str | None = Field(default=None, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-
-
-# ------------------------------------------------------
 # Response
 # ------------------------------------------------------
 

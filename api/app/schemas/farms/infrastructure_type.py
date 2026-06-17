@@ -30,20 +30,6 @@ class InfrastructureTypeCreate(InfrastructureTypeBase):
 
 
 # ------------------------------------------------------
-# Update
-# ------------------------------------------------------
-
-
-class InfrastructureTypeUpdate(BaseModel):
-    """
-    Schema used for updating InfrastructureType.
-    """
-
-    name: str | None = Field(default=None, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-
-
-# ------------------------------------------------------
 # Response
 # ------------------------------------------------------
 

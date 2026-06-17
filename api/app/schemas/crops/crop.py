@@ -34,21 +34,6 @@ class CropCreate(CropBase):
 # ------------------------------------------------------
 
 
-class CropUpdate(BaseModel):
-    """
-    Schema used for updating Crop.
-    """
-
-    name: str | None = Field(default=None, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-    category_id: int | None = None
-
-
-# ------------------------------------------------------
-# Response
-# ------------------------------------------------------
-
-
 class CropResponse(CropBase, AuditSchema):
     """
     API response schema for Crop.

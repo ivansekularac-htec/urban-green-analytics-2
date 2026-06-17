@@ -35,24 +35,6 @@ class SensorCreate(SensorBase):
 
 
 # ------------------------------------------------------
-# Update
-# ------------------------------------------------------
-
-
-class SensorUpdate(BaseModel):
-    """
-    Schema used for updating Sensor.
-    """
-
-    farm_id: int | None = None
-    sensor_type_id: int | None = None
-
-    serial_number: str | None = None
-    status: SensorStatus | None = None
-    installed_at: int | None = None
-
-
-# ------------------------------------------------------
 # Response
 # ------------------------------------------------------
 
