@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from app.services.sensors import sensor as sensor_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.sensors.sensor import SensorCreate, SensorResponse, SensorUpdate
+from app.services.sensors import sensor as sensor_service
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
 

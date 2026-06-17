@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from app.services.crops import crop_category as crop_category_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +9,7 @@ from app.schemas.crops.crop_category import (
     CropCategoryResponse,
     CropCategoryUpdate,
 )
+from app.services.crops import crop_category as crop_category_service
 
 router = APIRouter(prefix="/crop-categories", tags=["crop-categories"])
 

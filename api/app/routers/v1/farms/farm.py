@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from app.services.farms import farm as farm_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.farms.farm import FarmCreate, FarmResponse, FarmUpdate
+from app.services.farms import farm as farm_service
 
 router = APIRouter(prefix="/farms", tags=["farms"])
 

@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from app.services.crops import crop as crop_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.crops.crop import CropCreate, CropResponse, CropUpdate
+from app.services.crops import crop as crop_service
 
 router = APIRouter(prefix="/crops", tags=["crops"])
 

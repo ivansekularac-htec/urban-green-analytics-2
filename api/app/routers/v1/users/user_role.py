@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from app.services.users import user_role as user_role_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.users.user_roles import UserRoleCreate, UserRoleResponse, UserRoleUpdate
+from app.services.users import user_role as user_role_service
 
 router = APIRouter(prefix="/user-roles", tags=["user-roles"])
 

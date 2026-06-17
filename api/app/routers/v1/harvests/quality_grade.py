@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from app.services.harvests import quality_grade as quality_grade_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +9,7 @@ from app.schemas.harvests.quality_grade import (
     QualityGradeResponse,
     QualityGradeUpdate,
 )
+from app.services.harvests import quality_grade as quality_grade_service
 
 router = APIRouter(prefix="/quality-grades", tags=["quality-grades"])
 
