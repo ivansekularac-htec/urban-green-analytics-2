@@ -30,6 +30,8 @@ class HarvestCreate(HarvestBase):
     Schema used for creating Harvest record.
     """
 
+    pass
+
 
 # ------------------------------------------------------
 # Update
