@@ -1,41 +1,51 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import SensorType
-from app.schemas import SensorTypeCreate, SensorTypeResponse
+from app.schemas.sensors.sensor_type import SensorTypeCreate, SensorTypeResponse, SensorTypeUpdate
+from app.services.sensors import sensor_type as sensor_type_service
 
-sensor_type_router = APIRouter(
-    prefix="/sensor-types",
-    tags=["Sensor Types"],
-)
+router = APIRouter(prefix="/sensor-types", tags=["sensor-types"])
 
-
-@sensor_type_router.get(
-    "/",
-    response_model=list[SensorTypeResponse],
-)
-def get_sensor_types(
-    db: Session = Depends(get_db),
-):
-    return db.query(SensorType).all()
+DbSession = Annotated[Session, Depends(get_db)]
 
 
-@sensor_type_router.post(
-    "/",
-    response_model=SensorTypeResponse,
-    status_code=201,
-)
-def create_sensor_type(
-    sensor_type_data: SensorTypeCreate,
-    db: Session = Depends(get_db),
-):
-    sensor_type = SensorType(
-        **sensor_type_data.model_dump(),
-    )
+@router.get("/", response_model=list[SensorTypeResponse])
+def get_sensor_types(db: DbSession):
+    """List all sensor types."""
+    return sensor_type_service.get_sensor_types(db)
 
-    db.add(sensor_type)
-    db.commit()
-    db.refresh(sensor_type)
 
+@router.get("/{sensor_type_id}", response_model=SensorTypeResponse)
+def get_sensor_type(sensor_type_id: int, db: DbSession):
+    """Retrieve a single sensor type by ID."""
+    sensor_type = sensor_type_service.get_sensor_type(db, sensor_type_id)
+    if not sensor_type:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor type not found")
     return sensor_type
+
+
+@router.post("/", response_model=SensorTypeResponse, status_code=status.HTTP_201_CREATED)
+def create_sensor_type(payload: SensorTypeCreate, db: DbSession):
+    """Create a new sensor type."""
+    return sensor_type_service.create_sensor_type(db, payload)
+
+
+@router.put("/{sensor_type_id}", response_model=SensorTypeResponse)
+def update_sensor_type(sensor_type_id: int, payload: SensorTypeUpdate, db: DbSession):
+    """Update an existing sensor type."""
+    sensor_type = sensor_type_service.get_sensor_type(db, sensor_type_id)
+    if not sensor_type:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor type not found")
+    return sensor_type_service.update_sensor_type(db, sensor_type, payload)
+
+
+@router.delete("/{sensor_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_sensor_type(sensor_type_id: int, db: DbSession):
+    """Delete a sensor type."""
+    sensor_type = sensor_type_service.get_sensor_type(db, sensor_type_id)
+    if not sensor_type:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor type not found")
+    sensor_type_service.delete_sensor_type(db, sensor_type)

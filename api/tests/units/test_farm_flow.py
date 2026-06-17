@@ -5,6 +5,7 @@ from app.models.farms.farm_status import FarmStatus
 from app.models.sensors.sensor import Sensor
 from app.models.sensors.sensor_status import SensorStatus
 
+
 def test_farm_flow():
     farm = Farm(
         id=1,

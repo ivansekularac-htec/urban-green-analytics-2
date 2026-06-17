@@ -1,82 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Crop
-from app.schemas import CropCreate, CropResponse, CropUpdate
+from app.schemas.crops.crop import CropCreate, CropResponse, CropUpdate
+from app.services.crops import crop as crop_service
 
-crop_router = APIRouter(
-    prefix="/crops",
-    tags=["Crops"],
-)
+router = APIRouter(prefix="/crops", tags=["crops"])
 
-
-@crop_router.get("/", response_model=list[CropResponse])
-def get_crops(db: Session = Depends(get_db)):
-    return db.query(Crop).all()
+DbSession = Annotated[Session, Depends(get_db)]
 
 
-@crop_router.post(
-    "/",
-    response_model=CropResponse,
-    status_code=201,
-)
-def create_crop(
-    crop_data: CropCreate,
-    db: Session = Depends(get_db),
-):
-    crop = Crop(**crop_data.model_dump())
+@router.get("/", response_model=list[CropResponse])
+def get_crops(db: DbSession):
+    """List all crops."""
+    return crop_service.get_crops(db)
 
-    db.add(crop)
-    db.commit()
-    db.refresh(crop)
 
+@router.get("/{crop_id}", response_model=CropResponse)
+def get_crop(crop_id: int, db: DbSession):
+    """Retrieve a single crop by ID."""
+    crop = crop_service.get_crop(db, crop_id)
+    if not crop:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crop not found")
     return crop
 
 
-@crop_router.put(
-    "/{crop_id}",
-    response_model=CropResponse,
-)
-def update_crop(
-    crop_id: int,
-    crop_data: CropUpdate,
-    db: Session = Depends(get_db),
-):
-    crop = db.query(Crop).filter(Crop.id == crop_id).first()
-
-    if crop is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Crop not found",
-        )
-
-    for field, value in crop_data.model_dump(
-        exclude_unset=True,
-    ).items():
-        setattr(crop, field, value)
-
-    db.commit()
-    db.refresh(crop)
-
-    return crop
+@router.post("/", response_model=CropResponse, status_code=status.HTTP_201_CREATED)
+def create_crop(payload: CropCreate, db: DbSession):
+    """Create a new crop."""
+    return crop_service.create_crop(db, payload)
 
 
-@crop_router.delete(
-    "/{crop_id}",
-    status_code=204,
-)
-def delete_crop(
-    crop_id: int,
-    db: Session = Depends(get_db),
-):
-    crop = db.query(Crop).filter(Crop.id == crop_id).first()
+@router.put("/{crop_id}", response_model=CropResponse)
+def update_crop(crop_id: int, payload: CropUpdate, db: DbSession):
+    """Update an existing crop."""
+    crop = crop_service.get_crop(db, crop_id)
+    if not crop:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crop not found")
+    return crop_service.update_crop(db, crop, payload)
 
-    if crop is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Crop not found",
-        )
 
-    db.delete(crop)
-    db.commit()
+@router.delete("/{crop_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_crop(crop_id: int, db: DbSession):
+    """Delete a crop."""
+    crop = crop_service.get_crop(db, crop_id)
+    if not crop:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crop not found")
+    crop_service.delete_crop(db, crop)

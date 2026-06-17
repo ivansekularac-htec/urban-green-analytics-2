@@ -1,69 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Sensor
-from app.schemas import SensorCreate, SensorResponse, SensorUpdate
+from app.schemas.sensors.sensor import SensorCreate, SensorResponse, SensorUpdate
+from app.services.sensors import sensor as sensor_service
 
-sensor_router = APIRouter(
-    prefix="/sensors",
-    tags=["Sensors"],
-)
+router = APIRouter(prefix="/sensors", tags=["sensors"])
 
-
-@sensor_router.get(
-    "/",
-    response_model=list[SensorResponse],
-)
-def get_sensors(
-    db: Session = Depends(get_db),
-):
-    return db.query(Sensor).all()
+DbSession = Annotated[Session, Depends(get_db)]
 
 
-@sensor_router.post(
-    "/",
-    response_model=SensorResponse,
-    status_code=201,
-)
-def create_sensor(
-    sensor_data: SensorCreate,
-    db: Session = Depends(get_db),
-):
-    sensor = Sensor(
-        **sensor_data.model_dump(),
-    )
+@router.get("/", response_model=list[SensorResponse])
+def get_sensors(db: DbSession):
+    """List all sensors."""
+    return sensor_service.get_sensors(db)
 
-    db.add(sensor)
-    db.commit()
-    db.refresh(sensor)
 
+@router.get("/{sensor_id}", response_model=SensorResponse)
+def get_sensor(sensor_id: int, db: DbSession):
+    """Retrieve a single sensor by ID."""
+    sensor = sensor_service.get_sensor(db, sensor_id)
+    if not sensor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found")
     return sensor
 
 
-@sensor_router.put(
-    "/{sensor_id}",
-    response_model=SensorResponse,
-)
-def update_sensor(
-    sensor_id: int,
-    sensor_data: SensorUpdate,
-    db: Session = Depends(get_db),
-):
-    sensor = db.query(Sensor).filter(Sensor.id == sensor_id).first()
+@router.post("/", response_model=SensorResponse, status_code=status.HTTP_201_CREATED)
+def create_sensor(payload: SensorCreate, db: DbSession):
+    """Create a new sensor."""
+    return sensor_service.create_sensor(db, payload)
 
-    if sensor is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Sensor not found",
-        )
 
-    for field, value in sensor_data.model_dump(
-        exclude_unset=True,
-    ).items():
-        setattr(sensor, field, value)
+@router.put("/{sensor_id}", response_model=SensorResponse)
+def update_sensor(sensor_id: int, payload: SensorUpdate, db: DbSession):
+    """Update an existing sensor."""
+    sensor = sensor_service.get_sensor(db, sensor_id)
+    if not sensor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found")
+    return sensor_service.update_sensor(db, sensor, payload)
 
-    db.commit()
-    db.refresh(sensor)
 
-    return sensor
+@router.delete("/{sensor_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_sensor(sensor_id: int, db: DbSession):
+    """Delete a sensor."""
+    sensor = sensor_service.get_sensor(db, sensor_id)
+    if not sensor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found")
+    sensor_service.delete_sensor(db, sensor)

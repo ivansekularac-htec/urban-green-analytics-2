@@ -15,7 +15,7 @@ class SensorTypeBase(BaseModel):
     """
 
     name: str = Field(max_length=100)
-    unit: str = Field(default=None, max_length=50)
+    unit: str = Field(max_length=50)
     description: str | None = Field(default=None, max_length=500)
 
     optimal_min: Decimal | None = None

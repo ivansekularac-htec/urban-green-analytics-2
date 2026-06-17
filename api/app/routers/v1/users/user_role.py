@@ -1,87 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import UserRole
-from app.schemas import UserRoleCreate, UserRoleResponse, UserRoleUpdate
+from app.schemas.users.user_roles import UserRoleCreate, UserRoleResponse, UserRoleUpdate
+from app.services.users import user_role as user_role_service
 
-user_role_router = APIRouter(
-    prefix="/user-roles",
-    tags=["User Roles"],
-)
+router = APIRouter(prefix="/user-roles", tags=["user-roles"])
 
-
-@user_role_router.get(
-    "/",
-    response_model=list[UserRoleResponse],
-)
-def get_user_roles(
-    db: Session = Depends(get_db),
-):
-    return db.query(UserRole).all()
+DbSession = Annotated[Session, Depends(get_db)]
 
 
-@user_role_router.post(
-    "/",
-    response_model=UserRoleResponse,
-    status_code=201,
-)
-def create_user_role(
-    user_role_data: UserRoleCreate,
-    db: Session = Depends(get_db),
-):
-    user_role = UserRole(**user_role_data.model_dump())
+@router.get("/", response_model=list[UserRoleResponse])
+def get_user_roles(db: DbSession):
+    """List all user roles."""
+    return user_role_service.get_user_roles(db)
 
-    db.add(user_role)
-    db.commit()
-    db.refresh(user_role)
 
+@router.get("/{user_role_id}", response_model=UserRoleResponse)
+def get_user_role(user_role_id: int, db: DbSession):
+    """Retrieve a single user role by ID."""
+    user_role = user_role_service.get_user_role(db, user_role_id)
+    if not user_role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User role not found")
     return user_role
 
 
-@user_role_router.put(
-    "/{user_role_id}",
-    response_model=UserRoleResponse,
-)
-def update_user_role(
-    user_role_id: int,
-    user_role_data: UserRoleUpdate,
-    db: Session = Depends(get_db),
-):
-    user_role = db.query(UserRole).filter(UserRole.id == user_role_id).first()
-
-    if user_role is None:
-        raise HTTPException(
-            status_code=404,
-            detail="User role not found",
-        )
-
-    for field, value in user_role_data.model_dump(
-        exclude_unset=True,
-    ).items():
-        setattr(user_role, field, value)
-
-    db.commit()
-    db.refresh(user_role)
-
-    return user_role
+@router.post("/", response_model=UserRoleResponse, status_code=status.HTTP_201_CREATED)
+def create_user_role(payload: UserRoleCreate, db: DbSession):
+    """Create a new user role."""
+    return user_role_service.create_user_role(db, payload)
 
 
-@user_role_router.delete(
-    "/{user_role_id}",
-    status_code=204,
-)
-def delete_user_role(
-    user_role_id: int,
-    db: Session = Depends(get_db),
-):
-    user_role = db.query(UserRole).filter(UserRole.id == user_role_id).first()
+@router.put("/{user_role_id}", response_model=UserRoleResponse)
+def update_user_role(user_role_id: int, payload: UserRoleUpdate, db: DbSession):
+    """Update an existing user role."""
+    user_role = user_role_service.get_user_role(db, user_role_id)
+    if not user_role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User role not found")
+    return user_role_service.update_user_role(db, user_role, payload)
 
-    if user_role is None:
-        raise HTTPException(
-            status_code=404,
-            detail="User role not found",
-        )
 
-    db.delete(user_role)
-    db.commit()
+@router.delete("/{user_role_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_role(user_role_id: int, db: DbSession):
+    """Delete a user role."""
+    user_role = user_role_service.get_user_role(db, user_role_id)
+    if not user_role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User role not found")
+    user_role_service.delete_user_role(db, user_role)
