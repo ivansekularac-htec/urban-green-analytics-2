@@ -31,7 +31,7 @@ class BaseRepository(Generic[ModelType]):
     def create(self, data: dict) -> ModelType:
         item = self.model(**data)
         self.db.add(item)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(item)
         return item
 
@@ -39,10 +39,16 @@ class BaseRepository(Generic[ModelType]):
         for field, value in data.items():
             setattr(item, field, value)
 
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(item)
         return item
 
     def delete(self, item: ModelType) -> None:
         self.db.delete(item)
+        self.db.flush()
+
+    def commit(self) -> None:
         self.db.commit()
+
+    def rollback(self) -> None:
+        self.db.rollback()

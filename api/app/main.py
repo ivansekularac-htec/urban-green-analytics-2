@@ -11,8 +11,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database import verify_database_connection
-from app.routers.api import api_router
+from app.database import settings, verify_database_connection
+from app.routers.v1.api import v1_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(api_router)
+app.include_router(v1_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/")

@@ -13,7 +13,7 @@ class UserBase(BaseModel):
     """
 
     email: EmailStr
-    full_name: str | None = Field(max_length=255)
+    full_name: str = Field(max_length=255)
     is_active: bool = True
 
 

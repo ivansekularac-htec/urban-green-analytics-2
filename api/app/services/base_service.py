@@ -2,10 +2,11 @@
 Generic service utilities for CRUD operations.
 """
 
-from typing import Generic, TypeVar
+from typing import Generic, NoReturn, TypeVar
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
 
 from app.database import Base
 from app.repositories.base_repository import BaseRepository
@@ -78,7 +79,13 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             The created ORM model instance.
         """
         data = payload.model_dump()
-        return self.repository.create(data)
+
+        try:
+            item = self.repository.create(data)
+            self.repository.commit()
+            return item
+        except IntegrityError as exc:
+            self._raise_integrity_conflict(exc)
 
     def update(self, item_id: int, payload: UpdateSchemaType) -> ModelType:
         """
@@ -104,7 +111,12 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if not data:
             return item
 
-        return self.repository.update(item, data)
+        try:
+            updated_item = self.repository.update(item, data)
+            self.repository.commit()
+            return updated_item
+        except IntegrityError as exc:
+            self._raise_integrity_conflict(exc)
 
     def delete(self, item_id: int) -> None:
         """
@@ -117,4 +129,23 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             HTTPException: If the entity does not exist.
         """
         item = self.get(item_id)
-        self.repository.delete(item)
+
+        try:
+            self.repository.delete(item)
+            self.repository.commit()
+        except IntegrityError as exc:
+            self._raise_integrity_conflict(exc)
+
+    def _raise_integrity_conflict(self, error: IntegrityError) -> NoReturn:
+        """
+        Roll back the failed transaction and raise an HTTP conflict error.
+
+        Integrity errors include unique constraint violations, foreign key
+        violations, and restricted delete operations.
+        """
+        self.repository.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{self.entity_name} violates a database constraint.",
+        ) from error
