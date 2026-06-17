@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.crops.crop_category import CropCategory
 from app.schemas.crops.crop_category import CropCategoryCreate
 
@@ -23,7 +24,7 @@ def create(
     obj = CropCategory(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj

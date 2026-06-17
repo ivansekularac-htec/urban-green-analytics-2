@@ -8,6 +8,7 @@ infrastructure type records from the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.farms.infrastructure_type import InfrastructureType
 from app.schemas.farms.infrastructure_type import InfrastructureTypeCreate
 
@@ -30,7 +31,7 @@ def create(
     obj = InfrastructureType(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj

@@ -8,6 +8,7 @@ updating, and deleting farm crop records in the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.crops.farm_crop import FarmCrop
 from app.schemas.crops.farm_crop import FarmCropCreate, FarmCropUpdate
 
@@ -30,7 +31,7 @@ def create(
     obj = FarmCrop(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -92,7 +93,7 @@ def update(
     ).items():
         setattr(farm_crop, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(farm_crop)
 
     return farm_crop
@@ -114,4 +115,4 @@ def delete(
     """
 
     db.delete(farm_crop)
-    db.commit()
+    commit_or_409(db)

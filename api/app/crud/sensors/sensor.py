@@ -8,6 +8,7 @@ sensor records from the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.sensors.sensor import Sensor
 from app.schemas.sensors.sensor import SensorCreate
 
@@ -30,7 +31,7 @@ def create(
     obj = Sensor(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj

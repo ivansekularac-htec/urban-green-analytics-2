@@ -8,6 +8,7 @@ crop records from the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.crops.crop import Crop
 from app.schemas.crops.crop import CropCreate
 
@@ -30,7 +31,7 @@ def create(
     obj = Crop(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj

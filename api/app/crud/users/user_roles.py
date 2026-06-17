@@ -8,6 +8,7 @@ updating, and deleting user role assignment records in the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.users.user_roles import UserRole
 from app.schemas.users.user_roles import UserRoleCreate, UserRoleUpdate
 
@@ -30,7 +31,7 @@ def create(
     obj = UserRole(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -92,7 +93,7 @@ def update(
     ).items():
         setattr(user_role, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(user_role)
 
     return user_role
@@ -114,4 +115,4 @@ def delete(
     """
 
     db.delete(user_role)
-    db.commit()
+    commit_or_409(db)

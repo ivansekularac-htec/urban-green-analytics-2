@@ -9,6 +9,7 @@ from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.users.user import User
 from app.schemas.users.user import UserCreate, UserUpdate
 
@@ -39,7 +40,7 @@ def create(
     )
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -99,7 +100,7 @@ def update(
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(user)
 
     return user
@@ -121,4 +122,4 @@ def delete(
     """
 
     db.delete(user)
-    db.commit()
+    commit_or_409(db)

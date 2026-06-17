@@ -8,6 +8,7 @@ updating, and deleting harvest records in the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.harvests.harvest import Harvest
 from app.schemas.harvests.harvest import HarvestCreate, HarvestUpdate
 
@@ -30,7 +31,7 @@ def create(
     obj = Harvest(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -92,7 +93,7 @@ def update(
     ).items():
         setattr(harvest, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(harvest)
 
     return harvest
@@ -114,4 +115,4 @@ def delete(
     """
 
     db.delete(harvest)
-    db.commit()
+    commit_or_409(db)

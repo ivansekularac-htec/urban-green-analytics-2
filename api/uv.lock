@@ -1651,6 +1651,7 @@ dev = [
     { name = "httpx2" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -1671,6 +1672,7 @@ dev = [
     { name = "httpx2", specifier = ">=2.4.0" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
+    { name = "ruff", specifier = ">=0.15.16" },
 ]
 
 [[package]]

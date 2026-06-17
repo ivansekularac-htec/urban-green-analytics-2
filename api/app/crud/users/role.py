@@ -8,6 +8,7 @@ updating, and deleting role records in the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.users.role import Role
 from app.schemas.users.role import RoleCreate, RoleUpdate
 
@@ -30,7 +31,7 @@ def create(
     obj = Role(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -90,7 +91,7 @@ def update(
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(role, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(role)
 
     return role
@@ -112,4 +113,4 @@ def delete(
     """
 
     db.delete(role)
-    db.commit()
+    commit_or_409(db)

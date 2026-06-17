@@ -8,6 +8,7 @@ sensor type records from the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.sensors.sensor_type import SensorType
 from app.schemas.sensors.sensor_type import SensorTypeCreate
 
@@ -30,7 +31,7 @@ def create(
     obj = SensorType(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj

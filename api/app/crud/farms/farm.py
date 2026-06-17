@@ -8,6 +8,7 @@ updating, and deleting farm records in the database.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.crud.helpers import commit_or_409
 from app.models.farms.farm import Farm
 from app.schemas.farms.farm import FarmCreate, FarmUpdate
 
@@ -30,7 +31,7 @@ def create(
     obj = Farm(**payload.model_dump())
 
     db.add(obj)
-    db.commit()
+    commit_or_409(db)
     db.refresh(obj)
 
     return obj
@@ -92,7 +93,7 @@ def update(
     ).items():
         setattr(farm, field, value)
 
-    db.commit()
+    commit_or_409(db)
     db.refresh(farm)
 
     return farm
@@ -114,4 +115,4 @@ def delete(
     """
 
     db.delete(farm)
-    db.commit()
+    commit_or_409(db)
