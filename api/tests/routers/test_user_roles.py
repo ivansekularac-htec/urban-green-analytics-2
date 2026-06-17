@@ -284,7 +284,7 @@ def test_update_user_role_duplicate_assignment(client):
         json={"name": "Operator"},
     ).json()
 
-    first = client.post(
+    client.post(
         "/api/v1/user-roles/",
         json={
             "user_id": user["id"],

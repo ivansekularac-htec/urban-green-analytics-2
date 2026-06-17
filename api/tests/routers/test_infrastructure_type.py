@@ -96,7 +96,7 @@ def test_update_infrastructure_type(client):
 
 
 def test_update_duplicate_name(client):
-    a = client.post("/api/v1/infrastructure-types", json={"name": "A"}).json()
+    client.post("/api/v1/infrastructure-types", json={"name": "A"}).json()
     b = client.post("/api/v1/infrastructure-types", json={"name": "B"}).json()
 
     r = client.put(

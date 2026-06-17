@@ -167,7 +167,7 @@ def test_update_quality_grade(client):
 
 
 def test_update_quality_grade_duplicate_code(client):
-    first = client.post(
+    client.post(
         "/api/v1/quality-grades",
         json={
             "code": "A",
