@@ -12,11 +12,6 @@ dependencies = [
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
-# Optional
-[project.optional-dependencies]
-dev = ["pytest", "ruff"]
-
-
 [tool.ruff]
 line-length = 100
 target-version = "py311"
@@ -25,15 +20,15 @@ extend-exclude = [".venv", "build", "dist", "migrations"]
 [tool.ruff.lint]
 # A reasonable starter set
 select = [
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "F", # pyflakes
-    "I", # isort (import sorting)
-    "B", # flake8-bugbear
-    "UP", # pyupgrade
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
     "SIM", # flake8-simplify
-    "C4", # flake8-comprehensions
-    "N", # pep8-naming
+    "C4",  # flake8-comprehensions
+    "N",   # pep8-naming
 ]
 ignore = [
     "E501", # line length handled by formatter
@@ -49,8 +44,4 @@ line-ending = "auto"
 docstring-code-format = true
 
 [dependency-groups]
-dev = [
-    "httpx2>=2.4.0",
-    "pytest>=9.0.3",
-    "pytest-cov>=7.1.0",
-]
+dev = ["httpx2>=2.4.0", "pytest>=9.0.3", "pytest-cov>=7.1.0"]
