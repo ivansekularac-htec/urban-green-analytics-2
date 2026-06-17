@@ -14,3 +14,4 @@ def test_crop_model():
     )
 
     assert crop.name == "Tomato"
+    assert category.name == "Vegetables"
