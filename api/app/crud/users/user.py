@@ -101,7 +101,12 @@ def update(
         The updated user instance.
     """
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(
+        exclude_unset=True,
+        exclude={"password", "password_hash"},
+    )
+
+    for field, value in data.items():
         setattr(user, field, value)
 
     commit_or_409(db)

@@ -61,7 +61,7 @@ def get_infrastructure_type(
     if infrastructure_type is None:
         raise HTTPException(
             status_code=404,
-            detail="infrastructure Type not found",
+            detail="infrastructure type not found",
         )
 
     return infrastructure_type

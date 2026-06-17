@@ -50,7 +50,7 @@ def test_update_user_role(client):
 
 def test_delete_user_role(client):
     response = client.delete(
-        "/api/v1/user-roles/999999",
+        "/api/v1/user-role/999999",
     )
 
     assert response.status_code == 404
