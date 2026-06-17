@@ -9,7 +9,9 @@ database session management and connection verification.
 
 import logging
 from collections.abc import Generator
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -49,6 +51,9 @@ def get_db() -> Generator[Session, None, None]:
 
     finally:
         db.close()
+
+
+DatabaseSession = Annotated[Session, Depends(get_db)]
 
 
 def verify_database_connection() -> None:

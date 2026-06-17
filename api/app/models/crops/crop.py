@@ -13,7 +13,7 @@ from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.audit import AuditMixin
+from app.models.common.audit import AuditMixin
 
 if TYPE_CHECKING:
     from app.models.crops.crop_category import CropCategory
