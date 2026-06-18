@@ -14,9 +14,14 @@ from app.schemas.harvests.quality_grade import (
     QualityGradeResponse,
     QualityGradeUpdate,
 )
+from app.security.dependencies import get_current_active_user, require_admin
 from app.services.harvests.quality_grade import QualityGradeService
 
-router = APIRouter(prefix="/quality-grades", tags=["Quality Grades"])
+router = APIRouter(
+    prefix="/quality-grades",
+    tags=["Quality Grades"],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 def get_quality_grade_service(db: DatabaseSession) -> QualityGradeService:
@@ -42,13 +47,22 @@ def get_quality_grade(quality_grade_id: int, service: QualityGradeServiceDep):
     return service.get(quality_grade_id)
 
 
-@router.post("", response_model=QualityGradeResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=QualityGradeResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_quality_grade(payload: QualityGradeCreate, service: QualityGradeServiceDep):
     """Create a quality grade record."""
     return service.create(payload)
 
 
-@router.put("/{quality_grade_id}", response_model=QualityGradeResponse)
+@router.put(
+    "/{quality_grade_id}",
+    response_model=QualityGradeResponse,
+    dependencies=[Depends(require_admin)],
+)
 def update_quality_grade(
     quality_grade_id: int,
     payload: QualityGradeUpdate,
@@ -58,7 +72,11 @@ def update_quality_grade(
     return service.update(quality_grade_id, payload)
 
 
-@router.delete("/{quality_grade_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{quality_grade_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_quality_grade(quality_grade_id: int, service: QualityGradeServiceDep):
     """Delete a quality grade record by ID."""
     service.delete(quality_grade_id)

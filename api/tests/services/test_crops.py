@@ -21,4 +21,4 @@ def test_crop_category_service_uses_expected_entity_name():
 
 
 def test_farm_crop_service_uses_expected_entity_name():
-    assert FarmCropService(MagicMock()).entity_name == "Farm crop"
+    assert FarmCropService(MagicMock(), MagicMock(user_roles=[])).entity_name == "Farm crop"

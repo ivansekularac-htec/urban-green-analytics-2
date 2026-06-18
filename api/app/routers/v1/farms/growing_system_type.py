@@ -14,9 +14,14 @@ from app.schemas.farms.growing_system_type import (
     GrowingSystemTypeResponse,
     GrowingSystemTypeUpdate,
 )
+from app.security.dependencies import get_current_active_user, require_admin
 from app.services.farms.growing_system_type import GrowingSystemTypeService
 
-router = APIRouter(prefix="/growing-system-types", tags=["Growing System Types"])
+router = APIRouter(
+    prefix="/growing-system-types",
+    tags=["Growing System Types"],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 def get_growing_system_type_service(db: DatabaseSession) -> GrowingSystemTypeService:
@@ -49,6 +54,7 @@ def get_growing_system_type(
     "",
     response_model=GrowingSystemTypeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
 )
 def create_growing_system_type(
     payload: GrowingSystemTypeCreate,
@@ -58,7 +64,11 @@ def create_growing_system_type(
     return service.create(payload)
 
 
-@router.put("/{growing_system_type_id}", response_model=GrowingSystemTypeResponse)
+@router.put(
+    "/{growing_system_type_id}",
+    response_model=GrowingSystemTypeResponse,
+    dependencies=[Depends(require_admin)],
+)
 def update_growing_system_type(
     growing_system_type_id: int,
     payload: GrowingSystemTypeUpdate,
@@ -68,7 +78,11 @@ def update_growing_system_type(
     return service.update(growing_system_type_id, payload)
 
 
-@router.delete("/{growing_system_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{growing_system_type_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_growing_system_type(
     growing_system_type_id: int,
     service: GrowingSystemTypeServiceDep,

@@ -39,7 +39,7 @@ def test_crud_endpoints(client, service, case):
 
 
 def test_get_harvest_service_factory_constructs_service():
-    assert isinstance(get_harvest_service(MagicMock()), HarvestService)
+    assert isinstance(get_harvest_service(MagicMock(), MagicMock(user_roles=[])), HarvestService)
 
 
 def test_get_quality_grade_service_factory_constructs_service():

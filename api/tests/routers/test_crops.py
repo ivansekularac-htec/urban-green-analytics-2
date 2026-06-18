@@ -51,4 +51,4 @@ def test_get_crop_category_service_factory_constructs_service():
 
 
 def test_get_farm_crop_service_factory_constructs_service():
-    assert isinstance(get_farm_crop_service(MagicMock()), FarmCropService)
+    assert isinstance(get_farm_crop_service(MagicMock(), MagicMock(user_roles=[])), FarmCropService)

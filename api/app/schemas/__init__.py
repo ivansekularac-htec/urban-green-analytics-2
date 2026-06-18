@@ -11,6 +11,11 @@ circular imports and simplify test imports.
 from app.schemas.audit import AuditSchema
 
 # -------------------------
+# AUTH
+# -------------------------
+from app.schemas.auth import RefreshRequest, TokenPayload, TokenResponse
+
+# -------------------------
 # CROPS
 # -------------------------
 from app.schemas.crops.crop import (
@@ -105,6 +110,10 @@ from app.schemas.users.user_roles import (
 __all__ = [
     # audit
     "AuditSchema",
+    # auth
+    "TokenResponse",
+    "TokenPayload",
+    "RefreshRequest",
     # farms
     "FarmBase",
     "FarmCreate",

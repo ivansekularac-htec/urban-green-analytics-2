@@ -46,7 +46,7 @@ def test_crud_endpoints(client, service, case):
 
 
 def test_get_sensor_service_factory_constructs_service():
-    assert isinstance(get_sensor_service(MagicMock()), SensorService)
+    assert isinstance(get_sensor_service(MagicMock(), MagicMock(user_roles=[])), SensorService)
 
 
 def test_get_sensor_type_service_factory_constructs_service():

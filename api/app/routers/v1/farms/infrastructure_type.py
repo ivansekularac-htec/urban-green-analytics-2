@@ -14,9 +14,14 @@ from app.schemas.farms.infrastructure_type import (
     InfrastructureTypeResponse,
     InfrastructureTypeUpdate,
 )
+from app.security.dependencies import get_current_active_user, require_admin
 from app.services.farms.infrastructure_type import InfrastructureTypeService
 
-router = APIRouter(prefix="/infrastructure-types", tags=["Infrastructure Types"])
+router = APIRouter(
+    prefix="/infrastructure-types",
+    tags=["Infrastructure Types"],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 def get_infrastructure_type_service(db: DatabaseSession) -> InfrastructureTypeService:
@@ -49,6 +54,7 @@ def get_infrastructure_type(
     "",
     response_model=InfrastructureTypeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
 )
 def create_infrastructure_type(
     payload: InfrastructureTypeCreate,
@@ -58,7 +64,11 @@ def create_infrastructure_type(
     return service.create(payload)
 
 
-@router.put("/{infrastructure_type_id}", response_model=InfrastructureTypeResponse)
+@router.put(
+    "/{infrastructure_type_id}",
+    response_model=InfrastructureTypeResponse,
+    dependencies=[Depends(require_admin)],
+)
 def update_infrastructure_type(
     infrastructure_type_id: int,
     payload: InfrastructureTypeUpdate,
@@ -68,7 +78,11 @@ def update_infrastructure_type(
     return service.update(infrastructure_type_id, payload)
 
 
-@router.delete("/{infrastructure_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{infrastructure_type_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,

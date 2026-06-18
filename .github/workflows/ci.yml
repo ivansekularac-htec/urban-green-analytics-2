@@ -20,6 +20,10 @@ jobs:
       POSTGRES_PORT: 5432
       POSTGRES_DB: test
       POSTGRES_SCHEMA: app
+      JWT_SECRET_KEY: test-secret-key-not-for-production
+      SUPERUSER_EMAIL: admin@test.com
+      SUPERUSER_PASSWORD: superuser-test-password
+      SUPERUSER_FULL_NAME: Administrator
 
     steps:
       # 1. Check out your repository code

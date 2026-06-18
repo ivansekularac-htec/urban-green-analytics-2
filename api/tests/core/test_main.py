@@ -16,11 +16,13 @@ def test_root_endpoint_returns_status_message():
     assert response.json() == {"message": "Urban Green API is running"}
 
 
-def test_lifespan_verifies_database_connection_on_startup():
+def test_lifespan_runs_startup_hooks():
     with (
         patch("app.main.verify_database_connection") as verify,
+        patch("app.main.ensure_superuser") as seed,
         TestClient(app),
     ):
         pass
 
     verify.assert_called_once()
+    seed.assert_called_once()

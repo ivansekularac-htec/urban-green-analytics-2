@@ -10,9 +10,10 @@ from app.database import DatabaseSession
 from app.repositories.users.role import RoleRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.users.role import RoleCreate, RoleResponse, RoleUpdate
+from app.security.dependencies import require_admin
 from app.services.users.role import RoleService
 
-router = APIRouter(prefix="/roles", tags=["Roles"])
+router = APIRouter(prefix="/roles", tags=["Roles"], dependencies=[Depends(require_admin)])
 
 
 def get_role_service(db: DatabaseSession) -> RoleService:

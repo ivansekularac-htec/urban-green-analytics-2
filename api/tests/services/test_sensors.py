@@ -7,7 +7,7 @@ from app.services.sensors.sensor_type import SensorTypeService
 
 
 def test_sensor_service_uses_expected_entity_name():
-    assert SensorService(MagicMock()).entity_name == "Sensor"
+    assert SensorService(MagicMock(), MagicMock(user_roles=[])).entity_name == "Sensor"
 
 
 def test_sensor_type_service_uses_expected_entity_name():

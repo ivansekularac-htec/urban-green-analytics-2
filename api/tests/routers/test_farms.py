@@ -51,7 +51,7 @@ def test_crud_endpoints(client, service, case):
 
 
 def test_get_farm_service_factory_constructs_service():
-    assert isinstance(get_farm_service(MagicMock()), FarmService)
+    assert isinstance(get_farm_service(MagicMock(), MagicMock(user_roles=[])), FarmService)
 
 
 def test_get_infrastructure_type_service_factory_constructs_service():

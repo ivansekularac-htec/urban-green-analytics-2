@@ -14,9 +14,14 @@ from app.schemas.sensors.sensor_type import (
     SensorTypeResponse,
     SensorTypeUpdate,
 )
+from app.security.dependencies import get_current_active_user, require_admin
 from app.services.sensors.sensor_type import SensorTypeService
 
-router = APIRouter(prefix="/sensor-types", tags=["Sensor Types"])
+router = APIRouter(
+    prefix="/sensor-types",
+    tags=["Sensor Types"],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 def get_sensor_type_service(db: DatabaseSession) -> SensorTypeService:
@@ -39,24 +44,37 @@ def get_sensor_type(sensor_type_id: int, service: SensorTypeServiceDep):
     return service.get(sensor_type_id)
 
 
-@router.post("", response_model=SensorTypeResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=SensorTypeResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_sensor_type(payload: SensorTypeCreate, service: SensorTypeServiceDep):
-    """Create a sensor type record."""
+    """Create a sensor type record (Admin only)."""
     return service.create(payload)
 
 
-@router.put("/{sensor_type_id}", response_model=SensorTypeResponse)
+@router.put(
+    "/{sensor_type_id}",
+    response_model=SensorTypeResponse,
+    dependencies=[Depends(require_admin)],
+)
 def update_sensor_type(
     sensor_type_id: int,
     payload: SensorTypeUpdate,
     service: SensorTypeServiceDep,
 ):
-    """Update a sensor type record by ID."""
+    """Update a sensor type record by ID (Admin only)."""
     return service.update(sensor_type_id, payload)
 
 
-@router.delete("/{sensor_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{sensor_type_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_sensor_type(sensor_type_id: int, service: SensorTypeServiceDep):
-    """Delete a sensor type record by ID."""
+    """Delete a sensor type record by ID (Admin only)."""
     service.delete(sensor_type_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

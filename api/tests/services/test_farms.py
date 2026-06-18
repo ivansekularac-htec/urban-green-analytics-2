@@ -8,7 +8,7 @@ from app.services.farms.infrastructure_type import InfrastructureTypeService
 
 
 def test_farm_service_uses_expected_entity_name():
-    assert FarmService(MagicMock()).entity_name == "Farm"
+    assert FarmService(MagicMock(), MagicMock(user_roles=[])).entity_name == "Farm"
 
 
 def test_growing_system_type_service_uses_expected_entity_name():

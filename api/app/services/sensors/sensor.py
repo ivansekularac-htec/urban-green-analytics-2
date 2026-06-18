@@ -3,15 +3,16 @@ Sensor service.
 """
 
 from app.models.sensors.sensor import Sensor
+from app.models.users.user import User
 from app.repositories.sensors.sensor import SensorRepository
 from app.schemas.sensors.sensor import SensorCreate, SensorUpdate
-from app.services.base_service import BaseService
+from app.services.scoped_service import ScopedService
 
 
-class SensorService(BaseService[Sensor, SensorCreate, SensorUpdate]):
+class SensorService(ScopedService[Sensor, SensorCreate, SensorUpdate]):
     """
     Service for Sensor business logic.
     """
 
-    def __init__(self, repository: SensorRepository):
-        super().__init__(repository, "Sensor")
+    def __init__(self, repository: SensorRepository, current_user: User):
+        super().__init__(repository, "Sensor", current_user)

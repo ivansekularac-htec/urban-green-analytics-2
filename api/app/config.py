@@ -26,6 +26,21 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_schema: str
 
+    # ------------------------------------------------------
+    # Authentication / JWT
+    # ------------------------------------------------------
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+
+    # ------------------------------------------------------
+    # Superuser (seeded on startup)
+    # ------------------------------------------------------
+    superuser_email: str
+    superuser_password: str
+    superuser_full_name: str
+
     @property
     def database_url(self) -> str:
         """Build the PostgreSQL database connection URL.

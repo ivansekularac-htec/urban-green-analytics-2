@@ -8,12 +8,25 @@ behaviour is covered separately in ``tests/services``.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.security.dependencies import get_current_active_user
+
+# A global Admin user used to satisfy authentication/RBAC on protected routes.
+# Admins bypass role and farm-scope checks, so existing CRUD router tests pass
+# unchanged. Tests that exercise auth behaviour override or clear this.
+_ADMIN_USER = SimpleNamespace(
+    id=1,
+    email="admin@test",
+    full_name="Admin",
+    is_active=True,
+    user_roles=[SimpleNamespace(role=SimpleNamespace(name="Admin"), farm_id=None)],
+)
 
 
 @dataclass
@@ -39,6 +52,7 @@ def service() -> MagicMock:
 
 @pytest.fixture(autouse=True)
 def _reset_dependency_overrides():
+    app.dependency_overrides[get_current_active_user] = lambda: _ADMIN_USER
     yield
     app.dependency_overrides.clear()
 
