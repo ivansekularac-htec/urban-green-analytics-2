@@ -23,12 +23,15 @@ def get_sensor_service(db: DatabaseSession) -> SensorService:
 
 SensorServiceDep = Annotated[SensorService, Depends(get_sensor_service)]
 
+admin_operations_farm_manager_dep = Depends(require_roles("admin", "operations", "farm manager"))
+admin_only_dep = Depends(require_roles("admin"))
+
 
 @router.get("", response_model=list[SensorResponse])
 def list_sensors(
     service: SensorServiceDep,
     pagination: PaginationDep,
-    user: dict = Depends(require_roles("admin", "operations", "farm manager")),
+    user: dict = admin_operations_farm_manager_dep,
 ):
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -43,7 +46,7 @@ def get_sensor(sensor_id: int, service: SensorServiceDep):
 def create_sensor(
     payload: SensorCreate,
     service: SensorServiceDep,
-    user: dict = Depends(require_roles("admin")),
+    user: dict = admin_only_dep,
 ):
     return service.create(payload)
 

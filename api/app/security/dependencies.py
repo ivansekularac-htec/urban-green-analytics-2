@@ -23,13 +23,16 @@ def get_current_user_payload(token: str = Depends(oauth2_scheme)) -> dict:
     return payload
 
 
+current_user_payload_dep = Depends(get_current_user_payload)
+
+
 def require_roles(*allowed_roles: str) -> Callable:
     """
     Require at least one of the allowed roles from JWT payload.
     Admin is always allowed.
     """
 
-    def dependency(payload: dict = Depends(get_current_user_payload)) -> dict:
+    def dependency(payload: dict = current_user_payload_dep) -> dict:
         user_roles = [role.lower() for role in payload.get("roles", [])]
         normalized_allowed_roles = [role.lower() for role in allowed_roles]
 

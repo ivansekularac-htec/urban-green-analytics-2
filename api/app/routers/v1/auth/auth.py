@@ -16,11 +16,14 @@ from app.security.password import verify_password
 
 router = APIRouter(tags=["Auth"])
 
+oauth2_form = Depends(OAuth2PasswordRequestForm)
+db_dep = Depends(get_db)
+
 
 @router.post("/login", response_model=TokenResponse)
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = oauth2_form,
+    db: Session = db_dep,
 ) -> TokenResponse:
     """
     Authenticate user and return JWT access token.

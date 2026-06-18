@@ -23,12 +23,14 @@ def get_user_service(db: DatabaseSession) -> UserService:
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
+admin_only_dep = Depends(require_roles("admin"))
+
 
 @router.get("", response_model=list[UserResponse])
 def list_users(
     service: UserServiceDep,
     pagination: PaginationDep,
-    admin_user: dict = Depends(require_roles("admin")),
+    admin_user: dict = admin_only_dep,
 ):
     """List user records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
@@ -38,7 +40,7 @@ def list_users(
 def get_user(
     user_id: int,
     service: UserServiceDep,
-    admin_user: dict = Depends(require_roles("admin")),
+    admin_user: dict = admin_only_dep,
 ):
     """Get a user record by ID."""
     return service.get(user_id)
@@ -48,7 +50,7 @@ def get_user(
 def create_user(
     payload: UserCreate,
     service: UserServiceDep,
-    admin_user: dict = Depends(require_roles("admin")),
+    admin_user: dict = admin_only_dep,
 ):
     """Create a user record."""
     return service.create(payload)
@@ -59,7 +61,7 @@ def update_user(
     user_id: int,
     payload: UserUpdate,
     service: UserServiceDep,
-    admin_user: dict = Depends(require_roles("admin")),
+    admin_user: dict = admin_only_dep,
 ):
     """Update a user record by ID."""
     return service.update(user_id, payload)
@@ -69,7 +71,7 @@ def update_user(
 def delete_user(
     user_id: int,
     service: UserServiceDep,
-    admin_user: dict = Depends(require_roles("admin")),
+    admin_user: dict = admin_only_dep,
 ):
     """Delete a user record by ID."""
     service.delete(user_id)

@@ -23,12 +23,15 @@ def get_harvest_service(db: DatabaseSession) -> HarvestService:
 
 HarvestServiceDep = Annotated[HarvestService, Depends(get_harvest_service)]
 
+admin_operations_farm_manager_dep = Depends(require_roles("admin", "operations", "farm manager"))
+admin_operations_dep = Depends(require_roles("admin", "operations"))
+
 
 @router.get("", response_model=list[HarvestResponse])
 def list_harvests(
     service: HarvestServiceDep,
     pagination: PaginationDep,
-    user: dict = Depends(require_roles("admin", "operations", "farm manager")),
+    user: dict = admin_operations_farm_manager_dep,
 ):
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -43,7 +46,7 @@ def get_harvest(harvest_id: int, service: HarvestServiceDep):
 def create_harvest(
     payload: HarvestCreate,
     service: HarvestServiceDep,
-    user: dict = Depends(require_roles("admin", "operations")),
+    user: dict = admin_operations_dep,
 ):
     return service.create(payload)
 

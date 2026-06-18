@@ -23,12 +23,15 @@ def get_farm_service(db: DatabaseSession) -> FarmService:
 
 FarmServiceDep = Annotated[FarmService, Depends(get_farm_service)]
 
+admin_or_farm_manager_dep = Depends(require_roles("admin", "farm manager"))
+admin_only_dep = Depends(require_roles("admin"))
+
 
 @router.get("", response_model=list[FarmResponse])
 def list_farms(
     service: FarmServiceDep,
     pagination: PaginationDep,
-    user: dict = Depends(require_roles("admin", "farm manager")),
+    user: dict = admin_or_farm_manager_dep,
 ):
     """List farm records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
@@ -38,7 +41,7 @@ def list_farms(
 def get_farm(
     farm_id: int,
     service: FarmServiceDep,
-    user: dict = Depends(require_roles("admin", "farm manager")),
+    user: dict = admin_or_farm_manager_dep,
 ):
     """Get a farm record by ID."""
     return service.get(farm_id)
@@ -48,7 +51,7 @@ def get_farm(
 def create_farm(
     payload: FarmCreate,
     service: FarmServiceDep,
-    user: dict = Depends(require_roles("admin")),
+    user: dict = admin_only_dep,
 ):
     """Create a farm record."""
     return service.create(payload)
@@ -59,7 +62,7 @@ def update_farm(
     farm_id: int,
     payload: FarmUpdate,
     service: FarmServiceDep,
-    user: dict = Depends(require_roles("admin")),
+    user: dict = admin_only_dep,
 ):
     """Update a farm record by ID."""
     return service.update(farm_id, payload)
@@ -69,7 +72,7 @@ def update_farm(
 def delete_farm(
     farm_id: int,
     service: FarmServiceDep,
-    user: dict = Depends(require_roles("admin")),
+    user: dict = admin_only_dep,
 ):
     """Delete a farm record by ID."""
     service.delete(farm_id)
