@@ -1,0 +1,40 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+
+from app.database import DatabaseSession
+from app.repositories.users.user import UserRepository
+from app.schemas.auth import LoginRequest, TokenResponse
+from app.services.auth import AuthService
+
+
+def get_auth_service(
+    db: DatabaseSession,
+) -> AuthService:
+    return AuthService(
+        UserRepository(db),
+    )
+
+
+AuthServiceDep = Annotated[
+    AuthService,
+    Depends(get_auth_service),
+]
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"],
+)
+
+
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+)
+def login(
+    payload: LoginRequest,
+    service: AuthServiceDep,
+):
+    return TokenResponse(
+        access_token=service.login(payload),
+    )

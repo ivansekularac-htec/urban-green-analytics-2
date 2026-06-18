@@ -19,3 +19,33 @@ def hash_password(password: str) -> str:
     ).hex()
 
     return f"pbkdf2_sha256${salt}${password_hash}"
+
+
+def verify_password(
+    plain_password: str,
+    stored_password: str,
+) -> bool:
+    """
+    Verify a plain-text password against a stored hash.
+    """
+
+    try:
+        algorithm, salt, password_hash = stored_password.split("$")
+
+        if algorithm != "pbkdf2_sha256":
+            return False
+
+        computed_hash = hashlib.pbkdf2_hmac(
+            "sha256",
+            plain_password.encode("utf-8"),
+            salt.encode("utf-8"),
+            100_000,
+        ).hex()
+
+        return secrets.compare_digest(
+            computed_hash,
+            password_hash,
+        )
+
+    except ValueError:
+        return False
