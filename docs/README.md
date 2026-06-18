@@ -11,7 +11,7 @@ cd api
 ### 2. Create the virtual environment and install dependencies
 
 ```bash
-uv sync --extra dev
+uv sync --group dev
 ```
 
 This creates a local `.venv/` directory and installs dependencies from `pyproject.toml`, including development
