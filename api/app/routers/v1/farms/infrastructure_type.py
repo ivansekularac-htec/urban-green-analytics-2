@@ -14,9 +14,30 @@ from app.schemas.farms.infrastructure_type import (
     InfrastructureTypeResponse,
     InfrastructureTypeUpdate,
 )
+from app.security.rbac import require_roles
 from app.services.farms.infrastructure_type import InfrastructureTypeService
 
 router = APIRouter(prefix="/infrastructure-types", tags=["Infrastructure Types"])
+
+ReadDep = Annotated[
+    object,
+    Depends(
+        require_roles(
+            "Admin",
+            "Operations",
+            "Farm Manager",
+        )
+    ),
+]
+
+AdminDep = Annotated[
+    object,
+    Depends(
+        require_roles(
+            "Admin",
+        )
+    ),
+]
 
 
 def get_infrastructure_type_service(db: DatabaseSession) -> InfrastructureTypeService:
@@ -31,7 +52,11 @@ InfrastructureTypeServiceDep = Annotated[
 
 
 @router.get("", response_model=list[InfrastructureTypeResponse])
-def list_infrastructure_types(service: InfrastructureTypeServiceDep, pagination: PaginationDep):
+def list_infrastructure_types(
+    service: InfrastructureTypeServiceDep,
+    _: ReadDep,
+    pagination: PaginationDep,
+):
     """List infrastructure type records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -39,20 +64,18 @@ def list_infrastructure_types(service: InfrastructureTypeServiceDep, pagination:
 @router.get("/{infrastructure_type_id}", response_model=InfrastructureTypeResponse)
 def get_infrastructure_type(
     infrastructure_type_id: int,
+    _: ReadDep,
     service: InfrastructureTypeServiceDep,
 ):
     """Get an infrastructure type record by ID."""
     return service.get(infrastructure_type_id)
 
 
-@router.post(
-    "",
-    response_model=InfrastructureTypeResponse,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("", response_model=InfrastructureTypeResponse, status_code=status.HTTP_201_CREATED)
 def create_infrastructure_type(
     payload: InfrastructureTypeCreate,
     service: InfrastructureTypeServiceDep,
+    _: AdminDep,
 ):
     """Create an infrastructure type record."""
     return service.create(payload)
@@ -63,6 +86,7 @@ def update_infrastructure_type(
     infrastructure_type_id: int,
     payload: InfrastructureTypeUpdate,
     service: InfrastructureTypeServiceDep,
+    _: AdminDep,
 ):
     """Update an infrastructure type record by ID."""
     return service.update(infrastructure_type_id, payload)
@@ -72,6 +96,7 @@ def update_infrastructure_type(
 def delete_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,
+    _: AdminDep,
 ):
     """Delete an infrastructure type record by ID."""
     service.delete(infrastructure_type_id)

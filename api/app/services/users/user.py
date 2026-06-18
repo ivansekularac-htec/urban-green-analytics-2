@@ -57,3 +57,6 @@ class UserService(BaseService[User, UserCreate, UserUpdate]):
             return user
         except IntegrityError as exc:
             self._raise_integrity_conflict(exc)
+
+    def get_by_email(self, email: str):
+        return self.repository.get_by_email(email)

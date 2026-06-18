@@ -14,6 +14,7 @@ from app.schemas.farms.growing_system_type import (
     GrowingSystemTypeResponse,
     GrowingSystemTypeUpdate,
 )
+from app.security.rbac import require_roles
 from app.services.farms.growing_system_type import GrowingSystemTypeService
 
 router = APIRouter(prefix="/growing-system-types", tags=["Growing System Types"])
@@ -29,9 +30,33 @@ GrowingSystemTypeServiceDep = Annotated[
     Depends(get_growing_system_type_service),
 ]
 
+ReadDep = Annotated[
+    object,
+    Depends(
+        require_roles(
+            "Admin",
+            "Operations",
+            "Farm Manager",
+        )
+    ),
+]
+
+AdminDep = Annotated[
+    object,
+    Depends(
+        require_roles(
+            "Admin",
+        )
+    ),
+]
+
 
 @router.get("", response_model=list[GrowingSystemTypeResponse])
-def list_growing_system_types(service: GrowingSystemTypeServiceDep, pagination: PaginationDep):
+def list_growing_system_types(
+    service: GrowingSystemTypeServiceDep,
+    _: ReadDep,
+    pagination: PaginationDep,
+):
     """List growing system type records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -39,6 +64,7 @@ def list_growing_system_types(service: GrowingSystemTypeServiceDep, pagination: 
 @router.get("/{growing_system_type_id}", response_model=GrowingSystemTypeResponse)
 def get_growing_system_type(
     growing_system_type_id: int,
+    _: ReadDep,
     service: GrowingSystemTypeServiceDep,
 ):
     """Get a growing system type record by ID."""
@@ -53,6 +79,7 @@ def get_growing_system_type(
 def create_growing_system_type(
     payload: GrowingSystemTypeCreate,
     service: GrowingSystemTypeServiceDep,
+    _: AdminDep,
 ):
     """Create a growing system type record."""
     return service.create(payload)
@@ -63,6 +90,7 @@ def update_growing_system_type(
     growing_system_type_id: int,
     payload: GrowingSystemTypeUpdate,
     service: GrowingSystemTypeServiceDep,
+    _: AdminDep,
 ):
     """Update a growing system type record by ID."""
     return service.update(growing_system_type_id, payload)
@@ -72,6 +100,7 @@ def update_growing_system_type(
 def delete_growing_system_type(
     growing_system_type_id: int,
     service: GrowingSystemTypeServiceDep,
+    _: AdminDep,
 ):
     """Delete a growing system type record by ID."""
     service.delete(growing_system_type_id)

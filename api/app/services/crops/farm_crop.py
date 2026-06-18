@@ -15,3 +15,6 @@ class FarmCropService(BaseService[FarmCrop, FarmCropCreate, FarmCropUpdate]):
 
     def __init__(self, repository: FarmCropRepository):
         super().__init__(repository, "Farm crop")
+
+    def list_by_farm_ids(self, farm_ids: list[int], skip: int = 0, limit: int = 100):
+        return self.repository.list_by_farm_ids(farm_ids, skip, limit)

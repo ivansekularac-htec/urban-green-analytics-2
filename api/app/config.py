@@ -26,6 +26,16 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_schema: str
 
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    token_issuer: str = "urban-green-analytics-auth"
+    token_audience: str = "urban-green-analytics-api"
+
+    superuser_email: str
+    superuser_password: str
+    superuser_full_name: str
+
     @property
     def database_url(self) -> str:
         """Build the PostgreSQL database connection URL.

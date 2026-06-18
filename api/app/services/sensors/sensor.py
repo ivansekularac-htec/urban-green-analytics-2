@@ -15,3 +15,8 @@ class SensorService(BaseService[Sensor, SensorCreate, SensorUpdate]):
 
     def __init__(self, repository: SensorRepository):
         super().__init__(repository, "Sensor")
+
+    def list_by_farm_ids(
+        self, farm_ids: list[int], skip: int = 0, limit: int = 100
+    ) -> list[Sensor]:
+        return self.repository.list_by_farm(farm_ids, skip=skip, limit=limit)

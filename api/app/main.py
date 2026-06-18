@@ -11,7 +11,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database import settings, verify_database_connection
+from app.core.superuser import ensure_superuser
+from app.database import (
+    settings,
+    verify_database_connection,
+)
 from app.routers.v1.api import v1_router
 
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +27,7 @@ async def lifespan(app: FastAPI):
     """Run application startup and shutdown logic."""
 
     verify_database_connection()
+    ensure_superuser()
 
     yield
 
