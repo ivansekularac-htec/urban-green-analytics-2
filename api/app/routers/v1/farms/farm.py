@@ -10,6 +10,7 @@ from app.database import DatabaseSession
 from app.repositories.farms.farm import FarmRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.farms.farm import FarmCreate, FarmResponse, FarmUpdate
+from app.security.dependencies import require_roles
 from app.services.farms.farm import FarmService
 
 router = APIRouter(prefix="/farms", tags=["Farms"])
@@ -24,31 +25,52 @@ FarmServiceDep = Annotated[FarmService, Depends(get_farm_service)]
 
 
 @router.get("", response_model=list[FarmResponse])
-def list_farms(service: FarmServiceDep, pagination: PaginationDep):
+def list_farms(
+    service: FarmServiceDep,
+    pagination: PaginationDep,
+    user: dict = Depends(require_roles("admin", "farm manager")),
+):
     """List farm records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
 
 @router.get("/{farm_id}", response_model=FarmResponse)
-def get_farm(farm_id: int, service: FarmServiceDep):
+def get_farm(
+    farm_id: int,
+    service: FarmServiceDep,
+    user: dict = Depends(require_roles("admin", "farm manager")),
+):
     """Get a farm record by ID."""
     return service.get(farm_id)
 
 
 @router.post("", response_model=FarmResponse, status_code=status.HTTP_201_CREATED)
-def create_farm(payload: FarmCreate, service: FarmServiceDep):
+def create_farm(
+    payload: FarmCreate,
+    service: FarmServiceDep,
+    user: dict = Depends(require_roles("admin")),
+):
     """Create a farm record."""
     return service.create(payload)
 
 
 @router.put("/{farm_id}", response_model=FarmResponse)
-def update_farm(farm_id: int, payload: FarmUpdate, service: FarmServiceDep):
+def update_farm(
+    farm_id: int,
+    payload: FarmUpdate,
+    service: FarmServiceDep,
+    user: dict = Depends(require_roles("admin")),
+):
     """Update a farm record by ID."""
     return service.update(farm_id, payload)
 
 
 @router.delete("/{farm_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_farm(farm_id: int, service: FarmServiceDep):
+def delete_farm(
+    farm_id: int,
+    service: FarmServiceDep,
+    user: dict = Depends(require_roles("admin")),
+):
     """Delete a farm record by ID."""
     service.delete(farm_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

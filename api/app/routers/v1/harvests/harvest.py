@@ -10,6 +10,7 @@ from app.database import DatabaseSession
 from app.repositories.harvests.harvest import HarvestRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.harvests.harvest import HarvestCreate, HarvestResponse, HarvestUpdate
+from app.security.dependencies import require_roles
 from app.services.harvests.harvest import HarvestService
 
 router = APIRouter(prefix="/harvests", tags=["Harvests"])
@@ -24,8 +25,11 @@ HarvestServiceDep = Annotated[HarvestService, Depends(get_harvest_service)]
 
 
 @router.get("", response_model=list[HarvestResponse])
-def list_harvests(service: HarvestServiceDep, pagination: PaginationDep):
-    """List harvest records."""
+def list_harvests(
+    service: HarvestServiceDep,
+    pagination: PaginationDep,
+    user: dict = Depends(require_roles("admin", "operations", "farm manager")),
+):
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
 
@@ -36,8 +40,11 @@ def get_harvest(harvest_id: int, service: HarvestServiceDep):
 
 
 @router.post("", response_model=HarvestResponse, status_code=status.HTTP_201_CREATED)
-def create_harvest(payload: HarvestCreate, service: HarvestServiceDep):
-    """Create a harvest record."""
+def create_harvest(
+    payload: HarvestCreate,
+    service: HarvestServiceDep,
+    user: dict = Depends(require_roles("admin", "operations")),
+):
     return service.create(payload)
 
 

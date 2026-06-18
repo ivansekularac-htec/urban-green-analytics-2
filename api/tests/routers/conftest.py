@@ -14,6 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.security.dependencies import get_current_user_payload
 
 
 @dataclass
@@ -28,8 +29,18 @@ class RouteCase:
 
 
 @pytest.fixture
-def client() -> TestClient:
-    return TestClient(app)
+def client():
+    app.dependency_overrides[get_current_user_payload] = lambda: {
+        "sub": "1",
+        "email": "admin@example.com",
+        "roles": ["Admin"],
+        "farm_ids": [],
+    }
+
+    test_client = TestClient(app)
+    yield test_client
+
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

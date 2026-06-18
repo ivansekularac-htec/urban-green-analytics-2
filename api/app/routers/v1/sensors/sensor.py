@@ -10,6 +10,7 @@ from app.database import DatabaseSession
 from app.repositories.sensors.sensor import SensorRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.sensors.sensor import SensorCreate, SensorResponse, SensorUpdate
+from app.security.dependencies import require_roles
 from app.services.sensors.sensor import SensorService
 
 router = APIRouter(prefix="/sensors", tags=["Sensors"])
@@ -24,8 +25,11 @@ SensorServiceDep = Annotated[SensorService, Depends(get_sensor_service)]
 
 
 @router.get("", response_model=list[SensorResponse])
-def list_sensors(service: SensorServiceDep, pagination: PaginationDep):
-    """List sensor records."""
+def list_sensors(
+    service: SensorServiceDep,
+    pagination: PaginationDep,
+    user: dict = Depends(require_roles("admin", "operations", "farm manager")),
+):
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
 
@@ -36,8 +40,11 @@ def get_sensor(sensor_id: int, service: SensorServiceDep):
 
 
 @router.post("", response_model=SensorResponse, status_code=status.HTTP_201_CREATED)
-def create_sensor(payload: SensorCreate, service: SensorServiceDep):
-    """Create a sensor record."""
+def create_sensor(
+    payload: SensorCreate,
+    service: SensorServiceDep,
+    user: dict = Depends(require_roles("admin")),
+):
     return service.create(payload)
 
 
