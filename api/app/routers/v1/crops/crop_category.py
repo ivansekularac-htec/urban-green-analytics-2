@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Response, status
 
 from app.database import DatabaseSession
+from app.dependencies.auth import AdminUserDep, AuthenticatedUserDep
 from app.repositories.crops.crop_category import CropCategoryRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.crops.crop_category import (
@@ -28,19 +29,25 @@ CropCategoryServiceDep = Annotated[CropCategoryService, Depends(get_crop_categor
 
 
 @router.get("", response_model=list[CropCategoryResponse])
-def list_crop_categories(service: CropCategoryServiceDep, pagination: PaginationDep):
+def list_crop_categories(
+    service: CropCategoryServiceDep, pagination: PaginationDep, current_user: AuthenticatedUserDep
+):
     """List crop category records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
 
 @router.get("/{crop_category_id}", response_model=CropCategoryResponse)
-def get_crop_category(crop_category_id: int, service: CropCategoryServiceDep):
+def get_crop_category(
+    crop_category_id: int, service: CropCategoryServiceDep, current_user: AuthenticatedUserDep
+):
     """Get a crop category record by ID."""
     return service.get(crop_category_id)
 
 
 @router.post("", response_model=CropCategoryResponse, status_code=status.HTTP_201_CREATED)
-def create_crop_category(payload: CropCategoryCreate, service: CropCategoryServiceDep):
+def create_crop_category(
+    payload: CropCategoryCreate, service: CropCategoryServiceDep, current_user: AdminUserDep
+):
     """Create a crop category record."""
     return service.create(payload)
 
@@ -50,13 +57,16 @@ def update_crop_category(
     crop_category_id: int,
     payload: CropCategoryUpdate,
     service: CropCategoryServiceDep,
+    current_user: AdminUserDep,
 ):
     """Update a crop category record by ID."""
     return service.update(crop_category_id, payload)
 
 
 @router.delete("/{crop_category_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_crop_category(crop_category_id: int, service: CropCategoryServiceDep):
+def delete_crop_category(
+    crop_category_id: int, service: CropCategoryServiceDep, current_user: AdminUserDep
+):
     """Delete a crop category record by ID."""
     service.delete(crop_category_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

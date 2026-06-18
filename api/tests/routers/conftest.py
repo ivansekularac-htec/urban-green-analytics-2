@@ -13,6 +13,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
+from app.dependencies.auth import get_current_user
 from app.main import app
 
 
@@ -41,6 +42,32 @@ def service() -> MagicMock:
 def _reset_dependency_overrides():
     yield
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def admin_user():
+    user = MagicMock()
+    user.is_active = True
+
+    admin_role = MagicMock()
+    admin_role.name = "Admin"
+
+    user_role = MagicMock()
+    user_role.role = admin_role
+    user_role.farm_id = None
+
+    user.user_roles = [user_role]
+
+    return user
+
+
+@pytest.fixture(autouse=True)
+def override_auth(admin_user):
+    app.dependency_overrides[get_current_user] = lambda: admin_user
+
+    yield
+
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def assert_crud_endpoints(client: TestClient, service: MagicMock, case: RouteCase):

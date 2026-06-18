@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Response, status
 
 from app.database import DatabaseSession
+from app.dependencies.auth import AdminUserDep, AuthenticatedUserDep
 from app.repositories.farms.infrastructure_type import InfrastructureTypeRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.farms.infrastructure_type import (
@@ -31,7 +32,11 @@ InfrastructureTypeServiceDep = Annotated[
 
 
 @router.get("", response_model=list[InfrastructureTypeResponse])
-def list_infrastructure_types(service: InfrastructureTypeServiceDep, pagination: PaginationDep):
+def list_infrastructure_types(
+    service: InfrastructureTypeServiceDep,
+    pagination: PaginationDep,
+    current_user: AuthenticatedUserDep,
+):
     """List infrastructure type records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -40,6 +45,7 @@ def list_infrastructure_types(service: InfrastructureTypeServiceDep, pagination:
 def get_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,
+    current_user: AuthenticatedUserDep,
 ):
     """Get an infrastructure type record by ID."""
     return service.get(infrastructure_type_id)
@@ -53,6 +59,7 @@ def get_infrastructure_type(
 def create_infrastructure_type(
     payload: InfrastructureTypeCreate,
     service: InfrastructureTypeServiceDep,
+    current_user: AdminUserDep,
 ):
     """Create an infrastructure type record."""
     return service.create(payload)
@@ -63,6 +70,7 @@ def update_infrastructure_type(
     infrastructure_type_id: int,
     payload: InfrastructureTypeUpdate,
     service: InfrastructureTypeServiceDep,
+    current_user: AdminUserDep,
 ):
     """Update an infrastructure type record by ID."""
     return service.update(infrastructure_type_id, payload)
@@ -72,6 +80,7 @@ def update_infrastructure_type(
 def delete_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,
+    current_user: AdminUserDep,
 ):
     """Delete an infrastructure type record by ID."""
     service.delete(infrastructure_type_id)

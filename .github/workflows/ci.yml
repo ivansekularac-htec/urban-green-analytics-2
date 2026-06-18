@@ -20,6 +20,14 @@ jobs:
       POSTGRES_PORT: 5432
       POSTGRES_DB: test
       POSTGRES_SCHEMA: app
+      JWT_SECRET_KEY : test
+      JWT_ALGORITHM : test
+      ACCESS_TOKEN_EXPIRE_MINUTES : 30
+      REFRESH_TOKEN_EXPIRE_MINUTES : 10080
+
+      SUPERUSER_EMAIL : test
+      SUPERUSER_PASSWORD : test
+      SUPERUSER_FULL_NAME : test
 
     steps:
       # 1. Check out your repository code

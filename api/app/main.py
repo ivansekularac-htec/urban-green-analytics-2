@@ -13,6 +13,7 @@ from fastapi import FastAPI
 
 from app.database import settings, verify_database_connection
 from app.routers.v1.api import v1_router
+from app.services.superuser_service import ensure_superuser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ async def lifespan(app: FastAPI):
     """Run application startup and shutdown logic."""
 
     verify_database_connection()
+    ensure_superuser()
 
     yield
 

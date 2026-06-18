@@ -15,3 +15,16 @@ class HarvestService(BaseService[Harvest, HarvestCreate, HarvestUpdate]):
 
     def __init__(self, repository: HarvestRepository):
         super().__init__(repository, "Harvest")
+
+    def list_by_farm_ids(
+        self,
+        farm_ids: list[int],
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[Harvest]:
+        """Return harvests that belong to the provided farm IDs."""
+        return self.repository.list_by_farm_ids(
+            farm_ids=farm_ids,
+            skip=skip,
+            limit=limit,
+        )
