@@ -47,5 +47,12 @@ indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "httpx>=0.28.0",
+]
+
 [dependency-groups]
 dev = ["httpx2>=2.4.0", "pytest>=9.0.3", "pytest-cov>=7.1.0"]
