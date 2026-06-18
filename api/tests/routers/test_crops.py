@@ -33,6 +33,7 @@ CASES = [
         dependency=get_farm_crop_service,
         create_payload={"farm_id": 1, "crop_id": 1, "started_at": 1, "ended_at": 2},
         update_payload={"ended_at": 5},
+        scoped=True,
     ),
 ]
 

@@ -1,5 +1,7 @@
 """
 Infrastructure type API routes.
+
+Reference data — readable by any authenticated user; only Admin can write.
 """
 
 from typing import Annotated
@@ -14,9 +16,15 @@ from app.schemas.farms.infrastructure_type import (
     InfrastructureTypeResponse,
     InfrastructureTypeUpdate,
 )
+from app.security.dependencies import get_current_user, require_roles
+from app.security.roles import RoleName
 from app.services.farms.infrastructure_type import InfrastructureTypeService
 
-router = APIRouter(prefix="/infrastructure-types", tags=["Infrastructure Types"])
+router = APIRouter(
+    prefix="/infrastructure-types",
+    tags=["Infrastructure Types"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def get_infrastructure_type_service(db: DatabaseSession) -> InfrastructureTypeService:
@@ -49,30 +57,39 @@ def get_infrastructure_type(
     "",
     response_model=InfrastructureTypeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
 )
 def create_infrastructure_type(
     payload: InfrastructureTypeCreate,
     service: InfrastructureTypeServiceDep,
 ):
-    """Create an infrastructure type record."""
+    """Create an infrastructure type record (Admin only)."""
     return service.create(payload)
 
 
-@router.put("/{infrastructure_type_id}", response_model=InfrastructureTypeResponse)
+@router.put(
+    "/{infrastructure_type_id}",
+    response_model=InfrastructureTypeResponse,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def update_infrastructure_type(
     infrastructure_type_id: int,
     payload: InfrastructureTypeUpdate,
     service: InfrastructureTypeServiceDep,
 ):
-    """Update an infrastructure type record by ID."""
+    """Update an infrastructure type record by ID (Admin only)."""
     return service.update(infrastructure_type_id, payload)
 
 
-@router.delete("/{infrastructure_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{infrastructure_type_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def delete_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,
 ):
-    """Delete an infrastructure type record by ID."""
+    """Delete an infrastructure type record by ID (Admin only)."""
     service.delete(infrastructure_type_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

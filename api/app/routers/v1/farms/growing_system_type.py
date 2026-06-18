@@ -1,5 +1,7 @@
 """
 Growing system type API routes.
+
+Reference data — readable by any authenticated user; only Admin can write.
 """
 
 from typing import Annotated
@@ -14,9 +16,15 @@ from app.schemas.farms.growing_system_type import (
     GrowingSystemTypeResponse,
     GrowingSystemTypeUpdate,
 )
+from app.security.dependencies import get_current_user, require_roles
+from app.security.roles import RoleName
 from app.services.farms.growing_system_type import GrowingSystemTypeService
 
-router = APIRouter(prefix="/growing-system-types", tags=["Growing System Types"])
+router = APIRouter(
+    prefix="/growing-system-types",
+    tags=["Growing System Types"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def get_growing_system_type_service(db: DatabaseSession) -> GrowingSystemTypeService:
@@ -49,30 +57,39 @@ def get_growing_system_type(
     "",
     response_model=GrowingSystemTypeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
 )
 def create_growing_system_type(
     payload: GrowingSystemTypeCreate,
     service: GrowingSystemTypeServiceDep,
 ):
-    """Create a growing system type record."""
+    """Create a growing system type record (Admin only)."""
     return service.create(payload)
 
 
-@router.put("/{growing_system_type_id}", response_model=GrowingSystemTypeResponse)
+@router.put(
+    "/{growing_system_type_id}",
+    response_model=GrowingSystemTypeResponse,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def update_growing_system_type(
     growing_system_type_id: int,
     payload: GrowingSystemTypeUpdate,
     service: GrowingSystemTypeServiceDep,
 ):
-    """Update a growing system type record by ID."""
+    """Update a growing system type record by ID (Admin only)."""
     return service.update(growing_system_type_id, payload)
 
 
-@router.delete("/{growing_system_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{growing_system_type_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def delete_growing_system_type(
     growing_system_type_id: int,
     service: GrowingSystemTypeServiceDep,
 ):
-    """Delete a growing system type record by ID."""
+    """Delete a growing system type record by ID (Admin only)."""
     service.delete(growing_system_type_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

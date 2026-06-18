@@ -13,3 +13,11 @@ os.environ.setdefault("POSTGRES_HOST", "localhost")
 os.environ.setdefault("POSTGRES_PORT", "5432")
 os.environ.setdefault("POSTGRES_DB", "test")
 os.environ.setdefault("POSTGRES_SCHEMA", "app")
+
+os.environ.setdefault("JWT_SECRET", "test-secret-not-for-production-but-long-enough")
+os.environ.setdefault("JWT_ALGORITHM", "HS256")
+os.environ.setdefault("JWT_EXPIRES_MINUTES", "60")
+
+os.environ.setdefault("SUPERUSER_EMAIL", "admin@example.com")
+os.environ.setdefault("SUPERUSER_PASSWORD", "test-admin-password")
+os.environ.setdefault("SUPERUSER_FULL_NAME", "Test Administrator")
