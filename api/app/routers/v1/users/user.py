@@ -10,9 +10,10 @@ from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
+from app.security.dependencies import require_admin
 from app.services.users.user import UserService
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(require_admin())])
 
 
 def get_user_service(db: DatabaseSession) -> UserService:

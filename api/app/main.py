@@ -11,8 +11,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database import settings, verify_database_connection
+from app.database import SessionLocal, settings, verify_database_connection
 from app.routers.v1.api import v1_router
+from app.services.users.bootstrap import ensure_superuser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,6 +25,12 @@ async def lifespan(app: FastAPI):
 
     verify_database_connection()
 
+    db = SessionLocal()
+    try:
+        ensure_superuser(db, settings)
+    finally:
+        db.close()
+
     yield
 
 
@@ -33,6 +40,7 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
 
 app.include_router(v1_router, prefix=settings.api_v1_prefix)
 

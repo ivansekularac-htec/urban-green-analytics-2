@@ -14,6 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.routers.v1.auth.auth import get_auth_service
 
 
 @dataclass
@@ -41,6 +42,13 @@ def service() -> MagicMock:
 def _reset_dependency_overrides():
     yield
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def auth_service():
+    service = MagicMock()
+    app.dependency_overrides[get_auth_service] = lambda: service
+    return service
 
 
 def assert_crud_endpoints(client: TestClient, service: MagicMock, case: RouteCase):

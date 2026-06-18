@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str
     postgres_schema: str
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 15
+    jwt_refresh_token_expire_minutes: int = 10080
+    superuser_email: str | None = None
+    superuser_password: str | None = None
+    superuser_full_name: str = "System Administrator"
 
     @property
     def database_url(self) -> str:

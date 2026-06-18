@@ -4,6 +4,7 @@ Central API router registration.
 
 from fastapi import APIRouter
 
+from app.routers.v1.auth.auth import router as auth_router
 from app.routers.v1.crops.crop import router as crops_router
 from app.routers.v1.crops.crop_category import router as crop_categories_router
 from app.routers.v1.crops.farm_crop import router as farm_crops_router
@@ -19,6 +20,8 @@ from app.routers.v1.users.user import router as users_router
 from app.routers.v1.users.user_role import router as user_roles_router
 
 v1_router = APIRouter()
+
+v1_router.include_router(auth_router)
 
 v1_router.include_router(farms_router)
 v1_router.include_router(infrastructure_types_router)
