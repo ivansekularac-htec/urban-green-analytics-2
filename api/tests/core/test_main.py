@@ -19,8 +19,10 @@ def test_root_endpoint_returns_status_message():
 def test_lifespan_verifies_database_connection_on_startup():
     with (
         patch("app.main.verify_database_connection") as verify,
+        patch("app.main.ensure_superuser") as ensure_superuser,
         TestClient(app),
     ):
         pass
 
     verify.assert_called_once()
+    ensure_superuser.assert_called_once()

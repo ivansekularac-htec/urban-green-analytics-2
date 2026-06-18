@@ -8,13 +8,15 @@ behaviour is covered separately in ``tests/services``.
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.routers.v1.auth.auth import get_auth_service
+from app.security.dependencies import get_current_user
+from app.security.roles import RoleName
 
 
 @dataclass
@@ -49,6 +51,23 @@ def auth_service():
     service = MagicMock()
     app.dependency_overrides[get_auth_service] = lambda: service
     return service
+
+
+@pytest.fixture
+def admin_auth():
+    """Bypass JWT and admin role checks for protected router tests."""
+    admin = MagicMock()
+    admin.id = 1
+    admin.email = "admin@example.com"
+    admin.is_active = True
+
+    app.dependency_overrides[get_current_user] = lambda: admin
+
+    with patch("app.security.dependencies.UserRepository") as repo_cls:
+        repo_cls.return_value.get_role_names_for_user.return_value = [RoleName.ADMIN]
+        yield admin
+
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def assert_crud_endpoints(client: TestClient, service: MagicMock, case: RouteCase):

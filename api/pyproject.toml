@@ -11,7 +11,14 @@ dependencies = [
     "pydantic-settings>=2.14.1",
     "python-jose[cryptography]>=3.5.0",
     "sqlalchemy>=2.0.50",
-] # Add more dependencies
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx2>=2.4.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
 
 [tool.ruff]
 line-length = 100
@@ -19,24 +26,23 @@ target-version = "py311"
 extend-exclude = [".venv", "build", "dist", "migrations"]
 
 [tool.ruff.lint]
-# A reasonable starter set
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort (import sorting)
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "SIM", # flake8-simplify
-    "C4",  # flake8-comprehensions
-    "N",   # pep8-naming
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "C4",
+    "N",
 ]
 ignore = [
-    "E501", # line length handled by formatter
+    "E501",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"] # allow unused imports for re-exports
+"__init__.py" = ["F401"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -45,4 +51,8 @@ line-ending = "auto"
 docstring-code-format = true
 
 [dependency-groups]
-dev = ["httpx2>=2.4.0", "pytest>=9.0.3", "pytest-cov>=7.1.0"]
+dev = [
+    "httpx2>=2.4.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]

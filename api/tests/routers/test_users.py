@@ -48,7 +48,7 @@ CASES = [
 
 
 @pytest.mark.parametrize("case", CASES, ids=[c.name for c in CASES])
-def test_crud_endpoints(client, service, case):
+def test_crud_endpoints(client, service, admin_auth, case):
     assert_crud_endpoints(client, service, case)
 
 
@@ -64,7 +64,7 @@ def test_get_user_role_service_factory_constructs_service():
     assert isinstance(get_user_role_service(MagicMock()), UserRoleService)
 
 
-def test_pagination_uses_defaults_when_query_omitted(client, service):
+def test_pagination_uses_defaults_when_query_omitted(client, service, admin_auth):
     app.dependency_overrides[get_user_service] = lambda: service
     service.list.return_value = []
 
@@ -74,7 +74,7 @@ def test_pagination_uses_defaults_when_query_omitted(client, service):
     service.list.assert_called_once_with(skip=0, limit=100)
 
 
-def test_pagination_rejects_out_of_range_query(client, service):
+def test_pagination_rejects_out_of_range_query(client, service, admin_auth):
     app.dependency_overrides[get_user_service] = lambda: service
 
     response = client.get("/api/v1/users", params={"limit": 9999})

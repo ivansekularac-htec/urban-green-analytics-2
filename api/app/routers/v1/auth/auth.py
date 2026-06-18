@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import ValidationError
 
 from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
@@ -27,7 +28,15 @@ def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: AuthServiceDep,
 ):
-    return service.login(LoginRequest(email=form_data.username, password=form_data.password))
+    try:
+        payload = LoginRequest(email=form_data.username, password=form_data.password)
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=exc.errors(),
+        ) from exc
+
+    return service.login(payload)
 
 
 @router.post("/refresh", response_model=TokenResponse)
