@@ -8,6 +8,8 @@ import jwt
 
 from app.config import get_settings
 
+settings = get_settings()
+
 
 def create_access_token(
     *,
@@ -17,7 +19,6 @@ def create_access_token(
     """
     Create a signed JWT access token.
     """
-    settings = get_settings()
 
     expire = datetime.now(UTC) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes,
@@ -43,7 +44,6 @@ def decode_token(token: str) -> dict:
     Raises:
         jwt.InvalidTokenError: If token is invalid or expired.
     """
-    settings = get_settings()
 
     return jwt.decode(
         token,

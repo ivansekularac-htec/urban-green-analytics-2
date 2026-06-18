@@ -1,10 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import TokenResponse
 from app.schemas.users.user import UserResponse
 from app.security.dependencies import CurrentUserDep
 from app.services.auth import AuthService
@@ -34,11 +35,17 @@ router = APIRouter(
     response_model=TokenResponse,
 )
 def login(
-    payload: LoginRequest,
+    form_data: Annotated[
+        OAuth2PasswordRequestForm,
+        Depends(),
+    ],
     service: AuthServiceDep,
 ):
     return TokenResponse(
-        access_token=service.login(payload),
+        access_token=service.login(
+            email=form_data.username,
+            password=form_data.password,
+        ),
     )
 
 

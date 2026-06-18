@@ -36,7 +36,7 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-        )
+        ) from None
 
     user_id = payload.get("user_id")
 
@@ -46,7 +46,7 @@ def get_current_user(
             detail="Invalid authentication credentials",
         )
 
-    user = UserRepository(db).get(user_id)
+    user = UserRepository(db).get_with_roles(user_id)
 
     if user is None:
         raise HTTPException(

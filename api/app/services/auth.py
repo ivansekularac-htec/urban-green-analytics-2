@@ -5,7 +5,6 @@ Authentication service.
 from fastapi import HTTPException, status
 
 from app.repositories.users.user import UserRepository
-from app.schemas.auth import LoginRequest
 from app.security.jwt import create_access_token
 from app.security.password import verify_password
 
@@ -23,13 +22,15 @@ class AuthService:
 
     def login(
         self,
-        request: LoginRequest,
+        *,
+        email: str,
+        password: str,
     ) -> str:
         """
         Authenticate a user and return a JWT token.
         """
         user = self.user_repository.get_by_email(
-            request.email,
+            email,
         )
 
         if user is None:
@@ -39,7 +40,7 @@ class AuthService:
             )
 
         if not verify_password(
-            request.password,
+            password,
             user.password_hash,
         ):
             raise HTTPException(

@@ -6,11 +6,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
 
+from app.constants.roles import ADMIN_ROLE
 from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
-from app.services.users.user import UserService
+from app.security.authorization import RequireRoles
+from app.services.users.user import User, UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -21,10 +23,20 @@ def get_user_service(db: DatabaseSession) -> UserService:
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+UserDep = Annotated[
+    User,
+    Depends(
+        RequireRoles(ADMIN_ROLE),
+    ),
+]
 
 
 @router.get("", response_model=list[UserResponse])
-def list_users(service: UserServiceDep, pagination: PaginationDep):
+def list_users(
+    service: UserServiceDep,
+    pagination: PaginationDep,
+    current_user: UserDep,
+):
     """List user records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -36,7 +48,10 @@ def get_user(user_id: int, service: UserServiceDep):
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(payload: UserCreate, service: UserServiceDep):
+def create_user(
+    payload: UserCreate,
+    service: UserServiceDep,
+):
     """Create a user record."""
     return service.create(payload)
 
