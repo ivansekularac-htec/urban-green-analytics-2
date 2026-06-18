@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends
 from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.users.user import UserResponse
+from app.security.dependencies import CurrentUserDep
 from app.services.auth import AuthService
 
 
@@ -38,3 +40,13 @@ def login(
     return TokenResponse(
         access_token=service.login(payload),
     )
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def me(
+    current_user: CurrentUserDep,
+):
+    return current_user

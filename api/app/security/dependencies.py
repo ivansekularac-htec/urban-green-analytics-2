@@ -17,10 +17,15 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/auth/login",
 )
 
+TokenDep = Annotated[
+    str,
+    Depends(oauth2_scheme),
+]
+
 
 def get_current_user(
     db: DatabaseSession,
-    token: str = Depends(oauth2_scheme),
+    token: TokenDep,
 ):
     """
     Resolve the currently authenticated user.
