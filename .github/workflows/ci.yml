@@ -21,7 +21,6 @@ jobs:
       POSTGRES_DB: test
       POSTGRES_SCHEMA: app
       JWT_SECRET_KEY : test
-      JWT_ALGORITHM : test
       ACCESS_TOKEN_EXPIRE_MINUTES : 30
       REFRESH_TOKEN_EXPIRE_MINUTES : 10080
 
