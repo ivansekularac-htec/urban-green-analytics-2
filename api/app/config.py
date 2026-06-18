@@ -5,6 +5,7 @@ Application configuration for the Urban Green Analytics API.
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,8 +23,9 @@ class Settings(BaseSettings):
 
     api_v1_prefix: str = "/api/v1"
 
-    api_app_superuser_username: str
-    api_app_superuser_password: str
+    api_app_superuser_username: str = Field(default="admin@example.com")
+    api_app_superuser_password: str = Field(default="admin12345")
+    jwt_secret_key: str = Field(default="development-secret-key")
 
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
