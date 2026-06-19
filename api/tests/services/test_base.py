@@ -54,7 +54,14 @@ def test_list_passes_pagination(repository, service):
     repository.list.return_value = ["a"]
 
     assert service.list(skip=2, limit=5) == ["a"]
-    repository.list.assert_called_once_with(skip=2, limit=5)
+    repository.list.assert_called_once_with(skip=2, limit=5, farm_ids=None)
+
+
+def test_list_forwards_farm_ids(repository, service):
+    repository.list.return_value = ["a"]
+
+    assert service.list(skip=0, limit=10, farm_ids={1, 2}) == ["a"]
+    repository.list.assert_called_once_with(skip=0, limit=10, farm_ids={1, 2})
 
 
 def test_create_persists_payload_and_commits(repository, service):

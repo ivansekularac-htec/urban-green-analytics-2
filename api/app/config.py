@@ -9,6 +9,7 @@ throughout the application.
 
 from functools import lru_cache
 
+from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +26,14 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str
     postgres_schema: str
+
+    jwt_secret: str
+    jwt_algorithm: str = "HS256"
+    jwt_expires_minutes: int = 60
+
+    superuser_email: EmailStr
+    superuser_password: str
+    superuser_full_name: str = "System Administrator"
 
     @property
     def database_url(self) -> str:

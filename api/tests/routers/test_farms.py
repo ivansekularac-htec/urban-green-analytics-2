@@ -27,6 +27,7 @@ CASES = [
             "growing_beds_count": 4,
         },
         update_payload={"name": "Renamed"},
+        scoped=True,
     ),
     RouteCase(
         name="infrastructure-types",

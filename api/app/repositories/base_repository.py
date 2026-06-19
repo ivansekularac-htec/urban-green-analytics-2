@@ -24,8 +24,18 @@ class BaseRepository(Generic[ModelType]):
     def get(self, item_id: int) -> ModelType | None:
         return self.db.get(self.model, item_id)
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[ModelType]:
-        statement = select(self.model).offset(skip).limit(limit)
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        farm_ids: set[int] | None = None,
+    ) -> list[ModelType]:
+        statement = select(self.model)
+        if farm_ids is not None and hasattr(self.model, "farm_id"):
+            if not farm_ids:
+                return []
+            statement = statement.where(self.model.farm_id.in_(farm_ids))
+        statement = statement.offset(skip).limit(limit)
         return list(self.db.scalars(statement).all())
 
     def create(self, data: dict) -> ModelType:

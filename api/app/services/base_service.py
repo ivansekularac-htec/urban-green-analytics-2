@@ -55,18 +55,27 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return item
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[ModelType]:
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        farm_ids: set[int] | None = None,
+    ) -> list[ModelType]:
         """
-        Return a paginated list of entities.
+        Return a paginated list of entities, optionally restricted to farms.
 
         Args:
             skip: Number of records to skip.
             limit: Maximum number of records to return.
+            farm_ids: When ``None`` (Admin), no farm filter is applied.
+                When a set, only entities whose ``farm_id`` is in the set
+                are returned. Ignored on entities without a ``farm_id``
+                column.
 
         Returns:
             A list of ORM model instances.
         """
-        return self.repository.list(skip=skip, limit=limit)
+        return self.repository.list(skip=skip, limit=limit, farm_ids=farm_ids)
 
     def create(self, payload: CreateSchemaType) -> ModelType:
         """

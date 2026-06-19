@@ -1,5 +1,7 @@
 """
 User role API routes.
+
+Admin-only — role assignments are managed by system administrators.
 """
 
 from typing import Annotated
@@ -10,9 +12,15 @@ from app.database import DatabaseSession
 from app.repositories.users.user_role import UserRoleRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.users.user_roles import UserRoleCreate, UserRoleResponse, UserRoleUpdate
+from app.security.dependencies import require_roles
+from app.security.roles import RoleName
 from app.services.users.user_role import UserRoleService
 
-router = APIRouter(prefix="/user-roles", tags=["User Roles"])
+router = APIRouter(
+    prefix="/user-roles",
+    tags=["User Roles"],
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 
 
 def get_user_role_service(db: DatabaseSession) -> UserRoleService:

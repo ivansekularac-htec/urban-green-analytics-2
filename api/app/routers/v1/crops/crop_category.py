@@ -1,5 +1,7 @@
 """
 Crop category API routes.
+
+Reference data — readable by any authenticated user; only Admin can write.
 """
 
 from typing import Annotated
@@ -14,9 +16,15 @@ from app.schemas.crops.crop_category import (
     CropCategoryResponse,
     CropCategoryUpdate,
 )
+from app.security.dependencies import get_current_user, require_roles
+from app.security.roles import RoleName
 from app.services.crops.crop_category import CropCategoryService
 
-router = APIRouter(prefix="/crop-categories", tags=["Crop Categories"])
+router = APIRouter(
+    prefix="/crop-categories",
+    tags=["Crop Categories"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def get_crop_category_service(db: DatabaseSession) -> CropCategoryService:
@@ -39,24 +47,37 @@ def get_crop_category(crop_category_id: int, service: CropCategoryServiceDep):
     return service.get(crop_category_id)
 
 
-@router.post("", response_model=CropCategoryResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=CropCategoryResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def create_crop_category(payload: CropCategoryCreate, service: CropCategoryServiceDep):
-    """Create a crop category record."""
+    """Create a crop category record (Admin only)."""
     return service.create(payload)
 
 
-@router.put("/{crop_category_id}", response_model=CropCategoryResponse)
+@router.put(
+    "/{crop_category_id}",
+    response_model=CropCategoryResponse,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def update_crop_category(
     crop_category_id: int,
     payload: CropCategoryUpdate,
     service: CropCategoryServiceDep,
 ):
-    """Update a crop category record by ID."""
+    """Update a crop category record by ID (Admin only)."""
     return service.update(crop_category_id, payload)
 
 
-@router.delete("/{crop_category_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{crop_category_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 def delete_crop_category(crop_category_id: int, service: CropCategoryServiceDep):
-    """Delete a crop category record by ID."""
+    """Delete a crop category record by ID (Admin only)."""
     service.delete(crop_category_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

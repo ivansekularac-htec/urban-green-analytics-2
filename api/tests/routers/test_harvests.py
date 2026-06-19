@@ -22,6 +22,7 @@ CASES = [
             "weight_kg": 5,
         },
         update_payload={"weight_kg": 6},
+        scoped=True,
     ),
     RouteCase(
         name="quality-grades",

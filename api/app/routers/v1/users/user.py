@@ -1,5 +1,7 @@
 """
 User API routes.
+
+Admin-only — users are managed by system administrators.
 """
 
 from typing import Annotated
@@ -10,9 +12,15 @@ from app.database import DatabaseSession
 from app.repositories.users.user import UserRepository
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.users.user import UserCreate, UserResponse, UserUpdate
+from app.security.dependencies import require_roles
+from app.security.roles import RoleName
 from app.services.users.user import UserService
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    dependencies=[Depends(require_roles(RoleName.ADMIN))],
+)
 
 
 def get_user_service(db: DatabaseSession) -> UserService:

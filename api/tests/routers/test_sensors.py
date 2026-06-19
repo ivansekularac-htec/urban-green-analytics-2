@@ -23,6 +23,7 @@ CASES = [
             "installed_at": 1,
         },
         update_payload={"status": "OFFLINE"},
+        scoped=True,
     ),
     RouteCase(
         name="sensor-types",

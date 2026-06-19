@@ -11,8 +11,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database import settings, verify_database_connection
+from app.database import SessionLocal, settings, verify_database_connection
 from app.routers.v1.api import v1_router
+from app.security.superuser import ensure_superuser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,6 +24,9 @@ async def lifespan(app: FastAPI):
     """Run application startup and shutdown logic."""
 
     verify_database_connection()
+
+    with SessionLocal() as db:
+        ensure_superuser(db, settings)
 
     yield
 
@@ -48,3 +52,9 @@ def root() -> dict[str, str]:
         dict[str, str]: A response containing the API status message.
     """
     return {"message": "Urban Green API is running"}
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    """Return a health status used by container orchestration probes."""
+    return {"status": "ok"}
