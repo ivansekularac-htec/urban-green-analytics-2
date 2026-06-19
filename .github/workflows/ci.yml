@@ -20,6 +20,7 @@ jobs:
       POSTGRES_PORT: 5432
       POSTGRES_DB: test
       POSTGRES_SCHEMA: app
+      VIRTUAL_ENV: ""
 
     steps:
       # 1. Check out your repository code
