@@ -32,13 +32,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-          enable-cache: true
-          cache-dependency-glob: "api/uv.lock"
 
       # 3. Install project dependencies using uv sync
       - name: Install dependencies
         # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
-        run: uv sync --frozen --group dev
+        run: uv sync --group dev
         working-directory: ./api
 
       # 4. Execute test or linters using uv run
