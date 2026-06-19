@@ -37,7 +37,7 @@ jobs:
       # 3. Install project dependencies using uv sync
       - name: Install dependencies
         # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
-        run: uv sync --frozen --extra dev
+        run: uv sync --frozen --group dev
         working-directory: ./api
 
       # 4. Execute test or linters using uv run
