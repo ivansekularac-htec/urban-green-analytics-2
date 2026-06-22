@@ -76,9 +76,14 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
 
+    command: >
+      server /data
+      --address ":${MINIO_API_PORT:-9000}"
+      --console-address ":${MINIO_CONSOLE_PORT:-9001}"
+
     ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "${MINIO_API_PORT:-9000}:${MINIO_API_PORT:-9000}"
+      - "${MINIO_CONSOLE_PORT:-9001}:${MINIO_CONSOLE_PORT:-9001}"
 
     volumes:
       - urbangreen-minio-data:/data
@@ -87,7 +92,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:${MINIO_API_PORT:-9000}/minio/health/live || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
