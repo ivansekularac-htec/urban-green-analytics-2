@@ -40,18 +40,18 @@ CropServiceDep = Annotated[
 ]
 
 
-ReadCropsDep = Annotated[
+ReadDep = Annotated[
     object,
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -65,7 +65,7 @@ AdminDep = Annotated[
 def list_crops(
     service: CropServiceDep,
     pagination: PaginationDep,
-    _: ReadCropsDep,
+    _: ReadDep,
 ):
     """
     List crop records.
@@ -80,7 +80,7 @@ def list_crops(
 def get_crop(
     crop_id: int,
     service: CropServiceDep,
-    _: ReadCropsDep,
+    _: ReadDep,
 ):
     """
     Get a crop record by ID.
@@ -94,7 +94,7 @@ def get_crop(
 def create_crop(
     payload: CropCreate,
     service: CropServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Create a crop record.
@@ -109,7 +109,7 @@ def update_crop(
     crop_id: int,
     payload: CropUpdate,
     service: CropServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Update a crop record by ID.
@@ -124,7 +124,7 @@ def update_crop(
 def delete_crop(
     crop_id: int,
     service: CropServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Delete a crop record by ID.

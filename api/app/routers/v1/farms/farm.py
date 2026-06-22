@@ -10,9 +10,9 @@ from app.database import DatabaseSession
 from app.repositories.farms.farm import FarmRepository
 from app.routers.v1.auth.dependencies import (
     CurrentUserDep,
-    is_admin,
-    is_operations,
-    user_farm_ids,
+    assert_farm_access,
+    can_access_all_farms,
+    get_accessible_farm_ids,
 )
 from app.routers.v1.common.pagination import PaginationDep
 from app.schemas.farms.farm import FarmCreate, FarmResponse, FarmUpdate
@@ -32,7 +32,18 @@ FarmServiceDep = Annotated[
     Depends(get_farm_service),
 ]
 
-AdminDep = Annotated[
+ReadDep = Annotated[
+    object,
+    Depends(
+        require_roles(
+            "Admin",
+            "Operations Team",
+            "Farm Manager",
+        )
+    ),
+]
+
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -47,6 +58,7 @@ def list_farms(
     service: FarmServiceDep,
     pagination: PaginationDep,
     current_user: CurrentUserDep,
+    _: ReadDep,
 ):
     """
     List farms.
@@ -54,15 +66,14 @@ def list_farms(
     Admin and Operations can see all farms.
     Farm Managers can see only farms assigned to them.
     """
-
-    if is_admin(current_user) or is_operations(current_user):
+    if can_access_all_farms(current_user):
         return service.list(
             skip=pagination.skip,
             limit=pagination.limit,
         )
 
     return service.list_by_ids(
-        farm_ids=user_farm_ids(current_user),
+        farm_ids=get_accessible_farm_ids(current_user),
         skip=pagination.skip,
         limit=pagination.limit,
     )
@@ -73,20 +84,18 @@ def get_farm(
     farm_id: int,
     service: FarmServiceDep,
     current_user: CurrentUserDep,
+    _: ReadDep,
 ):
     """
     Get a farm by ID.
-
     Farm Managers can access only their own farms.
     """
-
     farm = service.get(farm_id)
 
-    if is_admin(current_user) or is_operations(current_user):
-        return farm
-
-    if farm_id not in user_farm_ids(current_user):
-        return Response(status_code=status.HTTP_403_FORBIDDEN)
+    assert_farm_access(
+        current_user,
+        farm.id,
+    )
 
     return farm
 
@@ -95,12 +104,10 @@ def get_farm(
 def create_farm(
     payload: FarmCreate,
     service: FarmServiceDep,
-    # current_user: CurrentUserDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Create a farm.
-
     Only Admin can create farms.
     """
 
@@ -112,7 +119,7 @@ def update_farm(
     farm_id: int,
     payload: FarmUpdate,
     service: FarmServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Update a farm.
@@ -125,11 +132,10 @@ def update_farm(
 def delete_farm(
     farm_id: int,
     service: FarmServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """
     Delete a farm.
-
     Only Admin can delete farms.
     """
     service.delete(farm_id)

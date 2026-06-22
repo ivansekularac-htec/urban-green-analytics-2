@@ -24,13 +24,13 @@ ReadDep = Annotated[
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -75,7 +75,7 @@ def get_infrastructure_type(
 def create_infrastructure_type(
     payload: InfrastructureTypeCreate,
     service: InfrastructureTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create an infrastructure type record."""
     return service.create(payload)
@@ -86,7 +86,7 @@ def update_infrastructure_type(
     infrastructure_type_id: int,
     payload: InfrastructureTypeUpdate,
     service: InfrastructureTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update an infrastructure type record by ID."""
     return service.update(infrastructure_type_id, payload)
@@ -96,7 +96,7 @@ def update_infrastructure_type(
 def delete_infrastructure_type(
     infrastructure_type_id: int,
     service: InfrastructureTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete an infrastructure type record by ID."""
     service.delete(infrastructure_type_id)

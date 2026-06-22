@@ -37,18 +37,18 @@ CropCategoryServiceDep = Annotated[
 ]
 
 
-ReadCropCategoriesDep = Annotated[
+ReadDep = Annotated[
     object,
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -62,7 +62,7 @@ AdminDep = Annotated[
 def list_crop_categories(
     service: CropCategoryServiceDep,
     pagination: PaginationDep,
-    _: ReadCropCategoriesDep,
+    _: ReadDep,
 ):
     """List crop category records."""
     return service.list(
@@ -75,7 +75,7 @@ def list_crop_categories(
 def get_crop_category(
     crop_category_id: int,
     service: CropCategoryServiceDep,
-    _: ReadCropCategoriesDep,
+    _: ReadDep,
 ):
     """Get a crop category record by ID."""
     return service.get(
@@ -87,7 +87,7 @@ def get_crop_category(
 def create_crop_category(
     payload: CropCategoryCreate,
     service: CropCategoryServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create a crop category record."""
     return service.create(
@@ -100,7 +100,7 @@ def update_crop_category(
     crop_category_id: int,
     payload: CropCategoryUpdate,
     service: CropCategoryServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update a crop category record by ID."""
     return service.update(
@@ -113,7 +113,7 @@ def update_crop_category(
 def delete_crop_category(
     crop_category_id: int,
     service: CropCategoryServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete a crop category record by ID."""
     service.delete(

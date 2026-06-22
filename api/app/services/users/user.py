@@ -60,3 +60,10 @@ class UserService(BaseService[User, UserCreate, UserUpdate]):
 
     def get_by_email(self, email: str):
         return self.repository.get_by_email(email)
+
+    def list_by_farm_ids(self, farm_ids: list[int], skip: int = 0, limit: int = 100):
+        return self.repository.list_by_farm_ids(
+            farm_ids=farm_ids,
+            skip=skip,
+            limit=limit,
+        )

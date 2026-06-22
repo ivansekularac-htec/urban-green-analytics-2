@@ -35,13 +35,13 @@ ReadDep = Annotated[
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -79,7 +79,7 @@ def get_growing_system_type(
 def create_growing_system_type(
     payload: GrowingSystemTypeCreate,
     service: GrowingSystemTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create a growing system type record."""
     return service.create(payload)
@@ -90,7 +90,7 @@ def update_growing_system_type(
     growing_system_type_id: int,
     payload: GrowingSystemTypeUpdate,
     service: GrowingSystemTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update a growing system type record by ID."""
     return service.update(growing_system_type_id, payload)
@@ -100,7 +100,7 @@ def update_growing_system_type(
 def delete_growing_system_type(
     growing_system_type_id: int,
     service: GrowingSystemTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete a growing system type record by ID."""
     service.delete(growing_system_type_id)

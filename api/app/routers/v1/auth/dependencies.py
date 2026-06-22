@@ -73,17 +73,25 @@ def is_admin(user: User) -> bool:
 
 
 def is_operations(user: User) -> bool:
-    return has_any_role(user, "operations", "operation")
+    return has_any_role(user, "operations team", "operation")
 
 
 def is_farm_manager(user: User) -> bool:
     return has_role(user, "farm manager")
 
 
+def can_access_all_farms(
+    current_user: CurrentUserDep,
+) -> bool:
+    return is_admin(current_user) or is_operations(current_user)
+
+
 def get_accessible_farm_ids(
     current_user: CurrentUserDep,
 ) -> list[int]:
-    return [ur.farm_id for ur in current_user.user_roles if ur.farm_id is not None]
+    return [
+        user_role.farm_id for user_role in current_user.user_roles if user_role.farm_id is not None
+    ]
 
 
 AccessibleFarmIdsDep = Annotated[
@@ -96,13 +104,44 @@ def assert_farm_access(
     current_user: CurrentUserDep,
     farm_id: int,
 ) -> None:
+    if can_access_all_farms(current_user):
+        return
+
+    if farm_id not in get_accessible_farm_ids(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden",
+        )
+
+
+def can_access_user(
+    current_user: CurrentUserDep,
+    target_user,
+) -> bool:
     if is_admin(current_user):
-        return
+        return True
 
-    if is_operations(current_user):
-        return
+    current_farm_ids = set(
+        get_accessible_farm_ids(current_user),
+    )
 
-    if farm_id not in user_farm_ids(current_user):
+    target_farm_ids = {role.farm_id for role in target_user.user_roles if role.farm_id is not None}
+
+    return bool(
+        current_farm_ids.intersection(
+            target_farm_ids,
+        )
+    )
+
+
+def assert_user_access(
+    current_user: CurrentUserDep,
+    target_user,
+) -> None:
+    if not can_access_user(
+        current_user,
+        target_user,
+    ):
         raise HTTPException(
             status_code=403,
             detail="Forbidden",

@@ -24,13 +24,13 @@ ReadDep = Annotated[
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -75,7 +75,7 @@ def get_quality_grade(
 def create_quality_grade(
     payload: QualityGradeCreate,
     service: QualityGradeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create a quality grade record."""
     return service.create(payload)
@@ -86,7 +86,7 @@ def update_quality_grade(
     quality_grade_id: int,
     payload: QualityGradeUpdate,
     service: QualityGradeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update a quality grade record by ID."""
     return service.update(quality_grade_id, payload)
@@ -96,7 +96,7 @@ def update_quality_grade(
 def delete_quality_grade(
     quality_grade_id: int,
     service: QualityGradeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete a quality grade record by ID."""
     service.delete(quality_grade_id)

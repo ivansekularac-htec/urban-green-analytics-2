@@ -33,13 +33,13 @@ ReadDep = Annotated[
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -50,7 +50,11 @@ AdminDep = Annotated[
 
 
 @router.get("", response_model=list[SensorTypeResponse])
-def list_sensor_types(service: SensorTypeServiceDep, _: ReadDep, pagination: PaginationDep):
+def list_sensor_types(
+    service: SensorTypeServiceDep,
+    _: ReadDep,
+    pagination: PaginationDep,
+):
     """List sensor type records."""
     return service.list(skip=pagination.skip, limit=pagination.limit)
 
@@ -65,11 +69,15 @@ def get_sensor_type(
     return service.get(sensor_type_id)
 
 
-@router.post("", response_model=SensorTypeResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=SensorTypeResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_sensor_type(
     payload: SensorTypeCreate,
     service: SensorTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create a sensor type record."""
     return service.create(payload)
@@ -80,7 +88,7 @@ def update_sensor_type(
     sensor_type_id: int,
     payload: SensorTypeUpdate,
     service: SensorTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update a sensor type record by ID."""
     return service.update(sensor_type_id, payload)
@@ -90,7 +98,7 @@ def update_sensor_type(
 def delete_sensor_type(
     sensor_type_id: int,
     service: SensorTypeServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete a sensor type record by ID."""
     service.delete(sensor_type_id)

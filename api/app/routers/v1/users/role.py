@@ -28,13 +28,13 @@ ReadDep = Annotated[
     Depends(
         require_roles(
             "Admin",
-            "Operations",
+            "Operations Team",
             "Farm Manager",
         )
     ),
 ]
 
-AdminDep = Annotated[
+ManageDep = Annotated[
     object,
     Depends(
         require_roles(
@@ -68,7 +68,7 @@ def get_role(
 def create_role(
     payload: RoleCreate,
     service: RoleServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Create a role record."""
     return service.create(payload)
@@ -79,7 +79,7 @@ def update_role(
     role_id: int,
     payload: RoleUpdate,
     service: RoleServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Update a role record by ID."""
     return service.update(role_id, payload)
@@ -89,7 +89,7 @@ def update_role(
 def delete_role(
     role_id: int,
     service: RoleServiceDep,
-    _: AdminDep,
+    _: ManageDep,
 ):
     """Delete a role record by ID."""
     service.delete(role_id)
