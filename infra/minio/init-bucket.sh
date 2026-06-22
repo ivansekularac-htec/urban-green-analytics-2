@@ -23,7 +23,11 @@ done
 echo "MinIO is ready!"
 
 echo "Creating bucket: $MINIO_STAGING_BUCKET"
-
 mc mb --ignore-existing "local/$MINIO_STAGING_BUCKET"
+
+echo "Verifying bucket exists..."
+mc ls local/ | grep -q "^.* $MINIO_STAGING_BUCKET/$"
+
+echo "Bucket verified: $MINIO_STAGING_BUCKET"
 
 echo "Bucket ensured successfully"
