@@ -87,6 +87,13 @@ services:
     networks:
       - urbangreen-network
 
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
