@@ -65,7 +65,7 @@ services:
       retries: 5
       start_period: 15s
 
-  urbangreen-minio:
+  minio:
     build:
       context: ./infra/minio
       dockerfile: Dockerfile
