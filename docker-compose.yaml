@@ -33,12 +33,36 @@ services:
       dockerfile: Dockerfile
     container_name: urbangreen-minio
     image: urbangreen-minio:latest
+    restart: unless-stopped
+
+    command:
+      - server
+      - /data
+      - --address
+      - ":${MINIO_API_PORT:-9000}"
+      - --console-address
+      - ":${MINIO_CONSOLE_PORT:-9001}"
+
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT:-9000}:${MINIO_API_PORT:-9000}"
+      - "${MINIO_CONSOLE_PORT:-9001}:${MINIO_CONSOLE_PORT:-9001}"
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+    volumes:
+      - urbangreen-minio-volume:/data
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   api:
     build:
@@ -81,6 +105,8 @@ services:
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
+  urbangreen-minio-volume:
+    name: urbangreen-minio-volume
 
 networks:
   urbangreen-network:
