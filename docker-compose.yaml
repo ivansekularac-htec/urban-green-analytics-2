@@ -27,35 +27,6 @@ services:
       retries: 5
       start_period: 10s
 
-  urbangreen-minio:
-    build:
-      context: ./infra/minio
-      dockerfile: Dockerfile
-    container_name: urbangreen-minio
-    restart: unless-stopped
-
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
-
-    ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
-
-    volumes:
-      - urbangreen-minio-data:/data
-
-    networks:
-      - urbangreen-network
-
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT}/minio/health/live || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   api:
     build:
       context: ./api
@@ -93,6 +64,35 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  minio:
+    build:
+      context: ./infra/minio
+      dockerfile: Dockerfile
+    container_name: urbangreen-minio
+    restart: unless-stopped
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+
+    volumes:
+      - urbangreen-minio-data:/data
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT}/minio/health/live || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   urbangreen-postgres-data:
