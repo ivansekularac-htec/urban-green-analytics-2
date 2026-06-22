@@ -48,3 +48,10 @@ http://localhost:8000/docs
 ### 6. Virtual environment note
 
 The `.venv/` directory is used only for local development and must not be committed.
+
+
+---
+## Platform documentation
+Other setup guides for the Docker stack and shared infrastructure:
+- [Database setup](./database-setup.md) — PostgreSQL, init scripts, connection settings
+- [MinIO setup](./minio-setup.md) — S3 API endpoints, web console, env vars, staging bucket
