@@ -104,6 +104,24 @@ services:
       retries: 5
       start_period: 15s
 
+  minio-init:
+    image: minio/mc:latest
+    container_name: urbangreen-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+    volumes:
+      - ./infra/minio/init:/scripts:ro
+    networks:
+      - urbangreen-network
+    restart: "no"
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
