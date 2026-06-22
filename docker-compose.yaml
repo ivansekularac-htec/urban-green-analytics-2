@@ -103,6 +103,21 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    
+  minio-init:
+    image: minio/mc:latest
+    container_name: urbangreen-minio-init
+    env_file:
+      - .env
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./infra/minio/init-bucket.sh:/init-bucket.sh:ro
+    entrypoint: ["/bin/sh", "/init-bucket.sh"]
+    networks:
+      - urbangreen-network
+    restart: "no"
 
 volumes:
   urbangreen-postgres-data:
