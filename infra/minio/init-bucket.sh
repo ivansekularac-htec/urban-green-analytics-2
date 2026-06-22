@@ -26,8 +26,11 @@ echo "Creating bucket: $MINIO_STAGING_BUCKET"
 mc mb --ignore-existing "local/$MINIO_STAGING_BUCKET"
 
 echo "Verifying bucket exists..."
-mc ls local/ | grep -q "^.* $MINIO_STAGING_BUCKET/$"
-
-echo "Bucket verified: $MINIO_STAGING_BUCKET"
+if mc ls "local/$MINIO_STAGING_BUCKET" >/dev/null 2>&1; then
+  echo "Bucket exists: $MINIO_STAGING_BUCKET"
+else
+  echo "Failed to verify bucket: $MINIO_STAGING_BUCKET"
+  exit 1
+fi
 
 echo "Bucket ensured successfully"
