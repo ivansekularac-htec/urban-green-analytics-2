@@ -11,6 +11,7 @@ dependencies = [
     "pydantic-settings>=2.14.1",
     "pyjwt>=2.9",
     "python-multipart>=0.0.20",
+    "ruff>=0.15.18",
     "sqlalchemy>=2.0.50",
 ] # Add more dependencies
 
@@ -46,4 +47,4 @@ line-ending = "auto"
 docstring-code-format = true
 
 [dependency-groups]
-dev = ["httpx2>=2.4.0", "pytest>=9.0.3", "pytest-cov>=7.1.0"]
+dev = ["httpx2>=2.4.0", "pytest>=9.0.3", "pytest-cov>=7.1.0", "ruff>=0.15.18"]
