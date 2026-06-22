@@ -72,6 +72,16 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
+    command:
+      [
+        "server",
+        "/data",
+        "--address",
+        ":${MINIO_API_PORT:-9000}",
+        "--console-address",
+        ":${MINIO_CONSOLE_PORT:-9001}",
+      ]
+
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
@@ -98,7 +108,7 @@ volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
   urbangreen-minio-data:
-    name: urbangreen-minio-data
+    name: urbangreen-minio-volume
 
 networks:
   urbangreen-network:
