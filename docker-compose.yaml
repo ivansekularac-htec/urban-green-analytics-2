@@ -73,6 +73,12 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
+    # Override the Dockerfile CMD so the server binds to the configured ports.
+    command:
+      server /data
+      --address ":${MINIO_API_PORT:-9000}"
+      --console-address ":${MINIO_CONSOLE_PORT:-9001}"
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
