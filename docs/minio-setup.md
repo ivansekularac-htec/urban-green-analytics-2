@@ -2,110 +2,134 @@
 
 ## Overview
 
-The system uses MinIO as an S3-compatible object storage for storing raw and processed files.
+The system uses MinIO as an S3-compatible object storage service for storing raw and processed files.
 
-It is primarily used as a **staging layer for raw data ingestion** and internal service file exchange.
+MinIO serves as the primary staging layer for raw data ingestion and internal file exchange between services.
 
 ---
 
 ## Docker Setup
 
-MinIO runs inside a Docker container defined in `docker-compose.yaml`.
+MinIO runs as a Docker service defined in `docker-compose.yaml`.
 
 ### Service Configuration
 
-- Container name: `urbangreen-minio`
-- Image: official MinIO latest
+* Container name: `urbangreen-minio`
+* S3-compatible object storage service
 
 ---
 
 ## Environment Variables
 
-Defined in `.env`:
+The following variables must be configured:
 
-- `MINIO_ROOT_USER`
-- `MINIO_ROOT_PASSWORD`
-- `MINIO_API_PORT`
-- `MINIO_CONSOLE_PORT`
-- `MINIO_HOST`
-- `MINIO_STAGING_BUCKET`
+* `MINIO_ROOT_USER`
+* `MINIO_ROOT_PASSWORD`
+* `MINIO_API_PORT`
+* `MINIO_CONSOLE_PORT`
+* `MINIO_HOST`
+* `MINIO_STAGING_BUCKET`
 
 ---
 
 ## Network Endpoints
 
-| Type | URL |
-|------|-----|
-| Internal (Docker) | http://urbangreen-minio:9000 |
-| External (Local) | http://localhost:9000 |
+| Type                      | URL                            |
+| ------------------------- | ------------------------------ |
+| Internal (Docker network) | `http://urbangreen-minio:9000` |
+| External (Host machine)   | `http://localhost:9000`        |
 
 ---
 
 ## MinIO Web Console
 
-| Property | Value |
-|----------|------|
-| URL | http://localhost:9001 |
-| Username | MINIO_ROOT_USER |
-| Password | MINIO_ROOT_PASSWORD |
+| Property | Value                   |
+| -------- | ----------------------- |
+| URL      | `http://localhost:9001` |
+| Username | `MINIO_ROOT_USER`       |
+| Password | `MINIO_ROOT_PASSWORD`   |
 
 ---
 
-## Volumes
+## Storage Volume
 
-| Volume | Purpose |
-|--------|--------|
-| /data | Persistent object storage |
+| Volume  | Purpose                   |
+| ------- | ------------------------- |
+| `/data` | Persistent object storage |
+
+---
+
+## Data Lake Convention
+
+The bucket defined by `MINIO_STAGING_BUCKET` is the agreed entry point for all raw data entering the platform.
+
+Future ingestion pipelines, simulators, ETL jobs, and external integrations should upload raw files to this bucket.
+
+Processed or curated datasets should be stored separately from the staging layer.
 
 ---
 
 ## Staging Bucket
 
-| Property | Value |
-|----------|------|
-| Bucket | staging |
+| Property | Value                             |
+| -------- | --------------------------------- |
+| Bucket   | Defined by `MINIO_STAGING_BUCKET` |
 
 ### Rules
 
-- All raw data MUST go to `staging`
-- `staging` is default ingestion layer
-- Bucket is created automatically on startup
+* All raw data must be uploaded to the staging bucket.
+* The staging bucket is the default ingestion layer.
+* The bucket is created automatically during startup.
+* Bucket creation is idempotent and safe to re-run.
 
 ---
 
 ## Bucket Initialization
 
-Init container runs:
+A one-shot initialization container creates the staging bucket automatically during startup.
 
-mc mb --ignore-existing local/staging
+The initialization script executes:
+
+```bash
+mc mb --ignore-existing local/${MINIO_STAGING_BUCKET}
+```
+
+This guarantees that the bucket exists while avoiding failures when the bucket has already been created.
 
 ---
 
 ## Health Check
 
-MinIO is healthy when this endpoint responds:
+MinIO is considered healthy when the following endpoint returns `200 OK`:
 
-``` http://urbangreen-minio:9000/minio/health/live ```
+```text
+http://urbangreen-minio:9000/minio/health/live
+```
 
 ---
 
 ## Starting MinIO
 
+Start all services:
+
 ```bash
-docker compose up -d minio
+docker compose up -d
 ```
 
-Logs:
+View MinIO logs:
+
 ```bash
 docker compose logs -f minio
 ```
 
-Stop:
+Stop the stack:
+
 ```bash
 docker compose down
 ```
 
-Rebuild (WARNING: deletes data):
+Recreate containers and volumes (warning: deletes persisted data):
+
 ```bash
 docker compose down -v
 docker compose up -d
@@ -116,11 +140,19 @@ docker compose up -d
 ## Connecting
 
 ### Web Console
+
+```text
 http://localhost:9001
+```
 
 ### S3 Endpoints
 
-| Scenario | Endpoint |
-|----------|----------|
-| Backend | http://urbangreen-minio:9000 |
-| Local tools | http://localhost:9000 |
+| Scenario                | Endpoint                       |
+| ----------------------- | ------------------------------ |
+| Backend services        | `http://urbangreen-minio:9000` |
+| Local tools and clients | `http://localhost:9000`        |
+
+```
+
+This setup standardizes object storage usage across services and establishes the staging bucket as the default raw data ingestion layer.
+```
