@@ -1,8 +1,7 @@
 #!/bin/sh
 
-set -e
+set -eu
 
-URL="http://urbangreen-minio:9000/minio/health/ready"
 ALIAS_URL="http://urbangreen-minio:9000"
 MAX_ATTEMPTS=30
 ATTEMPT=0
@@ -10,14 +9,18 @@ ATTEMPT=0
 echo "Waiting for MinIO to be ready..."
 
 until mc alias set local "$ALIAS_URL" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" >/dev/null 2>&1; do
-  echo "MinIO not ready yet... retrying"
-  sleep 2
+    ATTEMPT=$((ATTEMPT + 1))
+
+    if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+        echo "Error: MinIO did not become ready after $MAX_ATTEMPTS attempts."
+        exit 1
+    fi
+
+    echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: MinIO not ready yet. Retrying in 2s..."
+    sleep 2
 done
 
 echo "MinIO is ready!"
-
-# Configure alias
-mc alias set local "$ALIAS_URL" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
 
 echo "Creating bucket: $MINIO_STAGING_BUCKET"
 
