@@ -118,8 +118,8 @@ services:
     restart: "no"
 
     environment:
-      MINIO_HOST: ${MINIO_HOST}
-      MINIO_API_PORT: ${MINIO_API_PORT}
+      MINIO_HOST: ${MINIO_HOST:-urbangreen-minio}
+      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET}
