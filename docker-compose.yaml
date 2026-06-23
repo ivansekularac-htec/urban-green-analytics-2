@@ -21,7 +21,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -59,7 +59,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,15 +72,7 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
-    command:
-      [
-        "server",
-        "/data",
-        "--address",
-        ":${MINIO_API_PORT:-9000}",
-        "--console-address",
-        ":${MINIO_CONSOLE_PORT:-9001}",
-      ]
+    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -94,11 +86,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -115,7 +103,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
-    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+    entrypoint: [ "/bin/sh", "/scripts/init-bucket.sh" ]
     volumes:
       - ./infra/minio/init:/scripts:ro
     networks:
@@ -128,9 +116,11 @@ services:
       context: ./infra/airflow
     command: [ "airflow", "standalone" ]
     user: "${AIRFLOW_UID:-50000}:0"
+    restart: unless-stopped
     ports:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
     environment:
+      AIRFLOW_PORT: "${AIRFLOW_PORT:-8080}"
       AIRFLOW__API__PORT: "${AIRFLOW_PORT:-8080}"
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: "${AIRFLOW_PORT:-8080}"
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
@@ -149,6 +139,8 @@ services:
           memory: 3G
         reservations:
           memory: 1G
+    networks:
+      - urbangreen-network
 
 volumes:
   urbangreen-postgres-data:
