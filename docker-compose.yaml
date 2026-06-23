@@ -131,18 +131,20 @@ services:
     restart: unless-stopped
     image: urbangreen-airflow:latest
 
+    environment:
+      AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+      AIRFLOW_PORT: ${AIRFLOW_PORT:-8080}
+      AIRFLOW__API__PORT: ${AIRFLOW_PORT:-8080}
+      AIRFLOW__WEBSERVER__WEB_SERVER_PORT: ${AIRFLOW_PORT:-8080}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      
     user: "${AIRFLOW_UID:-50000}:0"
 
     command: ["airflow", "standalone"]
 
     ports:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
-
-    environment:
-      - AIRFLOW__API__PORT=${AIRFLOW_PORT:-8080}
-      - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=${AIRFLOW_PORT:-8080}
-      - AIRFLOW__CORE__LOAD_EXAMPLES=false
-      - AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS=true
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
