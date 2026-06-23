@@ -1,0 +1,8 @@
+# Normalize line endings: store everything as LF in the repo, and check out
+# as LF in the working tree (regardless of git core.autocrlf on Windows).
+# This keeps shell scripts runnable inside Linux containers.
+* text=auto eol=lf
+
+# Be explicit for files that must stay LF (executed inside Linux containers).
+*.sh text eol=lf
+Dockerfile text eol=lf
