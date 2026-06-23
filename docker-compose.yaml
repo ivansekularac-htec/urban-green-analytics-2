@@ -122,11 +122,57 @@ services:
       - urbangreen-network
     restart: "no"
 
+  airflow:
+    build:
+      context: ./infra/airflow
+      dockerfile: Dockerfile
+    container_name: urbangreen-airflow
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command: ["airflow", "standalone"]
+
+    user: "${AIRFLOW_UID:-50000}:0"
+
+    ports:
+      - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
+
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__API__PORT: ${AIRFLOW_PORT:-8080}
+      AIRFLOW__WEBSERVER__WEB_SERVER_PORT: ${AIRFLOW_PORT:-8080}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+
+    volumes:
+      - urbangreen-airflow-logs-volume:/opt/airflow/logs
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    mem_limit: 3g
+    mem_reservation: 1g
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
   urbangreen-minio-data:
     name: urbangreen-minio-volume
+  urbangreen-airflow-logs-volume:
+    name: urbangreen-airflow-logs-volume
 
 networks:
   urbangreen-network:
