@@ -1,0 +1,4 @@
+# Default: let Git decide, normalize text files
+* text=auto
+# Shell scripts must always be LF in repo and on checkout
+*.sh text eol=lf
