@@ -122,6 +122,13 @@ services:
       - urbangreen-network
     restart: "no"
 
+  airflow:
+    build: 
+      context: ./infra/airflow
+      dockerfile: Dockerfile
+    container_name: urbangreen-airflow
+    restart: unless-stopped
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
