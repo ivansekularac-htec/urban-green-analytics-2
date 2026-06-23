@@ -139,8 +139,12 @@ services:
       retries: 5
       start_period: 60s
 
-    mem_limit: 3g
-    mem_reservation: 1g
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 1G
 
 volumes:
   urbangreen-postgres-data:

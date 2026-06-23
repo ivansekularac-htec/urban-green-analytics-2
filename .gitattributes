@@ -1,0 +1,9 @@
+# Force LF everywhere (important for Docker/Linux scripts)
+* text=auto eol=lf
+
+# Shell scripts must always be LF
+*.sh text eol=lf
+
+# Optional: config files
+*.yml text eol=lf
+*.yaml text eol=lf
