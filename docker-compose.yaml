@@ -154,6 +154,9 @@ services:
         reservations:
           memory: 1G
 
+    networks:
+      - urbangreen-network
+
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1"]
       interval: 30s
