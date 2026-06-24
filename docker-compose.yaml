@@ -72,15 +72,7 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
-    command:
-      [
-        "server",
-        "/data",
-        "--address",
-        ":${MINIO_API_PORT:-9000}",
-        "--console-address",
-        ":${MINIO_CONSOLE_PORT:-9001}",
-      ]
+    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -94,11 +86,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -121,7 +109,7 @@ services:
     networks:
       - urbangreen-network
     restart: "no"
-  
+
   airflow:
     build:
       context: ./infra/airflow
@@ -149,15 +137,12 @@ services:
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
+      - ./etl/dags:/opt/airflow/dags
     networks:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
