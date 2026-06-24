@@ -149,6 +149,8 @@ services:
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
+      - ./etl/dags:/opt/airflow/dags
+
     networks:
       - urbangreen-network
 
