@@ -1,0 +1,11 @@
+[project]
+name = "urban-green-analytics"
+version = "0.1.0"
+description = "Urban Green Analytics Platform"
+requires-python = ">=3.10"
+dependencies = [
+    "apache-airflow-providers-postgres",
+    "apache-airflow-providers-amazon",
+    "pyarrow",
+    "pandas",
+]
