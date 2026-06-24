@@ -1,7 +1,7 @@
 [project]
-name = "urban-green"
+name = "urban-green-analytics"
 version = "1.0.0"
-description = "Application for Urban Green Farms"
+description = "Urban Green Analytics Platform"
 requires-python = ">=3.10.0"
 
 dependencies = [
