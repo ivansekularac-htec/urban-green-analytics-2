@@ -134,7 +134,32 @@ services:
       postgres:
         condition: service_healthy
 
-    command: [ "airflow", "standalone" ]
+    command:
+      - bash
+      - -c
+      - |
+        airflow db migrate
+
+        airflow connections add urbangreen_db \
+          --conn-type postgres \
+          --conn-host urbangreen-postgres \
+          --conn-login "$${POSTGRES_USER}" \
+          --conn-password "$${POSTGRES_PASSWORD}" \
+          --conn-schema "$${POSTGRES_DB}" \
+          --conn-port "$${POSTGRES_PORT:-5432}"
+
+        airflow connections add urbangreen_minio \
+          --conn-type aws \
+          --conn-login "$${MINIO_ROOT_USER}" \
+          --conn-password "$${MINIO_ROOT_PASSWORD}" \
+          --conn-extra "{\"endpoint_url\": \"http://urbangreen-minio:$${MINIO_API_PORT:-9000}\"}"
+
+        airflow connections add urbangreen_spark \
+          --conn-type spark \
+          --conn-host "spark://urbangreen-spark-master" \
+          --conn-port "$${SPARK_MASTER_PORT:-7077}"
+
+        exec airflow standalone
     user: "${AIRFLOW_UID:-50000}:0"
     ports:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
@@ -146,6 +171,17 @@ services:
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: ${AIRFLOW_PORT:-8080}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      # Inputs for the connection-seeding prologue in `command`.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+      # Re-exported so DAGs can read it via os.environ.
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
