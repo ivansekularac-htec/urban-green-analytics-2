@@ -143,21 +143,21 @@ services:
           airflow connections add urbangreen_db \
             --conn-type postgres \
             --conn-host postgres \
-            --conn-login ${POSTGRES_USER} \
-            --conn-password ${POSTGRES_PASSWORD} \
-            --conn-schema ${POSTGRES_DB} \
-            --conn-port ${POSTGRES_PORT:-5432}
+            --conn-login "${POSTGRES_USER}" \
+            --conn-password "${POSTGRES_PASSWORD}" \
+            --conn-schema "${POSTGRES_DB}" \
+            --conn-port "${POSTGRES_PORT:-5432}"
 
           airflow connections add urbangreen_minio \
             --conn-type aws \
-            --conn-login ${MINIO_ROOT_USER:-minio} \
-            --conn-password ${MINIO_ROOT_PASSWORD} \
+            --conn-login "${MINIO_ROOT_USER:-minio}" \
+            --conn-password "${MINIO_ROOT_PASSWORD}" \
             --conn-extra "{\"endpoint_url\":\"http://minio:$${MINIO_API_PORT:-9000}\"}"
 
           airflow connections add urbangreen_spark \
             --conn-type spark \
             --conn-host spark://urbangreen-spark-master \
-            --conn-port ${SPARK_MASTER_PORT:-7077}
+            --conn-port "${SPARK_MASTER_PORT:-7077}"
 
           exec airflow standalone
 
