@@ -121,9 +121,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    entrypoint: []
     command:
-      - /bin/bash
+      - bash
       - -c
       - |
         airflow db migrate
@@ -140,8 +139,7 @@ services:
           --conn-type aws \
           --conn-login "${MINIO_ROOT_USER}" \
           --conn-password "${MINIO_ROOT_PASSWORD}" \
-          --conn-extra '{"endpoint_url":"http://minio:${MINIO_API_PORT:-9000}"}'
-
+          --conn-extra "{\"endpoint_url\":\"http://minio:${MINIO_API_PORT:-9000}\"}"
         airflow connections add urbangreen_spark \
           --conn-type spark \
           --conn-host spark://urbangreen-spark-master \
