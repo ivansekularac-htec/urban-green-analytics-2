@@ -152,7 +152,7 @@ services:
           --conn-type aws \
           --conn-login "${MINIO_ROOT_USER:-minio}" \
           --conn-password "${MINIO_ROOT_PASSWORD}" \
-          --conn-extra "{\"endpoint_url\": \"http://minio:${MINIO_API_PORT:-9000}\"}"
+          --conn-extra "{\"endpoint_url\": \"http://minio:$${MINIO_API_PORT:-9000}\"}"
 
         airflow connections add urbangreen_spark \
           --conn-type spark \
