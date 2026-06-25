@@ -1,0 +1,15 @@
+[project]
+name = "urban-green-analytics"
+version = "0.0.0"
+description = "Urban Green Analytics — top-level dependency manifest (drift discipline)."
+requires-python = ">=3.10"
+
+# Mirrors infra/airflow/requirements.txt so the two don't drift.
+# apache-airflow itself is intentionally excluded — it ships in the
+# apache/airflow base image, not installed via pip.
+dependencies = [
+    "apache-airflow-providers-postgres",
+    "apache-airflow-providers-amazon",
+    "pyarrow",
+    "pandas",
+]
