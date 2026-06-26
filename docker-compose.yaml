@@ -132,20 +132,23 @@ services:
       - |
         airflow db migrate
 
+        airflow connections delete urbangreen_db >/dev/null 2>&1 || true
         airflow connections add urbangreen_db \
           --conn-type postgres \
           --conn-host postgres \
           --conn-login "$${POSTGRES_USER}" \
           --conn-password "$${POSTGRES_PASSWORD}" \
           --conn-schema "$${POSTGRES_DB}" \
-          --conn-port "$${POSTGRES_PORT:-5432}"
+          --conn-port 5432
 
+        airflow connections delete urbangreen_minio >/dev/null 2>&1 || true
         airflow connections add urbangreen_minio \
           --conn-type aws \
           --conn-login "$${MINIO_ROOT_USER:-minio}" \
           --conn-password "$${MINIO_ROOT_PASSWORD:-miniominio}" \
-          --conn-extra "{\"endpoint_url\":\"http://minio:$${MINIO_API_PORT:-9000}\"}"
+          --conn-extra "{\"endpoint_url\":\"http://minio:$${MINIO_API_PORT:-9000}\",\"region_name\":\"us-east-1\"}"
 
+        airflow connections delete urbangreen_spark >/dev/null 2>&1 || true
         airflow connections add urbangreen_spark \
           --conn-type spark \
           --conn-host spark://urbangreen-spark-master \
@@ -174,7 +177,9 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniominio}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
-      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      MINIO_STAGING_PREFIX: ${MINIO_STAGING_PREFIX:-staging/postgres/app}
+      EXTRACT_SAFETY_LAG_SECONDS: ${EXTRACT_SAFETY_LAG_SECONDS:-2}
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
