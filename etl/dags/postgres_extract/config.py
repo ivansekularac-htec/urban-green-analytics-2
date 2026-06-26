@@ -1,3 +1,12 @@
+"""
+config.py
+Configuration for PostgreSQL-to-MinIO extraction DAGs.
+
+This module defines Airflow connection identifiers, source and destination
+settings, extraction schedules, cursor columns, partitioning rules, and the
+chunk size used for large tables.
+"""
+
 from __future__ import annotations
 
 import os

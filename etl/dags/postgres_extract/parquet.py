@@ -1,3 +1,12 @@
+"""
+parquet.py
+Parquet serialization and MinIO upload utilities.
+
+This module converts extracted DataFrames to Parquet, creates deterministic
+object keys, applies optional date partitioning, and uploads the resulting
+objects to the configured MinIO staging bucket.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -20,7 +29,7 @@ def _build_partition_values(
     source_type: str,
 ) -> pd.Series:
     """
-    Convert source partition values to YYYY-MM-DD strings.
+    Convert source partition values to UTC dates in YYYY-MM-DD format.
     """
     if source_column not in dataframe.columns:
         raise ValueError(
@@ -62,10 +71,7 @@ def _build_object_key(
     part_number: int | None = None,
 ) -> str:
     """
-    Build a deterministic MinIO object key.
-
-    Small tables keep one descriptive file name.
-    Chunked tables use part-00000.parquet, part-00001.parquet, etc.
+    Build a deterministic MinIO object key for one Parquet file.
     """
     base_key = (
         f"extract/{POSTGRES_SCHEMA}/{table_name}/"
@@ -95,10 +101,7 @@ def _upload_dataframe_as_parquet(
     part_number: int | None = None,
 ) -> str:
     """
-    Convert one dataframe to Parquet and upload it to MinIO.
-
-    replace=True makes retries overwrite the same deterministic object key
-    instead of creating another object with a random name.
+    Serialize one DataFrame to Parquet and upload it to MinIO.
     """
     object_key = _build_object_key(
         table_name=table_name,
@@ -147,12 +150,7 @@ def write_dataframe_to_minio(
     part_number: int | None = None,
 ) -> int:
     """
-    Upload one dataframe.
-
-    For a normal table, one dataframe creates one Parquet object.
-
-    For a partitioned table, the dataframe is first split by its business
-    partition date and one object is uploaded for each date.
+    Write a DataFrame to MinIO, optionally split by a date partition.
     """
     if partition_config is None:
         _upload_dataframe_as_parquet(

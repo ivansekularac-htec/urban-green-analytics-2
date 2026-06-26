@@ -1,3 +1,13 @@
+"""
+extract.py
+PostgreSQL table extraction logic for the MinIO staging layer.
+
+This module supports full extraction for small tables and chunked extraction
+for large tables. It manages incremental cursor ranges, reads source rows from
+PostgreSQL, delegates Parquet writes to the storage layer, and advances the
+cursor only after all uploads succeed.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -27,7 +37,7 @@ def _get_high_watermark(
     cursor_column: str,
 ) -> int:
     """
-    Read the largest source cursor value available at the start of extraction.
+    Return the highest cursor value currently stored in the source table.
     """
     query = f"""
         SELECT COALESCE(MAX("{cursor_column}"), 0)
@@ -55,7 +65,7 @@ def _extract_full_result(
     partition_config: dict[str, str] | None,
 ) -> tuple[int, int, int]:
     """
-    Extract a small table using a normal cursor and fetchall().
+    Extract a small result set in memory and write it to MinIO.
     """
     with connection.cursor() as cursor:
         cursor.execute(
@@ -115,10 +125,7 @@ def _extract_chunked_result(
     partition_config: dict[str, str] | None,
 ) -> tuple[int, int, int]:
     """
-    Extract a large table using a server-side cursor and fetchmany().
-
-    Only tables explicitly configured with extract_strategy="chunked"
-    use this function.
+    Extract a large result set in chunks and write each chunk to MinIO.
     """
     total_rows = 0
     uploaded_objects = 0
@@ -193,7 +200,7 @@ def extract_table_to_minio(
     table_config: dict[str, Any],
 ) -> None:
     """
-    Incrementally extract one configured Postgres table to MinIO.
+    Incrementally extract one configured PostgreSQL table to MinIO.
     """
     table_name = table_config["table"]
     cursor_column = table_config["cursor_column"]
