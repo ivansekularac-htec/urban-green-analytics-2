@@ -1,8 +1,9 @@
 import pandas as pd
+from airflow.exceptions import AirflowSkipException
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 from ingestion.state import get_cursor, set_cursor
-from ingestion.storage import upload_parquet
+from ingestion.writer import write_dataframe
 
 
 def extract_table(config):
@@ -27,7 +28,6 @@ def extract_table(config):
                 - table (str): table name in Postgres
                 - schema (str): database schema name
                 - cursor_column (str): column used for incremental extraction
-                - bucket (str): target MinIO bucket name
 
     Returns:
         dict:
@@ -47,7 +47,6 @@ def extract_table(config):
     table = config["table"]
     schema = config["schema"]
     cursor_column = config["cursor_column"]
-    bucket = config["bucket"]
 
     # -----------------------
     # 1. CURSOR STATE
@@ -87,13 +86,7 @@ def extract_table(config):
     # 3. NO DATA CASE
     # -----------------------
     if not rows:
-        return build_result(
-            table=table,
-            rows_count=0,
-            status="SKIPPED",
-            cursor_before=cursor_before,
-            cursor_after=cursor_before,
-        )
+        raise AirflowSkipException(f"No new rows found for table '{table}'.")
 
     rows_count = len(rows)
 
@@ -102,26 +95,39 @@ def extract_table(config):
     # -----------------------
     df = pd.DataFrame(rows, columns=columns)
 
-    parquet_path = f"/tmp/{table}.parquet"
-    df.to_parquet(parquet_path, index=False)
+    last_row = df.iloc[-1]
+
+    cursor_end = int(last_row[cursor_column])
 
     # -----------------------
-    # 5. STORAGE (MINIO)
+    # 5. OBJECT KEY
     # -----------------------
-    object_key = f"{table}/{table}.parquet"
-    upload_parquet(parquet_path, bucket, object_key)
+
+    print("About to write dataframe")
+
+    write_dataframe(
+        df=df,
+        config=config,
+        cursor_start=last_ts,
+        cursor_end=cursor_end,
+    )
+
+    print("Finished writing dataframe")
 
     # -----------------------
     # 6. CURSOR UPDATE (ONLY AFTER SUCCESS)
     # -----------------------
-    last_row = df.iloc[-1]
 
     cursor_after = {
         "updated_at": int(last_row[cursor_column]),
         "id": int(last_row["id"]),
     }
 
+    print("About to update cursor")
+
     set_cursor(table, cursor_column, last_row)
+
+    print("Cursor updated")
 
     print(f"[{table}] Cursor updated → {cursor_after}")
 

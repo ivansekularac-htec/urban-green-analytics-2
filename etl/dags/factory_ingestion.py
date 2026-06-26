@@ -2,6 +2,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.decorators import task
+from airflow.exceptions import AirflowSkipException
 from ingestion.config import TABLE_CONFIGS
 from ingestion.extract import extract_table
 
@@ -61,12 +62,8 @@ def create_table_dag(config):
             """
             try:
                 result = extract_table(config)
-            except Exception as e:
-                result = {
-                    "table": table,
-                    "status": "FAILED",
-                    "error": str(e),
-                }
+            except AirflowSkipException:
+                raise
 
             print(f"[{table}] {result}")
             return result

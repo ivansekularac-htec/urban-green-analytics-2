@@ -59,6 +59,7 @@ TABLE_CONFIGS = [
         "table": "harvests",
         "schema": "app",
         "cursor_column": "updated_at",
+        "partition_column": "created_at",
         "bucket": "staging",
         "schedule": "@hourly",
     },
