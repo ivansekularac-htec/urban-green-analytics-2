@@ -8,7 +8,7 @@ def get_cursor(table):
     Retrieves the last successfully processed ingestion cursor
     for a given table from Airflow Variables.
 
-    The cursor is used to perform incremental extraction from Postgres.
+    This cursor enables incremental extraction from Postgres.
 
     Cursor format:
         {
@@ -17,19 +17,16 @@ def get_cursor(table):
         }
 
     Args:
-        table (str):
-            Name of the table whose cursor should be retrieved.
+        table (str): Table name
 
     Returns:
-        tuple:
+        tuple[int, int]:
             (updated_at, id)
-            - updated_at (int): timestamp of last processed record
-            - id (int): last processed row id (used for deterministic ordering)
 
     Behavior:
-        - If no cursor exists, returns (0, 0) for full backfill
-        - If cursor is corrupted or invalid, safely resets to (0, 0)
-        - Ensures ingestion can always recover without manual intervention
+        - Returns (0, 0) if no cursor exists (full backfill)
+        - Returns (0, 0) if cursor is corrupted (safe recovery mode)
+        - Guarantees ingestion never breaks due to bad state
     """
 
     cursor_raw = Variable.get(f"{table}_cursor", default_var=None)
@@ -40,46 +37,37 @@ def get_cursor(table):
     try:
         cursor = json.loads(cursor_raw)
 
-        updated_at = int(cursor.get("updated_at", 0))
-        row_id = int(cursor.get("id", 0))
-
-        return updated_at, row_id
+        return (
+            int(cursor.get("updated_at", 0)),
+            int(cursor.get("id", 0)),
+        )
 
     except Exception:
-        # Safe fallback: allows full reprocessing on corruption
+        # Safe fallback:
+        # If cursor is corrupted, we intentionally reprocess everything.
         return 0, 0
 
 
 def set_cursor(table, cursor_column, row):
     """
-    Persists the ingestion cursor after successful extraction.
+    Persists the ingestion cursor after a successful extraction run.
 
-    The cursor is advanced only after data is successfully:
-    - extracted from Postgres
-    - written to Parquet
-    - uploaded to object storage (MinIO)
+    IMPORTANT:
+        Cursor is only updated after:
+        - successful Postgres extraction
+        - successful Parquet write
+        - successful MinIO upload
+
+    This guarantees idempotency under retries.
 
     Args:
-        table (str):
-            Table name being processed.
-
-        cursor_column (str):
-            Column used as primary incremental marker (e.g. updated_at).
-
-        row (dict-like):
-            Last row from the extracted dataset, used to derive new cursor values.
+        table (str): Table name
+        cursor_column (str): Column used for incremental tracking
+        row (dict-like): Last row from extracted dataset
 
     Returns:
         dict:
-            Newly stored cursor in the format:
-            {
-                "updated_at": int,
-                "id": int
-            }
-
-    Notes:
-        - This ensures idempotent ingestion under Airflow retries
-        - Cursor represents the *last successfully committed record*
+            Updated cursor state
     """
 
     new_cursor = {

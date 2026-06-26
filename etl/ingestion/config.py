@@ -10,6 +10,21 @@ Each entry defines how a table is:
 This is the single source of truth for DAG generation.
 """
 
+import os
+
+# -------------------------
+# Connections
+# -------------------------
+
+POSTGRES_CONN_ID = os.getenv("POSTGRES_CONN_ID", "urbangreen_db")
+MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
+
+# -------------------------
+# Storage
+# -------------------------
+
+STAGING_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
+
 TABLE_CONFIGS = [
     # =========================
     # CORE BUSINESS TABLES
@@ -18,21 +33,21 @@ TABLE_CONFIGS = [
         "table": "farms",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "users",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "crops",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     # =========================
@@ -42,14 +57,14 @@ TABLE_CONFIGS = [
         "table": "farm_crops",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "user_roles",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     # =========================
@@ -60,7 +75,7 @@ TABLE_CONFIGS = [
         "schema": "app",
         "cursor_column": "updated_at",
         "partition_column": "created_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@hourly",
     },
     # =========================
@@ -70,7 +85,7 @@ TABLE_CONFIGS = [
         "table": "sensors",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     # =========================
@@ -80,42 +95,42 @@ TABLE_CONFIGS = [
         "table": "roles",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "quality_grades",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "farm_infrastructure_types",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "growing_system_types",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "crop_categories",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
     {
         "table": "sensor_types",
         "schema": "app",
         "cursor_column": "updated_at",
-        "bucket": "staging",
+        "bucket": STAGING_BUCKET,
         "schedule": "@daily",
     },
 ]
