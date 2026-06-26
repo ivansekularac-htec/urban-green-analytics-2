@@ -185,6 +185,8 @@ services:
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
+      HARVESTS_EXTRACT_CHUNK_SIZE: ${HARVESTS_EXTRACT_CHUNK_SIZE:-50000}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
