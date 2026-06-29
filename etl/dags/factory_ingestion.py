@@ -43,6 +43,9 @@ def create_table_dag(config):
         start_date=datetime(2026, 1, 1),
         schedule=config["schedule"],
         catchup=False,
+        # Cursor state is stored in a shared Airflow Variable,
+        # so only one run of this DAG may execute at a time.
+        max_active_runs=1,
         tags=["ingestion", table],
     ) as dag:
 

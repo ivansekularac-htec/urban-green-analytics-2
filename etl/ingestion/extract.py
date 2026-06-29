@@ -4,7 +4,11 @@ import pandas as pd
 from airflow.exceptions import AirflowSkipException
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from ingestion.config import CURSOR_SAFETY_WINDOW_SECONDS, POSTGRES_CONN_ID
+from ingestion.config import (
+    CURSOR_SAFETY_WINDOW_SECONDS,
+    INGESTION_CHUNK_SIZE,
+    POSTGRES_CONN_ID,
+)
 from ingestion.state import get_cursor, set_cursor
 from ingestion.writer import write_dataframe
 
@@ -83,46 +87,57 @@ def extract_table(config):
         ),
     )
 
-    rows = cur.fetchall()
     columns = [c[0] for c in cur.description]
+
+    # ---------------------------------------------------------
+    # 3. PROCESS RESULT SET IN CHUNKS
+    # ---------------------------------------------------------
+
+    rows_count = 0
+    last_row = None
+    first_batch = True
+
+    while True:
+        rows = cur.fetchmany(INGESTION_CHUNK_SIZE)
+
+        if not rows:
+            break
+
+        if first_batch:
+            first_batch = False
+
+        df = pd.DataFrame(rows, columns=columns)
+
+        # Preserve deterministic ordering
+        df = df.sort_values([cursor_column, "id"])
+
+        batch_first = df.iloc[0]
+        batch_last = df.iloc[-1]
+
+        write_dataframe(
+            df=df,
+            config=config,
+            cursor_start=int(batch_first[cursor_column]),
+            cursor_end=int(batch_last[cursor_column]),
+        )
+
+        rows_count += len(df)
+        last_row = batch_last
 
     cur.close()
     conn.close()
 
     # ---------------------------------------------------------
-    # 3. NO NEW DATA CASE
+    # 4. NO NEW DATA CASE
     # ---------------------------------------------------------
-    if not rows:
+
+    if last_row is None:
         raise AirflowSkipException(f"No new rows found for table '{table}'")
 
-    rows_count = len(rows)
+    # ---------------------------------------------------------
+    # 5. UPDATE CURSOR
+    # ---------------------------------------------------------
 
-    # ---------------------------------------------------------
-    # 4. DATAFRAME CONSTRUCTION
-    # ---------------------------------------------------------
-    df = pd.DataFrame(rows, columns=columns)
-
-    # IMPORTANT:
-    # Ensure deterministic ordering before taking last row for cursor.
-    # This protects against Postgres edge cases / planner changes.
-    df = df.sort_values([cursor_column, "id"])
-
-    last_row = df.iloc[-1]
-    cursor_end = int(last_row[cursor_column])
-
-    # ---------------------------------------------------------
-    # 5. WRITE TO MINIO (PARQUET)
-    # ---------------------------------------------------------
-    write_dataframe(
-        df=df,
-        config=config,
-        cursor_start=last_ts,
-        cursor_end=cursor_end,
-    )
-
-    # ---------------------------------------------------------
-    # 6. UPDATE CURSOR (ONLY AFTER SUCCESSFUL WRITE)
-    # ---------------------------------------------------------
     cursor_after = {
         "updated_at": int(last_row[cursor_column]),
         "id": int(last_row["id"]),
@@ -133,7 +148,7 @@ def extract_table(config):
     print(f"[{table}] Cursor updated → {cursor_after}")
 
     # ---------------------------------------------------------
-    # 7. RETURN RESULT
+    # 6. RETURN RESULT
     # ---------------------------------------------------------
     return build_result(
         table=table,

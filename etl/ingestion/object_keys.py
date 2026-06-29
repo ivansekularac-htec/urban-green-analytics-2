@@ -6,37 +6,40 @@ def build_object_key(
     partition_value=None,
 ):
     """
-    Builds a deterministic S3/MinIO object key for Parquet ingestion output.
+    Builds a deterministic object key for a Parquet ingestion batch.
 
-    This ensures:
-        - traceable ingestion ranges
-        - idempotent writes (same input → same key)
-        - optional partitioning for high-volume tables
+    Each file name encodes the cursor range processed by a single batch,
+    making the output traceable and idempotent.
 
-    Key structure:
+    Non-partitioned layout:
 
-        Non-partitioned:
-            {table}/updated_at={start}_{end}.parquet
+        {table}/updated_at={start}_{end}.parquet
 
-        Partitioned:
-            {table}/{partition_column}={partition_value}/updated_at={start}_{end}.parquet
+    Partitioned layout:
+
+        {table}/{partition_column}={partition_value}/
+            updated_at={start}_{end}.parquet
 
     Example:
-        harvests/created_at=2026-06-26/updated_at=100_200.parquet
+
+        harvests/
+            created_at=2024-06-10/
+                updated_at=1717977600_1717981200.parquet
     """
 
     # ---------------------------------------------------------
-    # Base filename encodes ingestion range (important for traceability)
+    # Encode the cursor range in the filename.
+    # Each extraction batch produces a unique object.
     # ---------------------------------------------------------
     filename = f"updated_at={cursor_start}_{cursor_end}.parquet"
 
     # ---------------------------------------------------------
-    # Partitioned layout (used for large/high-volume tables like harvests)
+    # Partitioned layout
     # ---------------------------------------------------------
     if partition_column and partition_value:
         return f"{table}/{partition_column}={partition_value}/{filename}"
 
     # ---------------------------------------------------------
-    # Default flat layout
+    # Non-partitioned layout
     # ---------------------------------------------------------
     return f"{table}/{filename}"

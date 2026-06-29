@@ -2,9 +2,9 @@
 Writer layer for ingestion pipeline.
 
 Responsible for:
-- Converting extracted DataFrames into Parquet files
-- Handling optional partitioning logic
-- Uploading files to object storage (MinIO/S3)
+- Converting extracted DataFrames into Parquet
+- Handling optional partitioning
+- Uploading Parquet bytes to object storage (MinIO/S3)
 """
 
 import os
@@ -23,29 +23,33 @@ DEFAULT_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
 
 def write_dataframe(df, config, cursor_start, cursor_end):
     """
-    Writes extracted DataFrame to MinIO as Parquet files.
+    Writes a single extraction batch to MinIO.
 
     Supports:
-    - Non-partitioned tables → single file per batch
-    - Partitioned tables → one file per partition value
+        - Non-partitioned tables -> one Parquet object
+        - Partitioned tables -> one Parquet object per partition
 
     Args:
-        df (pd.DataFrame): Extracted dataset
-        config (dict): Table ingestion configuration
-        cursor_start (int): Previous cursor value
-        cursor_end (int): New cursor value
+        df (pd.DataFrame):
+            Batch returned from Postgres.
+
+        config (dict):
+            Table ingestion configuration.
+
+        cursor_start (int):
+            First cursor value represented by this batch.
+
+        cursor_end (int):
+            Last cursor value represented by this batch.
     """
 
     table = config["table"]
-
-    # Use env fallback if bucket not explicitly set in config
     bucket = config.get("bucket", DEFAULT_BUCKET)
-
     partition_column = config.get("partition_column")
 
-    # =====================================================
-    # CASE 1: NON-PARTITIONED TABLES
-    # =====================================================
+    # ---------------------------------------------------------
+    # NON-PARTITIONED TABLES
+    # ---------------------------------------------------------
     if not partition_column:
         buffer = BytesIO()
 
@@ -53,8 +57,6 @@ def write_dataframe(df, config, cursor_start, cursor_end):
             buffer,
             index=False,
         )
-
-        buffer.seek(0)
 
         object_key = build_object_key(
             table=table,
@@ -70,23 +72,21 @@ def write_dataframe(df, config, cursor_start, cursor_end):
 
         return
 
-    # =====================================================
-    # CASE 2: PARTITIONED TABLES
-    # =====================================================
+    # ---------------------------------------------------------
+    # PARTITIONED TABLES
+    # ---------------------------------------------------------
 
-    # Create safe copy so we don't mutate original DataFrame
     partitioned_df = df.copy()
 
-    # Convert epoch → YYYY-MM-DD partition format
+    # Convert epoch timestamp into YYYY-MM-DD partition
     partitioned_df["_partition_date"] = pd.to_datetime(
         partitioned_df[partition_column],
         unit="s",
         utc=True,
     ).dt.strftime("%Y-%m-%d")
 
-    # Group by partition
+    # Write one object per partition
     for partition_date, partition_df in partitioned_df.groupby("_partition_date"):
-        # Clean helper column before writing
         partition_df = partition_df.drop(columns="_partition_date")
 
         buffer = BytesIO()
@@ -95,8 +95,6 @@ def write_dataframe(df, config, cursor_start, cursor_end):
             buffer,
             index=False,
         )
-
-        buffer.seek(0)
 
         object_key = build_object_key(
             table=table,

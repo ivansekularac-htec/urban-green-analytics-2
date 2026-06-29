@@ -20,9 +20,10 @@ POSTGRES_CONN_ID = os.getenv("POSTGRES_CONN_ID", "urbangreen_db")
 MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
 
 # -------------------------
-# Extracting
+# Extracting and Writing
 # -------------------------
 CURSOR_SAFETY_WINDOW_SECONDS = 30
+INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", 10000))
 
 # -------------------------
 # Storage
