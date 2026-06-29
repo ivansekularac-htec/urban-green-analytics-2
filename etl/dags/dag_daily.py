@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from airflow.sdk import dag, task
+from pendulum import datetime
 from run_table import run_table
 from utils import get_tables_by_schedule
 
@@ -9,7 +10,7 @@ DAILY_SCHEDULE = "0 2 * * *"
 
 @dag(
     schedule="0 2 * * *",
-    start_date=datetime(2024, 1, 1),
+    start_date=datetime(2024, 1, 1, tz="UTC"),
     catchup=False,
     max_active_runs=1,
     tags=["app", "extract", "daily"],
