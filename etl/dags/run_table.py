@@ -1,7 +1,11 @@
+import logging
+
 from airflow.exceptions import AirflowSkipException
 from cursor import get_cursor, update_cursor
 from extractor import extract_table
 from parquet_writer import write_batches
+
+logger = logging.getLogger(__name__)
 
 
 def run_table(table_config: dict) -> None:
@@ -44,6 +48,7 @@ def run_table(table_config: dict) -> None:
         table_name=table_name,
         batch_iter=batch_iter,
         partition_column=partition_column,
+        cursor_column=cursor_column,
     )
 
     if rows_written == 0:

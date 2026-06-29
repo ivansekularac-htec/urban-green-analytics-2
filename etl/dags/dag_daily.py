@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow.sdk import dag, task
 from run_table import run_table
@@ -26,7 +26,7 @@ def app_extract_daily():
 
     tables = get_tables_by_schedule(DAILY_SCHEDULE)
 
-    @task
+    @task(retries=2, retry_delay=timedelta(minutes=5))
     def run(table_config: dict):
         """
         Execute the extraction pipeline for a single table.
