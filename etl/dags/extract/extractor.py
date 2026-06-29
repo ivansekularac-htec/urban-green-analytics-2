@@ -16,7 +16,7 @@ Design notes:
   an in-flight transaction. We compute ``run_cutoff = now - SAFETY_LAG_SECONDS``
   and never read past it, so a half-committed batch isn't captured behind a cursor
   that would then skip the rest. Configurable via the ``EXTRACT_SAFETY_LAG_SECONDS``
-  env var (default 2); no compose change required.
+  env var (default 30); no compose change required.
 
 * **Idempotency.** The high-watermark is snapshotted up front; rows are written
   with a single atomic S3 PUT per object; the cursor advances only afterwards. A
@@ -42,8 +42,9 @@ SCHEMA = "app"
 CURSOR_COLUMN = "updated_at"
 PRIMARY_KEY = "id"
 
-# Rows newer than (now - lag) may still be mid-write; ignore them this run.
-SAFETY_LAG_SECONDS = int(os.environ.get("EXTRACT_SAFETY_LAG_SECONDS", "2"))
+# Rows newer than (now - lag) may still be mid-write (a transaction can take a few
+# seconds to commit), so we don't read past the cutoff and risk skipping them.
+SAFETY_LAG_SECONDS = int(os.environ.get("EXTRACT_SAFETY_LAG_SECONDS", "30"))
 
 DEFAULT_CURSOR = {"updated_at": 0, "id": 0}
 
