@@ -11,6 +11,7 @@ HOURLY_SCHEDULE = "0 * * * *"
     schedule="@hourly",
     start_date=datetime(2024, 1, 1),
     catchup=False,
+    max_active_runs=1,
     tags=["app", "extract", "hourly"],
 )
 def app_extract_hourly():
@@ -27,7 +28,7 @@ def app_extract_hourly():
     tables = get_tables_by_schedule(HOURLY_SCHEDULE)
 
     @task(retries=2, retry_delay=timedelta(minutes=5))
-    def run(table_config: dict):
+    def extract(table_config: dict):
         """
         Execute the extraction pipeline for a single table.
 
@@ -38,7 +39,8 @@ def app_extract_hourly():
 
         run_table(table_config)
 
-    run.expand(table_config=tables)
+    for table in tables:
+        extract.override(task_id=f"extract_{table['name']}")(table)
 
 
 app_extract_hourly()

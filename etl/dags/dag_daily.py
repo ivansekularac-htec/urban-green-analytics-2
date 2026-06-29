@@ -11,6 +11,7 @@ DAILY_SCHEDULE = "0 2 * * *"
     schedule="0 2 * * *",
     start_date=datetime(2024, 1, 1),
     catchup=False,
+    max_active_runs=1,
     tags=["app", "extract", "daily"],
 )
 def app_extract_daily():
@@ -27,7 +28,7 @@ def app_extract_daily():
     tables = get_tables_by_schedule(DAILY_SCHEDULE)
 
     @task(retries=2, retry_delay=timedelta(minutes=5))
-    def run(table_config: dict):
+    def extract(table_config: dict):
         """
         Execute the extraction pipeline for a single table.
 
@@ -37,7 +38,8 @@ def app_extract_daily():
         """
         run_table(table_config)
 
-    run.expand(table_config=tables)
+    for table in tables:
+        extract.override(task_id=f"extract_{table['name']}")(table)
 
 
 app_extract_daily()
