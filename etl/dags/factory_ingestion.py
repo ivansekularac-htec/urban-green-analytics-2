@@ -37,15 +37,14 @@ def create_table_dag(config):
     """
 
     table = config["table"]
-    dag_id = f"extract_{table}"
 
     with DAG(
-        dag_id=dag_id,
+        dag_id=f"extract_{table}",
         start_date=datetime(2026, 1, 1),
         schedule=config["schedule"],
         catchup=False,
         tags=["ingestion", table],
-    ):
+    ) as dag:
 
         @task
         def run():
@@ -67,7 +66,7 @@ def create_table_dag(config):
         # Register the task within the DAG.
         run()
 
-    return dag_id
+    return dag
 
 
 # ---------------------------------------------------------

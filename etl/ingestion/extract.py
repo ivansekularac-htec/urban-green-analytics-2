@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta, timezone
+
 import pandas as pd
 from airflow.exceptions import AirflowSkipException
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from ingestion.config import POSTGRES_CONN_ID
+from ingestion.config import CURSOR_SAFETY_WINDOW_SECONDS, POSTGRES_CONN_ID
 from ingestion.state import get_cursor, set_cursor
 from ingestion.writer import write_dataframe
 
@@ -54,16 +56,32 @@ def extract_table(config):
     conn = pg.get_conn()
     cur = conn.cursor()
 
+    cutoff = int(
+        (
+            datetime.now(timezone.utc) - timedelta(seconds=CURSOR_SAFETY_WINDOW_SECONDS)
+        ).timestamp()
+    )
+
     query = f"""
         SELECT *
         FROM {schema}.{table}
-        WHERE
-            {cursor_column} > %s
-            OR ({cursor_column} = %s AND id > %s)
+        WHERE (
+                {cursor_column} > %s
+                OR ({cursor_column} = %s AND id > %s)
+            )
+        AND {cursor_column} <= %s
         ORDER BY {cursor_column}, id
     """
 
-    cur.execute(query, (last_ts, last_ts, last_id))
+    cur.execute(
+        query,
+        (
+            last_ts,
+            last_ts,
+            last_id,
+            cutoff,
+        ),
+    )
 
     rows = cur.fetchall()
     columns = [c[0] for c in cur.description]

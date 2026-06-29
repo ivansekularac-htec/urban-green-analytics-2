@@ -20,6 +20,11 @@ POSTGRES_CONN_ID = os.getenv("POSTGRES_CONN_ID", "urbangreen_db")
 MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
 
 # -------------------------
+# Extracting
+# -------------------------
+CURSOR_SAFETY_WINDOW_SECONDS = 30
+
+# -------------------------
 # Storage
 # -------------------------
 

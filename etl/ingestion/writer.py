@@ -8,6 +8,7 @@ Responsible for:
 """
 
 import os
+from io import BytesIO
 
 import pandas as pd
 
@@ -46,9 +47,14 @@ def write_dataframe(df, config, cursor_start, cursor_end):
     # CASE 1: NON-PARTITIONED TABLES
     # =====================================================
     if not partition_column:
-        parquet_path = f"/tmp/{table}_{cursor_end}.parquet"
+        buffer = BytesIO()
 
-        df.to_parquet(parquet_path, index=False)
+        df.to_parquet(
+            buffer,
+            index=False,
+        )
+
+        buffer.seek(0)
 
         object_key = build_object_key(
             table=table,
@@ -57,7 +63,7 @@ def write_dataframe(df, config, cursor_start, cursor_end):
         )
 
         upload_parquet(
-            parquet_path=parquet_path,
+            parquet_bytes=buffer.getvalue(),
             bucket=bucket,
             object_key=object_key,
         )
@@ -83,11 +89,14 @@ def write_dataframe(df, config, cursor_start, cursor_end):
         # Clean helper column before writing
         partition_df = partition_df.drop(columns="_partition_date")
 
-        parquet_path = (
-            f"/tmp/{table}_{partition_date}_{cursor_start}_{cursor_end}.parquet"
+        buffer = BytesIO()
+
+        partition_df.to_parquet(
+            buffer,
+            index=False,
         )
 
-        partition_df.to_parquet(parquet_path, index=False)
+        buffer.seek(0)
 
         object_key = build_object_key(
             table=table,
@@ -100,7 +109,7 @@ def write_dataframe(df, config, cursor_start, cursor_end):
         print(f"[{table}] Uploading partition {partition_date}")
 
         upload_parquet(
-            parquet_path=parquet_path,
+            parquet_bytes=buffer.getvalue(),
             bucket=bucket,
             object_key=object_key,
         )
