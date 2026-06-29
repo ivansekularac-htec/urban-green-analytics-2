@@ -9,8 +9,7 @@ Adding a new table requires only updating ``TABLE_CONFIGS``; no additional
 DAG code is necessary.
 """
 
-from datetime import datetime
-
+import pendulum
 from airflow import DAG
 from airflow.decorators import task
 from airflow.exceptions import AirflowSkipException
@@ -32,15 +31,15 @@ def create_table_dag(config):
             Table-specific ingestion configuration.
 
     Returns:
-        str:
-            Generated DAG identifier.
+        DAG:
+            Configured Airflow DAG instance.
     """
 
     table = config["table"]
 
     with DAG(
         dag_id=f"extract_{table}",
-        start_date=datetime(2026, 1, 1),
+        start_date=pendulum.datetime(2024, 1, 1, tz="UTC"),
         schedule=config["schedule"],
         catchup=False,
         # Cursor state is stored in a shared Airflow Variable,
