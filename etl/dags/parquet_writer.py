@@ -1,58 +1,104 @@
 import io
 import logging
-from datetime import datetime, timezone
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
-import pyarrow as pa
-import pyarrow.parquet as pq
+import pandas as pd
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from config import BUCKET_NAME, MINIO_CONN_ID
 
 logger = logging.getLogger(__name__)
 
 
-def _partition_rows(
-    rows: Sequence[Tuple],
-    columns: Sequence[str],
+def build_sorted_df(
+    rows: List[tuple],
+    columns: List[str],
+    cursor_column: str,
+    id_column: str,
+) -> pd.DataFrame:
+    """Create and sort DataFrame by cursor and id."""
+    if cursor_column not in columns:
+        raise KeyError(f"Cursor column '{cursor_column}' not found")
+
+    df = pd.DataFrame(rows, columns=columns)
+    return df.sort_values([cursor_column, id_column])
+
+
+def extract_cursor_bounds(
+    df: pd.DataFrame,
+    cursor_column: str,
+    id_column: str,
+) -> Tuple[Tuple[Any, Any], Tuple[Any, Any]]:
+    """Extract first and last cursor boundaries from sorted DataFrame."""
+    first = df.iloc[0]
+    last = df.iloc[-1]
+
+    cursor_from = (first[cursor_column], first[id_column])
+    cursor_to = (last[cursor_column], last[id_column])
+
+    return cursor_from, cursor_to
+
+
+def update_max_cursor(
+    current_max: Tuple[Any, Any],
+    new_cursor_to: Tuple[Any, Any],
+) -> Tuple[Any, Any]:
+    """Keep highest cursor based on tuple comparison."""
+    if current_max == (None, None):
+        return new_cursor_to
+    return max(current_max, new_cursor_to)
+
+
+def add_partition_column(
+    df: pd.DataFrame,
     partition_column: Optional[str],
-) -> List[Tuple[Tuple, Optional[object]]]:
-    if partition_column is None or partition_column not in columns:
-        return [(tuple(rows), None)]
+):
+    """
+    Add partition column and return grouped dataframe.
+    If no partition column is provided, returns single group.
+    """
+    if partition_column and partition_column in df.columns:
+        df = df.copy()
+        df["_partition_day"] = pd.to_datetime(
+            df[partition_column],
+            unit="s",
+            utc=True,
+            errors="coerce",
+        ).dt.strftime("%Y-%m-%d")
 
-    partition_idx = columns.index(partition_column)
-    partitioned_rows = {}
+        return df.groupby("_partition_day", sort=True)
 
-    for row in rows:
-        value = row[partition_idx]
-
-        if isinstance(value, datetime):
-            partition_key = value.date()
-        elif isinstance(value, (int, float)):
-            partition_key = datetime.fromtimestamp(
-                value,
-                tz=timezone.utc,
-            ).date()
-        else:
-            partition_key = value
-
-        partitioned_rows.setdefault(partition_key, []).append(row)
-
-    return [
-        (tuple(group), partition_key)
-        for partition_key, group in partitioned_rows.items()
-    ]
+    return [(None, df)]
 
 
-def _format_partition_value(partition_value: object) -> str:
-    if isinstance(partition_value, datetime):
-        return partition_value.strftime("%Y-%m-%d")
+def build_object_key(
+    table_name: str,
+    cursor_from: Tuple[Any, Any],
+    cursor_to: Tuple[Any, Any],
+    batch_index: int,
+    partition_value: Optional[str] = None,
+) -> str:
+    """Generate S3 object key for parquet file."""
+    filename = f"{table_name}_{cursor_from}_{cursor_to}_{batch_index}.parquet"
 
-    if isinstance(partition_value, (int, float)):
-        return datetime.fromtimestamp(partition_value, tz=timezone.utc).strftime(
-            "%Y-%m-%d"
-        )
+    if partition_value is None:
+        return f"app/{table_name}/{filename}"
 
-    return str(partition_value)
+    return f"app/{table_name}/harvest_date={partition_value}/{filename}"
+
+
+def upload_parquet(
+    s3: S3Hook,
+    buffer: io.BytesIO,
+    bucket: str,
+    key: str,
+):
+    """Upload parquet buffer to S3."""
+    s3.load_file_obj(
+        file_obj=buffer,
+        key=key,
+        bucket_name=bucket,
+        replace=True,
+    )
 
 
 def write_batches(
@@ -60,6 +106,7 @@ def write_batches(
     batch_iter: Iterable[Tuple[List[tuple], List[str]]],
     partition_column: Optional[str],
     cursor_column: str = "updated_at",
+    id_column: str = "id",
 ):
     """
     Stream batches from Postgres extractor and upload Parquet files to MinIO via S3Hook.
@@ -72,11 +119,10 @@ def write_batches(
         max_cursor (int), written rows: highest cursor value processed
     """
 
-    hook = S3Hook(aws_conn_id=MINIO_CONN_ID)
-
+    s3 = S3Hook(aws_conn_id=MINIO_CONN_ID)
     bucket = BUCKET_NAME
 
-    max_cursor = -1
+    max_cursor = (None, None)
     batch_index = 0
     rows_written = 0
 
@@ -84,65 +130,41 @@ def write_batches(
         if not rows:
             continue
 
-        if cursor_column not in columns:
-            raise KeyError(
-                f"Cursor column '{cursor_column}' not found in table columns"
-            )
+        df = build_sorted_df(rows, columns, cursor_column, id_column)
 
-        logger.info(
-            "Processing batch for table '%s': %s rows with cursor column '%s'",
-            table_name,
-            len(rows),
-            cursor_column,
-        )
+        cursor_from, cursor_to = extract_cursor_bounds(df, cursor_column, id_column)
+        max_cursor = update_max_cursor(max_cursor, cursor_to)
 
-        cursor_idx = columns.index(cursor_column)
-        cursor_from = rows[0][cursor_idx]
-        cursor_to = rows[-1][cursor_idx]
-        max_cursor = max(max_cursor, cursor_to)
+        grouped = add_partition_column(df, partition_column)
 
-        partitioned_groups = _partition_rows(rows, columns, partition_column)
-
-        for group_rows, partition_value in partitioned_groups:
-            rows_written += len(group_rows)
-
-            table = pa.Table.from_arrays(list(zip(*group_rows)), names=columns)
+        for partition_value, group in grouped:
+            rows_written += len(group)
 
             buffer = io.BytesIO()
-            pq.write_table(table, buffer, compression="snappy")
+            group.to_parquet(
+                buffer,
+                engine="pyarrow",
+                compression="snappy",
+                index=False,
+            )
             buffer.seek(0)
 
-            if partition_column is None or partition_column not in columns:
-                object_key = (
-                    f"app/{table_name}/"
-                    f"{table_name}_{cursor_from}_{cursor_to}_{batch_index}.parquet"
-                )
-            else:
-                partition_date = _format_partition_value(partition_value)
-                object_key = (
-                    f"app/{table_name}/"
-                    f"harvest_date={partition_date}/"
-                    f"{table_name}_{cursor_from}_{cursor_to}_{batch_index}.parquet"
-                )
+            object_key = build_object_key(
+                table_name,
+                cursor_from,
+                cursor_to,
+                batch_index,
+                partition_value,
+            )
 
             logger.info(
-                "Writing %s rows for table '%s' to MinIO path '%s'",
-                len(group_rows),
+                "Writing %s rows for table '%s' to '%s'",
+                len(group),
                 table_name,
                 object_key,
             )
 
-            try:
-                hook.load_file_obj(
-                    file_obj=buffer,
-                    key=object_key,
-                    bucket_name=bucket,
-                    replace=True,
-                )
-            except Exception as exc:
-                raise RuntimeError(
-                    f"Failed to upload parquet object '{object_key}' for table '{table_name}': {exc}"
-                ) from exc
+            upload_parquet(s3, buffer, bucket, object_key)
 
             batch_index += 1
 

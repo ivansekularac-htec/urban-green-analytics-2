@@ -6,10 +6,6 @@ import os
 
 POSTGRES_CONN_ID = "urbangreen_db"
 MINIO_CONN_ID = "urbangreen_minio"
-
-# BUCKET_NAME = Variable.get("minio_bucket", default_var="staging")
-# SCHEMA = Variable.get("postgres_schema", default_var="app")
-
 SCHEMA = os.getenv("POSTGRES_SCHEMA", "app")
 BUCKET_NAME = os.getenv("MINIO_STAGING_BUCKET", "staging")
 

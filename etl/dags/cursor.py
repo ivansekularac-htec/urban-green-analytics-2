@@ -1,3 +1,5 @@
+import json
+
 from airflow.sdk import Variable
 
 
@@ -32,12 +34,13 @@ def get_cursor(table: str) -> int:
     try:
         value = Variable.get(variable_name(table))
     except Exception:
-        return 0
+        return (0, 0)
 
     try:
-        return int(value)
+        data = json.loads(value)
+        return (int(data["updated_at"]), int(data["id"]))
     except (TypeError, ValueError):
-        return 0
+        return (0, 0)
 
 
 def update_cursor(table: str, cursor: int):
@@ -49,10 +52,20 @@ def update_cursor(table: str, cursor: int):
         cursor: Cursor value to persist.
     """
 
-    if cursor is None:
+    if not cursor:
         return
 
-    Variable.set(variable_name(table), str(cursor))
+    updated_at, id_value = cursor
+
+    Variable.set(
+        variable_name(table),
+        json.dumps(
+            {
+                "updated_at": int(updated_at),
+                "id": int(id_value),
+            }
+        ),
+    )
 
 
 def reset_cursor(table: str):

@@ -1,5 +1,7 @@
 import logging
-from typing import Iterator, List, Tuple
+from datetime import datetime, timedelta, timezone
+from typing import Any, Iterator, List, Optional, Tuple
+from uuid import uuid4
 
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from config import (
@@ -10,10 +12,91 @@ from config import (
 logger = logging.getLogger(__name__)
 
 
+def get_table_columns(conn, schema: str, table_name: str) -> List[str]:
+    """Fetch column names from Postgres information schema."""
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = %s AND table_name = %s
+            ORDER BY ordinal_position
+            """,
+            (schema, table_name),
+        )
+        return [row[0] for row in cur.fetchall()]
+    finally:
+        cur.close()
+
+
+def validate_columns(
+    columns: List[str],
+    cursor_column: str,
+    id_column: str,
+    table_name: str,
+):
+    """Ensure required columns exist in table schema."""
+    if cursor_column not in columns:
+        raise ValueError(f"Cursor column '{cursor_column}' not found in '{table_name}'")
+    if id_column not in columns:
+        raise ValueError(f"Id column '{id_column}' not found in '{table_name}'")
+
+
+def build_extract_sql(
+    schema: str,
+    table_name: str,
+    cursor_column: str,
+    id_column: str,
+) -> str:
+    """Build extraction SQL with cursor pagination."""
+    return f'''
+        SELECT *
+        FROM "{schema}"."{table_name}"
+        WHERE ("{cursor_column}", "{id_column}") > (%s, %s)
+          AND "{cursor_column}" <= %s
+        ORDER BY "{cursor_column}" ASC, "{id_column}" ASC
+    '''
+
+
+def get_upper_bound() -> int:
+    """Return safe upper bound timestamp (30s lag for consistency)."""
+    return int((datetime.now(timezone.utc) - timedelta(seconds=30)).timestamp())
+
+
+def stream_query(
+    conn,
+    sql: str,
+    params: tuple,
+    batch_size: int,
+    table_name: str,
+) -> Iterator[Tuple[List[tuple], List[str]]]:
+    """Stream query results using server-side cursor."""
+    cur = conn.cursor(name=f"extract_{table_name}_{uuid4().hex}")
+    cur.itersize = batch_size
+    cur.execute(sql, params)
+
+    columns = None
+
+    try:
+        while True:
+            rows = cur.fetchmany(batch_size)
+            if not rows:
+                break
+
+            if columns is None:
+                columns = [desc[0] for desc in cur.description]
+
+            yield rows, columns
+    finally:
+        cur.close()
+
+
 def extract_table(
     table_name: str,
-    cursor: int,
+    cursor: Optional[Tuple[Any, Any]],
     cursor_column: str,
+    id_column: str = "id",
     batch_size: int = 10000,
 ) -> Iterator[Tuple[List[tuple], List[str]]]:
     """
@@ -29,7 +112,7 @@ def extract_table(
         table_name (str):
             Name of the table inside the configured schema.
 
-        cursor (int):
+        cursor (int, int):
             Last successfully processed cursor value (typically epoch timestamp
             stored in Airflow Variables).
 
@@ -47,49 +130,35 @@ def extract_table(
 
     hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
 
+    conn = None
     try:
         conn = hook.get_conn()
-        cur = conn.cursor()
 
-        column_query = """
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_schema = %s AND table_name = %s
-            ORDER BY ordinal_position
-        """
-        cur.execute(column_query, (SCHEMA, table_name))
-        available_columns = [row[0] for row in cur.fetchall()]
+        columns = get_table_columns(conn, SCHEMA, table_name)
 
-        if cursor_column not in available_columns:
-            raise ValueError(
-                f"Cursor column '{cursor_column}' not found in table '{table_name}'"
-            )
+        validate_columns(columns, cursor_column, id_column, table_name)
 
-        select_list = ", ".join(f'"{column}"' for column in available_columns)
-        sql = f"""
-            SELECT {select_list}
-            FROM {SCHEMA}.{table_name}
-            WHERE {cursor_column} > %s
-            ORDER BY {cursor_column} ASC
-        """
-
-        logger.info(
-            "Extracting table '%s' from schema '%s' using cursor '%s' and batch size %s",
-            table_name,
+        sql = build_extract_sql(
             SCHEMA,
+            table_name,
             cursor_column,
-            batch_size,
+            id_column,
         )
-        cur.execute(sql, (cursor,))
 
-        columns = [desc[0] for desc in cur.description]
+        cursor = cursor or (0, 0)
+        upper_bound = get_upper_bound()
 
-        while True:
-            rows = cur.fetchmany(batch_size)
-            if not rows:
-                break
-            yield rows, columns
+        yield from stream_query(
+            conn,
+            sql,
+            (cursor[0], cursor[1], upper_bound),
+            batch_size,
+            table_name,
+        )
+
     except Exception as exc:
-        raise RuntimeError(
-            f"Failed to extract data for table '{table_name}' from schema '{SCHEMA}': {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to extract '{SCHEMA}.{table_name}': {exc}") from exc
+
+    finally:
+        if conn is not None:
+            conn.close()
