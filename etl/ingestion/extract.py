@@ -17,25 +17,12 @@ def extract_table(config):
     """
     Incrementally extracts data from a Postgres table and writes it to MinIO as Parquet.
 
-    This is the core ingestion unit of the pipeline.
-
     Flow:
-        1. Read last processed cursor from Airflow Variables
-        2. Query Postgres for new rows using composite cursor (updated_at + id)
-        3. Convert results to DataFrame
-        4. Write Parquet file(s) to MinIO
-        5. Update cursor ONLY after successful write
-        6. Return execution metadata
-
-    Cursor strategy:
-        - Primary: updated_at (or configured cursor_column)
-        - Secondary: id (for deterministic ordering)
-
-    Args:
-        config (dict): Table ingestion configuration
-
-    Returns:
-        dict: Execution result metadata
+        1. Read last processed cursor
+        2. Query Postgres with safety cutoff
+        3. Stream results in chunks
+        4. Write each chunk to MinIO
+        5. Advance cursor after successful write
     """
 
     table = config["table"]
@@ -56,7 +43,6 @@ def extract_table(config):
     # 2. QUERY POSTGRES
     # ---------------------------------------------------------
     pg = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
-
     conn = pg.get_conn()
     cur = conn.cursor()
 
@@ -77,67 +63,68 @@ def extract_table(config):
         ORDER BY {cursor_column}, id
     """
 
-    cur.execute(
-        query,
-        (
-            last_ts,
-            last_ts,
-            last_id,
-            cutoff,
-        ),
-    )
+    cur.execute(query, (last_ts, last_ts, last_id, cutoff))
 
     columns = [c[0] for c in cur.description]
 
     # ---------------------------------------------------------
-    # 3. PROCESS RESULT SET IN CHUNKS
+    # 3. READ FIRST CHUNK (IMPORTANT: determines SKIP safely)
     # ---------------------------------------------------------
+    rows = cur.fetchmany(INGESTION_CHUNK_SIZE)
 
+    if not rows:
+        cur.close()
+        conn.close()
+        raise AirflowSkipException(f"No new rows found for table '{table}'")
+
+    # ---------------------------------------------------------
+    # 4. PROCESS CHUNKS
+    # ---------------------------------------------------------
     rows_count = 0
     last_row = None
-    first_batch = True
 
-    while True:
-        rows = cur.fetchmany(INGESTION_CHUNK_SIZE)
-
-        if not rows:
-            break
-
-        if first_batch:
-            first_batch = False
-
+    while rows:
         df = pd.DataFrame(rows, columns=columns)
 
-        # Preserve deterministic ordering
+        # Ensure deterministic ordering
         df = df.sort_values([cursor_column, "id"])
 
         batch_first = df.iloc[0]
         batch_last = df.iloc[-1]
 
+        start_cursor = {
+            "updated_at": int(batch_first[cursor_column]),
+            "id": int(batch_first["id"]),
+        }
+
+        end_cursor = {
+            "updated_at": int(batch_last[cursor_column]),
+            "id": int(batch_last["id"]),
+        }
+
+        # Write batch BEFORE moving cursor
         write_dataframe(
             df=df,
             config=config,
-            cursor_start=int(batch_first[cursor_column]),
-            cursor_end=int(batch_last[cursor_column]),
+            start_cursor=start_cursor,
+            end_cursor=end_cursor,
         )
 
         rows_count += len(df)
         last_row = batch_last
 
+        # next batch
+        rows = cur.fetchmany(INGESTION_CHUNK_SIZE)
+
+    # ---------------------------------------------------------
+    # 5. CLEANUP DB RESOURCES
+    # ---------------------------------------------------------
     cur.close()
     conn.close()
 
     # ---------------------------------------------------------
-    # 4. NO NEW DATA CASE
+    # 6. UPDATE CURSOR (ONLY AFTER SUCCESS)
     # ---------------------------------------------------------
-
-    if last_row is None:
-        raise AirflowSkipException(f"No new rows found for table '{table}'")
-
-    # ---------------------------------------------------------
-    # 5. UPDATE CURSOR
-    # ---------------------------------------------------------
-
     cursor_after = {
         "updated_at": int(last_row[cursor_column]),
         "id": int(last_row["id"]),
@@ -148,26 +135,24 @@ def extract_table(config):
     print(f"[{table}] Cursor updated → {cursor_after}")
 
     # ---------------------------------------------------------
-    # 6. RETURN RESULT
+    # 7. RESULT
     # ---------------------------------------------------------
     return build_result(
         table=table,
-        rows_count=rows_count,
+        rows=rows_count,
         status="SUCCESS",
         cursor_before=cursor_before,
         cursor_after=cursor_after,
     )
 
 
-def build_result(table, rows_count, status, cursor_before, cursor_after):
+def build_result(table, rows, status, cursor_before, cursor_after):
     """
     Standardized ingestion result object.
-
-    Used for logging, debugging, and future observability extensions.
     """
     return {
         "table": table,
-        "rows": rows_count,
+        "rows": rows,
         "status": status,
         "cursor_before": cursor_before,
         "cursor_after": cursor_after,

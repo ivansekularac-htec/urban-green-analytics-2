@@ -21,7 +21,7 @@ from ingestion.storage import upload_parquet
 DEFAULT_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
 
 
-def write_dataframe(df, config, cursor_start, cursor_end):
+def write_dataframe(df, config, start_cursor, end_cursor):
     """
     Writes a single extraction batch to MinIO.
 
@@ -60,8 +60,8 @@ def write_dataframe(df, config, cursor_start, cursor_end):
 
         object_key = build_object_key(
             table=table,
-            cursor_start=cursor_start,
-            cursor_end=cursor_end,
+            start_cursor=start_cursor,
+            end_cursor=end_cursor,
         )
 
         upload_parquet(
@@ -98,8 +98,8 @@ def write_dataframe(df, config, cursor_start, cursor_end):
 
         object_key = build_object_key(
             table=table,
-            cursor_start=cursor_start,
-            cursor_end=cursor_end,
+            start_cursor=start_cursor,
+            end_cursor=end_cursor,
             partition_column=partition_column,
             partition_value=partition_date,
         )

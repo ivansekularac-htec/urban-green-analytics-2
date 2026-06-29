@@ -1,7 +1,7 @@
 def build_object_key(
     table,
-    cursor_start,
-    cursor_end,
+    start_cursor,
+    end_cursor,
     partition_column=None,
     partition_value=None,
 ):
@@ -31,7 +31,11 @@ def build_object_key(
     # Encode the cursor range in the filename.
     # Each extraction batch produces a unique object.
     # ---------------------------------------------------------
-    filename = f"updated_at={cursor_start}_{cursor_end}.parquet"
+    filename = (
+        f"updated_at="
+        f"{start_cursor['updated_at']}-{start_cursor['id']}_"
+        f"{end_cursor['updated_at']}-{end_cursor['id']}.parquet"
+    )
 
     # ---------------------------------------------------------
     # Partitioned layout
