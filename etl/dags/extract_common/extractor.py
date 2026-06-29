@@ -4,6 +4,7 @@ import json
 import logging
 from typing import Any
 
+import pandas as pd
 from airflow.exceptions import AirflowSkipException
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
@@ -13,7 +14,7 @@ from extract_common.postgres_reader import (
     assert_table_shape,
     get_run_cutoff,
     get_upper_cursor,
-    read_changed_rows,
+    read_changed_rows_in_chunks,
 )
 from extract_common.settings import POSTGRES_CONN_ID
 from extract_common.validation import normalize_config, validate_config
@@ -67,7 +68,12 @@ def extract_table_to_minio(table_config: dict[str, Any]) -> dict[str, Any]:
         logger.info(message)
         raise AirflowSkipException(message)
 
-    dataframe = read_changed_rows(
+    object_keys: list[str] = []
+    total_rows = 0
+    chunk_count = 0
+    chunk_previous_cursor = previous_cursor
+
+    for dataframe_chunk in read_changed_rows_in_chunks(
         postgres=postgres,
         schema=schema,
         table=table_name,
@@ -75,9 +81,35 @@ def extract_table_to_minio(table_config: dict[str, Any]) -> dict[str, Any]:
         primary_key=primary_key,
         previous_cursor=previous_cursor,
         upper_cursor=upper_cursor,
-    )
+    ):
+        if dataframe_chunk.empty:
+            continue
 
-    if dataframe.empty:
+        chunk_count += 1
+        total_rows += len(dataframe_chunk)
+
+        chunk_upper_cursor = build_chunk_upper_cursor(
+            dataframe=dataframe_chunk,
+            cursor_column=cursor_column,
+            primary_key=primary_key,
+        )
+
+        chunk_object_keys = write_dataframe_to_minio(
+            dataframe=dataframe_chunk,
+            table=table_name,
+            partition_column=partition_column,
+            partition_name=partition_name,
+            previous_cursor=chunk_previous_cursor,
+            upper_cursor=chunk_upper_cursor,
+        )
+
+        object_keys.extend(chunk_object_keys)
+
+        # Move the in-memory chunk cursor only after this chunk is uploaded successfully.
+        # The Airflow cursor variable is still updated only after all chunks succeed.
+        chunk_previous_cursor = chunk_upper_cursor
+
+    if total_rows == 0:
         message = (
             f"Upper cursor {upper_cursor} existed for {schema}.{table_name}, "
             "but no rows were read. Marking task as skipped."
@@ -85,21 +117,13 @@ def extract_table_to_minio(table_config: dict[str, Any]) -> dict[str, Any]:
         logger.info(message)
         raise AirflowSkipException(message)
 
-    object_keys = write_dataframe_to_minio(
-        dataframe=dataframe,
-        table=table_name,
-        partition_column=partition_column,
-        partition_name=partition_name,
-        previous_cursor=previous_cursor,
-        upper_cursor=upper_cursor,
-    )
-
     # Critical ordering: advance the cursor only after every Parquet upload succeeds.
     set_cursor(cursor_key, upper_cursor)
 
     result = {
         "table": f"{schema}.{table_name}",
-        "rows": len(dataframe),
+        "rows": total_rows,
+        "chunks": chunk_count,
         "previous_cursor": previous_cursor,
         "new_cursor": upper_cursor,
         "object_keys": object_keys,
@@ -107,3 +131,17 @@ def extract_table_to_minio(table_config: dict[str, Any]) -> dict[str, Any]:
 
     logger.info("Extract completed: %s", json.dumps(result, sort_keys=True))
     return result
+
+
+def build_chunk_upper_cursor(
+    dataframe: pd.DataFrame,
+    cursor_column: str,
+    primary_key: str,
+) -> dict[str, int]:
+    """Build the upper cursor for one already ordered DataFrame chunk."""
+    last_row = dataframe.iloc[-1]
+
+    return {
+        "updated_at": int(last_row[cursor_column]),
+        "id": int(last_row[primary_key]),
+    }
