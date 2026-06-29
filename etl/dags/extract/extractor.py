@@ -43,7 +43,7 @@ CURSOR_COLUMN = "updated_at"
 PRIMARY_KEY = "id"
 
 # Rows newer than (now - lag) may still be mid-write; ignore them this run.
-SAFETY_LAG_SECONDS = int(os.environ.get("EXTRACT_SAFETY_LAG_SECONDS", "2"))
+SAFETY_LAG_SECONDS = int(os.environ.get("EXTRACT_SAFETY_LAG_SECONDS", "30"))
 
 DEFAULT_CURSOR = {"updated_at": 0, "id": 0}
 
@@ -114,10 +114,12 @@ def _high_watermark(
 def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
     """Fetch rows in the keyset window (low, high] as a DataFrame.
 
-    Uses the raw psycopg2 cursor and builds the DataFrame by hand: pandas'
-
+    Reads rows in chunks to avoid loading the entire result set into memory
+    at once while still returning a single DataFrame for downstream logic.
     """
     import pandas as pd
+
+    CHUNK_SIZE = 10_000
 
     select_sql = f"""
         SELECT *
@@ -126,6 +128,7 @@ def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
           AND ({CURSOR_COLUMN} < %s OR ({CURSOR_COLUMN} = %s AND {PRIMARY_KEY} <= %s))
         ORDER BY {CURSOR_COLUMN}, {PRIMARY_KEY}
     """
+
     params = (
         low["updated_at"],
         low["updated_at"],
@@ -134,15 +137,32 @@ def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
         high["updated_at"],
         high["id"],
     )
+
     conn = pg.get_conn()
+
     try:
+        chunks = []
+
         with conn.cursor() as cur:
             cur.execute(select_sql, params)
+
             columns = [desc[0] for desc in cur.description]
-            rows = cur.fetchall()
+
+            while True:
+                rows = cur.fetchmany(CHUNK_SIZE)
+
+                if not rows:
+                    break
+
+                chunks.append(pd.DataFrame(rows, columns=columns))
+
+        if not chunks:
+            return pd.DataFrame(columns=columns)
+
+        return pd.concat(chunks, ignore_index=True)
+
     finally:
         conn.close()
-    return pd.DataFrame(rows, columns=columns)
 
 
 def _assert_table_shape(pg, table: str, partition_by: str | None) -> None:
@@ -199,7 +219,10 @@ def run_extract(
         )
 
     s3 = S3Hook(aws_conn_id=MINIO_CONN_ID)
-    bucket = os.environ["MINIO_STAGING_BUCKET"]
+    bucket = os.environ.get(
+        "MINIO_STAGING_BUCKET",
+        "staging",
+    )
     # Range tag encodes the full (updated_at, id) window so the key shows exactly
     # which slice of changes the file covers.
     range_tag = f"{low['updated_at']}_{low['id']}__{high['updated_at']}_{high['id']}"
