@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import pendulum
-from airflow.providers.standard.operators.python import PythonOperator
-from airflow.sdk import DAG
+from typing import Any
 
+import pendulum
+from airflow.sdk import DAG, task
 from extract_common.extractor import extract_table_to_minio
 from extract_common.table_config import APP_TABLES, ExtractTable
 
@@ -27,12 +27,15 @@ def build_extract_dag(table: ExtractTable) -> DAG:
         default_args=DEFAULT_ARGS,
         tags=["urbangreen", "postgres", "minio", "staging", "extract"],
     ) as dag:
-        PythonOperator(
+
+        @task(
             task_id=f"extract_{table.name}",
-            python_callable=extract_table_to_minio,
-            op_kwargs={"table_config": table.to_dict()},
             show_return_value_in_logs=False,
         )
+        def extract_app_table(table_config: dict[str, Any]) -> None:
+            extract_table_to_minio(table_config=table_config)
+
+        extract_app_table(table_config=table.to_dict())
 
     return dag
 

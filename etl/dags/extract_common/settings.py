@@ -9,9 +9,11 @@ MINIO_CONN_ID: Final[str] = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
 MINIO_STAGING_BUCKET: Final[str] = os.getenv("MINIO_STAGING_BUCKET", "staging")
 MINIO_STAGING_PREFIX: Final[str] = os.getenv(
     "MINIO_STAGING_PREFIX",
-    "staging/postgres/app",
+    "postgres/app",
 ).strip("/")
 
-EXTRACT_SAFETY_LAG_SECONDS: Final[int] = int(os.getenv("EXTRACT_SAFETY_LAG_SECONDS", "2"))
+EXTRACT_SAFETY_LAG_SECONDS: Final[int] = int(
+    os.getenv("EXTRACT_SAFETY_LAG_SECONDS", "60")
+)
 
 DEFAULT_CURSOR: Final[dict[str, int]] = {"updated_at": 0, "id": 0}
