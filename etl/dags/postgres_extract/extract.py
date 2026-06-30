@@ -37,17 +37,23 @@ def _get_high_watermark(
     cursor_column: str,
 ) -> int:
     """
-    Return a safe ceiling as a Unix timestamp in seconds (bigint) to avoid
-    skipping rows from in-flight transactions that have not committed yet.
+    Return the highest source cursor value that is older than the safety lag.
     """
-    query = "SELECT EXTRACT(EPOCH FROM NOW() - INTERVAL '30 seconds')::bigint"
+    query = f"""
+        SELECT COALESCE(MAX("{cursor_column}"), 0)
+        FROM "{POSTGRES_SCHEMA}"."{table_name}"
+        WHERE "{cursor_column}" <=
+            EXTRACT(EPOCH FROM NOW() - INTERVAL '30 seconds')::bigint
+    """
 
     with connection.cursor() as cursor:
         cursor.execute(query)
         result = cursor.fetchone()
 
     if result is None:
-        raise RuntimeError("Could not determine extraction ceiling timestamp.")
+        raise RuntimeError(
+            f"Could not determine high watermark for {POSTGRES_SCHEMA}.{table_name}."
+        )
 
     return int(result[0])
 
