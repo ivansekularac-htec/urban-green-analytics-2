@@ -3,3 +3,4 @@ apache-airflow-providers-amazon
 apache-airflow-providers-apache-spark
 pyarrow
 pandas
+pyyaml

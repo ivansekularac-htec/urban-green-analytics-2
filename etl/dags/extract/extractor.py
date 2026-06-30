@@ -26,11 +26,16 @@ Design notes:
 
 from __future__ import annotations
 
+import io
 import logging
 import os
 import re
+from collections.abc import Iterator
 
+import pandas as pd
 from airflow.exceptions import AirflowSkipException
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.sdk import Variable
 
 logger = logging.getLogger(__name__)
@@ -111,15 +116,19 @@ def _high_watermark(
     return {"updated_at": int(row[0]), "id": int(row[1])}
 
 
-def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
-    """Fetch rows in the keyset window (low, high] as a DataFrame.
+def _read_window_batches(
+    pg,
+    table: str,
+    low: dict[str, int],
+    high: dict[str, int],
+) -> Iterator[pd.DataFrame]:
+    """Yield DataFrame batches for the keyset window (low, high].
 
-    Reads rows in chunks to avoid loading the entire result set into memory
-    at once while still returning a single DataFrame for downstream logic.
+    Reads rows incrementally using fetchmany() so large backfills do not
+    materialize the entire result set in memory at once.
     """
-    import pandas as pd
 
-    CHUNK_SIZE = 10_000
+    CHUNK_SIZE = int(os.environ.get("EXTRACT_CHUNK_SIZE", "10000"))
 
     select_sql = f"""
         SELECT *
@@ -141,8 +150,6 @@ def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
     conn = pg.get_conn()
 
     try:
-        chunks = []
-
         with conn.cursor() as cur:
             cur.execute(select_sql, params)
 
@@ -154,12 +161,7 @@ def _read_window(pg, table: str, low: dict[str, int], high: dict[str, int]):
                 if not rows:
                     break
 
-                chunks.append(pd.DataFrame(rows, columns=columns))
-
-        if not chunks:
-            return pd.DataFrame(columns=columns)
-
-        return pd.concat(chunks, ignore_index=True)
+                yield pd.DataFrame(rows, columns=columns)
 
     finally:
         conn.close()
@@ -190,11 +192,6 @@ def run_extract(
     partition_label: str | None = None,
 ) -> None:
     """Extract one table's changes since its cursor and land them as Parquet."""
-    import io
-
-    import pandas as pd
-    from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-    from airflow.providers.postgres.hooks.postgres import PostgresHook
 
     table = _safe_identifier(table)
     if partition_by is not None:
@@ -212,49 +209,75 @@ def run_extract(
             f"No new rows in {SCHEMA}.{table} since cursor {low} (run_cutoff={run_cutoff})."
         )
 
-    df = _read_window(pg, table, low, high)
-    if df.empty:
-        raise AirflowSkipException(
-            f"No rows read for {SCHEMA}.{table} in window {low}..{high}."
-        )
+    batches = _read_window_batches(
+        pg,
+        table,
+        low,
+        high,
+    )
 
     s3 = S3Hook(aws_conn_id=MINIO_CONN_ID)
     bucket = os.environ.get(
         "MINIO_STAGING_BUCKET",
         "staging",
     )
-    # Range tag encodes the full (updated_at, id) window so the key shows exactly
-    # which slice of changes the file covers.
+
     range_tag = f"{low['updated_at']}_{low['id']}__{high['updated_at']}_{high['id']}"
 
     written_keys: list[str] = []
+    rows_written = 0
+    batch_count = 0
 
     def _write(chunk: pd.DataFrame, key: str) -> None:
         buf = io.BytesIO()
         chunk.to_parquet(buf, engine="pyarrow", index=False)
-        # Single atomic PUT; replace=True makes a re-run overwrite the same key.
-        s3.load_bytes(buf.getvalue(), key=key, bucket_name=bucket, replace=True)
+
+        s3.load_bytes(
+            buf.getvalue(),
+            key=key,
+            bucket_name=bucket,
+            replace=True,
+        )
+
         written_keys.append(key)
 
-    if partition_by:
-        days = pd.to_datetime(df[partition_by], unit="s", utc=True).dt.strftime(
-            "%Y-%m-%d"
+    for batch_no, chunk in enumerate(batches, start=1):
+        batch_count += 1
+        rows_written += len(chunk)
+
+        if partition_by:
+            days = pd.to_datetime(
+                chunk[partition_by],
+                unit="s",
+                utc=True,
+            ).dt.strftime("%Y-%m-%d")
+
+            for day, group in chunk.groupby(days):
+                key = (
+                    f"app/{table}/"
+                    f"{partition_label}={day}/"
+                    f"{table}__{range_tag}__part_{batch_no:05d}.parquet"
+                )
+
+                _write(group, key)
+
+        else:
+            key = f"app/{table}/{table}__{range_tag}__part_{batch_no:05d}.parquet"
+
+            _write(chunk, key)
+
+    if batch_count == 0:
+        raise AirflowSkipException(
+            f"No rows read for {SCHEMA}.{table} in window {low}..{high}."
         )
-        for day, group in df.groupby(days):
-            key = f"app/{table}/{partition_label}={day}/{table}__{range_tag}.parquet"
-            _write(group, key)
-    else:
-        key = f"app/{table}/{table}__{range_tag}.parquet"
-        _write(df, key)
 
     # Advance the cursor only after every write above has succeeded.
     set_cursor(table, high)
-
     logger.info(
         "extract %s.%s: %d row(s), cursor %s -> %s, %d object(s) written",
         SCHEMA,
         table,
-        len(df),
+        rows_written,
         low,
         high,
         len(written_keys),

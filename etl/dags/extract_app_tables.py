@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import datetime
 
+import pendulum
 from airflow.sdk import dag, task
 
 # The sibling ``extract`` package lives in the dags folder, which isn't always on
@@ -33,7 +33,12 @@ def _build_extract_dag(cfg: dict):
     @dag(
         dag_id=f"extract_{table}",
         schedule=cfg["schedule"],
-        start_date=datetime(2024, 1, 1),
+        start_date=pendulum.datetime(
+            2024,
+            1,
+            1,
+            tz="UTC",
+        ),
         catchup=False,
         # Cursor is shared state — never let two runs of the same table overlap.
         max_active_runs=1,
