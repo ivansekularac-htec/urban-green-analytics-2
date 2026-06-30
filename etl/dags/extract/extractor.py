@@ -152,6 +152,7 @@ def _write_parquet(s3, dataframe, key: str) -> None:
     buf = io.BytesIO()
     dataframe.to_parquet(buf, engine="pyarrow", index=False)
     s3.load_bytes(buf.getvalue(), key=key, bucket_name=MINIO_STAGING_BUCKET, replace=True)
+    logger.info("wrote %d row(s) -> s3://%s/%s", len(dataframe), MINIO_STAGING_BUCKET, key)
 
 
 def _extract_single_file(pg, s3, table: str, low, high, range_tag: str):
