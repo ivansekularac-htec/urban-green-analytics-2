@@ -1,9 +1,9 @@
 import logging
 
 from airflow.exceptions import AirflowSkipException
-from cursor import get_cursor, update_cursor
-from extractor import extract_table
-from parquet_writer import write_batches
+from extract.cursor import get_cursor, update_cursor
+from extract.extractor import extract_table
+from extract.parquet_writer import write_batches
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def run_table(table_config: dict) -> None:
     cursor_column = table_config["cursor_column"]
     partition_column = table_config["partition_column"]
 
-    cursor = get_cursor(table_name)
+    cursor = get_cursor(table_config)
 
     batch_iter = extract_table(
         table_name=table_name,
@@ -54,4 +54,4 @@ def run_table(table_config: dict) -> None:
     if rows_written == 0:
         raise AirflowSkipException(f"No new rows found for table '{table_name}'.")
 
-    update_cursor(table_name, max_cursor)
+    update_cursor(table_config, max_cursor)

@@ -4,7 +4,7 @@ from typing import Any, Iterator, List, Optional, Tuple
 from uuid import uuid4
 
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from config import (
+from extract_tables.utils import (
     POSTGRES_CONN_ID,
     SCHEMA,
 )
@@ -12,7 +12,7 @@ from config import (
 logger = logging.getLogger(__name__)
 
 
-def get_table_columns(conn, schema: str, table_name: str) -> List[str]:
+def _get_table_columns(conn, schema: str, table_name: str) -> List[str]:
     """Fetch column names from Postgres information schema."""
     cur = conn.cursor()
     try:
@@ -30,7 +30,7 @@ def get_table_columns(conn, schema: str, table_name: str) -> List[str]:
         cur.close()
 
 
-def validate_columns(
+def _validate_columns(
     columns: List[str],
     cursor_column: str,
     id_column: str,
@@ -43,7 +43,7 @@ def validate_columns(
         raise ValueError(f"Id column '{id_column}' not found in '{table_name}'")
 
 
-def build_extract_sql(
+def _build_extract_sql(
     schema: str,
     table_name: str,
     cursor_column: str,
@@ -59,12 +59,12 @@ def build_extract_sql(
     '''
 
 
-def get_upper_bound() -> int:
+def _get_upper_bound() -> int:
     """Return safe upper bound timestamp (30s lag for consistency)."""
     return int((datetime.now(timezone.utc) - timedelta(seconds=30)).timestamp())
 
 
-def stream_query(
+def _stream_query(
     conn,
     sql: str,
     params: tuple,
@@ -134,11 +134,11 @@ def extract_table(
     try:
         conn = hook.get_conn()
 
-        columns = get_table_columns(conn, SCHEMA, table_name)
+        columns = _get_table_columns(conn, SCHEMA, table_name)
 
-        validate_columns(columns, cursor_column, id_column, table_name)
+        _validate_columns(columns, cursor_column, id_column, table_name)
 
-        sql = build_extract_sql(
+        sql = _build_extract_sql(
             SCHEMA,
             table_name,
             cursor_column,
@@ -146,9 +146,9 @@ def extract_table(
         )
 
         cursor = cursor or (0, 0)
-        upper_bound = get_upper_bound()
+        upper_bound = _get_upper_bound()
 
-        yield from stream_query(
+        yield from _stream_query(
             conn,
             sql,
             (cursor[0], cursor[1], upper_bound),

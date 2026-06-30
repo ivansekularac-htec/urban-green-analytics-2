@@ -1,0 +1,44 @@
+defaults:
+  cursor_column: updated_at
+  partition_column: null
+
+tables:
+  - name: roles
+    schedule: "0 2 * * *"
+
+  - name: quality_grades
+    schedule: "0 2 * * *"
+
+  - name: farm_infrastructure_types
+    schedule: "0 2 * * *"
+
+  - name: growing_system_types
+    schedule: "0 2 * * *"
+
+  - name: crop_categories
+    schedule: "0 2 * * *"
+
+  - name: sensor_types
+    schedule: "0 2 * * *"
+
+  - name: farms
+    schedule: "0 2 * * *"
+
+  - name: users
+    schedule: "0 2 * * *"
+
+  - name: crops
+    schedule: "0 2 * * *"
+
+  - name: user_roles
+    schedule: "0 2 * * *"
+
+  - name: farm_crops
+    schedule: "0 2 * * *"
+
+  - name: sensors
+    schedule: "0 2 * * *"
+
+  - name: harvests
+    schedule: "0 * * * *"
+    partition_column: created_at

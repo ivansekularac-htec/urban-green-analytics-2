@@ -4,12 +4,12 @@ from typing import Any, Iterable, List, Optional, Tuple
 
 import pandas as pd
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from config import BUCKET_NAME, MINIO_CONN_ID
+from extract.utils import BUCKET_NAME, MINIO_CONN_ID
 
 logger = logging.getLogger(__name__)
 
 
-def build_sorted_df(
+def _build_sorted_df(
     rows: List[tuple],
     columns: List[str],
     cursor_column: str,
@@ -23,7 +23,7 @@ def build_sorted_df(
     return df.sort_values([cursor_column, id_column])
 
 
-def extract_cursor_bounds(
+def _extract_cursor_bounds(
     df: pd.DataFrame,
     cursor_column: str,
     id_column: str,
@@ -38,7 +38,7 @@ def extract_cursor_bounds(
     return cursor_from, cursor_to
 
 
-def update_max_cursor(
+def _update_max_cursor(
     current_max: Tuple[Any, Any],
     new_cursor_to: Tuple[Any, Any],
 ) -> Tuple[Any, Any]:
@@ -48,7 +48,7 @@ def update_max_cursor(
     return max(current_max, new_cursor_to)
 
 
-def add_partition_column(
+def _add_partition_column(
     df: pd.DataFrame,
     partition_column: Optional[str],
 ):
@@ -70,7 +70,7 @@ def add_partition_column(
     return [(None, df)]
 
 
-def build_object_key(
+def _build_object_key(
     table_name: str,
     cursor_from: Tuple[Any, Any],
     cursor_to: Tuple[Any, Any],
@@ -86,7 +86,7 @@ def build_object_key(
     return f"app/{table_name}/harvest_date={partition_value}/{filename}"
 
 
-def upload_parquet(
+def _upload_parquet(
     s3: S3Hook,
     buffer: io.BytesIO,
     bucket: str,
@@ -130,12 +130,12 @@ def write_batches(
         if not rows:
             continue
 
-        df = build_sorted_df(rows, columns, cursor_column, id_column)
+        df = _build_sorted_df(rows, columns, cursor_column, id_column)
 
-        cursor_from, cursor_to = extract_cursor_bounds(df, cursor_column, id_column)
-        max_cursor = update_max_cursor(max_cursor, cursor_to)
+        cursor_from, cursor_to = _extract_cursor_bounds(df, cursor_column, id_column)
+        max_cursor = _update_max_cursor(max_cursor, cursor_to)
 
-        grouped = add_partition_column(df, partition_column)
+        grouped = _add_partition_column(df, partition_column)
 
         for partition_value, group in grouped:
             rows_written += len(group)
@@ -149,7 +149,7 @@ def write_batches(
             )
             buffer.seek(0)
 
-            object_key = build_object_key(
+            object_key = _build_object_key(
                 table_name,
                 cursor_from,
                 cursor_to,
@@ -164,7 +164,7 @@ def write_batches(
                 object_key,
             )
 
-            upload_parquet(s3, buffer, bucket, object_key)
+            _upload_parquet(s3, buffer, bucket, object_key)
 
             batch_index += 1
 
