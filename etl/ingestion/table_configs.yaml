@@ -1,0 +1,66 @@
+tables:
+  - table: farms
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: users
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: crops
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: farm_crops
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: user_roles
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: harvests
+    schema: app
+    cursor_column: updated_at
+    partition_column: created_at
+    schedule: "@hourly"
+
+  - table: sensors
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: roles
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: quality_grades
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: farm_infrastructure_types
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: growing_system_types
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: crop_categories
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"
+
+  - table: sensor_types
+    schema: app
+    cursor_column: updated_at
+    schedule: "@daily"

@@ -1,142 +1,45 @@
 """
-Central configuration for all Postgres tables used in the ingestion pipeline.
+Runtime configuration for the ingestion pipeline.
 
-Each entry defines how a table is:
-- extracted from Postgres
-- incrementally tracked via cursor
-- scheduled in Airflow
-- stored in MinIO as Parquet
-
-This is the single source of truth for DAG generation.
+Loads:
+- Environment configuration
+- Static table metadata from YAML
 """
 
 import os
+from pathlib import Path
 
-# -------------------------
+import yaml
+
+# ---------------------------------------------------------
 # Connections
-# -------------------------
+# ---------------------------------------------------------
 
 POSTGRES_CONN_ID = os.getenv("POSTGRES_CONN_ID", "urbangreen_db")
 MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
 
-# -------------------------
-# Extracting and Writing
-# -------------------------
-CURSOR_SAFETY_WINDOW_SECONDS = 30
-INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", 10000))
+# ---------------------------------------------------------
+# Extraction
+# ---------------------------------------------------------
 
-# -------------------------
+CURSOR_SAFETY_WINDOW_SECONDS = 30
+INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", "10000"))
+
+# ---------------------------------------------------------
 # Storage
-# -------------------------
+# ---------------------------------------------------------
 
 STAGING_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
 
-TABLE_CONFIGS = [
-    # =========================
-    # CORE BUSINESS TABLES
-    # =========================
-    {
-        "table": "farms",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "users",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "crops",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    # =========================
-    # TRANSACTIONAL / RELATION TABLES
-    # =========================
-    {
-        "table": "farm_crops",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "user_roles",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    # =========================
-    # HARVEST DATA (HIGH FREQUENCY)
-    # =========================
-    {
-        "table": "harvests",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "partition_column": "created_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@hourly",
-    },
-    # =========================
-    # SENSOR DATA
-    # =========================
-    {
-        "table": "sensors",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    # =========================
-    # LOOKUP TABLES
-    # =========================
-    {
-        "table": "roles",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "quality_grades",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "farm_infrastructure_types",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "growing_system_types",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "crop_categories",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-    {
-        "table": "sensor_types",
-        "schema": "app",
-        "cursor_column": "updated_at",
-        "bucket": STAGING_BUCKET,
-        "schedule": "@daily",
-    },
-]
+# ---------------------------------------------------------
+# Table metadata
+# ---------------------------------------------------------
+
+CONFIG_PATH = Path(__file__).parent / "table_configs.yaml"
+
+with CONFIG_PATH.open() as f:
+    TABLE_CONFIGS = yaml.safe_load(f)["tables"]
+
+# Inject runtime bucket into every table config.
+for table in TABLE_CONFIGS:
+    table["bucket"] = STAGING_BUCKET
