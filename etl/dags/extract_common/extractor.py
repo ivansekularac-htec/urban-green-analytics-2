@@ -129,7 +129,7 @@ def extract_table_to_minio(table_config: dict[str, Any]) -> dict[str, Any]:
         "object_keys": object_keys,
     }
 
-    logger.info("Extract completed: %s", json.dumps(result, sort_keys=True))
+    logger.info(f"Extract completed: {json.dumps(result, sort_keys=True)}")
     return result
 
 

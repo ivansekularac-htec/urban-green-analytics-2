@@ -139,7 +139,7 @@ services:
           --conn-login "$${POSTGRES_USER}" \
           --conn-password "$${POSTGRES_PASSWORD}" \
           --conn-schema "$${POSTGRES_DB}" \
-          --conn-port 5432
+          --conn-port "$${POSTGRES_PORT:-5432}"
 
         airflow connections delete urbangreen_minio >/dev/null 2>&1 || true
         airflow connections add urbangreen_minio \
@@ -177,9 +177,12 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniominio}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+      POSTGRES_EXTRACT_CONN_ID: ${POSTGRES_EXTRACT_CONN_ID:-urbangreen_db}
+      MINIO_CONN_ID: ${MINIO_CONN_ID:-urbangreen_minio}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
       MINIO_STAGING_PREFIX: ${MINIO_STAGING_PREFIX:-postgres/app}
       EXTRACT_SAFETY_LAG_SECONDS: ${EXTRACT_SAFETY_LAG_SECONDS:-60}
+      EXTRACT_CHUNK_SIZE: ${EXTRACT_CHUNK_SIZE:-50000}
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 

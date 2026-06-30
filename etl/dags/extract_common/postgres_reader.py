@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import re
 from collections.abc import Iterator
 from typing import Final
@@ -8,9 +7,7 @@ from typing import Final
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from extract_common.settings import EXTRACT_SAFETY_LAG_SECONDS
-
-DEFAULT_EXTRACT_CHUNK_SIZE: Final[int] = int(os.getenv("EXTRACT_CHUNK_SIZE", "50000"))
+from extract_common.settings import EXTRACT_CHUNK_SIZE, EXTRACT_SAFETY_LAG_SECONDS
 
 _IDENTIFIER_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -76,20 +73,24 @@ def get_upper_cursor(
     previous_cursor: dict[str, int],
     run_cutoff: int,
 ) -> dict[str, int] | None:
+    safe_schema = _safe_identifier(schema, "schema")
+    safe_table = _safe_identifier(table, "table")
+    safe_cursor_column = _safe_identifier(cursor_column, "cursor_column")
+    safe_primary_key = _safe_identifier(primary_key, "primary_key")
+
     sql = f"""
-        SELECT {_safe_identifier(cursor_column, "cursor_column")},
-               {_safe_identifier(primary_key, "primary_key")}
-        FROM {_safe_identifier(schema, "schema")}.{_safe_identifier(table, "table")}
+        SELECT {safe_cursor_column}, {safe_primary_key}
+        FROM {safe_schema}.{safe_table}
         WHERE (
-            {_safe_identifier(cursor_column, "cursor_column")} > %(last_updated_at)s
+            {safe_cursor_column} > %(last_updated_at)s
             OR (
-                {_safe_identifier(cursor_column, "cursor_column")} = %(last_updated_at)s
-                AND {_safe_identifier(primary_key, "primary_key")} > %(last_id)s
+                {safe_cursor_column} = %(last_updated_at)s
+                AND {safe_primary_key} > %(last_id)s
             )
         )
-        AND {_safe_identifier(cursor_column, "cursor_column")} <= %(run_cutoff)s
-        ORDER BY {_safe_identifier(cursor_column, "cursor_column")} DESC,
-                 {_safe_identifier(primary_key, "primary_key")} DESC
+        AND {safe_cursor_column} <= %(run_cutoff)s
+        ORDER BY {safe_cursor_column} DESC,
+                 {safe_primary_key} DESC
         LIMIT 1
     """
 
@@ -108,42 +109,6 @@ def get_upper_cursor(
     return {"updated_at": int(row[0]), "id": int(row[1])}
 
 
-def read_changed_rows(
-    postgres: PostgresHook,
-    schema: str,
-    table: str,
-    cursor_column: str,
-    primary_key: str,
-    previous_cursor: dict[str, int],
-    upper_cursor: dict[str, int],
-) -> pd.DataFrame:
-    """Read changed rows into a single DataFrame.
-
-    This function is kept for small tables and for backward compatibility with the
-    current extractor implementation.
-
-    For large tables such as harvests, use read_changed_rows_in_chunks instead.
-    """
-    sql = _build_changed_rows_query(
-        schema=schema,
-        table=table,
-        cursor_column=cursor_column,
-        primary_key=primary_key,
-    )
-
-    params = _build_changed_rows_params(
-        previous_cursor=previous_cursor,
-        upper_cursor=upper_cursor,
-    )
-
-    connection = postgres.get_conn()
-
-    try:
-        return pd.read_sql_query(sql=sql, con=connection, params=params)
-    finally:
-        connection.close()
-
-
 def read_changed_rows_in_chunks(
     postgres: PostgresHook,
     schema: str,
@@ -152,13 +117,9 @@ def read_changed_rows_in_chunks(
     primary_key: str,
     previous_cursor: dict[str, int],
     upper_cursor: dict[str, int],
-    chunk_size: int = DEFAULT_EXTRACT_CHUNK_SIZE,
+    chunk_size: int = EXTRACT_CHUNK_SIZE,
 ) -> Iterator[pd.DataFrame]:
-    """Read changed rows from Postgres in chunks.
-
-    This avoids loading the full result set into Airflow worker memory at once.
-    It is the safer option for large initial extracts such as harvests.
-    """
+    """Read changed rows from Postgres in chunks."""
     if chunk_size <= 0:
         raise ValueError("chunk_size must be greater than 0.")
 

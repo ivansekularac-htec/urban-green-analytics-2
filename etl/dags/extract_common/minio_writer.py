@@ -49,10 +49,16 @@ def write_dataframe_to_minio(
             return object_keys
 
         if partition_name is None:
-            raise ValueError("partition_name must be provided when partition_column is set.")
+            raise ValueError(
+                "partition_name must be provided when partition_column is set."
+            )
 
-        partition_values = partition_values_from_epoch_seconds(dataframe[partition_column])
-        partitioned_dataframe = dataframe.assign(_extract_partition_value=partition_values)
+        partition_values = partition_values_from_epoch_seconds(
+            dataframe[partition_column]
+        )
+        partitioned_dataframe = dataframe.assign(
+            _extract_partition_value=partition_values
+        )
 
         for partition_value, partition_df in partitioned_dataframe.groupby(
             "_extract_partition_value",
@@ -60,7 +66,9 @@ def write_dataframe_to_minio(
             sort=True,
         ):
             partition_value_as_text = str(partition_value)
-            cleaned_partition_df = partition_df.drop(columns=["_extract_partition_value"])
+            cleaned_partition_df = partition_df.drop(
+                columns=["_extract_partition_value"]
+            )
 
             object_key = build_partitioned_object_key(
                 table=table,
@@ -70,7 +78,10 @@ def write_dataframe_to_minio(
                 upper_cursor=upper_cursor,
             )
 
-            local_path = temp_path / f"{table}_{partition_name}_{partition_value_as_text}.parquet"
+            local_path = (
+                temp_path
+                / f"{table}_{partition_name}_{partition_value_as_text}.parquet"
+            )
 
             write_and_upload_parquet(
                 dataframe=cleaned_partition_df,
@@ -100,10 +111,7 @@ def write_and_upload_parquet(
     )
 
     logger.info(
-        "Uploaded %s rows to s3://%s/%s",
-        len(dataframe),
-        MINIO_STAGING_BUCKET,
-        object_key,
+        f"Uploaded {len(dataframe)} rows to s3://{MINIO_STAGING_BUCKET}/{object_key}"
     )
 
 

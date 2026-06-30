@@ -17,3 +17,4 @@ EXTRACT_SAFETY_LAG_SECONDS: Final[int] = int(
 )
 
 DEFAULT_CURSOR: Final[dict[str, int]] = {"updated_at": 0, "id": 0}
+EXTRACT_CHUNK_SIZE: Final[int] = int(os.getenv("EXTRACT_CHUNK_SIZE", "50000"))
