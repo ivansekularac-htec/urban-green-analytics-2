@@ -4,7 +4,7 @@ from typing import Any, Iterator, List, Optional, Tuple
 from uuid import uuid4
 
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from extract_tables.utils import (
+from extract.utils import (
     POSTGRES_CONN_ID,
     SCHEMA,
 )
