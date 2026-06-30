@@ -13,4 +13,5 @@ dependencies = [
     "pyarrow",
     "pandas",
     "apache-airflow-providers-apache-spark>=6.1.0",
+    "pyyaml>=6.0.3",
 ]

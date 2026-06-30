@@ -1,0 +1,58 @@
+tables:
+  - table: roles
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: quality_grades
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: farm_infrastructure_types
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: growing_system_types
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: crop_categories
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: sensor_types
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: users
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: farms
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: crops
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: farm_crops
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: sensors
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: user_roles
+    schedule: "@daily"
+    cursor_column: updated_at
+
+  - table: harvests
+    schedule: "@hourly"
+    cursor_column: updated_at
+    extract_strategy: chunked
+    chunk_size: 50000
+    partition:
+      source_column: created_at
+      output_name: harvest_date
+      source_type: epoch_seconds

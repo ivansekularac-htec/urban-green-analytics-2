@@ -4348,6 +4348,7 @@ dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pyarrow" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -4357,6 +4358,7 @@ requires-dist = [
     { name = "apache-airflow-providers-postgres" },
     { name = "pandas" },
     { name = "pyarrow" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
 [[package]]
