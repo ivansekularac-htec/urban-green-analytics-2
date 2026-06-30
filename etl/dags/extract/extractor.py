@@ -16,12 +16,12 @@ Design notes:
   an in-flight transaction. We compute ``run_cutoff = now - SAFETY_LAG_SECONDS``
   and never read past it, so a half-committed batch isn't captured behind a cursor
   that would then skip the rest. Configurable via the ``EXTRACT_SAFETY_LAG_SECONDS``
-  env var (default 2); no compose change required.
+  env var (default 30); no compose change required.
 
 * **Idempotency.** The high-watermark is snapshotted up front; rows are written
   with a single atomic S3 PUT per object; the cursor advances only afterwards. A
   crash mid-write leaves no partial object and an unmoved cursor, so a re-run
-  reproduces the same key (overwrite) — no duplicate rows.
+  reproduces the same key (overwrite) - no duplicate rows.
 """
 
 from __future__ import annotations
@@ -48,7 +48,12 @@ CURSOR_COLUMN = "updated_at"
 PRIMARY_KEY = "id"
 
 # Rows newer than (now - lag) may still be mid-write; ignore them this run.
-SAFETY_LAG_SECONDS = int(os.environ.get("EXTRACT_SAFETY_LAG_SECONDS", "30"))
+SAFETY_LAG_SECONDS = int(
+    Variable.get(
+        "EXTRACT_SAFETY_LAG_SECONDS",
+        default="30",
+    )
+)
 
 DEFAULT_CURSOR = {"updated_at": 0, "id": 0}
 
@@ -66,21 +71,47 @@ def _cursor_key(table: str) -> str:
     return f"extract_cursor__{table}"
 
 
-def get_cursor(table: str) -> dict[str, int]:
-    """Read the per-table ``(updated_at, id)`` cursor; default to zero on first run.
+def _high_watermark_key(table: str) -> str:
+    return f"extract_high_watermark__{table}"
 
-    Tolerates a legacy single-integer cursor by treating it as ``id=0``.
-    """
-    raw = Variable.get(
-        _cursor_key(table), default=DEFAULT_CURSOR, deserialize_json=True
+
+def get_pending_high_watermark(table: str) -> dict[str, int] | None:
+    value = Variable.get(
+        _high_watermark_key(table),
+        default=None,
+        deserialize_json=True,
     )
-    if isinstance(raw, dict):
-        return {
-            "updated_at": int(raw.get("updated_at", 0)),
-            "id": int(raw.get("id", 0)),
-        }
-    # Legacy format: a bare epoch-seconds integer.
-    return {"updated_at": int(raw), "id": 0}
+
+    return value
+
+
+def set_pending_high_watermark(
+    table: str,
+    watermark: dict[str, int],
+) -> None:
+    Variable.set(
+        _high_watermark_key(table),
+        watermark,
+        serialize_json=True,
+    )
+
+
+def clear_pending_high_watermark(table: str) -> None:
+    Variable.delete_variable(_high_watermark_key(table))
+
+
+def get_cursor(table: str) -> dict[str, int]:
+    """Read the per-table (updated_at, id) cursor."""
+    raw = Variable.get(
+        _cursor_key(table),
+        default=DEFAULT_CURSOR,
+        deserialize_json=True,
+    )
+
+    return {
+        "updated_at": int(raw.get("updated_at", 0)),
+        "id": int(raw.get("id", 0)),
+    }
 
 
 def set_cursor(table: str, cursor: dict[str, int]) -> None:
@@ -128,7 +159,12 @@ def _read_window_batches(
     materialize the entire result set in memory at once.
     """
 
-    CHUNK_SIZE = int(os.environ.get("EXTRACT_CHUNK_SIZE", "10000"))
+    CHUNK_SIZE = int(
+        Variable.get(
+            "EXTRACT_CHUNK_SIZE",
+            default="10000",
+        )
+    )
 
     select_sql = f"""
         SELECT *
@@ -203,11 +239,23 @@ def run_extract(
     _assert_table_shape(pg, table, partition_by)
     run_cutoff = _run_cutoff(pg)
 
-    high = _high_watermark(pg, table, low, run_cutoff)
+    high = get_pending_high_watermark(table)
+
     if high is None:
-        raise AirflowSkipException(
-            f"No new rows in {SCHEMA}.{table} since cursor {low} (run_cutoff={run_cutoff})."
+        high = _high_watermark(
+            pg,
+            table,
+            low,
+            run_cutoff,
         )
+
+        if high is None:
+            raise AirflowSkipException(
+                f"No new rows in {SCHEMA}.{table} since cursor {low} "
+                f"(run_cutoff={run_cutoff})."
+            )
+
+        set_pending_high_watermark(table, high)
 
     batches = _read_window_batches(
         pg,
@@ -226,7 +274,6 @@ def run_extract(
 
     written_keys: list[str] = []
     rows_written = 0
-    batch_count = 0
 
     def _write(chunk: pd.DataFrame, key: str) -> None:
         buf = io.BytesIO()
@@ -242,7 +289,6 @@ def run_extract(
         written_keys.append(key)
 
     for batch_no, chunk in enumerate(batches, start=1):
-        batch_count += 1
         rows_written += len(chunk)
 
         if partition_by:
@@ -254,7 +300,7 @@ def run_extract(
 
             for day, group in chunk.groupby(days):
                 key = (
-                    f"app/{table}/"
+                    f"raw/postgres/{table}/"
                     f"{partition_label}={day}/"
                     f"{table}__{range_tag}__part_{batch_no:05d}.parquet"
                 )
@@ -262,23 +308,19 @@ def run_extract(
                 _write(group, key)
 
         else:
-            key = f"app/{table}/{table}__{range_tag}__part_{batch_no:05d}.parquet"
+            key = (
+                f"raw/postgres/{table}/"
+                f"{table}__{range_tag}__part_{batch_no:05d}.parquet"
+            )
 
             _write(chunk, key)
 
-    if batch_count == 0:
-        raise AirflowSkipException(
-            f"No rows read for {SCHEMA}.{table} in window {low}..{high}."
-        )
-
     # Advance the cursor only after every write above has succeeded.
     set_cursor(table, high)
+    clear_pending_high_watermark(table)
     logger.info(
-        "extract %s.%s: %d row(s), cursor %s -> %s, %d object(s) written",
-        SCHEMA,
-        table,
-        rows_written,
-        low,
-        high,
-        len(written_keys),
+        f"extract {SCHEMA}.{table}: "
+        f"{rows_written} row(s), "
+        f"cursor {low} -> {high}, "
+        f"{len(written_keys)} object(s) written"
     )

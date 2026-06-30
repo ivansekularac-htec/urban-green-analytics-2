@@ -2,7 +2,7 @@
 
 Tables and their schedules come from ``extract.config.TABLES``; the extraction
 logic lives in ``extract.extractor``. Adding or removing a table is a one-line
-change in the registry — no per-table DAG code.
+change in the registry - no per-table DAG code.
 
 ``harvests`` runs hourly and is partitioned on disk by the harvest's own date;
 the other 12 tables run daily as a single object per run.
@@ -18,7 +18,7 @@ from airflow.sdk import dag, task
 
 # The sibling ``extract`` package lives in the dags folder, which isn't always on
 # sys.path (e.g. under `airflow dags test`). Add it explicitly so the imports
-# below resolve in every context — no compose changes needed.
+# below resolve in every context - no compose changes needed.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from extract.config import TABLES  # noqa: E402
@@ -40,7 +40,7 @@ def _build_extract_dag(cfg: dict):
             tz="UTC",
         ),
         catchup=False,
-        # Cursor is shared state — never let two runs of the same table overlap.
+        # Cursor is shared state - never let two runs of the same table overlap.
         max_active_runs=1,
         # Retry once to ride out a transient Postgres/MinIO blip.
         default_args={"retries": 1},
