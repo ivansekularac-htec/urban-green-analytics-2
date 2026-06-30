@@ -97,7 +97,7 @@ def set_pending_high_watermark(
 
 
 def clear_pending_high_watermark(table: str) -> None:
-    Variable.delete_variable(_high_watermark_key(table))
+    Variable.delete(_high_watermark_key(table))
 
 
 def get_cursor(table: str) -> dict[str, int]:
