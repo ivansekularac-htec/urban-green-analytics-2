@@ -12,7 +12,6 @@ DAG code is necessary.
 import pendulum
 from airflow import DAG
 from airflow.decorators import task
-from airflow.exceptions import AirflowSkipException
 from ingestion.config import TABLE_CONFIGS
 from ingestion.extract import extract_table
 
@@ -57,10 +56,8 @@ def create_table_dag(config):
             Any other exception is propagated so Airflow can apply retries
             and failure handling.
             """
-            try:
-                result = extract_table(config)
-            except AirflowSkipException:
-                raise
+
+            result = extract_table(config)
 
             print(f"[{table}] {result}")
             return result

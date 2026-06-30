@@ -125,14 +125,13 @@ def extract_table(config):
     # ---------------------------------------------------------
     # 6. UPDATE CURSOR (ONLY AFTER SUCCESS)
     # ---------------------------------------------------------
-    cursor_after = {
-        "updated_at": int(last_row[cursor_column]),
-        "id": int(last_row["id"]),
-    }
+    cursor_after = set_cursor(
+        table=table,
+        cursor_column=cursor_column,
+        row=last_row,
+    )
 
-    set_cursor(table, cursor_column, last_row)
-
-    print(f"[{table}] Cursor updated → {cursor_after}")
+    print(f"[{table}] Cursor updated -> {cursor_after}")
 
     # ---------------------------------------------------------
     # 7. RESULT

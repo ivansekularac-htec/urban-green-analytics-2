@@ -7,7 +7,6 @@ Responsible for:
 - Uploading Parquet bytes to object storage (MinIO/S3)
 """
 
-import os
 from io import BytesIO
 
 import pandas as pd
@@ -15,19 +14,18 @@ import pandas as pd
 from ingestion.object_keys import build_object_key
 from ingestion.storage import upload_parquet
 
-# -------------------------------------------------
-# ENV CONFIG (fallback if config does not provide it)
-# -------------------------------------------------
-DEFAULT_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
-
 
 def write_dataframe(df, config, start_cursor, end_cursor):
     """
     Writes a single extraction batch to MinIO.
 
     Supports:
-        - Non-partitioned tables -> one Parquet object
-        - Partitioned tables -> one Parquet object per partition
+        - Non-partitioned tables → one Parquet object
+        - Partitioned tables → one Parquet object per partition
+
+    Each object key encodes the composite cursor range
+    (updated_at + id) represented by this batch, making
+    uploads deterministic and idempotent.
 
     Args:
         df (pd.DataFrame):
@@ -36,15 +34,15 @@ def write_dataframe(df, config, start_cursor, end_cursor):
         config (dict):
             Table ingestion configuration.
 
-        cursor_start (int):
-            First cursor value represented by this batch.
+        start_cursor (dict):
+            Composite cursor for the first row in the batch.
 
-        cursor_end (int):
-            Last cursor value represented by this batch.
+        end_cursor (dict):
+            Composite cursor for the last row in the batch.
     """
 
     table = config["table"]
-    bucket = config.get("bucket", DEFAULT_BUCKET)
+    bucket = config["bucket"]
     partition_column = config.get("partition_column")
 
     # ---------------------------------------------------------

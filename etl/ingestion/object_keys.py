@@ -1,3 +1,6 @@
+from ingestion.config import OBJECT_PREFIX
+
+
 def build_object_key(
     table,
     start_cursor,
@@ -13,18 +16,19 @@ def build_object_key(
 
     Non-partitioned layout:
 
-        {table}/updated_at={start}_{end}.parquet
+        {OBJECT_PREFIX}/{table}/updated_at={start}_{end}.parquet
 
     Partitioned layout:
 
-        {table}/{partition_column}={partition_value}/
+        {OBJECT_PREFIX}/{table}/{partition_column}={partition_value}/
             updated_at={start}_{end}.parquet
 
     Example:
 
-        harvests/
-            created_at=2024-06-10/
-                updated_at=1717977600_1717981200.parquet
+        raw/postgres/
+            harvests/
+                created_at=2024-06-10/
+                    updated_at=1717977600-125_1717981200-418.parquet
     """
 
     # ---------------------------------------------------------
@@ -38,12 +42,19 @@ def build_object_key(
     )
 
     # ---------------------------------------------------------
+    # Build the common object prefix.
+    # This namespaces objects by ingestion source (e.g. raw/postgres)
+    # to avoid collisions with future pipelines such as Kafka.
+    # ---------------------------------------------------------
+    base_path = f"{OBJECT_PREFIX}/{table}"
+
+    # ---------------------------------------------------------
     # Partitioned layout
     # ---------------------------------------------------------
     if partition_column and partition_value:
-        return f"{table}/{partition_column}={partition_value}/{filename}"
+        return f"{base_path}/{partition_column}={partition_value}/{filename}"
 
     # ---------------------------------------------------------
     # Non-partitioned layout
     # ---------------------------------------------------------
-    return f"{table}/{filename}"
+    return f"{base_path}/{filename}"

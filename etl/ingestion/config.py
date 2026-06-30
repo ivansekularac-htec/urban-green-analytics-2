@@ -22,7 +22,7 @@ MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
 # Extraction
 # ---------------------------------------------------------
 
-CURSOR_SAFETY_WINDOW_SECONDS = 30
+CURSOR_SAFETY_WINDOW_SECONDS = os.getenv("CURSOR_SAFETY_WINDOW_SECONDS", "30")
 INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", "10000"))
 
 # ---------------------------------------------------------
@@ -30,6 +30,7 @@ INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", "10000"))
 # ---------------------------------------------------------
 
 STAGING_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
+OBJECT_PREFIX = "raw/postgres"
 
 # ---------------------------------------------------------
 # Table metadata

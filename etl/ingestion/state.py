@@ -1,6 +1,9 @@
 import json
+import logging
 
 from airflow.models import Variable
+
+logger = logging.getLogger(__name__)
 
 
 def get_cursor(table):
@@ -42,9 +45,10 @@ def get_cursor(table):
             int(cursor.get("id", 0)),
         )
 
-    except Exception:
-        # Safe fallback:
-        # If cursor is corrupted, we intentionally reprocess everything.
+    except (json.JSONDecodeError, TypeError, ValueError):
+        logger.warning(
+            f"Invalid cursor for table '{table}'. Resetting cursor to (0, 0)."
+        )
         return 0, 0
 
 
