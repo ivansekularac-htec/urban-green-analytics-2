@@ -1,0 +1,57 @@
+defaults:
+  daily_extract: &daily_extract
+    schedule: "@daily"
+    cursor_column: updated_at
+    tie_breaker_column: id
+    extract_strategy: full
+
+  hourly_chunked_extract: &hourly_chunked_extract
+    schedule: "@hourly"
+    cursor_column: updated_at
+    tie_breaker_column: id
+    extract_strategy: chunked
+    chunk_size: 200000
+
+tables:
+  - <<: *daily_extract
+    table: roles
+
+  - <<: *daily_extract
+    table: quality_grades
+
+  - <<: *daily_extract
+    table: farm_infrastructure_types
+
+  - <<: *daily_extract
+    table: growing_system_types
+
+  - <<: *daily_extract
+    table: crop_categories
+
+  - <<: *daily_extract
+    table: sensor_types
+
+  - <<: *daily_extract
+    table: users
+
+  - <<: *daily_extract
+    table: farms
+
+  - <<: *daily_extract
+    table: crops
+
+  - <<: *daily_extract
+    table: farm_crops
+
+  - <<: *daily_extract
+    table: sensors
+
+  - <<: *daily_extract
+    table: user_roles
+
+  - <<: *hourly_chunked_extract
+    table: harvests
+    partition:
+      source_column: created_at
+      output_name: date
+      source_type: epoch_seconds

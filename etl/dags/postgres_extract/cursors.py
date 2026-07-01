@@ -10,8 +10,6 @@ from __future__ import annotations
 
 from airflow.sdk import Variable
 
-_CURSOR_SEPARATOR = "|"
-
 
 def cursor_variable_name(table_name: str) -> str:
     """
@@ -20,22 +18,16 @@ def cursor_variable_name(table_name: str) -> str:
     return f"postgres_extract_cursor__{table_name}"
 
 
-def get_cursor(table_name: str) -> tuple[int | None, int]:
+def get_cursor(table_name: str) -> str | None:
     """
-    Return the last successfully processed cursor value for a table.
+    Return the last successfully processed cursor for a table, or None if
+    the table has never been extracted.
     """
-    value = Variable.get(cursor_variable_name(table_name), default=None)
-
-    if value is None:
-        return None, 0
-
-    ts_str, id_str = value.split(_CURSOR_SEPARATOR, 1)
-    return int(ts_str), int(id_str)
+    return Variable.get(cursor_variable_name(table_name), default=None)
 
 
-def set_cursor(table_name: str, timestamp: int, row_id: int) -> None:
+def set_cursor(table_name: str, cursor_value: str) -> None:
     """
-    Store the last successfully processed cursor value for a table.
+    Store the last successfully processed cursor for a table.
     """
-    value = f"{timestamp}{_CURSOR_SEPARATOR}{row_id}"
-    Variable.set(cursor_variable_name(table_name), value)
+    Variable.set(cursor_variable_name(table_name), cursor_value)

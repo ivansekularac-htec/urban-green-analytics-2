@@ -10,15 +10,14 @@ objects to the configured MinIO staging bucket.
 from __future__ import annotations
 
 import logging
+import os
 from io import BytesIO
 
 import pandas as pd
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-from postgres_extract.config import (
-    POSTGRES_SCHEMA,
-    STAGING_BUCKET,
-)
+POSTGRES_SCHEMA = os.getenv("POSTGRES_EXTRACT_SCHEMA", "app")
+STAGING_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ def _build_partition_values(
     """
     if source_column not in dataframe.columns:
         raise ValueError(
-            f"Partition source column '{source_column}' "
+            f"Partition source column {source_column!r} "
             "does not exist in extracted dataframe."
         )
 
@@ -44,11 +43,16 @@ def _build_partition_values(
             utc=True,
             errors="coerce",
         )
-    else:
+    elif source_type in {"datetime", "date"}:
         timestamps = pd.to_datetime(
             dataframe[source_column],
             utc=True,
             errors="coerce",
+        )
+    else:
+        raise ValueError(
+            f"Unsupported partition source type {source_type!r} "
+            f"for column {source_column!r}."
         )
 
     if timestamps.isna().any():
@@ -56,7 +60,7 @@ def _build_partition_values(
 
         raise ValueError(
             f"Table contains {invalid_count} invalid values "
-            f"in partition column '{source_column}'."
+            f"in partition column {source_column!r}."
         )
 
     return timestamps.dt.strftime("%Y-%m-%d")
@@ -64,8 +68,8 @@ def _build_partition_values(
 
 def _build_object_key(
     table_name: str,
-    cursor_from: int,
-    cursor_to: int,
+    cursor_from: str,
+    cursor_to: str,
     partition_column: str | None = None,
     partition_value: str | None = None,
     part_number: int | None = None,
@@ -74,15 +78,13 @@ def _build_object_key(
     Build a deterministic MinIO object key for one Parquet file.
     """
     base_key = (
-        f"extract/{POSTGRES_SCHEMA}/{table_name}/"
-        f"updated_at_from={cursor_from}/"
-        f"updated_at_to={cursor_to}"
+        f"raw/{POSTGRES_SCHEMA}/{table_name}/updated_at={cursor_from}_{cursor_to}"
     )
 
     if part_number is None:
-        file_name = f"{table_name}_{cursor_from}_{cursor_to}.parquet"
+        file_name = f"{table_name}.parquet"
     else:
-        file_name = f"part-{part_number:05d}.parquet"
+        file_name = f"{table_name}_part-{part_number:05d}.parquet"
 
     if partition_column and partition_value:
         return f"{base_key}/{partition_column}={partition_value}/{file_name}"
@@ -94,8 +96,8 @@ def _upload_dataframe_as_parquet(
     s3_hook: S3Hook,
     table_name: str,
     dataframe: pd.DataFrame,
-    cursor_from: int,
-    cursor_to: int,
+    cursor_from: str,
+    cursor_to: str,
     partition_column: str | None = None,
     partition_value: str | None = None,
     part_number: int | None = None,
@@ -112,23 +114,22 @@ def _upload_dataframe_as_parquet(
         part_number=part_number,
     )
 
-    buffer = BytesIO()
+    with BytesIO() as buffer:
+        dataframe.to_parquet(
+            buffer,
+            engine="pyarrow",
+            compression="snappy",
+            index=False,
+        )
 
-    dataframe.to_parquet(
-        buffer,
-        engine="pyarrow",
-        compression="snappy",
-        index=False,
-    )
+        buffer.seek(0)
 
-    buffer.seek(0)
-
-    s3_hook.load_bytes(
-        bytes_data=buffer.getvalue(),
-        key=object_key,
-        bucket_name=STAGING_BUCKET,
-        replace=True,
-    )
+        s3_hook.load_bytes(
+            bytes_data=buffer.getvalue(),
+            key=object_key,
+            bucket_name=STAGING_BUCKET,
+            replace=True,
+        )
 
     logger.debug(
         "Uploaded Parquet object: bucket=%s key=%s rows=%s",
@@ -144,8 +145,8 @@ def write_dataframe_to_minio(
     s3_hook: S3Hook,
     table_name: str,
     dataframe: pd.DataFrame,
-    cursor_from: int,
-    cursor_to: int,
+    cursor_from: str,
+    cursor_to: str,
     partition_config: dict[str, str] | None,
     part_number: int | None = None,
 ) -> int:

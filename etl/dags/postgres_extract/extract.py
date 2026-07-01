@@ -11,6 +11,7 @@ cursor only after all uploads succeed.
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import closing
 from typing import Any
 from uuid import uuid4
@@ -20,13 +21,12 @@ from airflow.exceptions import AirflowSkipException
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from postgres_extract.config import (
-    MINIO_CONN_ID,
-    POSTGRES_CONN_ID,
-    POSTGRES_SCHEMA,
-)
 from postgres_extract.cursors import get_cursor, set_cursor
 from postgres_extract.parquet import write_dataframe_to_minio
+
+POSTGRES_CONN_ID = os.getenv("POSTGRES_EXTRACT_CONN_ID", "urbangreen_db")
+MINIO_CONN_ID = os.getenv("MINIO_EXTRACT_CONN_ID", "urbangreen_minio")
+POSTGRES_SCHEMA = os.getenv("POSTGRES_EXTRACT_SCHEMA", "app")
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +35,13 @@ def _get_high_watermark(
     connection: Any,
     table_name: str,
     cursor_column: str,
-) -> int:
+) -> str:
     """
-    Return the highest source cursor value that is older than the safety lag.
+    Return the highest source cursor value for the table.
     """
     query = f"""
-        SELECT COALESCE(MAX("{cursor_column}"), 0)
+        SELECT COALESCE(MAX("{cursor_column}"), 0)::text
         FROM "{POSTGRES_SCHEMA}"."{table_name}"
-        WHERE "{cursor_column}" <=
-            EXTRACT(EPOCH FROM NOW() - INTERVAL '30 seconds')::bigint
     """
 
     with connection.cursor() as cursor:
@@ -55,20 +53,19 @@ def _get_high_watermark(
             f"Could not determine high watermark for {POSTGRES_SCHEMA}.{table_name}."
         )
 
-    return int(result[0])
+    return str(result[0])
 
 
 def _extract_full_result(
     connection: Any,
     query: str,
-    query_parameters: tuple,
+    query_parameters: tuple[int, int],
     s3_hook: S3Hook,
     table_name: str,
-    cursor_from_ts: int | None,
-    cursor_from_id: int,
-    cursor_to: int,
+    cursor_from: str,
+    cursor_to: str,
     partition_config: dict[str, str] | None,
-) -> tuple[int, int, int, int]:
+) -> tuple[int, int, int]:
     """
     Extract a small result set in memory and write it to MinIO.
     """
@@ -89,20 +86,18 @@ def _extract_full_result(
         column_names = [description[0] for description in cursor.description]
 
     if not rows:
-        return 0, 0, 0, cursor_from_id
+        return 0, 0, 0
 
     dataframe = pd.DataFrame(
         rows,
         columns=column_names,
     )
 
-    last_row_id = int(dataframe["id"].iloc[-1])
-
     uploaded_objects = write_dataframe_to_minio(
         s3_hook=s3_hook,
         table_name=table_name,
         dataframe=dataframe,
-        cursor_from=cursor_from_ts,
+        cursor_from=cursor_from,
         cursor_to=cursor_to,
         partition_config=partition_config,
         part_number=None,
@@ -111,34 +106,31 @@ def _extract_full_result(
     total_rows = len(dataframe)
 
     logger.info(
-        "Processed full result: table=%s rows=%s uploaded_objects=%s",
-        table_name,
-        total_rows,
-        uploaded_objects,
+        f"Processed full result: table={table_name} "
+        f"rows={total_rows} "
+        f"uploaded_objects={uploaded_objects}"
     )
 
-    return total_rows, uploaded_objects, 1, last_row_id
+    return total_rows, uploaded_objects, 1
 
 
 def _extract_chunked_result(
     connection: Any,
     query: str,
-    query_parameters: tuple,
+    query_parameters: tuple[int, int],
     s3_hook: S3Hook,
     table_name: str,
-    cursor_from_ts: int | None,
-    cursor_from_id: int,
-    cursor_to: int,
+    cursor_from: str,
+    cursor_to: str,
     chunk_size: int,
     partition_config: dict[str, str] | None,
-) -> tuple[int, int, int, int]:
+) -> tuple[int, int, int]:
     """
     Extract a large result set in chunks and write each chunk to MinIO.
     """
     total_rows = 0
     uploaded_objects = 0
     part_number = 0
-    last_row_id = cursor_from_id
 
     server_cursor_name = f"extract_{table_name}_{uuid4().hex}"
 
@@ -151,12 +143,10 @@ def _extract_chunked_result(
             query_parameters,
         )
 
-        # For a server-side cursor, fetch the first chunk before reading
-        # cursor.description.
         rows = cursor.fetchmany(chunk_size)
 
         if not rows:
-            return 0, 0, 0, cursor_from_id
+            return 0, 0, 0
 
         if cursor.description is None:
             raise RuntimeError(
@@ -174,35 +164,32 @@ def _extract_chunked_result(
             )
 
             current_chunk_rows = len(dataframe)
-            last_row_id = int(dataframe["id"].iloc[-1])
 
             uploaded_objects += write_dataframe_to_minio(
                 s3_hook=s3_hook,
                 table_name=table_name,
                 dataframe=dataframe,
-                cursor_from=cursor_from_ts,
+                cursor_from=cursor_from,
                 cursor_to=cursor_to,
                 partition_config=partition_config,
                 part_number=part_number,
             )
 
             logger.info(
-                "Processed chunk: table=%s part=%05d rows=%s uploaded_objects=%s",
-                table_name,
-                part_number,
-                current_chunk_rows,
-                uploaded_objects,
+                f"Processed chunk: table={table_name} "
+                f"part={part_number:05d} "
+                f"rows={current_chunk_rows} "
+                f"uploaded_objects={uploaded_objects}"
             )
 
             total_rows += current_chunk_rows
             part_number += 1
 
             del dataframe
-            del rows
 
             rows = cursor.fetchmany(chunk_size)
 
-    return total_rows, uploaded_objects, part_number, last_row_id
+    return total_rows, uploaded_objects, part_number
 
 
 def extract_table_to_minio(
@@ -213,7 +200,6 @@ def extract_table_to_minio(
     """
     table_name = table_config["table"]
     cursor_column = table_config["cursor_column"]
-    tie_breaker_column = table_config.get("tie_breaker_column", "id")
     partition_config = table_config.get("partition")
 
     extract_strategy = table_config.get(
@@ -230,7 +216,8 @@ def extract_table_to_minio(
             f"{extract_strategy!r} for table {table_name!r}."
         )
 
-    cursor_from_ts, cursor_from_id = get_cursor(table_name)
+    raw_cursor_from = get_cursor(table_name)
+    cursor_from = "0" if raw_cursor_from is None else str(raw_cursor_from)
 
     postgres_hook = PostgresHook(
         postgres_conn_id=POSTGRES_CONN_ID,
@@ -247,60 +234,43 @@ def extract_table_to_minio(
         )
 
         logger.info(
-            "Starting extraction: table=%s strategy=%s "
-            "cursor_from_ts=%s cursor_from_id=%s cursor_to=%s",
-            table_name,
-            extract_strategy,
-            cursor_from_ts,
-            cursor_from_id,
-            cursor_to,
+            f"Starting extraction: table={table_name} "
+            f"strategy={extract_strategy} "
+            f"cursor_from={cursor_from} "
+            f"cursor_to={cursor_to}"
         )
 
-        if cursor_from_ts is not None and cursor_to <= cursor_from_ts:
+        if int(cursor_to) <= int(cursor_from):
             raise AirflowSkipException(
                 "No new or changed rows found for "
                 f"{POSTGRES_SCHEMA}.{table_name}. "
-                f"Current cursor is ({cursor_from_ts}, {cursor_from_id})."
+                f"Current cursor is {cursor_from}."
             )
 
-        # Use a keyset / row-value comparison so that rows sharing the same
-        # cursor_column value are never skipped.
-        if cursor_from_ts is None:
-            query = f"""
-                SELECT *
-                FROM "{POSTGRES_SCHEMA}"."{table_name}"
-                WHERE "{cursor_column}" <= %s
-                ORDER BY
-                    "{cursor_column}" ASC,
-                    "{tie_breaker_column}" ASC
-            """
-            query_parameters = (cursor_to,)
-        else:
-            query = f"""
-                SELECT *
-                FROM "{POSTGRES_SCHEMA}"."{table_name}"
-                WHERE ("{cursor_column}", "{tie_breaker_column}") > (%s, %s)
-                  AND "{cursor_column}" <= %s
-                ORDER BY
-                    "{cursor_column}" ASC,
-                    "{tie_breaker_column}" ASC
-            """
-            query_parameters = (cursor_from_ts, cursor_from_id, cursor_to)
+        query = f"""
+            SELECT *
+            FROM "{POSTGRES_SCHEMA}"."{table_name}"
+            WHERE "{cursor_column}" > %s
+              AND "{cursor_column}" <= %s
+        """
+
+        query_parameters = (
+            int(cursor_from),
+            int(cursor_to),
+        )
 
         if extract_strategy == "full":
             (
                 total_rows,
                 uploaded_objects,
                 processed_batches,
-                last_row_id,
             ) = _extract_full_result(
                 connection=connection,
                 query=query,
                 query_parameters=query_parameters,
                 s3_hook=s3_hook,
                 table_name=table_name,
-                cursor_from_ts=cursor_from_ts,
-                cursor_from_id=cursor_from_id,
+                cursor_from=cursor_from,
                 cursor_to=cursor_to,
                 partition_config=partition_config,
             )
@@ -317,15 +287,13 @@ def extract_table_to_minio(
                 total_rows,
                 uploaded_objects,
                 processed_batches,
-                last_row_id,
             ) = _extract_chunked_result(
                 connection=connection,
                 query=query,
                 query_parameters=query_parameters,
                 s3_hook=s3_hook,
                 table_name=table_name,
-                cursor_from_ts=cursor_from_ts,
-                cursor_from_id=cursor_from_id,
+                cursor_from=cursor_from,
                 cursor_to=cursor_to,
                 chunk_size=chunk_size,
                 partition_config=partition_config,
@@ -335,27 +303,21 @@ def extract_table_to_minio(
         raise AirflowSkipException(
             "No rows were returned for "
             f"{POSTGRES_SCHEMA}.{table_name} "
-            f"in cursor range ({cursor_from_ts}, {cursor_from_id}) → {cursor_to}."
+            f"in cursor range ({cursor_from}, {cursor_to}]."
         )
 
-    # Advance the composite cursor only after all Parquet uploads have succeeded.
+    # Advance the cursor only after all Parquet uploads have succeeded.
     set_cursor(
         table_name,
         cursor_to,
-        last_row_id,
     )
 
     logger.info(
-        "Extraction completed: table=%s strategy=%s "
-        "cursor_from_ts=%s cursor_from_id=%s cursor_to=%s last_row_id=%s "
-        "rows=%s batches=%s uploaded_objects=%s",
-        table_name,
-        extract_strategy,
-        cursor_from_ts,
-        cursor_from_id,
-        cursor_to,
-        last_row_id,
-        total_rows,
-        processed_batches,
-        uploaded_objects,
+        f"Extraction completed: table={table_name} "
+        f"strategy={extract_strategy} "
+        f"cursor_from={cursor_from} "
+        f"cursor_to={cursor_to} "
+        f"rows={total_rows} "
+        f"batches={processed_batches} "
+        f"uploaded_objects={uploaded_objects}"
     )

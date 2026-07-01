@@ -4,17 +4,34 @@ postgres_to_minio_extract.py
 Dynamic Airflow DAG definitions for PostgreSQL-to-MinIO extraction.
 
 This module creates one extraction DAG for every table defined in
-TABLE_CONFIGS. Small tables run daily, while the harvests table runs hourly.
+postgres_extract/tables.yaml. Small tables run daily, while the harvests table
+runs hourly.
 """
 
 from __future__ import annotations
 
+from importlib.resources import files
 from typing import Any
 
 import pendulum
+import yaml
 from airflow.sdk import dag, task
-from postgres_extract.config import TABLE_CONFIGS
 from postgres_extract.extract import extract_table_to_minio
+
+
+def load_table_configs() -> list[dict[str, Any]]:
+    """Load table extraction configs from postgres_extract/tables.yaml."""
+    config_path = files("postgres_extract").joinpath("tables.yaml")
+
+    with config_path.open("r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+
+    tables = config.get("tables")
+
+    if not isinstance(tables, list):
+        raise ValueError("Invalid table config file. Expected top-level 'tables' list.")
+
+    return tables
 
 
 def build_extract_dag(table_config: dict[str, Any]):
@@ -43,6 +60,6 @@ def build_extract_dag(table_config: dict[str, Any]):
     return extract_dag()
 
 
-for config in TABLE_CONFIGS:
-    dag_name = f"extract_postgres_{config['table']}_to_minio"
-    globals()[dag_name] = build_extract_dag(config)
+for table_config in load_table_configs():
+    dag_name = f"extract_postgres_{table_config['table']}_to_minio"
+    globals()[dag_name] = build_extract_dag(table_config)
