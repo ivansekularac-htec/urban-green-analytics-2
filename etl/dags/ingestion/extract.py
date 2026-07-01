@@ -66,8 +66,6 @@ def extract_and_write(config: dict) -> None:
         query += f" WHERE {cursor_column} > %s"
         params.append(cursor_value)
 
-    query += f" ORDER BY {cursor_column}"
-
     cur.execute(query, params)
 
     # ---------------------------------------------------------
