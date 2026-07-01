@@ -57,99 +57,9 @@ def extract_table(table_config: dict[str, Any]) -> dict[str, Any]:
         "upper_updated_at": upper_cursor,
     }
 
-    if partition_column is not None:
-        result = extract_partitioned_table(
-            postgres=postgres,
-            sql=sql,
-            params=params,
-            schema=schema,
-            table=table,
-            cursor_column=cursor_column,
-            partition_column=partition_column,
-            partition_name=partition_name,
-            previous_cursor=previous_cursor,
-            upper_cursor=upper_cursor,
-        )
-    else:
-        result = extract_non_partitioned_table(
-            postgres=postgres,
-            sql=sql,
-            params=params,
-            schema=schema,
-            table=table,
-            cursor_column=cursor_column,
-            previous_cursor=previous_cursor,
-            upper_cursor=upper_cursor,
-        )
-
-    set_cursor(cursor_variable, upper_cursor)
-
-    logger.info(f"Extract completed: {json.dumps(result, sort_keys=True)}")
-
-    return result
-
-
-def extract_partitioned_table(
-    postgres: PostgresHook,
-    sql: str,
-    params: dict[str, str],
-    schema: str,
-    table: str,
-    cursor_column: str,
-    partition_column: str,
-    partition_name: str | None,
-    previous_cursor: str,
-    upper_cursor: str,
-) -> dict[str, Any]:
-    connection = postgres.get_conn()
-
-    try:
-        dataframe = pd.read_sql_query(
-            sql=sql,
-            con=connection,
-            params=params,
-        )
-    finally:
-        connection.close()
-
-    if dataframe.empty:
-        message = f"Upper cursor existed for {schema}.{table}, but no rows were read."
-        logger.info(message)
-        raise AirflowSkipException(message)
-
-    object_keys = write_dataframe_to_minio(
-        dataframe=dataframe,
-        table=table,
-        partition_column=partition_column,
-        partition_name=partition_name,
-        previous_cursor=previous_cursor,
-        upper_cursor=upper_cursor,
-    )
-
-    return {
-        "table": f"{schema}.{table}",
-        "rows": len(dataframe),
-        "chunks": 1,
-        "previous_cursor": previous_cursor,
-        "new_cursor": upper_cursor,
-        "object_keys": object_keys,
-    }
-
-
-def extract_non_partitioned_table(
-    postgres: PostgresHook,
-    sql: str,
-    params: dict[str, str],
-    schema: str,
-    table: str,
-    cursor_column: str,
-    previous_cursor: str,
-    upper_cursor: str,
-) -> dict[str, Any]:
     object_keys: list[str] = []
     total_rows = 0
     chunk_count = 0
-    chunk_previous_cursor = previous_cursor
 
     connection = postgres.get_conn()
 
@@ -168,19 +78,17 @@ def extract_non_partitioned_table(
             chunk_count += 1
             total_rows += len(dataframe_chunk)
 
-            chunk_upper_cursor = str(dataframe_chunk[cursor_column].max())
-
             chunk_object_keys = write_dataframe_to_minio(
                 dataframe=dataframe_chunk,
                 table=table,
-                partition_column=None,
-                partition_name=None,
-                previous_cursor=chunk_previous_cursor,
-                upper_cursor=chunk_upper_cursor,
+                partition_column=partition_column,
+                partition_name=partition_name,
+                previous_cursor=previous_cursor,
+                upper_cursor=upper_cursor,
+                part_number=chunk_count,
             )
 
             object_keys.extend(chunk_object_keys)
-            chunk_previous_cursor = chunk_upper_cursor
 
     finally:
         connection.close()
@@ -190,7 +98,9 @@ def extract_non_partitioned_table(
         logger.info(message)
         raise AirflowSkipException(message)
 
-    return {
+    set_cursor(cursor_variable, upper_cursor)
+
+    result = {
         "table": f"{schema}.{table}",
         "rows": total_rows,
         "chunks": chunk_count,
@@ -198,6 +108,10 @@ def extract_non_partitioned_table(
         "new_cursor": upper_cursor,
         "object_keys": object_keys,
     }
+
+    logger.info(f"Extract completed: {json.dumps(result, sort_keys=True)}")
+
+    return result
 
 
 def get_upper_cursor(

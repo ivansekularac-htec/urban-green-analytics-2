@@ -22,6 +22,7 @@ def write_dataframe_to_minio(
     partition_name: str | None,
     previous_cursor: str,
     upper_cursor: str,
+    part_number: int,
 ) -> list[str]:
     s3 = S3Hook(aws_conn_id=MINIO_CONN_ID)
     object_keys: list[str] = []
@@ -30,7 +31,12 @@ def write_dataframe_to_minio(
         temp_path = Path(temp_dir)
 
         if partition_column is None:
-            object_key = table_object_key(table, previous_cursor, upper_cursor)
+            object_key = table_object_key(
+                table=table,
+                previous_cursor=previous_cursor,
+                upper_cursor=upper_cursor,
+                part_number=part_number,
+            )
             local_path = temp_path / f"{table}.parquet"
 
             upload_parquet(dataframe, local_path, object_key, s3)
@@ -61,6 +67,7 @@ def write_dataframe_to_minio(
                 partition_value=str(partition_value),
                 previous_cursor=previous_cursor,
                 upper_cursor=upper_cursor,
+                part_number=part_number,
             )
 
             local_path = temp_path / f"{table}_{partition_value}.parquet"
@@ -95,11 +102,12 @@ def table_object_key(
     table: str,
     previous_cursor: str,
     upper_cursor: str,
+    part_number: int,
 ) -> str:
     return (
         f"{MINIO_STAGING_PREFIX}/{table}/"
         f"{range_path(previous_cursor, upper_cursor)}/"
-        f"{table}.parquet"
+        f"part={part_number:06d}.parquet"
     )
 
 
@@ -109,12 +117,13 @@ def partitioned_object_key(
     partition_value: str,
     previous_cursor: str,
     upper_cursor: str,
+    part_number: int,
 ) -> str:
     return (
         f"{MINIO_STAGING_PREFIX}/{table}/"
         f"{partition_name}={partition_value}/"
         f"{range_path(previous_cursor, upper_cursor)}/"
-        f"{table}.parquet"
+        f"part={part_number:06d}.parquet"
     )
 
 

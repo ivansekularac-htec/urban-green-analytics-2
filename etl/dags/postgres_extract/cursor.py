@@ -10,10 +10,11 @@ def cursor_key(schema: str, table: str) -> str:
 
 
 def get_cursor(key: str) -> str:
-    try:
-        cursor = Variable.get(key, default=DEFAULT_CURSOR, deserialize_json=True)
-    except TypeError:
-        cursor = Variable.get(key, default_var=DEFAULT_CURSOR, deserialize_json=True)
+    cursor = Variable.get(
+        key,
+        default=DEFAULT_CURSOR,
+        deserialize_json=True,
+    )
 
     return str(cursor)
 

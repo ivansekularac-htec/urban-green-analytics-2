@@ -39,3 +39,4 @@ tables:
     schedule: "@hourly"
     partition_column: created_at
     partition_name: harvest_date
+    
