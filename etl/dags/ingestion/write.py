@@ -10,6 +10,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 STAGING_BUCKET = os.getenv("MINIO_STAGING_BUCKET", "staging")
 MINIO_CONN_ID = os.getenv("MINIO_CONN_ID", "urbangreen_minio")
+OBJECT_PREFIX = "raw/postgres"
 
 
 def write_parquet(
@@ -59,11 +60,19 @@ def write_parquet(
     # Partitioned write (multiple files per chunk)
     # ---------------------------------------------------------
     if partition_column:
-        for partition_value, group in df.groupby(partition_column):
+        df = df.copy()
+
+        # Convert Unix timestamp → date partition
+        df["partition_day"] = pd.to_datetime(
+            df[partition_column], unit="s"
+        ).dt.strftime("%Y-%m-%d")
+
+        for partition_value, group in df.groupby("partition_day"):
             start = group[cursor_column].min()
             end = group[cursor_column].max()
 
             object_key = (
+                f"{OBJECT_PREFIX}/"
                 f"{table}/"
                 f"{partition_column}={partition_value}/"
                 f"{cursor_column}={start}_{end}.parquet"
@@ -78,7 +87,7 @@ def write_parquet(
         start = df[cursor_column].min()
         end = df[cursor_column].max()
 
-        object_key = f"{table}/{cursor_column}={start}_{end}.parquet"
+        object_key = f"{OBJECT_PREFIX}/{table}/{cursor_column}={start}_{end}.parquet"
 
         upload_dataframe(hook, df, object_key)
 
@@ -103,7 +112,6 @@ def upload_dataframe(
 
     buffer = BytesIO()
 
-    # Convert DataFrame into Parquet format in-memory
     df.to_parquet(
         buffer,
         engine="pyarrow",
@@ -112,7 +120,6 @@ def upload_dataframe(
 
     buffer.seek(0)
 
-    # Upload to object storage
     hook.load_bytes(
         bytes_data=buffer.getvalue(),
         key=object_key,

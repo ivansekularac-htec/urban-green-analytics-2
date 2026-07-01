@@ -50,6 +50,7 @@ def build_dag(config: dict) -> DAG:
             "retries": 1,
             "retry_delay": timedelta(minutes=5),
         },
+        max_active_runs=1,
         tags=["ingestion", table],
     )
 
