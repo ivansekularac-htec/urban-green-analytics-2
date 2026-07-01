@@ -1,2 +1,4 @@
-# Helper package — importable by DAGs, but not itself a DAG file to scan.
-^extract/
+# Helper package - importable by DAGs, but not itself a DAG file to scan.
+# Airflow 3 defaults .airflowignore to glob syntax (not regexp), so a glob is
+# what excludes the subtree from DAG scanning while leaving it importable.
+postgres_extract/*
