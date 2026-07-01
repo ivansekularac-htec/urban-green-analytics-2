@@ -113,7 +113,6 @@ def upload_dataframe(
     buffer.seek(0)
 
     # Upload to object storage
-    # NOTE: replace=False ensures idempotency safety is handled upstream
     hook.load_bytes(
         bytes_data=buffer.getvalue(),
         key=object_key,
