@@ -16,7 +16,7 @@ OBJECT_PREFIX = "raw/postgres"
 def write_parquet(
     df: pd.DataFrame,
     table: str,
-    cursor_column: str,
+    part: int,
     partition_column: str | None = None,
 ) -> None:
     """
@@ -68,14 +68,11 @@ def write_parquet(
         ).dt.strftime("%Y-%m-%d")
 
         for partition_value, group in df.groupby("partition_day"):
-            start = group[cursor_column].min()
-            end = group[cursor_column].max()
-
             object_key = (
                 f"{OBJECT_PREFIX}/"
                 f"{table}/"
                 f"{partition_column}={partition_value}/"
-                f"{cursor_column}={start}_{end}.parquet"
+                f"part-{part:06d}.parquet"
             )
 
             upload_dataframe(hook, group, object_key)
@@ -84,10 +81,7 @@ def write_parquet(
     # Non-partitioned write (single file per chunk)
     # ---------------------------------------------------------
     else:
-        start = df[cursor_column].min()
-        end = df[cursor_column].max()
-
-        object_key = f"{OBJECT_PREFIX}/{table}/{cursor_column}={start}_{end}.parquet"
+        object_key = f"{OBJECT_PREFIX}/{table}/part-{part:06d}.parquet"
 
         upload_dataframe(hook, df, object_key)
 

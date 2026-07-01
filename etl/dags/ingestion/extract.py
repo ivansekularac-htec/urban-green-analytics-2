@@ -12,7 +12,7 @@ from ingestion.write import write_parquet
 # ---------------------------------------------------------
 
 POSTGRES_CONN_ID = os.getenv("POSTGRES_CONN_ID", "urbangreen_db")
-INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", 100000))
+INGESTION_CHUNK_SIZE = int(os.getenv("INGESTION_CHUNK_SIZE", 200000))
 
 
 def extract_and_write(config: dict) -> None:
@@ -74,18 +74,21 @@ def extract_and_write(config: dict) -> None:
         # ---------------------------------------------------------
         # 4. Stream data in chunks
         # ---------------------------------------------------------
+        part = 1
+
         while rows:
             df = pd.DataFrame(rows, columns=columns)
 
             write_parquet(
                 df=df,
                 table=table,
-                cursor_column=cursor_column,
+                part=part,
                 partition_column=config.get("partition_column"),
             )
 
             max_cursor = df[cursor_column].max()
             rows = cur.fetchmany(INGESTION_CHUNK_SIZE)
+            part += 1
 
     finally:
         cur.close()
