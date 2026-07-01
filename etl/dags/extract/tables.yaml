@@ -4,41 +4,41 @@ defaults:
 
 tables:
   - name: roles
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: quality_grades
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: farm_infrastructure_types
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: growing_system_types
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: crop_categories
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: sensor_types
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: farms
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: users
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: crops
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: user_roles
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: farm_crops
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: sensors
-    schedule: "0 2 * * *"
+    cadence: daily
 
   - name: harvests
-    schedule: "0 * * * *"
+    cadence: hourly
     partition_column: created_at

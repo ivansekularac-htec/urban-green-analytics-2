@@ -4,13 +4,18 @@ from pathlib import Path
 import yaml
 
 # =========================
-# CONNECTIONS / GLOBAL SETTINGS
+# CONNECTIONS / GLOBAL SETTINGS / PATHS
 # =========================
 
 POSTGRES_CONN_ID = "urbangreen_db"
 MINIO_CONN_ID = "urbangreen_minio"
 SCHEMA = os.getenv("POSTGRES_SCHEMA", "app")
 BUCKET_NAME = os.getenv("MINIO_STAGING_BUCKET", "staging")
+
+
+def raw(source: str, name: str) -> str:
+    return f"raw/{source}/{name}"
+
 
 # =========================
 # TABLE CONFIG
@@ -32,6 +37,6 @@ def load_tables() -> list[dict]:
     return [{**defaults, **table} for table in config.get("tables", [])]
 
 
-def get_tables_by_schedule(schedule: str):
+def get_tables_by_cadence(cadence: str):
     tables = load_tables()
-    return [t for t in tables if t["schedule"] == schedule]
+    return [t for t in tables if t["cadence"] == cadence]

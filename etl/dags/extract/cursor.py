@@ -3,89 +3,72 @@ import json
 from airflow.sdk import Variable
 
 
-def variable_name(table: str) -> str:
+def variable_name(table_name: str) -> str:
     """
     Return the Airflow Variable name used to store the extraction cursor.
 
     Args:
-        table: Name of the source table.
+        table_name: Name of the source table.
 
     Returns:
         The Airflow Variable key for the table's cursor.
     """
 
-    return f"extract.{table}.cursor"
+    return f"extract.{table_name}.cursor"
 
 
-def get_cursor(table_config: dict) -> tuple[int, int]:
+def get_cursor(table_config: dict) -> str:
     """
     Retrieve the last successfully processed cursor for a table.
 
-    If the cursor variable does not exist, returns ``0`` so the initial
+    If the cursor variable does not exist, returns "0" so the initial
     extraction processes all available records.
 
     Args:
-        table: Name of the source table.
+        table_config:
+            Table configuration containing the table name and cursor column.
 
     Returns:
-        The last processed cursor value, or ``0`` if no cursor exists.
+        The stored cursor value.
     """
-    table = table_config["name"]
+    table_name = table_config["name"]
     cursor_column = table_config["cursor_column"]
 
     try:
-        value = Variable.get(variable_name(table))
+        value = Variable.get(variable_name(table_name))
     except Exception:
-        return (0, 0)
+        return "0"
 
     try:
         data = json.loads(value)
-        return (
-            int(data.get(cursor_column, 0)),
-            int(data.get("id", 0)),
-        )
+        return str(data.get(cursor_column, "0"))
     except (TypeError, ValueError):
-        return (0, 0)
+        return "0"
 
 
-def update_cursor(table_config: dict, cursor: tuple[int, int]):
+def update_cursor(
+    table_config: dict,
+    cursor: str,
+) -> None:
     """
     Store the latest successfully processed cursor for a table.
 
     Args:
-        table: Name of the source table.
-        cursor: Cursor value to persist.
+        table_config:
+            Table configuration containing the table name and cursor column.
+        cursor:
+            Cursor value to persist.
     """
-
-    if not cursor:
-        return
-
-    table = table_config["name"]
+    table_name = table_config["name"]
     cursor_column = table_config["cursor_column"]
 
-    cursor_value, id_value = cursor
+    cursor_value = cursor
 
     Variable.set(
-        variable_name(table),
+        variable_name(table_name),
         json.dumps(
             {
-                cursor_column: int(cursor_value),
-                "id": int(id_value),
+                cursor_column: cursor_value,
             }
         ),
     )
-
-
-def reset_cursor(table_config: dict):
-    """
-    Delete the stored cursor for a table.
-
-    This causes the next extraction to start from the initial cursor
-    value (``0``).
-
-    Args:
-        table: Name of the source table.
-    """
-
-    table = table_config["name"]
-    Variable.delete(variable_name(table))
