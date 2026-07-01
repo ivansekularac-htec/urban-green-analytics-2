@@ -38,8 +38,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: urbangreen-postgres
-      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-app}
       JWT_SECRET: ${API_JWT_SECRET}
       JWT_ALGORITHM: ${API_JWT_ALGORITHM:-HS256}
@@ -72,21 +72,24 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
-    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
+    command: [ "server", "/data", "--address", ":9000", "--console-address", ":9001" ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
     volumes:
-      - urbangreen-minio-data:/data
+      - urbangreen-minio-volume:/data
+
     networks:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -95,20 +98,25 @@ services:
   minio-init:
     image: minio/mc:latest
     container_name: urbangreen-minio-init
+    restart: "no"
+
     depends_on:
       minio:
         condition: service_healthy
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+      MINIO_API_PORT: 9000
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+
     entrypoint: [ "/bin/sh", "/scripts/init-bucket.sh" ]
+
     volumes:
       - ./infra/minio/init:/scripts:ro
+
     networks:
       - urbangreen-network
-    restart: "no"
 
   airflow:
     build:
@@ -132,31 +140,26 @@ services:
       - |
         airflow db migrate
 
-        airflow connections delete urbangreen_db >/dev/null 2>&1 || true
-        airflow connections add urbangreen_db \
+        airflow connections delete "$${POSTGRES_EXTRACT_CONN_ID:-urbangreen_db}" >/dev/null 2>&1 || true
+        airflow connections add "$${POSTGRES_EXTRACT_CONN_ID:-urbangreen_db}" \
           --conn-type postgres \
           --conn-host postgres \
           --conn-login "$${POSTGRES_USER}" \
           --conn-password "$${POSTGRES_PASSWORD}" \
           --conn-schema "$${POSTGRES_DB}" \
-          --conn-port "$${POSTGRES_PORT:-5432}"
+          --conn-port 5432
 
-        airflow connections delete urbangreen_minio >/dev/null 2>&1 || true
-        airflow connections add urbangreen_minio \
+        airflow connections delete "$${MINIO_CONN_ID:-urbangreen_minio}" >/dev/null 2>&1 || true
+        airflow connections add "$${MINIO_CONN_ID:-urbangreen_minio}" \
           --conn-type aws \
-          --conn-login "$${MINIO_ROOT_USER:-minio}" \
-          --conn-password "$${MINIO_ROOT_PASSWORD:-miniominio}" \
-          --conn-extra "{\"endpoint_url\":\"http://minio:$${MINIO_API_PORT:-9000}\",\"region_name\":\"us-east-1\"}"
-
-        airflow connections delete urbangreen_spark >/dev/null 2>&1 || true
-        airflow connections add urbangreen_spark \
-          --conn-type spark \
-          --conn-host spark://urbangreen-spark-master \
-          --conn-port "$${SPARK_MASTER_PORT:-7077}"
+          --conn-login "$${MINIO_ROOT_USER}" \
+          --conn-password "$${MINIO_ROOT_PASSWORD}" \
+          --conn-extra "{\"endpoint_url\":\"http://minio:9000\",\"region_name\":\"us-east-1\"}"
 
         exec airflow standalone
 
     user: "${AIRFLOW_UID:-50000}:0"
+
     ports:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
 
@@ -172,19 +175,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniominio}
-      MINIO_API_PORT: ${MINIO_API_PORT:-9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      MINIO_STAGING_PREFIX: ${MINIO_STAGING_PREFIX:-app/raw/postgres}
+
       POSTGRES_EXTRACT_CONN_ID: ${POSTGRES_EXTRACT_CONN_ID:-urbangreen_db}
       MINIO_CONN_ID: ${MINIO_CONN_ID:-urbangreen_minio}
-      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
-      MINIO_STAGING_PREFIX: ${MINIO_STAGING_PREFIX:-postgres/app}
-      EXTRACT_SAFETY_LAG_SECONDS: ${EXTRACT_SAFETY_LAG_SECONDS:-60}
-      EXTRACT_CHUNK_SIZE: ${EXTRACT_CHUNK_SIZE:-50000}
-
-      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      EXTRACT_CHUNK_SIZE: ${EXTRACT_CHUNK_SIZE:-100000}
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
@@ -210,8 +209,10 @@ services:
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
-  urbangreen-minio-data:
+
+  urbangreen-minio-volume:
     name: urbangreen-minio-volume
+
   urbangreen-airflow-logs-volume:
     name: urbangreen-airflow-logs-volume
 
