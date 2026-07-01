@@ -21,7 +21,6 @@ def _update_max_cursor(
 
 def _build_object_key(
     table_name: str,
-    batch_index: int,
     partition_value: str | None = None,
 ) -> str:
     """Generate S3 object key for parquet file."""
@@ -114,7 +113,6 @@ def write_batches(
 
             object_key = _build_object_key(
                 table_name,
-                batch_index,
                 partition_value,
             )
 
