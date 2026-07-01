@@ -8,7 +8,7 @@ from airflow.operators.python import PythonOperator
 from ingestion.extract import extract_and_write
 
 # ---------------------------------------------------------
-# Load table configuration
+# Configuration loading
 # ---------------------------------------------------------
 
 CONFIG_PATH = Path(__file__).resolve().parent / "ingestion" / "tables.yaml"
@@ -16,11 +16,26 @@ CONFIG_PATH = Path(__file__).resolve().parent / "ingestion" / "tables.yaml"
 with open(CONFIG_PATH, "r") as f:
     configs = yaml.safe_load(f)["tables"]
 
-# ---------------------------------------------------------
-# Create one DAG per table
-# ---------------------------------------------------------
 
-for config in configs:
+def build_dag(config: dict) -> DAG:
+    """
+    Builds a single Airflow DAG for a given table configuration.
+
+    Each DAG represents an incremental extraction pipeline:
+    Postgres → chunked extraction → MinIO (Parquet).
+
+    Args:
+        config (dict): Table configuration containing:
+            - table (str): table name
+            - schedule (str): Airflow schedule expression
+            - schema (str): Postgres schema
+            - cursor_column (str): incremental column
+            - partition_column (str | None): optional partition column
+
+    Returns:
+        DAG: Fully configured Airflow DAG instance
+    """
+
     table = config["table"]
     schedule = config["schedule"]
 
@@ -45,5 +60,15 @@ for config in configs:
             op_kwargs={"config": config},
         )
 
-    # Register DAG so Airflow discovers it
+    return dag
+
+
+# ---------------------------------------------------------
+# DAG registration (Airflow discovery point)
+# ---------------------------------------------------------
+
+for config in configs:
+    dag = build_dag(config)
+
+    # Register DAG in module scope so Airflow can discover it
     globals()[dag.dag_id] = dag
