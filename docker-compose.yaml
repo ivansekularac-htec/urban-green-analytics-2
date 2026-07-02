@@ -72,15 +72,7 @@ services:
     container_name: urbangreen-minio
     restart: unless-stopped
 
-    command:
-      [
-        "server",
-        "/data",
-        "--address",
-        ":${MINIO_API_PORT:-9000}",
-        "--console-address",
-        ":${MINIO_CONSOLE_PORT:-9001}",
-      ]
+    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -94,11 +86,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -121,7 +109,7 @@ services:
     networks:
       - urbangreen-network
     restart: "no"
-  
+
   airflow:
     build:
       context: ./infra/airflow
@@ -193,11 +181,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -210,6 +194,44 @@ services:
         reservations:
           memory: 1G
 
+  kafka:
+    image: apache/kafka:latest
+    container_name: urbangreen-kafka
+    restart: unless-stopped
+
+    ports:
+      - "${KAFKA_PORT_HOST:-29092}:${KAFKA_PORT_HOST:-29092}"
+
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: ${CLUSTER_ID}
+
+      KAFKA_LISTENERS: PLAINTEXT://:${KAFKA_PORT_INTERNAL:-9092},CONTROLLER://:${KAFKA_PORT_CONTROLLER:-9093},PLAINTEXT_HOST://:${KAFKA_PORT_HOST:-29092}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://urbangreen-kafka:${KAFKA_PORT_INTERNAL:-9092},PLAINTEXT_HOST://localhost:${KAFKA_PORT_HOST:-29092}
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@urbangreen-kafka:${KAFKA_PORT_CONTROLLER:-9093}
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+    volumes:
+      - urbangreen-kafka-volume:/var/lib/kafka/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:${KAFKA_PORT_INTERNAL:-9092} --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -217,6 +239,8 @@ volumes:
     name: urbangreen-minio-volume
   urbangreen-airflow-logs-volume:
     name: urbangreen-airflow-logs-volume
+  urbangreen-kafka-volume:
+    name: urbangreen-kafka-volume
 
 networks:
   urbangreen-network:
