@@ -1,0 +1,21 @@
+defaults:
+  schedule: "@daily"
+
+tables:
+  - name: roles
+  - name: quality_grades
+  - name: farm_infrastructure_types
+  - name: growing_system_types
+  - name: crop_categories
+  - name: sensor_types
+  - name: farms
+  - name: users
+  - name: crops
+  - name: user_roles
+  - name: farm_crops
+  - name: sensors
+
+  - name: harvests
+    schedule: "@hourly"
+    partition_by: created_at
+    partition_label: harvest_date
