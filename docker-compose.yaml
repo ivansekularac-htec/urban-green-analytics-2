@@ -194,8 +194,9 @@ services:
         reservations:
           memory: 1G
   kafka:
-    container_name: urbangreen-kafka
     image: apache/kafka:latest
+    container_name: urbangreen-kafka
+
     restart: unless-stopped
 
     ports:
