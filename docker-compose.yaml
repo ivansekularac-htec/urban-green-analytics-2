@@ -216,6 +216,8 @@ services:
     restart: unless-stopped
 
     environment:
+      KAFKA_PORT_INTERNAL: ${KAFKA_PORT_INTERNAL:-9092}
+      
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
 
@@ -243,7 +245,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:${KAFKA_PORT_INTERNAL:-9092} --list >/dev/null 2>&1" ]
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:$${KAFKA_PORT_INTERNAL:-9092} --list >/dev/null 2>&1" ]
       interval: 30s
       timeout: 10s
       retries: 5
