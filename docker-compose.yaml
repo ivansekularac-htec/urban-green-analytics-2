@@ -1,7 +1,6 @@
 services:
-  postgres:
+  urbangreen-postgres:
     image: postgres:16
-    container_name: urbangreen-postgres
     restart: unless-stopped
 
     environment:
@@ -21,17 +20,16 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
 
-  api:
+  urbangreen-api:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: urbangreen-api
     restart: unless-stopped
 
     environment:
@@ -52,74 +50,92 @@ services:
       - "${API_PORT:-8000}:8000"
 
     depends_on:
-      postgres:
+      urbangreen-postgres:
         condition: service_healthy
 
     networks:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
-  minio:
+  urbangreen-minio:
     build:
       context: ./infra/minio
       dockerfile: Dockerfile
-    container_name: urbangreen-minio
     restart: unless-stopped
 
-    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
+    command:
+      [
+        "server",
+        "/data",
+        "--address",
+        ":${MINIO_API_PORT:-9000}",
+        "--console-address",
+        ":${MINIO_CONSOLE_PORT:-9001}",
+      ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
     volumes:
       - urbangreen-minio-data:/data
+
     networks:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
-  minio-init:
+  urbangreen-minio-init:
     image: minio/mc:latest
-    container_name: urbangreen-minio-init
+
     depends_on:
-      minio:
+      urbangreen-minio:
         condition: service_healthy
+
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
-    entrypoint: [ "/bin/sh", "/scripts/init-bucket.sh" ]
+
+    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+
     volumes:
       - ./infra/minio/init:/scripts:ro
+
     networks:
       - urbangreen-network
+
     restart: "no"
 
-  airflow:
+  urbangreen-airflow:
     build:
       context: ./infra/airflow
       dockerfile: Dockerfile
     image: urbangreen-airflow:latest
-    container_name: urbangreen-airflow
     restart: unless-stopped
 
     depends_on:
-      postgres:
+      urbangreen-postgres:
         condition: service_healthy
 
     command:
@@ -130,7 +146,7 @@ services:
 
         airflow connections add urbangreen_db \
           --conn-type postgres \
-          --conn-host postgres \
+          --conn-host urbangreen-postgres \
           --conn-login "${POSTGRES_USER}" \
           --conn-password "${POSTGRES_PASSWORD}" \
           --conn-schema "${POSTGRES_DB}" \
@@ -140,7 +156,7 @@ services:
           --conn-type aws \
           --conn-login "${MINIO_ROOT_USER:-minio}" \
           --conn-password "${MINIO_ROOT_PASSWORD}" \
-          --conn-extra "{\"endpoint_url\": \"http://minio:$${MINIO_API_PORT:-9000}\"}"
+          --conn-extra "{\"endpoint_url\": \"http://urbangreen-minio:$${MINIO_API_PORT:-9000}\"}"
 
         airflow connections add urbangreen_spark \
           --conn-type spark \
@@ -150,6 +166,7 @@ services:
         exec airflow standalone
 
     user: "${AIRFLOW_UID:-50000}:0"
+
     ports:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
 
@@ -181,7 +198,11 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -194,9 +215,8 @@ services:
         reservations:
           memory: 1G
 
-  kafka:
+  urbangreen-kafka:
     image: apache/kafka:latest
-    container_name: urbangreen-kafka
     restart: unless-stopped
 
     environment:
@@ -232,25 +252,28 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:$${KAFKA_PORT_INTERNAL} --list >/dev/null 2>&1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:$${KAFKA_PORT_INTERNAL} --list >/dev/null 2>&1",
+        ]
       interval: 10s
       timeout: 10s
       retries: 10
       start_period: 45s
 
-  kafka-init:
+  urbangreen-kafka-init:
     image: apache/kafka:latest
-    container_name: urbangreen-kafka-init
 
     depends_on:
-      kafka:
+      urbangreen-kafka:
         condition: service_healthy
 
     environment:
       KAFKA_PORT_INTERNAL: ${KAFKA_PORT_INTERNAL:-9092}
       KAFKA_TOPIC_SENSOR_READINGS: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
 
-    entrypoint: [ "/bin/sh", "/scripts/init-topics.sh" ]
+    entrypoint: ["/bin/sh", "/scripts/init-topics.sh"]
 
     volumes:
       - ./infra/kafka/init:/scripts:ro
@@ -263,10 +286,13 @@ services:
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
+
   urbangreen-minio-data:
     name: urbangreen-minio-volume
+
   urbangreen-airflow-logs-volume:
     name: urbangreen-airflow-logs-volume
+
   urbangreen-kafka-volume:
     name: urbangreen-kafka-volume
 
