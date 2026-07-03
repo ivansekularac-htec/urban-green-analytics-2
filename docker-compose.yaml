@@ -247,17 +247,11 @@ services:
     environment:
       KAFKA_PORT_INTERNAL: ${KAFKA_PORT_INTERNAL:-9092}
       KAFKA_TOPIC_SENSOR_READINGS: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
-    command:
-      - bash
-      - -c
-      - |
-        /opt/kafka/bin/kafka-topics.sh \
-        --bootstrap-server urbangreen-kafka:${KAFKA_PORT_INTERNAL:-9092} \
-        --create \
-        --if-not-exists \
-        --topic ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings} \
-        --partitions 3 \
-        --replication-factor 1
+
+    entrypoint: [ "/bin/sh", "/scripts/init-topics.sh" ]
+
+    volumes:
+      - ./infra/kafka/init:/scripts:ro
     
     networks:
       - urbangreen-network
