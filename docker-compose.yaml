@@ -138,32 +138,7 @@ services:
       urbangreen-postgres:
         condition: service_healthy
 
-    command:
-      - bash
-      - -c
-      - |
-        airflow db migrate
-
-        airflow connections add urbangreen_db \
-          --conn-type postgres \
-          --conn-host urbangreen-postgres \
-          --conn-login "${POSTGRES_USER}" \
-          --conn-password "${POSTGRES_PASSWORD}" \
-          --conn-schema "${POSTGRES_DB}" \
-          --conn-port "${POSTGRES_PORT:-5432}"
-
-        airflow connections add urbangreen_minio \
-          --conn-type aws \
-          --conn-login "${MINIO_ROOT_USER:-minio}" \
-          --conn-password "${MINIO_ROOT_PASSWORD}" \
-          --conn-extra "{\"endpoint_url\": \"http://urbangreen-minio:$${MINIO_API_PORT:-9000}\"}"
-
-        airflow connections add urbangreen_spark \
-          --conn-type spark \
-          --conn-host "spark://urbangreen-spark-master" \
-          --conn-port "${SPARK_MASTER_PORT:-7077}"
-
-        exec airflow standalone
+    entrypoint: ["/bin/sh", "/scripts/init-airflow.sh"]
 
     user: "${AIRFLOW_UID:-50000}:0"
 
@@ -193,6 +168,7 @@ services:
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
+      - ./infra/airflow/init:/scripts:ro
 
     networks:
       - urbangreen-network
