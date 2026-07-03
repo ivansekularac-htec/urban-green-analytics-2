@@ -6,7 +6,7 @@
 set -eu
 
 MINIO_API_PORT="${MINIO_API_PORT:-9000}"
-MINIO_ENDPOINT="http://minio:${MINIO_API_PORT}"
+MINIO_ENDPOINT="http://urbangreen-minio:${MINIO_API_PORT}"
 
 # Point `mc` at the running MinIO using the root credentials.
 mc alias set local "${MINIO_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"
