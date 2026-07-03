@@ -238,6 +238,28 @@ services:
       retries: 10
       start_period: 45s
 
+  kafka-init:
+    image: apache/kafka:latest
+    container_name: urbangreen-kafka-init
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    environment:
+      KAFKA_PORT_INTERNAL: ${KAFKA_PORT_INTERNAL:-9092}
+      KAFKA_TOPIC_SENSOR_READINGS: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
+
+    entrypoint: [ "/bin/sh", "/scripts/init-topics.sh" ]
+
+    volumes:
+      - ./infra/kafka/init:/scripts:ro
+
+    networks:
+      - urbangreen-network
+
+    restart: "no"
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
