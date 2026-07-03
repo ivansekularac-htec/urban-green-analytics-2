@@ -252,7 +252,7 @@ services:
       - -c
       - |
         /opt/kafka/bin/kafka-topics.sh \
-        --bootstrap-server urbangreen-kafka:${KAFKA_PORT_INTERNAL:-9092} \
+        --bootstrap-server kafka:${KAFKA_PORT_INTERNAL:-9092} \
         --create \
         --if-not-exists \
         --topic ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings} \
