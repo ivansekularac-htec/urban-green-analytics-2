@@ -20,7 +20,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,7 +57,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -69,15 +69,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
-    command:
-      [
-        "server",
-        "/data",
-        "--address",
-        ":${MINIO_API_PORT:-9000}",
-        "--console-address",
-        ":${MINIO_CONSOLE_PORT:-9001}",
-      ]
+    command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
 
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -94,11 +86,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MINIO_API_PORT:-9000}/minio/health/live || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -117,7 +105,7 @@ services:
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
 
-    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+    entrypoint: [ "/bin/sh", "/scripts/init-bucket.sh" ]
 
     volumes:
       - ./infra/minio/init:/scripts:ro
@@ -138,7 +126,7 @@ services:
       urbangreen-postgres:
         condition: service_healthy
 
-    entrypoint: ["/bin/sh", "/scripts/init-airflow.sh"]
+    entrypoint: [ "/bin/sh", "/scripts/init-airflow.sh" ]
 
     user: "${AIRFLOW_UID:-50000}:0"
 
@@ -174,11 +162,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1",
-        ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${AIRFLOW_PORT:-8080}/api/v2/monitor/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -228,11 +212,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:$${KAFKA_PORT_INTERNAL} --list >/dev/null 2>&1",
-        ]
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:$${KAFKA_PORT_INTERNAL} --list >/dev/null 2>&1" ]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -249,7 +229,7 @@ services:
       KAFKA_PORT_INTERNAL: ${KAFKA_PORT_INTERNAL:-9092}
       KAFKA_TOPIC_SENSOR_READINGS: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
 
-    entrypoint: ["/bin/sh", "/scripts/init-topics.sh"]
+    entrypoint: [ "/bin/sh", "/scripts/init-topics.sh" ]
 
     volumes:
       - ./infra/kafka/init:/scripts:ro
@@ -258,6 +238,32 @@ services:
       - urbangreen-network
 
     restart: "no"
+
+  urbangreen-spark-master:
+    build:
+      context: ./infra/spark
+    restart: unless-stopped
+
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host urbangreen-spark-master --port ${SPARK_MASTER_PORT:-7077} --webui-port ${SPARK_MASTER_UI_PORT:-8090}
+
+    environment:
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      SPARK_MASTER_UI_PORT: ${SPARK_MASTER_UI_PORT:-8090}
+
+    ports:
+      - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
+      - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/localhost/$${SPARK_MASTER_UI_PORT:-8090}; printf \"GET / HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"HTTP/\" <&3'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   urbangreen-postgres-data:
