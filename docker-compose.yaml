@@ -259,6 +259,41 @@ services:
 
     restart: "no"
 
+  urbangreen-spark-master:
+    build: ./infra/spark
+    restart: unless-stopped
+
+    environment:
+      SPARK_MASTER_UI_PORT: ${SPARK_MASTER_UI_PORT:-8090}
+
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.master.Master
+      - --host
+      - urbangreen-spark-master
+      - --port
+      - "${SPARK_MASTER_PORT:-7077}"
+      - --webui-port
+      - "${SPARK_MASTER_UI_PORT:-8090}"
+
+    ports:
+      - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
+      - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${SPARK_MASTER_UI_PORT:-8090}/ || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
