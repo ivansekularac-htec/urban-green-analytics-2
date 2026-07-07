@@ -1,6 +1,7 @@
 services:
   urbangreen-postgres:
     image: postgres:16
+    container_name: urbangreen-postgres
     restart: unless-stopped
 
     environment:
@@ -30,6 +31,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
+    container_name: urbangreen-api
     restart: unless-stopped
 
     environment:
@@ -67,6 +69,7 @@ services:
     build:
       context: ./infra/minio
       dockerfile: Dockerfile
+    container_name: urbangreen-minio
     restart: unless-stopped
 
     command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
@@ -94,6 +97,7 @@ services:
 
   urbangreen-minio-init:
     image: minio/mc:latest
+    container_name: urbangreen-minio-init
 
     depends_on:
       urbangreen-minio:
@@ -119,6 +123,7 @@ services:
     build:
       context: ./infra/airflow
       dockerfile: Dockerfile
+    container_name: urbangreen-airflow
     image: urbangreen-airflow:latest
     restart: unless-stopped
 
@@ -177,6 +182,7 @@ services:
 
   urbangreen-kafka:
     image: apache/kafka:latest
+    container_name: urbangreen-kafka
     restart: unless-stopped
 
     environment:
@@ -220,6 +226,7 @@ services:
 
   urbangreen-kafka-init:
     image: apache/kafka:latest
+    container_name: urbangreen-kafka-init
 
     depends_on:
       urbangreen-kafka:
@@ -244,6 +251,7 @@ services:
       context: ./infra/spark
       dockerfile: Dockerfile
     restart: unless-stopped
+    container_name: urbangreen-spark-master
 
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
@@ -269,6 +277,7 @@ services:
     build:
       context: ./infra/spark
       dockerfile: Dockerfile
+    container_name: urbangreen-spark-worker-1
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
 
@@ -290,6 +299,7 @@ services:
     build:
       context: ./infra/spark
       dockerfile: Dockerfile
+    container_name: urbangreen-spark-worker-2
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
 
