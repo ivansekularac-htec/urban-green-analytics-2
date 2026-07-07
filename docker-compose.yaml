@@ -245,7 +245,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
-    entrypoint: [ "/bin/sh", "/scripts/init-master.sh" ]
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
     environment:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
@@ -258,30 +258,26 @@ services:
     networks:
       - urbangreen-network
 
-    volumes:
-      - ./infra/spark/init:/scripts:ro
-
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${SPARK_MASTER_UI_PORT:-8090}/ || exit 1" ]
+      test: [ "CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/localhost/$${SPARK_MASTER_UI_PORT:-8090}; printf \"GET / HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"HTTP/\" <&3'" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
 
   urbangreen-spark-worker-1:
-    build: ./infra/spark
+    build:
+      context: ./infra/spark
+      dockerfile: Dockerfile
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
 
-    command: [ "sh", "/opt/spark/init/init-worker.sh" ]
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
       SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
       SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
-
-    volumes:
-      - ./infra/spark/init:/opt/spark/init:ro
 
     depends_on:
       urbangreen-spark-master:
@@ -291,19 +287,18 @@ services:
       - urbangreen-network
 
   urbangreen-spark-worker-2:
-    build: ./infra/spark
+    build:
+      context: ./infra/spark
+      dockerfile: Dockerfile
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
 
-    command: [ "sh", "/opt/spark/init/init-worker.sh" ]
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
       SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
       SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
-
-    volumes:
-      - ./infra/spark/init:/opt/spark/init:ro
 
     depends_on:
       urbangreen-spark-master:
