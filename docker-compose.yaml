@@ -245,7 +245,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
-    entrypoint: [ "/bin/sh", "/scripts/init-master.sh" ]
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
     environment:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
@@ -258,15 +258,54 @@ services:
     networks:
       - urbangreen-network
 
-    volumes:
-      - ./infra/spark/init:/scripts:ro
-
     healthcheck:
       test: [ "CMD-SHELL", "curl -fsS http://localhost:$${SPARK_MASTER_UI_PORT:-8090}/ || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  urbangreen-spark-worker-1:
+    build:
+      context: ./infra/spark
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    hostname: urbangreen-spark-worker-1
+
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
+
+    environment:
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
+      SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
+
+    depends_on:
+      urbangreen-spark-master:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+  urbangreen-spark-worker-2:
+    build:
+      context: ./infra/spark
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    hostname: urbangreen-spark-worker-2
+
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
+
+    environment:
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
+      SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
+
+    depends_on:
+      urbangreen-spark-master:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
 
 volumes:
   urbangreen-postgres-data:
