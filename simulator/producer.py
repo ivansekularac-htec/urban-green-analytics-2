@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from kafka import KafkaProducer
-from kafka.errors import NoBrokersAvailable
+from kafka.errors import KafkaTimeoutError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -168,7 +168,7 @@ def make_producer(bootstrap: str, deadline_seconds: int = 60) -> KafkaProducer:
                 retries=5,
                 retry_backoff_ms=500,
             )
-        except NoBrokersAvailable as exc:
+        except KafkaTimeoutError as exc:
             last_err = exc
             log.warning(f"kafka broker not yet reachable at {bootstrap}; retrying...")
             time.sleep(2.0)

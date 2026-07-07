@@ -317,6 +317,31 @@ services:
     networks:
       - urbangreen-network
 
+  urbangreen-sensor-simulator:
+    build:
+      context: ./simulator
+    container_name: urbangreen-sensor-simulator
+    image: urbangreen-sensor-simulator
+    restart: unless-stopped
+
+    depends_on:
+      urbangreen-kafka:
+        condition: service_healthy
+    
+    volumes:
+      - urbangreen-simulator-volume:/state
+
+    environment:
+      SIMULATOR_KAFKA_BOOTSTRAP: ${SIMULATOR_KAFKA_BOOTSTRAP:-urbangreen-kafka:9092}
+      SIMULATOR_BACKFILL_DAYS: ${SIMULATOR_BACKFILL_DAYS:-365}
+      SIMULATOR_BACKFILL_EVENTS_PER_DAY: ${SIMULATOR_BACKFILL_EVENTS_PER_DAY:-4}
+      SIMULATOR_LIVE_INTERVAL_SECONDS: ${SIMULATOR_LIVE_INTERVAL_SECONDS:-600}
+      SIMULATOR_OUTLIER_PROBABILITY: ${SIMULATOR_OUTLIER_PROBABILITY:-0}
+      SIMULATOR_LOG_LEVEL: ${SIMULATOR_LOG_LEVEL:-INFO}
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -329,6 +354,9 @@ volumes:
 
   urbangreen-kafka-volume:
     name: urbangreen-kafka-volume
+
+  urbangreen-simulator-volume:
+    name: urbangreen-simulator-volume
 
 networks:
   urbangreen-network:
