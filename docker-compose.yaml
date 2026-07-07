@@ -268,6 +268,50 @@ services:
       retries: 5
       start_period: 20s
 
+  urbangreen-spark-worker-1:
+    build: ./infra/spark
+    restart: unless-stopped
+    hostname: urbangreen-spark-worker-1
+
+    command: [ "sh", "/opt/spark/init/init-worker.sh" ]
+
+    environment:
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
+      SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
+
+    volumes:
+      - ./infra/spark/init:/opt/spark/init:ro
+
+    depends_on:
+      urbangreen-spark-master:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+  urbangreen-spark-worker-2:
+    build: ./infra/spark
+    restart: unless-stopped
+    hostname: urbangreen-spark-worker-2
+
+    command: [ "sh", "/opt/spark/init/init-worker.sh" ]
+
+    environment:
+      SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+      SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
+      SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
+
+    volumes:
+      - ./infra/spark/init:/opt/spark/init:ro
+
+    depends_on:
+      urbangreen-spark-master:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
