@@ -259,7 +259,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/localhost/$${SPARK_MASTER_UI_PORT:-8090}; printf \"GET / HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"HTTP/\" <&3'" ]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${SPARK_MASTER_UI_PORT:-8090}/ || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
