@@ -77,6 +77,7 @@ def create_spark_session(config):
             "spark.hadoop.fs.s3a.aws.credentials.provider",
             "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
         )
+        .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )
 
