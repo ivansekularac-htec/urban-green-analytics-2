@@ -345,6 +345,27 @@ services:
     networks:
       - urbangreen-network
 
+  urbangreen-jupyter:
+    profiles:
+      - dev
+
+    container_name: urbangreen-jupyter
+    hostname: jupyter
+
+    build:
+      context: .
+      dockerfile: ./infra/jupyter/Dockerfile
+
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+      - "${SPARK_DRIVER_UI_PORT:-4040}:4040"
+
+    volumes:
+      - ./notebooks:/home/jovyan/work
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
