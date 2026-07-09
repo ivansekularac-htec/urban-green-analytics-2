@@ -69,16 +69,6 @@ def create_spark_session(config):
             "spark.hadoop.fs.s3a.aws.credentials.provider",
             "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
         )
-        .config(
-            "spark.jars.packages",
-            ",".join(
-                [
-                    "org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.2",
-                    "org.apache.hadoop:hadoop-aws:3.4.1",
-                    "com.amazonaws:aws-java-sdk-bundle:1.12.782",
-                ]
-            ),
-        )
         .getOrCreate()
     )
 
