@@ -3087,15 +3087,6 @@ wheels = [
 ]
 
 [[package]]
-name = "py4j"
-version = "0.10.9.9"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/38/31/0b210511177070c8d5d3059556194352e5753602fa64b85b7ab81ec1a009/py4j-0.10.9.9.tar.gz", hash = "sha256:f694cad19efa5bd1dee4f3e5270eb406613c974394035e5bfc4ec1aba870b879", size = 761089, upload-time = "2025-01-15T03:53:18.624Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/db/ea0203e495be491c85af87b66e37acfd3bf756fd985f87e46fc5e3bf022c/py4j-0.10.9.9-py2.py3-none-any.whl", hash = "sha256:c7c26e4158defb37b0bb124933163641a2ff6e3a3913f7811b0ddbe07ed61533", size = 203008, upload-time = "2025-01-15T03:53:15.648Z" },
-]
-
-[[package]]
 name = "pyarrow"
 version = "24.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3364,15 +3355,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/3b/81/58d0ac84e1ef3a384
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/5e/ecf12fdb62546d64385c158514e9b2b671f7832108ef2ecd2020ce0af2d1/pyjwt-2.13.0-py3-none-any.whl", hash = "sha256:66adcc2aff09b3f1bbd95fc1e1577df8ac8723c978552fd43304c8a290ac5728", size = 31274, upload-time = "2026-05-21T19:54:35.362Z" },
 ]
-
-[[package]]
-name = "pyspark"
-version = "4.0.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "py4j" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/96/89/408b42c803db71f4a4d8a3f1ab0745a40dfe41aeacdfc453545665a171f4/pyspark-4.0.2.tar.gz", hash = "sha256:938b4a1883383374d331ebfcb5d92debfa1891cf3d7a6d730520a1a2d23f1a90", size = 434209940, upload-time = "2026-02-05T19:31:13.6Z" }
 
 [[package]]
 name = "pyspark-client"
@@ -4366,7 +4348,6 @@ dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pyarrow" },
-    { name = "pyspark" },
 ]
 
 [package.metadata]
@@ -4376,7 +4357,6 @@ requires-dist = [
     { name = "apache-airflow-providers-postgres" },
     { name = "pandas" },
     { name = "pyarrow" },
-    { name = "pyspark", specifier = "==4.0.2" },
 ]
 
 [[package]]
