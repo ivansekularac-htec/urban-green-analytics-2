@@ -37,14 +37,6 @@ def get_config():
         dict: Kafka, MinIO, and streaming configuration.
     """
     return {
-        # Spark
-        "spark_master_url": (
-            f"spark://{os.getenv('SPARK_MASTER_HOST', 'urbangreen-spark-master')}:"
-            f"{os.getenv('SPARK_MASTER_PORT', '7077')}"
-        ),
-        "spark_driver_host": os.getenv("SPARK_DRIVER_HOST", "urbangreen-spark-driver"),
-        "spark_worker_cores": os.getenv("SPARK_WORKER_CORES", "1"),
-        "spark_worker_memory": os.getenv("SPARK_WORKER_MEMORY", "1g"),
         # Kafka
         "kafka_bootstrap_servers": (
             f"{os.getenv('KAFKA_HOST', 'urbangreen-kafka')}:"
@@ -76,14 +68,7 @@ def create_spark_session(config):
         SparkSession: Configured Spark session.
     """
     return (
-        SparkSession.builder.master(config["spark_master_url"])
-        .appName("sensor_readings_stream")
-        # Driver networking
-        .config("spark.driver.host", config["spark_driver_host"])
-        .config("spark.driver.bindAddress", "0.0.0.0")
-        # Local cluster resources
-        .config("spark.executor.cores", config["spark_worker_cores"])
-        .config("spark.executor.memory", config["spark_worker_memory"])
+        SparkSession.builder.appName("sensor_readings_stream")
         # MinIO / S3A
         .config("spark.hadoop.fs.s3a.endpoint", config["minio_endpoint"])
         .config("spark.hadoop.fs.s3a.access.key", config["minio_access_key"])
