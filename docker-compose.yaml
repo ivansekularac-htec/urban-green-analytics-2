@@ -263,6 +263,9 @@ services:
       - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
       - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
 
+    volumes:
+      - ./etl/ingestion:/opt/spark/ingestion
+
     networks:
       - urbangreen-network
 
@@ -313,6 +316,23 @@ services:
     depends_on:
       urbangreen-spark-master:
         condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+  urbangreen-jupyter:
+    container_name: urbangreen-jupyter
+    profiles: [ "dev" ]
+    build:
+      context: .
+      dockerfile: ./infra/jupyter/Dockerfile
+
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+      - "${JUPYTER_SPARK_UI_PORT:-4040}:4040"
+
+    volumes:
+      - ./notebooks:/home/jovyan/work
 
     networks:
       - urbangreen-network
