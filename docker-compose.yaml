@@ -346,7 +346,9 @@ services:
       - urbangreen-network
 
   urbangreen-jupyter:
-    profiles: dev
+    profiles:
+      - dev
+
     container_name: urbangreen-jupyter
     build:
       context: .
