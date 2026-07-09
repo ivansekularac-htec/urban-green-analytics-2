@@ -34,10 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 def env(name: str, default: str) -> str:
+    """Return an environment variable value or the provided default."""
     return os.environ.get(name, default)
 
 
 def build_spark_session() -> SparkSession:
+    """Create a Spark session configured for Structured Streaming and MinIO S3A."""
     minio_api_port = env("MINIO_API_PORT", "9000")
     minio_endpoint = f"http://urbangreen-minio:{minio_api_port}"
     minio_access_key = env("MINIO_ROOT_USER", "minioadmin")
@@ -60,6 +62,7 @@ def build_spark_session() -> SparkSession:
 
 
 def main() -> None:
+    """Run the Kafka-to-MinIO sensor readings streaming pipeline."""
     kafka_bootstrap_servers = env(
         "SIMULATOR_KAFKA_BOOTSTRAP",
         "urbangreen-kafka:9092",
