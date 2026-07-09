@@ -266,7 +266,7 @@ services:
 
       KAFKA_BOOTSTRAP_SERVERS: ${SIMULATOR_KAFKA_BOOTSTRAP:-urbangreen-kafka:9092}
       KAFKA_TOPIC: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
-      KAFKA_STARTING_OFFSETS: ${KAFKA_STARTING_OFFSETS:-latest}
+      KAFKA_STARTING_OFFSETS: ${KAFKA_STARTING_OFFSETS:-earliest}
       STREAM_TRIGGER_INTERVAL: ${STREAM_TRIGGER_INTERVAL:-60 seconds}
 
     ports:
@@ -359,13 +359,15 @@ services:
       - urbangreen-network
 
   urbangreen-jupyter:
+    profiles:
+      - dev
     container_name: urbangreen-jupyter
     build:
       context: .
       dockerfile: ./infra/jupyter/Dockerfile
     ports:
-      - "8888:8888"
-      - "4040:4040"
+      - "${JUPYTER_PORT:-8888}:8888"
+      - "${SPARK_DRIVER_UI_PORT:-4040}:4040"
     volumes:
       - ./notebooks:/home/jovyan/work
     networks:
