@@ -252,6 +252,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     container_name: urbangreen-spark-master
+    env_file:
+      - .env
 
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
@@ -342,6 +344,21 @@ services:
     volumes:
       - urbangreen-simulator-volume:/state
 
+    networks:
+      - urbangreen-network
+
+  urbangreen-jupyter:
+    container_name: urbangreen-jupyter
+    build:
+      context: .
+      dockerfile: ./infra/jupyter/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+    volumes:
+      - ./notebooks:/home/jovyan/work
     networks:
       - urbangreen-network
 
