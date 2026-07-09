@@ -259,12 +259,25 @@ services:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
       SPARK_MASTER_UI_PORT: ${SPARK_MASTER_UI_PORT:-8090}
 
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      MINIO_ENDPOINT: http://urbangreen-minio:${MINIO_API_PORT:-9000}
+
+      KAFKA_BOOTSTRAP_SERVERS: ${SIMULATOR_KAFKA_BOOTSTRAP:-urbangreen-kafka:9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
+      KAFKA_STARTING_OFFSETS: ${KAFKA_STARTING_OFFSETS:-latest}
+      STREAM_TRIGGER_INTERVAL: ${STREAM_TRIGGER_INTERVAL:-60 seconds}
+
     ports:
       - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
       - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
 
     networks:
       - urbangreen-network
+
+    volumes:
+      - ./etl/ingestion:/opt/spark/ingestion
 
     healthcheck:
       test: [ "CMD-SHELL", "curl -fsS http://localhost:$${SPARK_MASTER_UI_PORT:-8090}/ || exit 1" ]
@@ -342,6 +355,19 @@ services:
     volumes:
       - urbangreen-simulator-volume:/state
 
+    networks:
+      - urbangreen-network
+
+  urbangreen-jupyter:
+    container_name: urbangreen-jupyter
+    build:
+      context: .
+      dockerfile: ./infra/jupyter/Dockerfile
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+    volumes:
+      - ./notebooks:/home/jovyan/work
     networks:
       - urbangreen-network
 
