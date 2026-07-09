@@ -116,3 +116,8 @@ Urban Green API/Testing API.yml
 
 # Coverage
 api/.coverage
+
+# -----------------------
+# Jupyter
+# -----------------------
+.ipynb_checkpoints/
