@@ -23,7 +23,6 @@ env*/
 
 # Jupyter notebooks
 .ipynb_checkpoints/
-/notebooks/
 
 # -----------------------
 # Spark / Hadoop

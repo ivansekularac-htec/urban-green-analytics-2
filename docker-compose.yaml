@@ -349,6 +349,8 @@ services:
 
   urbangreen-jupyter:
     container_name: urbangreen-jupyter
+    profiles:
+      - dev
     build:
       context: .
       dockerfile: ./infra/jupyter/Dockerfile
