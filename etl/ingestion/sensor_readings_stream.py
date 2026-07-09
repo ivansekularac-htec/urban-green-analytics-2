@@ -1,3 +1,11 @@
+"""Spark Structured Streaming job for landing sensor readings from Kafka to MinIO.
+
+Consumes JSON sensor reading events from the Kafka topic, validates and parses
+messages using the defined schema, enriches records with an event date partition,
+and continuously writes the processed data as Parquet files to MinIO using S3A
+with checkpointing enabled for fault-tolerant streaming.
+"""
+
 import os
 
 from pyspark.sql import SparkSession
