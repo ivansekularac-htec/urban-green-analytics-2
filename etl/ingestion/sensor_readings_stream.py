@@ -1,3 +1,18 @@
+"""Structured Streaming: sensor_readings (Kafka JSON) -> Parquet on MinIO (S3A).
+
+Reads the ``sensor_readings`` Kafka topic, parses each JSON payload with an
+explicit schema (no inference), drops rows that failed to parse, derives an
+event-date partition column from the payload's UTC timestamp, and writes Parquet
+to the MinIO staging bucket partitioned by that date.
+
+The schema mirrors the simulator's Kafka payload exactly (not the Postgres column
+names); ``from_json`` matches by JSON key, so any drift would silently yield
+nulls. Mapping ``farm_sensor_id`` to the DB ``sensors.id`` happens downstream.
+
+Config is read from the environment so the same script runs unchanged across
+environments; the defaults target the compose stack.
+"""
+
 import os
 
 from pyspark.sql import SparkSession
@@ -35,6 +50,11 @@ SENSOR_SCHEMA = StructType(
 
 
 def build_spark():
+    """SparkSession wired to MinIO via S3A, with streaming schema inference off.
+
+    The session timezone is pinned to UTC so ``event_date`` is derived in UTC
+    (matching the producer's epoch) regardless of the container timezone.
+    """
     return (
         SparkSession.builder.appName("sensor_readings_stream")
         .config("spark.hadoop.fs.s3a.endpoint", MINIO_ENDPOINT)
@@ -53,6 +73,7 @@ def build_spark():
 
 
 def read_source(spark):
+    """Open the Kafka source stream. failOnDataLoss=false survives topic rebuilds."""
     return (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP)
@@ -64,6 +85,7 @@ def read_source(spark):
 
 
 def parse(raw):
+    """Decode the JSON value, drop unparseable rows, and add the event_date column."""
     decoded = raw.select(
         from_json(col("value").cast("string"), SENSOR_SCHEMA).alias("payload")
     ).select("payload.*")
@@ -72,6 +94,7 @@ def parse(raw):
 
 
 def sink(events):
+    """Start the Parquet writer: append mode, partitioned by event_date, checkpointed."""
     return (
         events.writeStream.format("parquet")
         .option("path", OUTPUT_PATH)
@@ -84,6 +107,7 @@ def sink(events):
 
 
 def main():
+    """Wire source -> parse -> sink and block until the streaming query terminates."""
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
     query = sink(parse(read_source(spark)))
