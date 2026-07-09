@@ -263,6 +263,10 @@ services:
       - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
       - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
 
+    # ADD THIS VOLUME BLOCK SO YOUR NOTEBOOKS SYNC TO YOUR HARD DRIVE
+    volumes:
+      - .:/workspace 
+
     networks:
       - urbangreen-network
 
@@ -342,6 +346,19 @@ services:
     volumes:
       - urbangreen-simulator-volume:/state
 
+    networks:
+      - urbangreen-network
+
+  urbangreen-jupyter:
+    container_name: urbangreen-jupyter
+    build:
+      context: .
+      dockerfile: ./infra/jupyter/Dockerfile
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+    volumes:
+      - ./notebooks:/home/jovyan/work
     networks:
       - urbangreen-network
 
