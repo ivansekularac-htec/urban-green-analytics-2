@@ -7,7 +7,6 @@ RUN apt-get update && \
     apt-get clean && \  
     rm -rf /var/lib/apt/lists/*
  
-# Auto-detect JAVA_HOME regardless of architecture
 RUN JAVA_PATH=$(readlink -f $(which java) | sed 's:/bin/java::') && \    
     echo "export JAVA_HOME=$JAVA_PATH" >> /etc/profile.d/java.sh && \    
     ln -s $JAVA_PATH /usr/lib/jvm/default-java
@@ -17,7 +16,10 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
  
 USER jovyan
  
-RUN pip install --no-cache-dir pyspark==4.0.0 pandas pyarrow
+RUN pip install --no-cache-dir pyspark==4.0.2 pandas pyarrow
+
+# Tell PySpark to pre-cache the Kafka driver inside the docker image
+ENV PYSPARK_SUBMIT_ARGS="--packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.2 pyspark-shell"
  
 WORKDIR /home/jovyan/work
  

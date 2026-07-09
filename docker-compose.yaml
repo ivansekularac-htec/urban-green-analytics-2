@@ -357,6 +357,19 @@ services:
     ports:
       - "8888:8888"
       - "4040:4040"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      SPARK_MINIO_ENDPOINT: ${SPARK_MINIO_ENDPOINT:-http://urbangreen-minio:9000}
+
+      KAFKA_TOPIC_SENSOR_READINGS: ${KAFKA_TOPIC_SENSOR_READINGS:-sensor_readings}
+      SIMULATOR_KAFKA_BOOTSTRAP: ${SIMULATOR_KAFKA_BOOTSTRAP:-urbangreen-kafka:9092}
+
+      SPARK_KAFKA_OFFSET: ${SPARK_KAFKA_OFFSET:-latest}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+
+      STREAM_TRIGGER_INTERVAL: ${STREAM_TRIGGER_INTERVAL:-10 seconds}
+
     volumes:
       - ./notebooks:/home/jovyan/work
     networks:
