@@ -13,6 +13,7 @@ Config is read from the environment so the same script runs unchanged across
 environments; the defaults target the compose stack.
 """
 
+import logging
 import os
 
 from pyspark.sql import SparkSession
@@ -25,6 +26,8 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
+
+logger = logging.getLogger(__name__)
 
 KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
@@ -55,18 +58,17 @@ class BatchLogger(StreamingQueryListener):
 
     def onQueryStarted(self, event):
         """Log query start."""
-        print(f"stream started; query id={event.id}", flush=True)
+        logger.info(f"stream started; query id={event.id}")
 
     def onQueryProgress(self, event):
         """Log completed micro-batches."""
-        print(
-            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}",
-            flush=True,
+        logger.info(
+            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}"
         )
 
     def onQueryTerminated(self, event):
         """Log query termination."""
-        print(f"stream terminated; query id={event.id}", flush=True)
+        logger.info(f"stream terminated; query id={event.id}")
 
 
 def build_spark():
@@ -128,6 +130,12 @@ def sink(events):
 
 def main():
     """Start the streaming pipeline and wait for termination."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+    )
+    logging.getLogger("py4j").setLevel(logging.WARNING)
+
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
     spark.streams.addListener(BatchLogger())
