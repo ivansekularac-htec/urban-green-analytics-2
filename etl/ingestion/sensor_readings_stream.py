@@ -17,6 +17,7 @@ import os
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, from_unixtime, to_date
+from pyspark.sql.streaming import StreamingQueryListener
 from pyspark.sql.types import (
     DoubleType,
     IntegerType,
@@ -48,6 +49,17 @@ SENSOR_SCHEMA = StructType(
     ]
 )
 
+class BatchLogger(StreamingQueryListener):
+    def onQueryStarted(self, event):
+        print(f"Stream started; query id={event.id}")
+
+    def onQueryProgress(self, event):
+        print(
+            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}"
+        )
+
+    def onQueryTerminated(self, event):
+        print(f"Stream terminated; id={event.id}")
 
 def build_spark():
     """SparkSession wired to MinIO via S3A, with streaming schema inference off.
@@ -105,14 +117,16 @@ def sink(events):
         .start()
     )
 
-
 def main():
     """Wire source -> parse -> sink and block until the streaming query terminates."""
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
-    query = sink(parse(read_source(spark)))
-    query.awaitTermination()
 
+    spark.streams.addListener(BatchLogger())
+
+    query = sink(parse(read_source(spark)))
+
+    query.awaitTermination()
 
 if __name__ == "__main__":
     main()
