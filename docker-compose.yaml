@@ -353,7 +353,7 @@ services:
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-driver.sh" ]
 
     ports:
-      - "${SPARK_DRIVER_UI_PORT:-4040}:4040"
+      - "${SPARK_DRIVER_UI_PORT:-4050}:4050"
 
     networks:
       - urbangreen-network
