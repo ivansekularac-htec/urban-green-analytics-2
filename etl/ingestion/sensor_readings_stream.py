@@ -26,26 +26,6 @@ from pyspark.sql.types import (
     StructType,
 )
 
-
-class BatchLogger(StreamingQueryListener):
-    """Logs streaming lifecycle and batch progress."""
-
-    def onQueryStarted(self, event):
-        """Log query start."""
-        print(f"stream started; query id={event.id}", flush=True)
-
-    def onQueryProgress(self, event):
-        """Log completed micro-batches."""
-        print(
-            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}",
-            flush=True,
-        )
-
-    def onQueryTerminated(self, event):
-        """Log query termination."""
-        print(f"stream terminated; query id={event.id}", flush=True)
-
-
 KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
 STARTING_OFFSETS = os.environ.get("STREAM_STARTING_OFFSETS", "earliest")
@@ -68,6 +48,25 @@ SENSOR_SCHEMA = StructType(
         StructField("timestamp", LongType()),
     ]
 )
+
+
+class BatchLogger(StreamingQueryListener):
+    """Logs streaming lifecycle and batch progress."""
+
+    def onQueryStarted(self, event):
+        """Log query start."""
+        print(f"stream started; query id={event.id}", flush=True)
+
+    def onQueryProgress(self, event):
+        """Log completed micro-batches."""
+        print(
+            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}",
+            flush=True,
+        )
+
+    def onQueryTerminated(self, event):
+        """Log query termination."""
+        print(f"stream terminated; query id={event.id}", flush=True)
 
 
 def build_spark():
