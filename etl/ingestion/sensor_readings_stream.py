@@ -13,6 +13,7 @@ Config is read from the environment so the same script runs unchanged across
 environments; the defaults target the compose stack.
 """
 
+import logging
 import os
 
 from pyspark.sql import SparkSession
@@ -24,6 +25,13 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
@@ -111,6 +119,9 @@ def main():
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
     query = sink(parse(read_source(spark)))
+
+    logger.info("Stream started; query id=%s", query.id)
+
     query.awaitTermination()
 
 
