@@ -121,7 +121,7 @@ class BatchLogger(StreamingQueryListener):
         pass
 
     def onQueryProgress(self, event):
-        logger.info("Batch: %s", event.progress.batchId)
+        logger.info(f"Batch: {event.progress.batchId}")
 
     def onQueryIdle(self, event):
         pass
@@ -136,7 +136,7 @@ def main():
     spark.sparkContext.setLogLevel("WARN")
     spark.streams.addListener(BatchLogger())
     query = sink(parse(read_source(spark)))
-    logger.info("stream started; query id=%s", query.id)
+    logger.info(f"stream started; query id={query.id}")
     query.awaitTermination()
 
 
