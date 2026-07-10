@@ -13,11 +13,11 @@ Config is read from the environment so the same script runs unchanged across
 environments; the defaults target the compose stack.
 """
 
-import logging
 import os
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, from_unixtime, to_date
+from pyspark.sql.streaming import StreamingQueryListener
 from pyspark.sql.types import (
     DoubleType,
     IntegerType,
@@ -25,13 +25,6 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
-
-logger = logging.getLogger(__name__)
 
 KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
@@ -55,6 +48,19 @@ SENSOR_SCHEMA = StructType(
         StructField("timestamp", LongType()),
     ]
 )
+
+
+class BatchLogger(StreamingQueryListener):
+    def onQueryStarted(self, event):
+        print(f"Stream started; query id={event.id}")
+
+    def onQueryProgress(self, event):
+        print(
+            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}"
+        )
+
+    def onQueryTerminated(self, event):
+        print(f"Stream terminated; id={event.id}")
 
 
 def build_spark():
@@ -118,9 +124,10 @@ def main():
     """Wire source -> parse -> sink and block until the streaming query terminates."""
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
-    query = sink(parse(read_source(spark)))
 
-    logger.info(f"Stream started; query id={query.id}")
+    spark.streams.addListener(BatchLogger())
+
+    query = sink(parse(read_source(spark)))
 
     query.awaitTermination()
 
