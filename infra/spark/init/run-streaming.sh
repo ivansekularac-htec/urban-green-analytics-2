@@ -11,3 +11,4 @@ exec /opt/spark/bin/spark-submit \
   --conf spark.ui.port=4040 \
   --conf spark.sql.session.timeZone=UTC \
   /opt/spark/work-dir/ingestion/sensor_readings_stream.py
+  

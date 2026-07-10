@@ -120,7 +120,7 @@ def main():
     spark.sparkContext.setLogLevel("WARN")
     query = sink(parse(read_source(spark)))
 
-    logger.info("Stream started; query id=%s", query.id)
+    logger.info(f"Stream started; query id={query.id}")
 
     query.awaitTermination()
 
