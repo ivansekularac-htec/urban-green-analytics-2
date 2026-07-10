@@ -13,10 +13,13 @@ Config is read from the environment so the same script runs unchanged across
 environments; the defaults target the compose stack.
 """
 
+import logging
 import os
+import sys
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, from_unixtime, to_date
+from pyspark.sql.streaming import StreamingQueryListener
 from pyspark.sql.types import (
     DoubleType,
     IntegerType,
@@ -25,10 +28,11 @@ from pyspark.sql.types import (
     StructType,
 )
 
-KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
+KAFKA_BOOTSTRAP = os.environ.get("KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
 STARTING_OFFSETS = os.environ.get("STREAM_STARTING_OFFSETS", "earliest")
 TRIGGER_INTERVAL = os.environ.get("STREAM_TRIGGER_INTERVAL", "60 seconds")
+LOG_LEVEL = os.environ.get("STREAM_LOG_LEVEL", "INFO").upper()
 
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://urbangreen-minio:9000")
 MINIO_ACCESS_KEY = os.environ.get("MINIO_ROOT_USER", "minioadmin")
@@ -37,6 +41,15 @@ STAGING_BUCKET = os.environ.get("MINIO_STAGING_BUCKET", "staging")
 
 OUTPUT_PATH = f"s3a://{STAGING_BUCKET}/raw/kafka/{KAFKA_TOPIC}/"
 CHECKPOINT_PATH = f"s3a://{STAGING_BUCKET}/_checkpoints/kafka/{KAFKA_TOPIC}/"
+
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+    force=True,
+)
+
+logger = logging.getLogger(__name__)
 
 SENSOR_SCHEMA = StructType(
     [
@@ -47,6 +60,35 @@ SENSOR_SCHEMA = StructType(
         StructField("timestamp", LongType()),
     ]
 )
+
+
+class BatchProgressListener(StreamingQueryListener):
+    """Log the streaming query lifecycle and completed micro-batches."""
+
+    def onQueryStarted(self, event) -> None:
+        logger.info(f"stream started; query id={event.id}; run id={event.runId}")
+
+    def onQueryProgress(self, event) -> None:
+        progress = event.progress
+
+        logger.info(
+            f"Batch: {progress.batchId}; "
+            f"input rows={progress.numInputRows}; "
+            f"processed rows per second={progress.processedRowsPerSecond}"
+        )
+
+    def onQueryTerminated(self, event) -> None:
+        if event.exception:
+            logger.error(
+                f"stream terminated; query id={event.id}; "
+                f"run id={event.runId}; exception={event.exception}"
+            )
+            return
+
+        logger.info(f"stream terminated; query id={event.id}; run id={event.runId}")
+
+    def onQueryIdle(self, event) -> None:
+        logger.debug(f"stream idle; query id={event.id}; run id={event.runId}")
 
 
 def build_spark():
@@ -89,8 +131,13 @@ def parse(raw):
     decoded = raw.select(
         from_json(col("value").cast("string"), SENSOR_SCHEMA).alias("payload")
     ).select("payload.*")
+
     valid = decoded.filter(col("farm_sensor_id").isNotNull())
-    return valid.withColumn("event_date", to_date(from_unixtime(col("timestamp"))))
+
+    return valid.withColumn(
+        "event_date",
+        to_date(from_unixtime(col("timestamp"))),
+    )
 
 
 def sink(events):
@@ -110,6 +157,14 @@ def main():
     """Wire source -> parse -> sink and block until the streaming query terminates."""
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
+    spark.streams.addListener(BatchProgressListener())
+
+    logger.info(
+        f"starting stream; topic={KAFKA_TOPIC}; "
+        f"starting offsets={STARTING_OFFSETS}; "
+        f"trigger interval={TRIGGER_INTERVAL}"
+    )
+
     query = sink(parse(read_source(spark)))
     query.awaitTermination()
 

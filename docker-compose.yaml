@@ -365,6 +365,55 @@ services:
     networks:
       - urbangreen-network
 
+  urbangreen-spark-streaming:
+    container_name: urbangreen-spark-streaming
+    build:
+      context: ./infra/spark
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP:-urbangreen-kafka:9092}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://urbangreen-minio:9000}
+
+    ports:
+      - "${SPARK_DRIVER_UI_PORT:-4040}:4040"
+
+    volumes:
+      - ./etl/ingestion:/opt/spark/work-dir/ingestion:ro
+
+    depends_on:
+      urbangreen-spark-master:
+        condition: service_healthy
+      urbangreen-spark-worker-1:
+        condition: service_started
+      urbangreen-spark-worker-2:
+        condition: service_started
+      urbangreen-kafka:
+        condition: service_healthy
+      urbangreen-kafka-init:
+        condition: service_completed_successfully
+      urbangreen-minio:
+        condition: service_healthy
+      urbangreen-minio-init:
+        condition: service_completed_successfully
+
+    entrypoint: [ "/bin/sh", "/opt/spark/init/init-streaming.sh" ]
+
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
