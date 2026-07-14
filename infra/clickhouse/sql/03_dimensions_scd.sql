@@ -11,7 +11,6 @@
 -- Tables created:
 --   dim_farm            — farm attributes over time (size_m2, status, beds)
 --   dim_user_farm_role  — user–role–farm assignments (bridge-like SCD2)
---   dim_farm_crop       — which crop was active on a farm and when
 --   dim_sensor          — sensor status / installation history
 --   dim_sensor_type     — optimal_min/max thresholds over time (anomaly logic)
 --
@@ -19,6 +18,13 @@
 --   dim_user_farm_role.farm_id = 0 means system-wide role (Postgres NULL).
 --   Manager history (e.g. Ivan → Stefan) is queried via dim_user_farm_role,
 --   not via attributes on dim_farm or dim_user.
+--   Surrogate keys (*_sk) are deterministic hashes of the version identity
+--   (natural key + valid_from), so SCD2 reloads are idempotent and the sk is
+--   stable for lineage / future equi-joins. ETL may omit it (DEFAULT computes
+--   it) or compute the identical value in Spark.
+--   Per-farm crop planting history lives in the source (Postgres farm_crops →
+--   lake); crop-per-farm metrics are derived from fact_harvests, so no
+--   dedicated warehouse dimension is needed.
 --
 -- Data sources (Module 3 ETL):
 --   Postgres → MinIO → Spark (SCD close/open logic on change detection).
@@ -28,7 +34,7 @@
 USE urbangreen_analytics;
 
 CREATE TABLE IF NOT EXISTS dim_farm (
-    farm_sk UInt64,
+    farm_sk UInt64 DEFAULT cityHash64 (farm_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(farm_id, valid_from)',
     farm_id UInt32,
     name String,
     city LowCardinality (String),
@@ -51,7 +57,7 @@ CREATE TABLE IF NOT EXISTS dim_farm (
 ORDER BY (farm_id, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_user_farm_role (
-    user_role_sk UInt64,
+    user_role_sk UInt64 DEFAULT cityHash64 (user_id, role_id, farm_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt32,
     user_id UInt32,
     role_id UInt32,
@@ -72,26 +78,8 @@ ORDER BY (
         user_id, role_id, farm_id, valid_from
     );
 
-CREATE TABLE IF NOT EXISTS dim_farm_crop (
-    farm_crop_sk UInt64,
-    farm_crop_id UInt32,
-    farm_id UInt32,
-    crop_id UInt32,
-    farm_name LowCardinality (String),
-    crop_name LowCardinality (String),
-    valid_from DateTime64 (3, 'UTC'),
-    valid_to DateTime64 (3, 'UTC') DEFAULT toDateTime64 (
-        '2099-12-31 23:59:59',
-        3,
-        'UTC'
-    ),
-    is_current UInt8,
-    _version UInt64
-) ENGINE = ReplacingMergeTree (_version)
-ORDER BY (farm_id, crop_id, valid_from);
-
 CREATE TABLE IF NOT EXISTS dim_sensor (
-    sensor_sk UInt64,
+    sensor_sk UInt64 DEFAULT cityHash64 (sensor_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_id, valid_from)',
     sensor_id UInt32,
     farm_id UInt32,
     sensor_type_id UInt32,
@@ -110,7 +98,7 @@ CREATE TABLE IF NOT EXISTS dim_sensor (
 ORDER BY (sensor_id, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_sensor_type (
-    sensor_type_sk UInt64,
+    sensor_type_sk UInt64 DEFAULT cityHash64 (sensor_type_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_type_id, valid_from)',
     sensor_type_id UInt32,
     name LowCardinality (String),
     unit LowCardinality (String),

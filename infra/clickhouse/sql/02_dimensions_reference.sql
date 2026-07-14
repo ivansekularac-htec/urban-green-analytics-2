@@ -9,9 +9,13 @@
 --   current row per natural key (ReplacingMergeTree on _loaded_at).
 --
 -- Tables created:
---   dim_date, dim_time          — seeded in init (~4k dates, 86k time slots)
---   dim_role, dim_quality_grade, dim_infrastructure_type,
---   dim_growing_system_type, dim_crop_category, dim_crop, dim_user
+--   dim_date, dim_time          — seeded in init (~4k dates, 1440 minute slots)
+--   dim_role, dim_quality_grade, dim_crop, dim_user
+--
+-- Design notes:
+--   Pure star: farm/crop reference lookups (infrastructure type, growing system
+--   type, crop category) are denormalized directly onto dim_farm / dim_crop
+--   (*_name, is_high_value), so no standalone snowflake lookup tables are kept.
 --
 -- Data sources (Module 3 ETL):
 --   Postgres app.* tables → MinIO Parquet (raw/postgres/) → Spark → ClickHouse
@@ -50,7 +54,7 @@ CREATE TABLE IF NOT EXISTS dim_date (
     is_quarter_end UInt8,
     is_year_start UInt8,
     is_year_end UInt8
-) ENGINE = MergeTree ()
+) ENGINE = ReplacingMergeTree ()
 ORDER BY (date_key);
 
 INSERT INTO
@@ -105,27 +109,23 @@ FROM (
     );
 
 CREATE TABLE IF NOT EXISTS dim_time (
-    time_key UInt32,
+    time_key UInt32 COMMENT 'minute grain: hour * 100 + minute',
     hour UInt8,
     minute UInt8,
-    second UInt8,
-    hour_minute UInt16,
-    hour_bucket UInt8,
+    quarter_hour_bucket UInt8 COMMENT '0-3, 15-min quarter within the hour',
     part_of_day LowCardinality (String),
     am_pm LowCardinality (String),
     is_business_hours UInt8
-) ENGINE = MergeTree ()
+) ENGINE = ReplacingMergeTree ()
 ORDER BY (time_key);
 
 INSERT INTO
     dim_time
 SELECT
-    toUInt32 (h * 10000 + m * 100 + s) AS time_key,
+    toUInt32 (h * 100 + m) AS time_key,
     toUInt8 (h) AS hour,
     toUInt8 (m) AS minute,
-    toUInt8 (s) AS second,
-    toUInt16 (h * 100 + m) AS hour_minute,
-    toUInt8 (intDiv (m, 15)) AS hour_bucket,
+    toUInt8 (intDiv (m, 15)) AS quarter_hour_bucket,
     multiIf (
         h >= 6
         AND h < 12,
@@ -141,8 +141,8 @@ SELECT
     if(h < 12, 'AM', 'PM') AS am_pm,
     toUInt8 (h BETWEEN 8 AND 17) AS is_business_hours
 FROM (
-        SELECT intDiv (number, 3600) AS h, intDiv (number % 3600, 60) AS m, number % 60 AS s
-        FROM numbers (86400)
+        SELECT intDiv (number, 60) AS h, number % 60 AS m
+        FROM numbers (1440)
     );
 
 CREATE TABLE IF NOT EXISTS dim_role (
@@ -162,31 +162,6 @@ CREATE TABLE IF NOT EXISTS dim_quality_grade (
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (quality_grade_id);
-
-CREATE TABLE IF NOT EXISTS dim_infrastructure_type (
-    infrastructure_type_id UInt32,
-    name LowCardinality (String),
-    description String,
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
-) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (infrastructure_type_id);
-
-CREATE TABLE IF NOT EXISTS dim_growing_system_type (
-    growing_system_type_id UInt32,
-    name LowCardinality (String),
-    description String,
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
-) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (growing_system_type_id);
-
-CREATE TABLE IF NOT EXISTS dim_crop_category (
-    crop_category_id UInt32,
-    name LowCardinality (String),
-    description String,
-    is_high_value UInt8,
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
-) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (crop_category_id);
 
 CREATE TABLE IF NOT EXISTS dim_crop (
     crop_id UInt32,

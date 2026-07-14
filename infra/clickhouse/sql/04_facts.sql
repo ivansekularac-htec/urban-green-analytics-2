@@ -14,9 +14,10 @@
 --     sensor_id maps to Kafka field farm_sensor_id
 --
 -- Aggregate facts (periodic snapshot — dashboard performance):
---   fact_daily_farm_metrics    — one row per farm per day
---   fact_daily_sensor_metrics  — one row per farm × sensor_type per day
---   fact_weekly_crop_metrics   — one row per farm × crop per ISO week
+--   fact_daily_farm_metrics          — one row per farm per day
+--   fact_daily_sensor_metrics        — one row per farm × sensor_type per day
+--   fact_daily_farm_quality_metrics  — one row per farm × quality_grade per day
+--   fact_weekly_crop_metrics         — one row per farm × crop per ISO week
 --
 -- Engines:
 --   ReplacingMergeTree(_loaded_at) — idempotent hourly reloads from lake.
@@ -44,7 +45,9 @@ CREATE TABLE IF NOT EXISTS fact_harvests (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (harvest_date)
-ORDER BY (harvest_id);
+ORDER BY (
+        farm_id, harvest_date, crop_id, harvest_id
+    );
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_id UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
@@ -61,7 +64,9 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (reading_date)
-ORDER BY (reading_id);
+ORDER BY (
+        farm_id, sensor_type_id, reading_ts, reading_id
+    );
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
@@ -89,8 +94,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     farm_id UInt32,
     sensor_type_id UInt32,
     reading_count UInt64,
-    sum_value Float64,
-    avg_value Float64,
+    sum_value Float64 COMMENT 'avg = sum_value / reading_count (re-aggregation safe)',
     min_value Float64,
     max_value Float64,
     anomaly_count UInt64,
@@ -111,4 +115,21 @@ CREATE TABLE IF NOT EXISTS fact_weekly_crop_metrics (
     harvest_count UInt32,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
+PARTITION BY
+    intDiv (year_week, 100)
 ORDER BY (year_week, farm_id, crop_id);
+
+CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
+    metric_date Date,
+    date_key UInt32,
+    farm_id UInt32,
+    quality_grade_id UInt32,
+    total_yield_kg Decimal(18, 3),
+    harvest_count UInt32,
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+) ENGINE = ReplacingMergeTree (_loaded_at)
+PARTITION BY
+    toYYYYMM (metric_date)
+ORDER BY (
+        farm_id, date_key, quality_grade_id
+    );
