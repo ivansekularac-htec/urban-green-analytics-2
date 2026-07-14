@@ -8,9 +8,10 @@
 --   init scripts run against this database.
 --
 -- Execution:
---   Runs automatically on first container start when /var/lib/clickhouse is
---   empty (docker-entrypoint-initdb.d). Requires CLICKHOUSE_DB in .env
---   (default: urbangreen_analytics).
+--   Runs on first container start when /var/lib/clickhouse is empty.
+--   Database name is fixed here as urbangreen_analytics. It MUST match
+--   CLICKHOUSE_DB in docker-compose / .env (entrypoint creates that DB too).
+--   Init SQL cannot read env vars — if you rename the warehouse, update both.
 --
 -- Dependencies: none (runs first, alphabetically after any 01_* peers).
 -- =============================================================================
