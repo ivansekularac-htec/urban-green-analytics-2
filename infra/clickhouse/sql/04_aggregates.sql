@@ -17,12 +17,10 @@ CREATE TABLE IF NOT EXISTS agg_daily_farm (
     in_range_count UInt64,
     last_sensor_reading_at DateTime64(3,'UTC'),
     loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
-
 )
 ENGINE = SummingMergeTree
 PARTITION BY intDiv(date_key,100)
 ORDER BY (date_key,farm_key);
-
 
 
 CREATE TABLE IF NOT EXISTS agg_daily_crop (
@@ -32,12 +30,10 @@ CREATE TABLE IF NOT EXISTS agg_daily_crop (
     total_harvest_kg Float64,
     harvest_count UInt64,
     loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
-
 )
 ENGINE = SummingMergeTree
 PARTITION BY intDiv(date_key,100)
 ORDER BY (date_key,farm_key,crop_key);
-
 
 
 CREATE TABLE IF NOT EXISTS agg_daily_quality (
@@ -47,12 +43,10 @@ CREATE TABLE IF NOT EXISTS agg_daily_quality (
     total_harvest_kg Float64,
     harvest_count UInt64,
     loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
-
 )
 ENGINE = SummingMergeTree
 PARTITION BY intDiv(date_key,100)
 ORDER BY (date_key,farm_key,quality_key);
-
 
 
 CREATE TABLE IF NOT EXISTS agg_daily_sensor (
