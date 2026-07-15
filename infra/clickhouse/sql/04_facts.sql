@@ -5,9 +5,11 @@
 --
 -- Purpose:
 --   Fact tables - measurable events at a defined grain. Empty at init; populated
---   by Spark batch jobs (Module 3). Atomic facts carry NATURAL keys + date_key +
---   an event timestamp; SCD2 dimensions are resolved at query time via the
---   validity window, so no surrogate FKs are stored on the atomic facts.
+--   by Spark batch jobs (Module 3). Atomic facts carry the natural id, the as-of
+--   SCD2 surrogate key (*_key, written by the ETL from the validity window at
+--   load time), date_key, and an event timestamp. Reads join on the surrogate
+--   key (plain key = key); the natural id + event timestamp stay for
+--   point-in-time and entity-level queries.
 --
 -- Atomic facts (one row per event):
 --   fact_harvest           - one row per harvest (Postgres harvests -> lake)
@@ -32,7 +34,9 @@
 --   never a pre-computed avg (avg = sum_value / readings_count at query time).
 --
 -- Engines:
---   ReplacingMergeTree(_loaded_at) everywhere - idempotent hourly reloads.
+--   ReplacingMergeTree(_loaded_at). Event facts are append-only: a re-insert of an
+--   identical row collapses on the sorting key. Correcting a key column (ids /
+--   dates) is not part of the pipeline and would not replace the prior row.
 --
 -- Dependencies: 02_dimensions_reference.sql, 03_dimensions_scd.sql.
 -- =============================================================================
@@ -45,6 +49,7 @@ USE urbangreen;
 CREATE TABLE IF NOT EXISTS fact_harvest (
     harvest_id UInt64,
     farm_id UInt32,
+    farm_key UInt64,
     crop_id UInt32,
     quality_grade_id UInt32,
     date_key UInt32,
@@ -65,8 +70,11 @@ ORDER BY (farm_id, harvest_date, crop_id, harvest_id);
 CREATE TABLE IF NOT EXISTS fact_sensor_reading (
     reading_id UInt64,
     farm_id UInt32,
+    farm_key UInt64,
     sensor_id UInt32,
+    sensor_key UInt64,
     sensor_type_id UInt32,
+    sensor_type_key UInt64,
     date_key UInt32,
     reading_ts DateTime64(3, 'UTC'),
     reading_date Date,

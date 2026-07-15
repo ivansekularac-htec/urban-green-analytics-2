@@ -5,9 +5,10 @@
 --
 -- Purpose:
 --   Slowly Changing Dimension (Type 2) tables. Each row is one version of an
---   entity valid in [valid_from, valid_to). Atomic facts carry the natural key
---   plus an event timestamp and resolve the correct version at query time:
---       fact.event_ts >= dim.valid_from AND fact.event_ts < dim.valid_to
+--   entity valid in [valid_from, valid_to). The ETL resolves the version valid
+--   at the event time and writes its surrogate key (*_sk) onto the fact, so
+--   reads are a plain key = key join. valid_from / valid_to stay available for
+--   point-in-time queries.
 --
 -- Tables created:
 --   dim_farm             - farm attributes over time (status, size_m2, beds)
@@ -19,12 +20,15 @@
 --   Only here (SCD2) do surrogates make sense, since one natural key has many
 --   versions. `*_sk` is a deterministic DEFAULT = cityHash64(natural_key,
 --   valid_from), so reloads are idempotent and the version identity is stable.
---   Facts do NOT carry it - they join on the natural key + validity window.
+--   Facts carry the as-of `*_sk` written by the ETL (reads are key = key); the
+--   natural key stays for entity-level queries.
 --
 -- Version / watermark:
 --   ReplacingMergeTree(_version) with ORDER BY (natural_key, valid_from). Because
 --   valid_from is in the sorting key, versions are NOT collapsed; only an exact
---   reload of the same version is de-duplicated.
+--   reload of the same version is de-duplicated. _version defaults to the load
+--   time in ms (toUnixTimestamp64Milli(now64(3))) so a later reload of the same
+--   version always wins the merge deterministically.
 --
 -- Design notes:
 --   dim_farm_assignment folds the role in (role_name) - no standalone dim_role.
@@ -52,7 +56,7 @@ CREATE TABLE IF NOT EXISTS dim_farm (
     valid_from DateTime64(3, 'UTC'),
     valid_to DateTime64(3, 'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59', 3, 'UTC'),
     is_current UInt8,
-    _version UInt64
+    _version UInt64 DEFAULT toUInt64(toUnixTimestamp64Milli(now64(3)))
 )
 ENGINE = ReplacingMergeTree(_version)
 ORDER BY (farm_id, valid_from);
@@ -68,7 +72,7 @@ CREATE TABLE IF NOT EXISTS dim_sensor (
     valid_from DateTime64(3, 'UTC'),
     valid_to DateTime64(3, 'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59', 3, 'UTC'),
     is_current UInt8,
-    _version UInt64
+    _version UInt64 DEFAULT toUInt64(toUnixTimestamp64Milli(now64(3)))
 )
 ENGINE = ReplacingMergeTree(_version)
 ORDER BY (sensor_id, valid_from);
@@ -84,7 +88,7 @@ CREATE TABLE IF NOT EXISTS dim_sensor_type (
     valid_from DateTime64(3, 'UTC'),
     valid_to DateTime64(3, 'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59', 3, 'UTC'),
     is_current UInt8,
-    _version UInt64
+    _version UInt64 DEFAULT toUInt64(toUnixTimestamp64Milli(now64(3)))
 )
 ENGINE = ReplacingMergeTree(_version)
 ORDER BY (sensor_type_id, valid_from);
@@ -98,7 +102,7 @@ CREATE TABLE IF NOT EXISTS dim_farm_assignment (
     valid_from DateTime64(3, 'UTC'),
     valid_to DateTime64(3, 'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59', 3, 'UTC'),
     is_current UInt8,
-    _version UInt64
+    _version UInt64 DEFAULT toUInt64(toUnixTimestamp64Milli(now64(3)))
 )
 ENGINE = ReplacingMergeTree(_version)
 ORDER BY (farm_id, user_id, role_id, valid_from);
