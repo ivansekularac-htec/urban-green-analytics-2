@@ -1,3 +1,5 @@
+USE urbangreen;
+
 INSERT INTO dim_date
 (
     date_key,
