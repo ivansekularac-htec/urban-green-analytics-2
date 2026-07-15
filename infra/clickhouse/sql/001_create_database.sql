@@ -1,3 +1,3 @@
 CREATE DATABASE IF NOT EXISTS urbangreen;
 
-USE urbangreen_analytics;
+USE urbangreen;

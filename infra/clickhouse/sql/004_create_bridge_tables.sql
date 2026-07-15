@@ -1,6 +1,8 @@
-CREATE TABLE [IF NOT EXIST] [db.]bridge_user_role 
+USE urbangreen;
+
+CREATE TABLE IF NOT EXISTS bridge_user_role 
 (
-    user_key UInt32 [PRIMARY KEY],
+    user_key UInt32,
     farm_key UInt32,
 
     role_id UInt32,
@@ -11,4 +13,5 @@ CREATE TABLE [IF NOT EXIST] [db.]bridge_user_role
     valid_to DateTime,
     is_current Bool,
     loaded_at DateTime
-)
+) ENGINE = MergeTree()
+ORDER BY(user_key, farm_key, role_id);
