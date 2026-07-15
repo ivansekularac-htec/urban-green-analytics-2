@@ -5,8 +5,8 @@
 --
 -- Purpose:
 --   Slowly Changing Dimension (Type 2) tables. Each row is one version of an
---   entity valid in [valid_from, valid_to). Facts carry the natural key plus an
---   event timestamp and resolve the correct version at query time:
+--   entity valid in [valid_from, valid_to). Atomic facts carry the natural key
+--   plus an event timestamp and resolve the correct version at query time:
 --       fact.event_ts >= dim.valid_from AND fact.event_ts < dim.valid_to
 --
 -- Tables created:

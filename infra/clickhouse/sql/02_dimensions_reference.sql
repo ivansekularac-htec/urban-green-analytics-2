@@ -46,12 +46,15 @@ CREATE TABLE IF NOT EXISTS dim_date (
     year_month UInt32,
     year_week UInt32,
     week_start Date,
-    month_start Date
+    month_start Date,
+    _loaded_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
-ENGINE = ReplacingMergeTree()
+ENGINE = ReplacingMergeTree(_loaded_at)
 ORDER BY (date_key);
 
 INSERT INTO dim_date
+    (date_key, full_date, year, quarter, month, month_name, week, day,
+     day_of_week, day_name, is_weekend, year_month, year_week, week_start, month_start)
 SELECT
     toUInt32(formatDateTime(d, '%Y%m%d'))            AS date_key,
     d                                                AS full_date,
