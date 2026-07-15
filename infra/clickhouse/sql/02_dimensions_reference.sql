@@ -5,8 +5,9 @@
 --
 -- Purpose:
 --   Type 1 (reference) dimensions and conformed date/time dimensions.
---   These are slowly changing lookup tables or generated calendars — one
---   current row per natural key (ReplacingMergeTree on _loaded_at).
+--   Lookups: one current row per natural key (ReplacingMergeTree on _loaded_at).
+--   Calendars (dim_date/dim_time): static, generated once, unique by key —
+--   plain MergeTree (never reloaded, so no dedup / no FINAL needed on joins).
 --
 -- Tables created:
 --   dim_date, dim_time          — seeded in init (~4k dates, 1440 minute slots)
@@ -54,7 +55,7 @@ CREATE TABLE IF NOT EXISTS dim_date (
     is_quarter_end UInt8,
     is_year_start UInt8,
     is_year_end UInt8
-) ENGINE = ReplacingMergeTree ()
+) ENGINE = MergeTree ()
 ORDER BY (date_key);
 
 INSERT INTO
@@ -85,19 +86,13 @@ SELECT
     toUInt8 (d = toLastDayOfMonth (d)) AS is_month_end,
     toUInt8 (d = toStartOfQuarter (d)) AS is_quarter_start,
     toUInt8 (
-        d = subtractDays (
-            addMonths (toStartOfQuarter (d), 3),
-            1
-        )
+        d = toLastDayOfMonth (d)
+        AND toMonth (d) IN (3, 6, 9, 12)
     ) AS is_quarter_end,
     toUInt8 (d = toStartOfYear (d)) AS is_year_start,
     toUInt8 (
-        d = toDate (
-            concat(
-                toString (toYear (d)),
-                '-12-31'
-            )
-        )
+        toMonth (d) = 12
+        AND toDayOfMonth (d) = 31
     ) AS is_year_end
 FROM (
         SELECT toDate ('2020-01-01') + number AS d
@@ -116,7 +111,7 @@ CREATE TABLE IF NOT EXISTS dim_time (
     part_of_day LowCardinality (String),
     am_pm LowCardinality (String),
     is_business_hours UInt8
-) ENGINE = ReplacingMergeTree ()
+) ENGINE = MergeTree ()
 ORDER BY (time_key);
 
 INSERT INTO
