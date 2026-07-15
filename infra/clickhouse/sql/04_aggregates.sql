@@ -16,8 +16,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_farm (
     anomaly_count UInt64,
     in_range_count UInt64,
     last_sensor_reading_at DateTime64(3,'UTC'),
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 
 )
 ENGINE = SummingMergeTree
@@ -32,8 +31,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_crop (
     crop_key UInt64,
     total_harvest_kg Float64,
     harvest_count UInt64,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 
 )
 ENGINE = SummingMergeTree
@@ -48,8 +46,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_quality (
     quality_key UInt64,
     total_harvest_kg Float64,
     harvest_count UInt64,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 
 )
 ENGINE = SummingMergeTree
@@ -70,8 +67,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_sensor (
     anomaly_count UInt64,
     in_range_count UInt64,
     last_reading_at DateTime64(3,'UTC'),
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 )
 ENGINE = SummingMergeTree
 PARTITION BY intDiv(date_key,100)

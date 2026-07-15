@@ -13,8 +13,7 @@ CREATE TABLE IF NOT EXISTS fact_harvest (
     quality_key UInt64,
     weight_kg Float64,
     harvested_at DateTime64(3,'UTC'),
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 )
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(harvested_at)
@@ -29,8 +28,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_reading (
     event_timestamp DateTime64(3,'UTC'),
     value Float64,
     is_anomaly Bool,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3),
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3),
 
     INDEX idx_anomaly is_anomaly
         TYPE bloom_filter

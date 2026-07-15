@@ -78,11 +78,9 @@ CREATE TABLE IF NOT EXISTS bridge_user_role (
     role_key UInt64,
     farm_key UInt64,
     valid_from DateTime64(3,'UTC'),
-    valid_to DateTime64(3,'UTC')
-        DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
+    valid_to DateTime64(3,'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
     is_current Bool,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 )
 ENGINE = ReplacingMergeTree(loaded_at)
 ORDER BY (user_key, role_key, farm_key, valid_from);
@@ -104,11 +102,9 @@ CREATE TABLE IF NOT EXISTS dim_farm (
     status String,
     registered_at DateTime64(3,'UTC'),
     valid_from DateTime64(3,'UTC'),
-    valid_to DateTime64(3,'UTC')
-        DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
+    valid_to DateTime64(3,'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
     is_current Bool,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 )
 ENGINE = ReplacingMergeTree(loaded_at)
 ORDER BY (farm_id, valid_from);
@@ -128,11 +124,9 @@ CREATE TABLE IF NOT EXISTS dim_sensor (
     status String,
     installed_at DateTime64(3,'UTC'),
     valid_from DateTime64(3,'UTC'),
-    valid_to DateTime64(3,'UTC')
-        DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
+    valid_to DateTime64(3,'UTC') DEFAULT toDateTime64('2099-12-31 23:59:59',3,'UTC'),
     is_current Bool,
-    loaded_at DateTime64(3,'UTC')
-        DEFAULT now64(3)
+    loaded_at DateTime64(3,'UTC') DEFAULT now64(3)
 )
 ENGINE = ReplacingMergeTree(loaded_at)
 ORDER BY (sensor_id, valid_from);
