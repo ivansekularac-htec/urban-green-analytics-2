@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS dim_date
     year UInt16,
 
     is_weekend Bool,
-    loaded_at DateTime,
+    loaded_at DateTime
 ) ENGINE = MergeTree()
 ORDER BY(full_date);
 
-CREATE TABLE IF NOT EXISTS quality_grade
+CREATE TABLE IF NOT EXISTS dim_quality_grade
 (
     quality_grade_key UInt32,
     quality_grade_id UInt32,
@@ -89,8 +89,8 @@ CREATE TABLE IF NOT EXISTS dim_sensor
     sensor_type_name String,
     sensor_type_description String,
 
-    sensor_type_optimal_min Float32,
-    sensor_type_optimal_max Float32,
+    sensor_type_optimal_min Float64,
+    sensor_type_optimal_max Float64,
 
     serial_number String,
 
@@ -134,13 +134,13 @@ CREATE TABLE IF NOT EXISTS fact_harvest
     event_date Date,
     timestamp DateTime,
 
-    weight Float32,
+    weight_kg Decimal(10, 3),
 
     quality_grade_key UInt32,
     crop_key UInt32,
     farm_key UInt32,
     loaded_at DateTime
-) ENGINE = MergeTree() -- or ReplacingMergeTree if harvests can be corrected
+) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(event_date)
 ORDER BY (farm_key, timestamp);
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_reading
     event_date Date,
     timestamp DateTime,
 
-    value Float32,
+    value Float64,
 
     sensor_key UInt32,
     farm_key UInt32,
@@ -193,9 +193,9 @@ CREATE TABLE IF NOT EXISTS agg_daily_farm_harvest
 
     farm_key UInt32,
 
-    total_weight Float32,
+    total_weight_kg Decimal(18, 3),
     harvest_count UInt32,
-    avg_weight Float32,
+    avg_weight_kg Decimal(18, 3),
 
     loaded_at DateTime
 )
@@ -211,7 +211,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_crop_harvest
     farm_key UInt32,
     crop_key UInt32,
 
-    total_weight Float32,
+    total_weight_kg Decimal(18, 3),
     harvest_count UInt32,
 
     loaded_at DateTime
@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS agg_daily_quality
     farm_key UInt32,
     quality_grade_key UInt32,
 
-    total_weight Float32,
+    total_weight_kg Decimal(18, 3),
     harvest_count UInt32,
 
     loaded_at DateTime
@@ -245,14 +245,14 @@ CREATE TABLE IF NOT EXISTS agg_daily_sensor
     farm_key UInt32,
     sensor_key UInt32,
 
-    avg_value Float32,
-    min_value Float32,
-    max_value Float32,
+    avg_value Float64,
+    min_value Float64,
+    max_value Float64,
 
     reading_count UInt32,
     anomaly_count UInt32,
 
-    compliance_rate Float32,
+    compliance_rate Float64,
 
     loaded_at DateTime
 )
@@ -267,16 +267,16 @@ CREATE TABLE IF NOT EXISTS agg_farm_performance
 
     farm_key UInt32,
 
-    total_yield_kg Float32,
+    total_yield_kg Decimal(18, 3),
 
-    average_quality_score Float32,
+    average_quality_score Float64,
 
-    energy_consumption_kwh Float32,
-    energy_efficiency_kwh_kg Float32,
+    energy_consumption_kwh Float64,
+    energy_efficiency_kwh_kg Float64,
 
-    sensor_anomaly_rate Float32,
+    sensor_anomaly_rate Float64,
 
-    composite_score Float32,
+    composite_score Float64,
 
     loaded_at DateTime
 )
