@@ -17,11 +17,11 @@
 --   fact_harvest_daily     - one row per farm-version per day
 --   fact_sensor_daily      - one row per farm-version x sensor-type-version per day
 --
--- Recalculated table (mentor: a table, not a view):
+-- Recalculated snapshot table (a physical table refreshed by ETL, not a view):
 --   fact_farm_leaderboard  - one row per farm-version per snapshot day
 --
--- Keys on aggregates (both, on purpose):
---   Aggregates keep BOTH the SCD2 version key (farm_key / sensor_type_key) AND
+-- Keys on aggregates:
+--   Aggregates keep both the SCD2 version key (farm_key / sensor_type_key) and
 --   the durable natural id (farm_id / sensor_type_id). The version key lets you
 --   attribute performance to a specific state ("did the farm perform better after
 --   it moved?"); the natural id gives a trivial continuous entity rollup without

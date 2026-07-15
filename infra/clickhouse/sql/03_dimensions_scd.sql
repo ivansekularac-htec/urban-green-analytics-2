@@ -29,7 +29,8 @@
 -- Design notes:
 --   dim_farm_assignment folds the role in (role_name) - no standalone dim_role.
 --   farm_id = 0 marks a system-wide role (Postgres NULL farm_id, e.g. Admin).
---   Manager history (Ivan -> Stefan) is answered from dim_farm_assignment.
+--   Manager/role history over time (which user held which role on a farm) is
+--   answered from dim_farm_assignment, not from attributes on dim_farm.
 --
 -- Dependencies: 02_dimensions_reference.sql.
 -- =============================================================================
