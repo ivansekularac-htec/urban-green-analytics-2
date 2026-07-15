@@ -6,7 +6,7 @@ USE urbangreen;
 
 CREATE TABLE IF NOT EXISTS dim_date
 (
-    date_key UInt32I,
+    date_key UInt32,
     full_date Date,
 
     day UInt8,
@@ -22,7 +22,7 @@ ORDER BY(full_date);
 
 CREATE TABLE IF NOT EXISTS quality_grade
 (
-    quality_grade_key UInt32I,
+    quality_grade_key UInt32,
     quality_grade_id UInt32,
 
     code String,
@@ -35,7 +35,7 @@ ORDER BY(quality_grade_id);
 
 CREATE TABLE IF NOT EXISTS dim_crop
 (
-    crop_key UInt32I,
+    crop_key UInt32,
     crop_id UInt32,
 
     name String,
@@ -51,7 +51,7 @@ ORDER BY(crop_id);
 
 CREATE TABLE IF NOT EXISTS dim_farm 
 (
-    farm_key UInt32I,
+    farm_key UInt32,
     farm_id UInt32,
 
     infrastructure_type_id UInt32,
@@ -82,7 +82,7 @@ ORDER BY(farm_key);
 
 CREATE TABLE IF NOT EXISTS dim_sensor
 (
-    sensor_key UInt32I,
+    sensor_key UInt32,
     sensor_id UInt32,
 
     sensor_type_id UInt32,
@@ -110,7 +110,7 @@ ORDER BY(sensor_key);
 
 CREATE TABLE IF NOT EXISTS dim_user
 (
-    user_key UInt32I,
+    user_key UInt32,
     user_id UInt32,
 
     email String,
