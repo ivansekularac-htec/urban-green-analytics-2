@@ -23,6 +23,38 @@ CREATE TABLE IF NOT EXISTS dim_date (
 ENGINE = MergeTree
 ORDER BY date_key;
 
+INSERT INTO dim_date
+SELECT
+    toUInt32(toYYYYMMDD(d)) AS date_key,
+    d AS full_date,
+    toDayOfMonth(d) AS day,
+    toDayOfWeek(d) AS day_of_week,
+    toWeek(d) AS week,
+    toMonth(d) AS month,
+    multiIf(
+        toMonth(d)=1, 'January',
+        toMonth(d)=2, 'February',
+        toMonth(d)=3, 'March',
+        toMonth(d)=4, 'April',
+        toMonth(d)=5, 'May',
+        toMonth(d)=6, 'June',
+        toMonth(d)=7, 'July',
+        toMonth(d)=8, 'August',
+        toMonth(d)=9, 'September',
+        toMonth(d)=10, 'October',
+        toMonth(d)=11, 'November',
+        'December'
+    ) AS month_name,
+    toQuarter(d) AS quarter,
+    toYear(d) AS year,
+    toDayOfWeek(d) IN (6, 7) AS is_weekend,
+    now64(3) AS loaded_at
+FROM
+(
+    SELECT addDays(toDate('2024-01-01'), number) AS d
+    FROM numbers(dateDiff('day', toDate('2024-01-01'), toDate('2026-01-01')))
+);
+
 
 CREATE TABLE IF NOT EXISTS dim_crop (
     crop_key UInt64,
