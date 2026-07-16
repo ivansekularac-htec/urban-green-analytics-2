@@ -22,6 +22,6 @@
 -- =============================================================================
 
 
-CREATE DATABASE IF NOT EXISTS urbangreen_db;
+CREATE DATABASE IF NOT EXISTS urbangreen_dw;
 
-USE urbangreen_db;
+USE urbangreen_dw;

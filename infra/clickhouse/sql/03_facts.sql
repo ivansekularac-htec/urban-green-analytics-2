@@ -2,7 +2,7 @@
 -- Creates atomic fact tables containing business events and sensor measurements.
 -- =============================================================================
 
-USE urbangreen_db;
+USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS fact_harvest (
     harvest_key UInt64,

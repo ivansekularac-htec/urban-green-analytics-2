@@ -3,7 +3,7 @@
 -- Includes Type 1 dimensions and SCD Type 2 entities.
 -- =============================================================================
 
-USE urbangreen_db;
+USE urbangreen_dw;
 
 -- =============================== STATIC DIMENSIONS ===========================
 
