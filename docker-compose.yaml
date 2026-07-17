@@ -160,7 +160,7 @@ services:
 
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      CLICKHOUSE_DB_NAME: ${CLICKHOUSE_DB_NAME:-urbangreen_dw}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
