@@ -48,7 +48,7 @@ airflow connections add urbangreen_clickhouse \
   --conn-password "${CLICKHOUSE_PASSWORD}" \
   --conn-schema "${CLICKHOUSE_DB:-urbangreen_dw}" \
   --conn-port 8123 \
-  --conn-extra "{\"tcp_port\": 9000, \"jdbc_url\": \"jdbc:clickhouse://urbangreen-clickhouse:8123/${CLICKHOUSE_DB_NAME:-urbangreen_dw}\"}" \
+  --conn-extra "{\"tcp_port\": 9000, \"jdbc_url\": \"jdbc:clickhouse://urbangreen-clickhouse:8123/${CLICKHOUSE_DB:-urbangreen_dw}\"}" \
   || true
 
 exec airflow standalone
