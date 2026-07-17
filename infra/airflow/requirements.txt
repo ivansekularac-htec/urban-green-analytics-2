@@ -1,5 +1,6 @@
 apache-airflow-providers-postgres
 apache-airflow-providers-amazon
 apache-airflow-providers-apache-spark
+pyspark==4.0.2
 pyarrow
 pandas
