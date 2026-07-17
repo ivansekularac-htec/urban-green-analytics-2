@@ -10,7 +10,6 @@ ADD https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.1/hadoop-aws
 ADD https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.29.52/bundle-2.29.52.jar /opt/spark/jars/
 ADD https://repo1.maven.org/maven2/com/clickhouse/clickhouse-jdbc/0.9.8/clickhouse-jdbc-0.9.8-all-dependencies.jar /opt/spark/jars/
 
-
 RUN chmod 644 /opt/spark/jars/*.jar
 
 COPY init/*.sh /opt/spark/init/
