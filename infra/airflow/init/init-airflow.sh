@@ -14,6 +14,10 @@ MINIO_API_PORT="${MINIO_API_PORT:-9000}"
 
 SPARK_MASTER_PORT="${SPARK_MASTER_PORT:-7077}"
 
+CLICKHOUSE_DB="${CLICKHOUSE_DB}"
+CLICKHOUSE_USER="${CLICKHOUSE_USER}"
+CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD}"
+
 AIRFLOW_PORT="${AIRFLOW_PORT:-8080}"
 
 airflow db migrate
@@ -36,5 +40,19 @@ airflow connections add urbangreen_spark \
   --conn-type spark \
   --conn-host "spark://urbangreen-spark-master" \
   --conn-port "${SPARK_MASTER_PORT}" || true
+
+airflow connections add urbangreen_clickhouse \
+  --conn-json "{
+    \"conn_type\": \"generic\",
+    \"host\": \"urbangreen-clickhouse\",
+    \"login\": \"${CLICKHOUSE_USER}\",
+    \"password\": \"${CLICKHOUSE_PASSWORD}\",
+    \"schema\": \"${CLICKHOUSE_DB}\",
+    \"port\": 8123,
+    \"extra\": {
+      \"tcp_port\": 9000,
+      \"jdbc_url\": \"jdbc:clickhouse://urbangreen-clickhouse:8123/${CLICKHOUSE_DB}\"
+    }
+  }" || true
 
 exec airflow standalone
