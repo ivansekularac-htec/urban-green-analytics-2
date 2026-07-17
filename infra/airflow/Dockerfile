@@ -1,4 +1,3 @@
-
 FROM apache/airflow:3.1.1-python3.10
 
 USER root
