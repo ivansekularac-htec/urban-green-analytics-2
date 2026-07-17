@@ -158,6 +158,12 @@ services:
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_analytics}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
+      CLICKHOUSE_TCP_PORT_HOST: ${CLICKHOUSE_TCP_PORT_HOST:-9009}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags

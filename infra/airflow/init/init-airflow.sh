@@ -37,4 +37,18 @@ airflow connections add urbangreen_spark \
   --conn-host "spark://urbangreen-spark-master" \
   --conn-port "${SPARK_MASTER_PORT}" || true
 
+airflow connections add urbangreen_clickhouse \
+  --conn-json "{
+    \"conn_type\": \"generic\",
+    \"host\": \"urbangreen-clickhouse\",
+    \"login\": \"${CLICKHOUSE_USER}\",
+    \"password\": \"${CLICKHOUSE_PASSWORD}\",
+    \"schema\": \"${CLICKHOUSE_DB:-urbangreen_analytics}\",
+    \"port\": 8123,
+    \"extra\": {
+      \"tcp_port\": 9000,
+      \"jdbc_url\": \"jdbc:clickhouse://urbangreen-clickhouse:8123/${CLICKHOUSE_DB:-urbangreen_analytics}\"
+    }
+  }" || true
+
 exec airflow standalone
