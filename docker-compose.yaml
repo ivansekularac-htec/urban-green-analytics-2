@@ -418,7 +418,7 @@ services:
     restart: unless-stopped
 
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_analytics}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
