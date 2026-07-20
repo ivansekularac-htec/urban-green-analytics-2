@@ -16,6 +16,10 @@ SPARK_MASTER_PORT="${SPARK_MASTER_PORT:-7077}"
 
 AIRFLOW_PORT="${AIRFLOW_PORT:-8080}"
 
+CLICKHOUSE_USER="${CLICKHOUSE_USER}"
+CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD}"
+CLICKHOUSE_DB="${CLICKHOUSE_DB:-urbangreen_dw}"
+
 airflow db migrate
 
 airflow connections add urbangreen_db \
@@ -36,5 +40,15 @@ airflow connections add urbangreen_spark \
   --conn-type spark \
   --conn-host "spark://urbangreen-spark-master" \
   --conn-port "${SPARK_MASTER_PORT}" || true
+
+airflow connections add urbangreen_clickhouse \
+  --conn-type generic \
+  --conn-host "urbangreen-clickhouse" \
+  --conn-login "${CLICKHOUSE_USER}" \
+  --conn-password "${CLICKHOUSE_PASSWORD}" \
+  --conn-schema "${CLICKHOUSE_DB:-urbangreen_dw}" \
+  --conn-port 8123 \
+  --conn-extra "{\"tcp_port\": 9000, \"jdbc_url\": \"jdbc:clickhouse://urbangreen-clickhouse:8123/${CLICKHOUSE_DB:-urbangreen_dw}\"}" \
+  || true
 
 exec airflow standalone
