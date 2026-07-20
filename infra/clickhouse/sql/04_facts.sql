@@ -17,7 +17,6 @@
 --   fact_daily_farm_metrics          — one row per farm per day
 --   fact_daily_sensor_metrics        — one row per farm × sensor_type per day
 --   fact_daily_farm_quality_metrics  — one row per farm × quality_grade per day
---   fact_weekly_crop_metrics         — one row per farm × crop per ISO week
 --
 -- Engines:
 --   ReplacingMergeTree(_loaded_at) — idempotent hourly reloads from lake.
@@ -34,9 +33,9 @@ USE urbangreen_dw;
 CREATE TABLE IF NOT EXISTS fact_harvests (
     harvest_key UInt64,
     harvest_id UInt64,
-    farm_key UInt32,
-    crop_key UInt32,
-    quality_grade_key UInt32,
+    farm_key UInt64,
+    crop_key UInt64,
+    quality_grade_key UInt64,
     date_key UInt32,
     time_key UInt32,
     harvested_at DateTime64 (3, 'UTC'),
@@ -53,9 +52,9 @@ ORDER BY (
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
     reading_id UInt64 COMMENT 'Kafka: farm_sensor_reading_id',
-    farm_key UInt32,
-    sensor_key UInt32 COMMENT 'Kafka: farm_sensor_id',
-    sensor_type_key UInt32,
+    farm_key UInt64,
+    sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
+    sensor_type_key UInt64,
     date_key UInt32,
     time_key UInt32,
     reading_ts DateTime64 (3, 'UTC'),
@@ -73,7 +72,7 @@ ORDER BY (
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
     metric_date Date,
     date_key UInt32,
-    farm_key UInt32,
+    farm_key UInt64,
     total_yield_kg Decimal(18, 3),
     premium_yield_share Float64,
     energy_efficiency_kwh_per_kg Float64,
@@ -91,7 +90,7 @@ ORDER BY (farm_key, date_key);
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_key UInt32,
+    farm_key UInt64,
     year_week UInt32,
     total_yield_kg Decimal(18, 3),
     harvest_count UInt32,
@@ -101,7 +100,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     reading_count UInt64,
     anomaly_count UInt64,
     in_range_count UInt64,
-    last_sensor_reading_ts DateTime64 (3, 'UTC'),
+    last_sensor_reading_ts Nullable(DateTime64(3, 'UTC'))
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
@@ -111,8 +110,8 @@ ORDER BY (farm_key, date_key);
 CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_key UInt32,
-    sensor_type_key UInt32,
+    farm_key UInt64,
+    sensor_type_key UInt64,
     reading_count UInt64,
     sum_value Float64 COMMENT 'avg = sum_value / reading_count (re-aggregation safe)',
     min_value Float64,
@@ -130,8 +129,8 @@ ORDER BY (
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_key UInt32,
-    quality_grade_key UInt32,
+    farm_key UInt64,
+    quality_grade_key UInt64,
     total_yield_kg Decimal(18, 3),
     harvest_count UInt32,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
