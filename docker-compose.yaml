@@ -380,6 +380,9 @@ services:
       - "${JUPYTER_PORT:-8888}:8888"
       - "${JUPYTER_SPARK_UI_PORT:-4040}:4040"
 
+    env_file:
+      - .env
+
     volumes:
       - .:/home/jovyan/work
 

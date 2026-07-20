@@ -34,6 +34,30 @@ def create_spark(app_name: str) -> SparkSession:
     )
 
 
+def list_batches(spark: SparkSession, path: str) -> list[str]:
+    """
+    Return batch directory names under the given S3A path.
+
+    Example:
+        s3a://staging/raw/postgres/crops/
+
+    returns:
+        [
+            "19700101T000000Z__20260720T141148Z",
+            "20260720T141148Z__20260721T083000Z",
+        ]
+    """
+    jvm = spark.sparkContext._jvm
+    conf = spark.sparkContext._jsc.hadoopConfiguration()
+
+    uri = jvm.java.net.URI(path)
+    fs = jvm.org.apache.hadoop.fs.FileSystem.get(uri, conf)
+
+    statuses = fs.listStatus(jvm.org.apache.hadoop.fs.Path(path))
+
+    return sorted(file.getPath().getName() for file in statuses if file.isDirectory())
+
+
 # Read Parquet from MinIO
 def read_parquet(spark: SparkSession, path: str) -> DataFrame:
     """Read Parquet data from MinIO."""
