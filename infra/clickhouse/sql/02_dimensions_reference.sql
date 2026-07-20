@@ -141,44 +141,40 @@ FROM (
     );
 
 CREATE TABLE IF NOT EXISTS dim_role (
-    role_key UInt32,
-    role_id UInt32,
+    role_id UInt64,
     name LowCardinality (String),
     description String,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (role_key);
+ORDER BY (role_id);
 
 CREATE TABLE IF NOT EXISTS dim_quality_grade (
-    quality_grade_key UInt32,
-    quality_grade_id UInt32,
+    quality_grade_id UInt64,
     code LowCardinality (String),
     name LowCardinality (String),
     description String,
     is_premium UInt8 COMMENT '1 when code = A',
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (quality_grade_key);
+ORDER BY (quality_grade_id);
 
 CREATE TABLE IF NOT EXISTS dim_crop (
-    crop_key UInt32,
-    crop_id UInt32,
+    crop_id UInt64,
     name String,
     description String,
-    crop_category_id UInt32,
+    crop_category_id UInt64,
     category_name LowCardinality (String),
     is_high_value UInt8,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (crop_key);
+ORDER BY (crop_id);
 
 CREATE TABLE IF NOT EXISTS dim_user (
-    user_key UInt32,
-    user_id UInt32,
+    user_id UInt64,
     email String,
     full_name String,
     is_active UInt8,
     created_at DateTime64 (3, 'UTC'),
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (user_key);
+ORDER BY (user_id);
