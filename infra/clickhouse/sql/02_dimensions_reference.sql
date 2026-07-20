@@ -27,9 +27,9 @@
 --   runtime date functions. dim_quality_grade.is_premium, dim_crop.is_high_value
 --   support quality mix and profitability metrics.
 --
--- Dependencies: 01_database.sql (USE urbangreen_analytics).
+-- Dependencies: 01_database.sql (USE urbangreen_dw).
 -- =============================================================================
-USE urbangreen_analytics;
+USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS dim_date (
     date_key UInt32,
@@ -141,14 +141,16 @@ FROM (
     );
 
 CREATE TABLE IF NOT EXISTS dim_role (
+    role_key UInt32,
     role_id UInt32,
     name LowCardinality (String),
     description String,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (role_id);
+ORDER BY (role_key);
 
 CREATE TABLE IF NOT EXISTS dim_quality_grade (
+    quality_grade_key UInt32,
     quality_grade_id UInt32,
     code LowCardinality (String),
     name LowCardinality (String),
@@ -156,9 +158,10 @@ CREATE TABLE IF NOT EXISTS dim_quality_grade (
     is_premium UInt8 COMMENT '1 when code = A',
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (quality_grade_id);
+ORDER BY (quality_grade_key);
 
 CREATE TABLE IF NOT EXISTS dim_crop (
+    crop_key UInt32,
     crop_id UInt32,
     name String,
     description String,
@@ -167,9 +170,10 @@ CREATE TABLE IF NOT EXISTS dim_crop (
     is_high_value UInt8,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (crop_id);
+ORDER BY (crop_key);
 
 CREATE TABLE IF NOT EXISTS dim_user (
+    user_key UInt32,
     user_id UInt32,
     email String,
     full_name String,
@@ -177,4 +181,4 @@ CREATE TABLE IF NOT EXISTS dim_user (
     created_at DateTime64 (3, 'UTC'),
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
-ORDER BY (user_id);
+ORDER BY (user_key);
