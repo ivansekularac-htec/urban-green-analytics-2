@@ -15,6 +15,6 @@
 --
 -- Dependencies: none (runs first, alphabetically after any 01_* peers).
 -- =============================================================================
-CREATE DATABASE IF NOT EXISTS urbangreen_analytics;
+CREATE DATABASE IF NOT EXISTS urbangreen_dw;
 
-USE urbangreen_analytics;
+USE urbangreen_dw;

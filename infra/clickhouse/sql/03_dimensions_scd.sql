@@ -31,10 +31,10 @@
 --
 -- Dependencies: 02_dimensions_reference.sql.
 -- =============================================================================
-USE urbangreen_analytics;
+USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS dim_farm (
-    farm_sk UInt64 DEFAULT cityHash64 (farm_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(farm_id, valid_from)',
+    farm_key UInt64 DEFAULT cityHash64 (farm_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(farm_id, valid_from)',
     farm_id UInt32,
     name String,
     city LowCardinality (String),
@@ -54,14 +54,19 @@ CREATE TABLE IF NOT EXISTS dim_farm (
     is_current UInt8,
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
-ORDER BY (farm_id, valid_from);
+ORDER BY (farm_key, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_user_farm_role (
-    user_role_sk UInt64 DEFAULT cityHash64 (user_id, role_id, farm_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
+    user_role_key UInt64 DEFAULT cityHash64 (
+        user_key,
+        role_key,
+        farm_key,
+        valid_from
+    ) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt32,
-    user_id UInt32,
-    role_id UInt32,
-    farm_id UInt32 DEFAULT 0 COMMENT '0 = system-wide (admin without farm)',
+    user_key UInt32,
+    role_key UInt32,
+    farm_key UInt32 DEFAULT 0 COMMENT '0 = system-wide (admin without farm)',
     user_full_name LowCardinality (String),
     role_name LowCardinality (String),
     farm_name LowCardinality (String),
@@ -75,14 +80,14 @@ CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
 ORDER BY (
-        user_id, role_id, farm_id, valid_from
+        user_key, role_key, farm_key, valid_from
     );
 
 CREATE TABLE IF NOT EXISTS dim_sensor (
-    sensor_sk UInt64 DEFAULT cityHash64 (sensor_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_id, valid_from)',
+    sensor_key UInt64 DEFAULT cityHash64 (sensor_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_id, valid_from)',
     sensor_id UInt32,
-    farm_id UInt32,
-    sensor_type_id UInt32,
+    farm_key UInt32,
+    sensor_type_key UInt32,
     serial_number String,
     status LowCardinality (String),
     installed_at Nullable (DateTime64 (3, 'UTC')),
@@ -95,10 +100,10 @@ CREATE TABLE IF NOT EXISTS dim_sensor (
     is_current UInt8,
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
-ORDER BY (sensor_id, valid_from);
+ORDER BY (sensor_key, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_sensor_type (
-    sensor_type_sk UInt64 DEFAULT cityHash64 (sensor_type_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_type_id, valid_from)',
+    sensor_type_key UInt64 DEFAULT cityHash64 (sensor_type_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_type_id, valid_from)',
     sensor_type_id UInt32,
     name LowCardinality (String),
     unit LowCardinality (String),
@@ -114,4 +119,4 @@ CREATE TABLE IF NOT EXISTS dim_sensor_type (
     is_current UInt8,
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
-ORDER BY (sensor_type_id, valid_from);
+ORDER BY (sensor_type_key, valid_from);

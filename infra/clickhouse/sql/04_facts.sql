@@ -29,13 +29,14 @@
 --
 -- Dependencies: 02_dimensions_reference.sql, 03_dimensions_scd.sql.
 -- =============================================================================
-USE urbangreen_analytics;
+USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS fact_harvests (
+    harvest_key UInt64,
     harvest_id UInt64,
-    farm_id UInt32,
-    crop_id UInt32,
-    quality_grade_id UInt32,
+    farm_key UInt32,
+    crop_key UInt32,
+    quality_grade_key UInt32,
     date_key UInt32,
     time_key UInt32,
     harvested_at DateTime64 (3, 'UTC'),
@@ -46,14 +47,15 @@ CREATE TABLE IF NOT EXISTS fact_harvests (
 PARTITION BY
     toYYYYMM (harvest_date)
 ORDER BY (
-        farm_id, harvest_date, crop_id, harvest_id
+        farm_key, harvest_date, crop_key, harvest_id
     );
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
-    reading_id UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
-    farm_id UInt32,
-    sensor_id UInt32 COMMENT 'Kafka: farm_sensor_id',
-    sensor_type_id UInt32,
+    reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
+    reading_id UInt64 COMMENT 'Kafka: farm_sensor_reading_id',
+    farm_key UInt32,
+    sensor_key UInt32 COMMENT 'Kafka: farm_sensor_id',
+    sensor_type_key UInt32,
     date_key UInt32,
     time_key UInt32,
     reading_ts DateTime64 (3, 'UTC'),
@@ -65,13 +67,31 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_id, sensor_type_id, reading_ts, reading_id
+        farm_key, sensor_type_key, reading_ts, reading_id
     );
+
+CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
+    metric_date Date,
+    date_key UInt32,
+    farm_key UInt32,
+    total_yield_kg Decimal(18, 3),
+    premium_yield_share Float64,
+    energy_efficiency_kwh_per_kg Float64,
+    yield_rank UInt32,
+    quality_rank UInt32,
+    energy_rank UInt32,
+    composite_score Float64,
+    composite_rank UInt32,
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+) ENGINE = ReplacingMergeTree (_loaded_at)
+PARTITION BY
+    toYYYYMM (metric_date)
+ORDER BY (farm_key, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_id UInt32,
+    farm_key UInt32,
     year_week UInt32,
     total_yield_kg Decimal(18, 3),
     harvest_count UInt32,
@@ -86,13 +106,13 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_id, date_key);
+ORDER BY (farm_key, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_id UInt32,
-    sensor_type_id UInt32,
+    farm_key UInt32,
+    sensor_type_key UInt32,
     reading_count UInt64,
     sum_value Float64 COMMENT 'avg = sum_value / reading_count (re-aggregation safe)',
     min_value Float64,
@@ -104,26 +124,14 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_id, sensor_type_id, date_key
+        farm_key, sensor_type_key, date_key
     );
-
-CREATE TABLE IF NOT EXISTS fact_weekly_crop_metrics (
-    year_week UInt32,
-    farm_id UInt32,
-    crop_id UInt32,
-    total_yield_kg Decimal(18, 3),
-    harvest_count UInt32,
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
-) ENGINE = ReplacingMergeTree (_loaded_at)
-PARTITION BY
-    intDiv (year_week, 100)
-ORDER BY (year_week, farm_id, crop_id);
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
     metric_date Date,
     date_key UInt32,
-    farm_id UInt32,
-    quality_grade_id UInt32,
+    farm_key UInt32,
+    quality_grade_key UInt32,
     total_yield_kg Decimal(18, 3),
     harvest_count UInt32,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
@@ -131,5 +139,5 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_id, date_key, quality_grade_id
+        farm_key, date_key, quality_grade_key
     );
