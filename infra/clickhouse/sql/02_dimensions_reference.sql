@@ -141,7 +141,6 @@ FROM (
     );
 
 CREATE TABLE IF NOT EXISTS dim_role (
-    role_key UInt64 DEFAULT cityHash64 (role_id),
     role_id UInt64,
     name LowCardinality (String),
     description String,
@@ -150,7 +149,6 @@ CREATE TABLE IF NOT EXISTS dim_role (
 ORDER BY (role_id);
 
 CREATE TABLE IF NOT EXISTS dim_quality_grade (
-    quality_grade_key DEFAULT cityHash64 (quality_grade_id),
     quality_grade_id UInt64,
     code LowCardinality (String),
     name LowCardinality (String),
@@ -161,7 +159,6 @@ CREATE TABLE IF NOT EXISTS dim_quality_grade (
 ORDER BY (quality_grade_id);
 
 CREATE TABLE IF NOT EXISTS dim_crop (
-    crop_key UInt64 DEFAULT cityHash64 (crop_id),
     crop_id UInt64,
     name String,
     description String,
@@ -173,7 +170,6 @@ CREATE TABLE IF NOT EXISTS dim_crop (
 ORDER BY (crop_id);
 
 CREATE TABLE IF NOT EXISTS dim_user (
-    user_key DEFAULT cityHash64 (user_id),
     user_id UInt64,
     email String,
     full_name String,

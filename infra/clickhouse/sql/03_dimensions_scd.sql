@@ -58,15 +58,16 @@ ORDER BY (farm_id, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     user_role_key UInt64 DEFAULT cityHash64 (
-        user_key,
-        role_key,
+        user_id,
+        role_id,
         farm_key,
         valid_from
     ) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt64,
-    user_key UInt64,
-    role_key UInt64,
+    user_id UInt64,
+    role_id UInt64,
     farm_key UInt64 DEFAULT 0 COMMENT '0 = system-wide (admin without farm)',
+    farm_id UInt64,
     user_full_name LowCardinality (String),
     role_name LowCardinality (String),
     farm_name LowCardinality (String),
