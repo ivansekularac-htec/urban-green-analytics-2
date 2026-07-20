@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS fact_harvests (
 PARTITION BY
     toYYYYMM (harvest_date)
 ORDER BY (
-        farm_key, harvest_date, crop_id, harvest_id
+        farm_id, harvest_date, crop_id, harvest_id
     );
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_key, sensor_type_key, reading_ts, reading_id
+        farm_id, sensor_type_key, reading_ts, reading_id
     );
 
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_key, date_key);
+ORDER BY (farm_id, date_key, farm_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_key, date_key);
+ORDER BY (farm_id, date_key, farm_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     metric_date Date,
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_key, sensor_type_key, date_key
+        farm_id, date_key, sensor_type_key, farm_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
@@ -144,5 +144,5 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_key, date_key, quality_grade_id
+        farm_id, date_key, quality_grade_id, farm_key
     );
