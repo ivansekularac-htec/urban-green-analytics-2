@@ -381,7 +381,7 @@ services:
       - "${JUPYTER_SPARK_UI_PORT:-4040}:4040"
 
     volumes:
-      - ./notebooks:/home/jovyan/work
+      - .:/home/jovyan/work
 
     networks:
       - urbangreen-network
