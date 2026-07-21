@@ -10,7 +10,7 @@ from pyspark.sql.functions import current_timestamp
 from transformations.common import (
     create_spark,
     epoch_to_timestamp,
-    read_raw_table,
+    read_latest_batch,
     write_clickhouse,
 )
 
@@ -37,22 +37,22 @@ def main():
     """
     Load the dim_crop dimension from raw PostgreSQL snapshots into ClickHouse.
     """
-    spark = create_spark("load_dim_quality_grade")
+    spark = create_spark("load_dim_user")
 
     try:
-        quality_grade_df = read_raw_table(
+        user_df = read_latest_batch(
             spark,
             MINIO_STAGING_BUCKET,
-            "quality_grades",
+            "users",
         )
 
-        dim_quality_grade_df = transform_dim_quality_grade(quality_grade_df)
+        dim_user_df = transform_dim_user(user_df)
 
         # Write to ClickHouse. ReplacingMergeTree ensures repeated runs converge
         # to the latest version of each crop.
         write_clickhouse(
-            dim_quality_grade_df,
-            "dim_quality_grade",
+            dim_user_df,
+            "dim_user",
         )
     finally:
         spark.stop()
