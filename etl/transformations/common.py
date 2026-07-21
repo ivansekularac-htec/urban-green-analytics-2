@@ -9,6 +9,7 @@ The session is configured to:
 import os
 
 from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.functions import from_unixtime
 
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://urbangreen-minio:9000")
 MINIO_ACCESS_KEY = os.environ.get("MINIO_ROOT_USER", "minioadmin")
@@ -115,3 +116,7 @@ def write_clickhouse(
         .mode(mode)
         .save()
     )
+
+
+def epoch_to_timestamp(column):
+    return from_unixtime(column).cast("timestamp")

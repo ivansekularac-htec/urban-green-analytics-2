@@ -1,3 +1,8 @@
+"""
+Read crop source data from MinIO, transform it, and load the dim_crop
+warehouse table in ClickHouse.
+"""
+
 import os
 
 from pyspark.sql import DataFrame
@@ -12,7 +17,8 @@ def transform_dim_crop(
     categories_df: DataFrame,
 ) -> DataFrame:
     """
-    Create ClickHouse dim_crop dataset from source tables.
+    Build the dim_crop warehouse dimension by joining crops with their
+    category metadata.
     """
 
     return crops_df.join(
@@ -32,19 +38,11 @@ def transform_dim_crop(
 
 def main():
     """
-    Build and load the dim_crop warehouse dimension.
-
-    Source tables:
-    - crops
-    - crop_categories
-
-    Target:
-    - ClickHouse dim_crop
+    Load the dim_crop dimension from raw PostgreSQL snapshots into ClickHouse.
     """
     spark = create_spark("load_dim_crop")
 
     try:
-        # Read latest source snapshots from MinIO
         crops_df = read_raw_table(
             spark,
             MINIO_STAGING_BUCKET,
@@ -57,14 +55,13 @@ def main():
             "crop_categories",
         )
 
-        # Denormalize crop category information into the warehouse dimension.
-        # Category name is stored directly in dim_crop to simplify BI queries.
         dim_crop_df = transform_dim_crop(
             crops_df,
             categories_df,
         )
 
-        # ReplacingMergeTree handles multiple versions of the same crop_id.
+        # Write to ClickHouse. ReplacingMergeTree ensures repeated runs converge
+        # to the latest version of each crop.
         write_clickhouse(
             dim_crop_df,
             "dim_crop",
