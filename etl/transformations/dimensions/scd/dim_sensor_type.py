@@ -1,5 +1,5 @@
 """
-Load the dim_sensor_type warehouse dimension as an SCD2 table.
+Load the dim_sensor_type warehouse SCD2 dimension.
 """
 
 import os

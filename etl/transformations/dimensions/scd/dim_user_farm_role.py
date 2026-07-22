@@ -1,5 +1,5 @@
 """
-Load the dim_user_farm_role warehouse dimension.
+Load the dim_user_farm_role warehouse SCD2 dimension.
 """
 
 import os
@@ -39,7 +39,7 @@ def transform_dim_user_farm_role(
     dim_farm_df: DataFrame,
 ) -> DataFrame:
     """
-    Build the dim_user_farm_role source dataset.
+    Build the dim_user_farm_role warehouse shape from source snapshot.
 
     Uses dim_farm surrogate key because dim_farm is SCD2.
     """

@@ -1,81 +1,94 @@
+"""
+Helpers for managing ETL processing state stored in MinIO.
+"""
+
 import json
-import time
-import uuid
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (
-    LongType,
-    StringType,
-    StructField,
-    StructType,
-)
-
-from transformations.common import read_clickhouse, write_clickhouse
 
 
-def get_load_state(
+def get_watermark(
     spark: SparkSession,
-    job_name: str,
+    path: str,
 ) -> str | None:
     """
-    Return the last successfully processed batch for a transformation job.
-
-    Returns None when the job has never run.
+    Read the last processed batch watermark from MinIO.
     """
 
-    state_df = read_clickhouse(
-        spark,
-        f"""
-        (
-            SELECT cursor_json
-            FROM warehouse_load_state FINAL
-            WHERE job_name = '{job_name}'
-            LIMIT 1
-        ) AS warehouse_load_state
-        """,
+    jvm = spark.sparkContext._jvm
+    conf = spark.sparkContext._jsc.hadoopConfiguration()
+
+    uri = jvm.java.net.URI(path)
+
+    fs = jvm.org.apache.hadoop.fs.FileSystem.get(
+        uri,
+        conf,
     )
 
-    rows = state_df.collect()
+    file_path = jvm.org.apache.hadoop.fs.Path(path)
 
-    if not rows:
+    if not fs.exists(file_path):
         return None
 
-    return json.loads(rows[0]["cursor_json"])
+    input_stream = fs.open(file_path)
+
+    reader = jvm.java.io.BufferedReader(jvm.java.io.InputStreamReader(input_stream))
+
+    content = []
+
+    line = reader.readLine()
+
+    while line:
+        content.append(line)
+        line = reader.readLine()
+
+    reader.close()
+
+    state = json.loads("".join(content))
+
+    return state.get("last_batch")
 
 
-def set_load_state(
+def set_watermark(
     spark: SparkSession,
-    job_name: str,
-    batch_name: str,
-):
+    path: str,
+    batch: str,
+) -> None:
     """
-    Save the latest successfully processed batch for a transformation job.
+    Write the last processed batch watermark to MinIO.
     """
 
-    version = int(time.time() * 1000)
+    jvm = spark.sparkContext._jvm
+    conf = spark.sparkContext._jsc.hadoopConfiguration()
 
-    schema = StructType(
-        [
-            StructField("job_name", StringType()),
-            StructField("cursor_json", StringType()),
-            StructField("run_key", StringType()),
-            StructField("_version", LongType()),
-        ]
+    uri = jvm.java.net.URI(path)
+
+    fs = jvm.org.apache.hadoop.fs.FileSystem.get(
+        uri,
+        conf,
     )
 
-    state_df = spark.createDataFrame(
-        [
-            (
-                job_name,
-                json.dumps(batch_name),
-                str(uuid.uuid4()),
-                version,
-            )
-        ],
-        schema=schema,
+    file_path = jvm.org.apache.hadoop.fs.Path(path)
+
+    state = {
+        "last_batch": batch,
+    }
+
+    content = json.dumps(
+        state,
+        indent=2,
     )
 
-    write_clickhouse(
-        state_df,
-        "warehouse_load_state",
+    output_stream = fs.create(
+        file_path,
+        True,
     )
+
+    output_stream.write(
+        bytearray(
+            content,
+            "UTF-8",
+        )
+    )
+
+    output_stream.close()

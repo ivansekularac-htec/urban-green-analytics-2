@@ -32,7 +32,7 @@ def transform_dim_farm(
     growing_system_type_df: DataFrame,
 ) -> DataFrame:
     """
-    Build dim_farm rows from the latest farm changes.
+    Build dim_farm warehouse shape from source snapshot
     """
 
     return (

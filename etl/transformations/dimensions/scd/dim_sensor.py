@@ -1,5 +1,5 @@
 """
-Load the dim_sensor warehouse dimension as an SCD2 dimension.
+Load the dim_sensor warehouse SCD2 dimension.
 """
 
 import os
@@ -33,7 +33,7 @@ def transform_dim_sensor(
     sensor_type_df: DataFrame,
 ) -> DataFrame:
     """
-    Build dim_sensor source shape.
+    Build dim_sensor warehouse shape from source snapshot.
 
     Converts source foreign keys:
         farm_id        -> farm_key

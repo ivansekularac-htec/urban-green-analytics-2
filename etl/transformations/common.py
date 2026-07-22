@@ -138,91 +138,54 @@ def list_batches(
 
 def read_batches_since(
     spark: SparkSession,
-    bucket: str,
-    table_name: str,
+    base_path: str,
     last_batch: str | None,
-) -> tuple[DataFrame, str | None]:
+    schema: StructType | None = None,
+) -> tuple[DataFrame | None, str | None]:
     """
-    Read every ingestion batch written after the supplied batch.
+    Read ingestion batches newer than the supplied watermark.
 
     Returns:
         dataframe,
         newest processed batch
     """
 
-    base_path = f"s3a://{bucket}/raw/postgres/{table_name}/"
-
     batches = list_batches(
         spark,
         base_path,
     )
 
-    if last_batch is None:
-        batches_to_read = batches
-    else:
+    if last_batch:
         batches_to_read = [batch for batch in batches if batch > last_batch]
+    else:
+        batches_to_read = batches
 
     if not batches_to_read:
-        return (
-            None,
-            last_batch,
-        )
+        return None, last_batch
 
     paths = [f"{base_path}{batch}" for batch in batches_to_read]
 
-    return (
-        read_parquet(
+    df = None
+
+    for path in paths:
+        batch_df = read_parquet(
             spark,
-            *paths,
-        ),
-        batches_to_read[-1],
-    )
-
-
-def read_incremental_sources(
-    spark: SparkSession,
-    bucket: str,
-    state: dict | None,
-    tables: list[str],
-) -> dict[str, dict]:
-    """
-    Read new ingestion batches for multiple source tables.
-
-    Each table is processed independently using its stored watermark.
-
-    Returns:
-
-    {
-        "farms": {
-            "df": DataFrame | None,
-            "last_batch": str | None,
-            "changed": bool,
-        }
-    }
-    """
-
-    sources = {}
-
-    for table in tables:
-        last_batch = None
-
-        if state:
-            last_batch = state.get(table)
-
-        df, newest_batch = read_batches_since(
-            spark,
-            bucket,
-            table,
-            last_batch,
+            path,
+            schema=schema,
         )
 
-        sources[table] = {
-            "df": df,
-            "last_batch": newest_batch,
-            "changed": df is not None,
-        }
+        if df is None:
+            df = batch_df
+        else:
+            df = df.unionByName(
+                batch_df,
+                allowMissingColumns=True,
+            )
 
-    return sources
+    return (
+        df,
+        batches_to_read[-1],
+    )
 
 
 def read_current_snapshot(
