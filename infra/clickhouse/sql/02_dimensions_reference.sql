@@ -16,7 +16,7 @@
 -- Design notes:
 --   Pure star: farm/crop reference lookups (infrastructure type, growing system
 --   type, crop category) are denormalized directly onto dim_farm / dim_crop
---   (*_name, is_high_value), so no standalone snowflake lookup tables are kept.
+--   as *_name, so no standalone snowflake lookup tables are kept.
 --
 -- Data sources (Module 3 ETL):
 --   Postgres app.* tables → MinIO Parquet (raw/postgres/) → Spark → ClickHouse
@@ -24,8 +24,8 @@
 --
 -- Dashboard use:
 --   dim_date/dim_time — GROUP BY year_week, month_name, part_of_day without
---   runtime date functions. dim_quality_grade.is_premium, dim_crop.is_high_value
---   support quality mix and profitability metrics.
+--   runtime date functions. dim_quality_grade.is_premium supports quality mix
+--   metrics.
 --
 -- Dependencies: 01_database.sql (USE urbangreen_dw).
 -- =============================================================================
@@ -164,7 +164,6 @@ CREATE TABLE IF NOT EXISTS dim_crop (
     description String,
     crop_category_id UInt64,
     category_name LowCardinality (String),
-    is_high_value UInt8,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (crop_id);

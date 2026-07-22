@@ -166,6 +166,7 @@ services:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
       - ./infra/airflow/init:/scripts:ro
+      - ./etl/transformations:/opt/airflow/transformations:ro
 
     networks:
       - urbangreen-network
@@ -422,7 +423,7 @@ services:
     restart: unless-stopped
 
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_analytics}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1

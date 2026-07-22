@@ -52,7 +52,6 @@ ORDER BY (
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
-    reading_id UInt64 COMMENT 'Kafka: farm_sensor_reading_id',
     farm_key UInt64,
     farm_id UInt64,
     sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
@@ -68,7 +67,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_id, sensor_type_key, reading_ts, reading_id
+        farm_id, sensor_type_key, reading_ts, sensor_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (

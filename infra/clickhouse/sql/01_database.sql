@@ -9,7 +9,7 @@
 --
 -- Execution:
 --   Runs on first container start when /var/lib/clickhouse is empty.
---   Database name is fixed here as urbangreen_analytics. It MUST match
+--   Database name is fixed here as urbangreen_dw. It MUST match
 --   CLICKHOUSE_DB in docker-compose / .env (entrypoint creates that DB too).
 --   Init SQL cannot read env vars — if you rename the warehouse, update both.
 --
