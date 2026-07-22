@@ -31,7 +31,7 @@
 USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS fact_harvests (
-    harvest_key UInt64,
+    harvest_key UInt64 DEFAULT cityHash64(harvest_id),
     harvest_id UInt64,
     farm_key UInt64,
     farm_id UInt64,
@@ -51,7 +51,7 @@ ORDER BY (
     );
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
-    reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
+    reading_key UInt64 DEFAULT cityHash64(farm_sensor_id, reading_ts),
     farm_key UInt64,
     farm_id UInt64,
     sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
