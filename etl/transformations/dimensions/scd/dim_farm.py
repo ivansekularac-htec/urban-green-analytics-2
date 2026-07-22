@@ -191,18 +191,20 @@ def main():
             build_new_version(
                 new_farms_df,
                 load_version,
+                ["farm_key"],
             )
             .unionByName(
                 build_expired_version(
                     expired_farms_df,
                     load_version,
-                    "farm_key",
+                    ["farm_key"],
                 )
             )
             .unionByName(
                 build_new_version(
                     new_versions_df,
                     load_version,
+                    ["farm_key"],
                 )
             )
         )

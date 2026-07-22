@@ -11,14 +11,22 @@ DEFAULT_VALID_TO = "2099-12-31 23:59:59"
 def build_new_version(
     df: DataFrame,
     load_version: int,
+    generated_columns: list[str] | None = None,
 ) -> DataFrame:
     """
-    Create active SCD2 versions from source rows.
+    Create active SCD2 versions.
+
+    Warehouse-generated columns are removed because ClickHouse
+    generates them during insert.
     """
 
+    result = df.drop("_hash")
+
+    if generated_columns:
+        result = result.drop(*generated_columns)
+
     return (
-        df.drop("_hash")
-        .withColumn(
+        result.withColumn(
             "valid_from",
             current_timestamp(),
         )
@@ -40,18 +48,22 @@ def build_new_version(
 def build_expired_version(
     df: DataFrame,
     load_version: int,
-    surrogate_key: str,
+    generated_columns: list[str] | None = None,
 ) -> DataFrame:
     """
     Close existing active SCD2 versions.
+
+    Warehouse-generated columns are removed because they are
+    recreated by ClickHouse for new versions.
     """
 
+    result = df.drop("_hash")
+
+    if generated_columns:
+        result = result.drop(*generated_columns)
+
     return (
-        df.drop(
-            "_hash",
-            surrogate_key,
-        )
-        .withColumn(
+        result.withColumn(
             "valid_to",
             current_timestamp(),
         )

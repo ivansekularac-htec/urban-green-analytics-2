@@ -1,16 +1,16 @@
 """
-Load the dim_user_farm_role warehouse dimension from raw snapshots.
+Load the dim_user_farm_role warehouse dimension.
 """
 
 import os
 import time
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col
+from pyspark.sql.functions import coalesce, col, lit
 from transformations.common import (
     create_spark,
     read_clickhouse,
-    read_latest_batch,
+    read_current_snapshot,
     write_clickhouse,
 )
 
@@ -18,7 +18,6 @@ from etl.transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
-    split_changes,
 )
 
 MINIO_STAGING_BUCKET = os.environ.get(
@@ -31,10 +30,12 @@ def transform_dim_user_farm_role(
     user_role_df: DataFrame,
     user_df: DataFrame,
     role_df: DataFrame,
-    farm_df: DataFrame,
+    dim_farm_df: DataFrame,
 ) -> DataFrame:
     """
-    Build the dim_user_farm_role SCD2 dimension from source tables.
+    Build the dim_user_farm_role source dataset.
+
+    Uses dim_farm surrogate key because dim_farm is SCD2.
     """
 
     return (
@@ -49,64 +50,73 @@ def transform_dim_user_farm_role(
             "left",
         )
         .join(
-            farm_df,
-            user_role_df.farm_id == farm_df.id,
+            dim_farm_df,
+            user_role_df.farm_id == dim_farm_df.farm_id,
             "left",
         )
         .select(
             user_role_df.id.alias("user_role_id"),
             user_role_df.user_id,
             user_role_df.role_id,
+            coalesce(
+                dim_farm_df.farm_key,
+                lit(0),
+            ).alias("farm_key"),
             user_role_df.farm_id,
             user_df.full_name.alias("user_full_name"),
             role_df.name.alias("role_name"),
-            farm_df.name.alias("farm_name"),
+            dim_farm_df.name.alias("farm_name"),
         )
     )
 
 
 def main():
     """
-    Load dim_user_farm_role from raw snapshots into ClickHouse.
+    Load dim_user_farm_role as an SCD2 dimension.
     """
 
     spark = create_spark("load_dim_user_farm_role")
 
     try:
-        # Read latest raw snapshots.
-        user_role_df = read_latest_batch(
+        # Reconstruct current PostgreSQL state from all MinIO batches.
+        user_role_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "user_roles",
         )
 
-        user_df = read_latest_batch(
+        user_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "users",
         )
 
-        role_df = read_latest_batch(
+        role_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "roles",
         )
 
-        farm_df = read_latest_batch(
+        dim_farm_df = read_clickhouse(
             spark,
-            MINIO_STAGING_BUCKET,
-            "farms",
+            """
+                (
+                    SELECT *
+                    FROM dim_farm FINAL
+                    WHERE is_current = 1
+                ) AS dim_farm
+            """,
         )
 
-        # Build warehouse dimension shape.
-        dim_user_farm_role_df = transform_dim_user_farm_role(
+        # Build the complete current dimension state.
+        dim_user_farm_role_source_df = transform_dim_user_farm_role(
             user_role_df,
             user_df,
             role_df,
-            farm_df,
+            dim_farm_df,
         )
 
-        # Read current SCD2 versions only.
+        # Read current active SCD2 versions.
         current_dim_df = read_clickhouse(
             spark,
             """
@@ -114,70 +124,101 @@ def main():
                     SELECT *
                     FROM dim_user_farm_role FINAL
                 ) AS dim_user_farm_role
-                """,
-        ).filter(col("is_current") == 1)
+            """,
+        ).filter(
+            col("is_current") == 1,
+        )
 
-        # Detect changes using business attributes.
+        hash_columns = [
+            "user_id",
+            "role_id",
+            "farm_key",
+            "farm_id",
+            "user_full_name",
+            "role_name",
+            "farm_name",
+        ]
+
         source_hashed_df = add_hash(
-            dim_user_farm_role_df,
-            [
-                "user_id",
-                "role_id",
-                "farm_id",
-                "user_full_name",
-                "role_name",
-                "farm_name",
-            ],
+            dim_user_farm_role_source_df,
+            hash_columns,
         )
 
         current_hashed_df = add_hash(
             current_dim_df,
-            [
-                "user_id",
-                "role_id",
-                "farm_id",
-                "user_full_name",
-                "role_name",
-                "farm_name",
-            ],
+            hash_columns,
         )
 
-        # Compare source snapshot with current warehouse state.
-        new_rows_df, changed_rows_df = split_changes(
-            source_hashed_df,
-            current_hashed_df,
+        # Compare source state with active warehouse state.
+        comparison_df = source_hashed_df.alias("source").join(
+            current_hashed_df.alias(
+                "current",
+            ),
             "user_role_id",
+            "left",
         )
 
-        load_version = int(time.time() * 1000)
+        # New relationships.
+        new_rows_df = comparison_df.filter(col("current.user_role_id").isNull()).select(
+            "source.*",
+        )
 
-        # Changed rows generate:
-        # 1. expired old version
-        # 2. new active version
+        # Existing relationships where attributes changed.
+        changed_rows_df = comparison_df.filter(
+            (col("current.user_role_id").isNotNull())
+            & (col("source._hash") != col("current._hash"))
+        )
+
+        # Old versions to close.
+        expired_rows_df = changed_rows_df.select(
+            "current.*",
+        )
+
+        # New active versions.
+        new_versions_df = changed_rows_df.select(
+            "source.*",
+        )
+
+        load_version = int(
+            time.time() * 1000,
+        )
+
         rows_to_write = (
             build_new_version(
                 new_rows_df,
                 load_version,
+                [
+                    "user_role_key",
+                    "farm_key",
+                ],
             )
             .unionByName(
                 build_expired_version(
-                    changed_rows_df,
+                    expired_rows_df,
                     load_version,
-                    "user_role_key",
+                    [
+                        "user_role_key",
+                        "farm_key",
+                    ],
                 )
             )
             .unionByName(
                 build_new_version(
-                    changed_rows_df,
+                    new_versions_df,
                     load_version,
+                    [
+                        "user_role_key",
+                        "farm_key",
+                    ],
                 )
             )
         )
 
-        write_clickhouse(
-            rows_to_write,
-            "dim_user_farm_role",
-        )
+        if rows_to_write.count() > 0:
+            write_clickhouse(
+                rows_to_write,
+                "dim_user_farm_role",
+            )
 
     finally:
         spark.stop()
