@@ -4,12 +4,12 @@ Load the dim_crop warehouse dimension from incremental raw data.
 
 import os
 
-from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, current_timestamp, lit
+from pyspark.sql import DataFrame, SparkSession, Window
+from pyspark.sql.functions import col, current_timestamp, lit, row_number
 from transformations.common import (
     create_spark,
-    read_clickhouse,
-    read_latest_batch,
+    list_batches,
+    read_parquet,
     write_clickhouse,
 )
 
@@ -30,7 +30,7 @@ def transform_dim_crop(
     return crops_df.join(
         categories_df,
         crops_df.category_id == categories_df.id,
-        "left",
+        "inner",
     ).select(
         crops_df.id.alias("crop_id"),
         crops_df.name,
@@ -42,117 +42,86 @@ def transform_dim_crop(
     )
 
 
-def read_current_dim_crop(
-    spark,
+def read_current_snapshot(
+    spark: SparkSession,
+    bucket: str,
+    table_name: str,
+    primary_key: str = "id",
+    version_column: str = "updated_at",
 ) -> DataFrame:
     """
-    Read the current ClickHouse state of dim_crop.
+    Reconstruct the current table state from all incremental batches.
 
-    FINAL makes ReplacingMergeTree return the latest version.
+    Airflow stores only changed rows in each batch, so the latest batch is
+    not necessarily a complete snapshot. This helper reads every available
+    batch and keeps only the newest version of each primary key.
+
+    Example:
+
+        batch1
+        id=1
+        id=2
+
+        batch2
+        id=2 (updated)
+
+        result
+        id=1
+        id=2 (updated)
     """
 
-    return read_clickhouse(
+    base_path = f"s3a://{bucket}/raw/postgres/{table_name}/"
+
+    batches = list_batches(
         spark,
-        """
-        (
-            SELECT *
-            FROM dim_crop FINAL
-        ) AS dim_crop
-        """,
+        base_path,
     )
 
+    paths = [f"{base_path}{batch}" for batch in batches]
 
-def get_category_affected_crops(
-    current_dim_crop_df: DataFrame,
-    changed_categories_df: DataFrame,
-) -> DataFrame:
-    """
-    Find existing crops whose category was updated.
-    """
+    df = read_parquet(
+        spark,
+        *paths,
+    )
 
-    return current_dim_crop_df.join(
-        changed_categories_df,
-        current_dim_crop_df.crop_category_id == changed_categories_df.id,
-        "inner",
-    ).select(
-        current_dim_crop_df.crop_id,
+    window = Window.partitionBy(primary_key).orderBy(col(version_column).desc())
+
+    return (
+        df.withColumn(
+            "_row_number",
+            row_number().over(window),
+        )
+        .filter(
+            col("_row_number") == 1,
+        )
+        .drop("_row_number")
     )
 
 
 def main():
 
-    spark = create_spark(
-        "load_dim_crop",
-    )
+    spark = create_spark("load_dim_crop")
 
     try:
-        changed_crops_df = read_latest_batch(
+        crops_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "crops",
         )
 
-        changed_categories_df = read_latest_batch(
+        categories_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "crop_categories",
         )
 
-        current_dim_crop_df = read_current_dim_crop(
-            spark,
-        )
-
-        # Find crops affected by category changes.
-        category_affected_crop_ids = get_category_affected_crops(
-            current_dim_crop_df,
-            changed_categories_df,
-        )
-
-        # Read old crop records and rebuild them with new category names.
-        category_affected_crops_df = current_dim_crop_df.join(
-            category_affected_crop_ids,
-            "crop_id",
-            "inner",
-        ).select(
-            "crop_id",
-            "name",
-            "description",
-            col("crop_category_id").alias("category_id"),
-        )
-
-        # Combine:
-        # - directly changed crops
-        # - crops affected by category changes
-        crops_to_update_df = (
-            changed_crops_df.select(
-                "id",
-                "name",
-                "description",
-                "category_id",
-            )
-            .unionByName(
-                category_affected_crops_df.select(
-                    col("crop_id").alias("id"),
-                    "name",
-                    "description",
-                    "category_id",
-                )
-            )
-            .dropDuplicates(["id"])
-        )
-
-        dim_crop_updates_df = transform_dim_crop(
-            crops_to_update_df,
-            changed_categories_df.unionByName(
-                current_dim_crop_df.select(
-                    col("crop_category_id").alias("id"),
-                    col("category_name").alias("name"),
-                )
-            ),
+        dim_crop_df = transform_dim_crop(
+            crops_df,
+            categories_df,
         )
 
         write_clickhouse(
-            dim_crop_updates_df,
+            dim_crop_df,
             "dim_crop",
         )
 

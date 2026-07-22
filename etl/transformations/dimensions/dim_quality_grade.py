@@ -9,7 +9,6 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import current_timestamp, when
 from transformations.common import (
     create_spark,
-    execute_clickhouse_sql,
     read_latest_batch,
     write_clickhouse,
 )
@@ -47,11 +46,6 @@ def main():
         )
 
         dim_quality_grade_df = transform_dim_quality_grade(quality_grade_df)
-
-        execute_clickhouse_sql(
-            spark,
-            "TRUNCATE TABLE dim_quality_grade",
-        )
 
         # Write to ClickHouse. ReplacingMergeTree ensures repeated runs converge
         # to the latest version of each crop.

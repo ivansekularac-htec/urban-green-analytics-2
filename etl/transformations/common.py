@@ -177,30 +177,6 @@ def read_latest_batch(
     )
 
 
-def execute_clickhouse_sql(
-    spark: SparkSession,
-    sql: str,
-):
-    """
-    Execute a SQL statement against ClickHouse using JDBC.
-    """
-
-    jvm = spark.sparkContext._jvm
-
-    conn = jvm.java.sql.DriverManager.getConnection(
-        CLICKHOUSE_JDBC_URL,
-        CLICKHOUSE_USER,
-        CLICKHOUSE_PASSWORD,
-    )
-
-    try:
-        statement = conn.createStatement()
-        statement.execute(sql)
-        statement.close()
-    finally:
-        conn.close()
-
-
 def write_clickhouse(
     df: DataFrame,
     table_name: str,
