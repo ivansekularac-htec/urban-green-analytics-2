@@ -1,6 +1,6 @@
 """
-Read crop source data from MinIO, transform it, and load the dim_crop
-warehouse table in ClickHouse.
+Read quality grade source data from MinIO, transform it, and load the
+dim_quality_grade warehouse table in ClickHouse.
 """
 
 import os
@@ -18,8 +18,7 @@ MINIO_STAGING_BUCKET = os.environ.get("MINIO_STAGING_BUCKET", "staging")
 
 def transform_dim_quality_grade(quality_grade_df: DataFrame) -> DataFrame:
     """
-    Build the dim_crop warehouse dimension by joining crops with their
-    category metadata.
+    Build dim_quality_grade rows from quality grade source data.
     """
 
     return quality_grade_df.select(
@@ -27,15 +26,22 @@ def transform_dim_quality_grade(quality_grade_df: DataFrame) -> DataFrame:
         quality_grade_df.code,
         quality_grade_df.name,
         quality_grade_df.description,
-        when(quality_grade_df.code == "A", 1).otherwise(0).alias("is_premium"),
+        when(
+            quality_grade_df.code == "A",
+            1,
+        )
+        .otherwise(0)
+        .alias("is_premium"),
         current_timestamp().alias("_loaded_at"),
     )
 
 
 def main():
     """
-    Load the dim_crop dimension from raw PostgreSQL snapshots into ClickHouse.
+    Load the dim_quality_grade dimension from raw PostgreSQL snapshots
+    stored in MinIO into ClickHouse.
     """
+
     spark = create_spark("load_dim_quality_grade")
 
     try:
@@ -45,14 +51,17 @@ def main():
             "quality_grades",
         )
 
-        dim_quality_grade_df = transform_dim_quality_grade(quality_grade_df)
+        dim_quality_grade_df = transform_dim_quality_grade(
+            quality_grade_df,
+        )
 
-        # Write to ClickHouse. ReplacingMergeTree ensures repeated runs converge
-        # to the latest version of each crop.
+        # Write transformed dimension data to ClickHouse.
+        # ReplacingMergeTree resolves duplicate versions based on the table key.
         write_clickhouse(
             dim_quality_grade_df,
             "dim_quality_grade",
         )
+
     finally:
         spark.stop()
 

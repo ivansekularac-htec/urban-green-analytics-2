@@ -1,5 +1,5 @@
 """
-Read crop source data from MinIO, transform it, and load the dim_crop
+Read user source data from MinIO, transform it, and load the dim_user
 warehouse table in ClickHouse.
 """
 
@@ -19,8 +19,7 @@ MINIO_STAGING_BUCKET = os.environ.get("MINIO_STAGING_BUCKET", "staging")
 
 def transform_dim_user(user_df: DataFrame) -> DataFrame:
     """
-    Build the dim_crop warehouse dimension by joining crops with their
-    category metadata.
+    Build dim_user rows from user source data.
     """
 
     return user_df.select(
@@ -35,8 +34,10 @@ def transform_dim_user(user_df: DataFrame) -> DataFrame:
 
 def main():
     """
-    Load the dim_crop dimension from raw PostgreSQL snapshots into ClickHouse.
+    Load the dim_user dimension from raw PostgreSQL snapshots
+    stored in MinIO into ClickHouse.
     """
+
     spark = create_spark("load_dim_user")
 
     try:
@@ -48,12 +49,13 @@ def main():
 
         dim_user_df = transform_dim_user(user_df)
 
-        # Write to ClickHouse. ReplacingMergeTree ensures repeated runs converge
-        # to the latest version of each crop.
+        # Write transformed dimension data to ClickHouse.
+        # ReplacingMergeTree resolves duplicate versions based on the table key.
         write_clickhouse(
             dim_user_df,
             "dim_user",
         )
+
     finally:
         spark.stop()
 

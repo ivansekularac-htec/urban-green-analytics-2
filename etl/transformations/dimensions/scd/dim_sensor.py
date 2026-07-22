@@ -74,9 +74,11 @@ def main():
     )
 
     try:
+        # Read the current state of all source tables.
         #
-        # Read current snapshots from staging.
-        #
+        # MinIO contains incremental batches, so this reconstructs the
+        # latest PostgreSQL state by combining all batches and keeping
+        # the newest record per primary key.
         sensor_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
@@ -84,9 +86,7 @@ def main():
             primary_key="id",
         )
 
-        #
-        # Read current warehouse dimensions.
-        #
+        # Read currently active SCD2 versions from ClickHouse.
         current_dim_farm_df = read_clickhouse(
             spark,
             """
@@ -111,9 +111,7 @@ def main():
             col("is_current") == 1,
         )
 
-        #
         # Prepare current dimension lookup tables.
-        #
         farm_lookup_df = current_dim_farm_df.select(
             "farm_id",
             "farm_key",
@@ -124,18 +122,14 @@ def main():
             "sensor_type_key",
         )
 
-        #
-        # Create source shape for dim_sensor.
-        #
+        # Build the complete current dimension state.
         source_sensor_df = transform_dim_sensor(
             sensor_df,
             farm_lookup_df,
             sensor_type_lookup_df,
         )
 
-        #
-        # Read current SCD2 versions.
-        #
+        # Read currently active SCD2 versions from ClickHouse.
         current_dim_sensor_df = read_clickhouse(
             spark,
             """
@@ -148,9 +142,10 @@ def main():
             col("is_current") == 1,
         )
 
+        # Add hashes to compare business attributes.
         #
-        # Detect new and changed sensors.
-        #
+        # The hash represents the state of the dimension row.
+        # If the hash changes, a new SCD2 version is created.
         source_hashed_df = add_hash(
             source_sensor_df,
             [
@@ -173,15 +168,14 @@ def main():
             ],
         )
 
+        # Detect new rows and changed rows.
         new_sensors_df, changed_sensors_df = split_changes(
             source_hashed_df,
             current_hashed_df,
             "sensor_id",
         )
 
-        #
-        # Get current versions that must expire.
-        #
+        # Find currently active versions that need to expire.
         expired_sensors_df = current_dim_sensor_df.join(
             changed_sensors_df.select(
                 "sensor_id",
@@ -190,13 +184,14 @@ def main():
             "inner",
         )
 
+        # Changed source rows become new active versions.
+        new_sensors_version_df = changed_sensors_df
+
+        # One version identifier for this warehouse load.
         load_version = int(
             time.time() * 1000,
         )
 
-        #
-        # Build SCD2 rows.
-        #
         rows_to_write = (
             build_new_version(
                 new_sensors_df,
@@ -211,19 +206,17 @@ def main():
             )
             .unionByName(
                 build_new_version(
-                    changed_sensors_df,
+                    new_sensors_version_df,
                     load_version,
                 )
             )
         )
 
-        #
-        # Write warehouse changes.
-        #
-        write_clickhouse(
-            rows_to_write,
-            "dim_sensor",
-        )
+        if rows_to_write.count() > 0:
+            write_clickhouse(
+                rows_to_write,
+                "dim_sensor",
+            )
 
     finally:
         spark.stop()

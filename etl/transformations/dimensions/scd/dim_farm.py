@@ -17,6 +17,7 @@ from transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
+    split_changes,
 )
 
 MINIO_STAGING_BUCKET = os.environ.get(
@@ -98,7 +99,7 @@ def main():
             "growing_system_types",
         )
 
-        # Build the complete current dim_farm source dataset.
+        # Build the complete current dimension state.
         dim_farm_source_df = transform_dim_farm(
             farm_df,
             infrastructure_type_df,
@@ -152,35 +153,22 @@ def main():
             ],
         )
 
-        # Compare current source state with the active warehouse state.
-        comparison_df = source_hashed_df.alias("source").join(
-            current_hashed_df.alias(
-                "current",
-            ),
+        # Detect new farms and changed farms.
+        new_farms_df, changed_farms_df = split_changes(
+            source_hashed_df,
+            current_hashed_df,
             "farm_id",
-            "left",
         )
 
-        # Farms that do not exist in ClickHouse yet.
-        new_farms_df = comparison_df.filter(col("current.farm_id").isNull()).select(
-            "source.*",
+        # Find currently active versions that need to expire.
+        expired_farms_df = current_dim_farm_df.join(
+            changed_farms_df.select("farm_id"),
+            "farm_id",
+            "inner",
         )
 
-        # Farms where one or more business attributes changed.
-        changed_farms_df = comparison_df.filter(
-            (col("current.farm_id").isNotNull())
-            & (col("source._hash") != col("current._hash"))
-        )
-
-        # Current versions that must be closed.
-        expired_farms_df = changed_farms_df.select(
-            "current.*",
-        )
-
-        # New versions that replace the expired ones.
-        new_versions_df = changed_farms_df.select(
-            "source.*",
-        )
+        # Changed source rows become new active versions.
+        new_versions_df = changed_farms_df
 
         # One version identifier for this warehouse load.
         load_version = int(
@@ -209,7 +197,6 @@ def main():
             )
         )
 
-        # Avoid unnecessary ClickHouse inserts when nothing changed.
         if rows_to_write.count() > 0:
             write_clickhouse(
                 rows_to_write,
