@@ -112,3 +112,44 @@ def add_hash(
             256,
         ),
     )
+
+
+def split_changes(
+    source_df: DataFrame,
+    current_df: DataFrame,
+    business_key: str,
+) -> tuple[DataFrame, DataFrame]:
+    """
+    Compare source snapshot with current SCD2 rows.
+
+    Returns:
+        new_rows_df:
+            Records that do not exist in the dimension yet.
+
+        changed_rows_df:
+            Records that exist but have changed attributes.
+    """
+
+    comparison_df = source_df.alias("source").join(
+        current_df.alias("current"),
+        business_key,
+        "left",
+    )
+
+    new_rows_df = comparison_df.filter(
+        col(f"current.{business_key}").isNull(),
+    ).select(
+        "source.*",
+    )
+
+    changed_rows_df = comparison_df.filter(
+        col(f"current.{business_key}").isNotNull()
+        & (col("source._hash") != col("current._hash"))
+    ).select(
+        "source.*",
+    )
+
+    return (
+        new_rows_df,
+        changed_rows_df,
+    )

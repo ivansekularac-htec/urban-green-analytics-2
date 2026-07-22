@@ -12,6 +12,7 @@ import os
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col, from_unixtime, row_number
+from pyspark.sql.types import StructType
 from pyspark.sql.window import Window
 
 MINIO_ENDPOINT = os.environ.get(
@@ -87,12 +88,18 @@ def create_spark(app_name: str) -> SparkSession:
 def read_parquet(
     spark: SparkSession,
     *paths: str,
+    schema: StructType | None = None,
 ) -> DataFrame:
     """
     Read parquet files from MinIO.
     """
 
-    return spark.read.parquet(*paths)
+    reader = spark.read
+
+    if schema is not None:
+        reader = reader.schema(schema)
+
+    return reader.parquet(*paths)
 
 
 def list_batches(
@@ -224,6 +231,7 @@ def read_current_snapshot(
     table_name: str,
     primary_key: str = "id",
     version_column: str = "updated_at",
+    schema: StructType | None = None,
 ) -> DataFrame:
     """
     Reconstruct the current state of a source table.
@@ -248,6 +256,7 @@ def read_current_snapshot(
     df = read_parquet(
         spark,
         *paths,
+        schema=schema,
     )
 
     window = Window.partitionBy(

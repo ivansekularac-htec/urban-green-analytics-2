@@ -9,6 +9,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from transformations.common import (
     create_spark,
+    epoch_to_timestamp,
     read_clickhouse,
     read_current_snapshot,
     write_clickhouse,
@@ -18,9 +19,6 @@ from transformations.dimensions.scd.common import (
     build_expired_version,
     build_new_version,
     split_changes,
-)
-from transformations.state import (
-    set_load_state,
 )
 
 MINIO_STAGING_BUCKET = os.environ.get(
@@ -61,7 +59,7 @@ def transform_dim_sensor(
             sensor_type_df.sensor_type_key,
             sensor_df.serial_number,
             sensor_df.status,
-            sensor_df.installed_at,
+            epoch_to_timestamp(sensor_df.installed_at).alias("installed_at"),
         )
     )
 
@@ -225,17 +223,6 @@ def main():
         write_clickhouse(
             rows_to_write,
             "dim_sensor",
-        )
-
-        #
-        # Update watermark only after successful write.
-        #
-        set_load_state(
-            spark,
-            "dim_sensor",
-            {
-                "sensors": True,
-            },
         )
 
     finally:

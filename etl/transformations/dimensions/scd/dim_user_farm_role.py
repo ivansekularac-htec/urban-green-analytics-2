@@ -7,6 +7,11 @@ import time
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import coalesce, col, lit
+from pyspark.sql.types import (
+    LongType,
+    StructField,
+    StructType,
+)
 from transformations.common import (
     create_spark,
     read_clickhouse,
@@ -78,11 +83,23 @@ def main():
     spark = create_spark("load_dim_user_farm_role")
 
     try:
+        USER_ROLE_SCHEMA = StructType(
+            [
+                StructField("id", LongType(), True),
+                StructField("user_id", LongType(), True),
+                StructField("role_id", LongType(), True),
+                StructField("farm_id", LongType(), True),
+                StructField("created_at", LongType(), True),
+                StructField("updated_at", LongType(), True),
+            ]
+        )
+
         # Reconstruct current PostgreSQL state from all MinIO batches.
         user_role_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "user_roles",
+            schema=USER_ROLE_SCHEMA,
         )
 
         user_df = read_current_snapshot(
