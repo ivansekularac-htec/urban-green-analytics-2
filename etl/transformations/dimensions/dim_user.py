@@ -10,7 +10,7 @@ from pyspark.sql.functions import current_timestamp
 from transformations.common import (
     create_spark,
     epoch_to_timestamp,
-    read_latest_batch,
+    read_current_snapshot,
     write_clickhouse,
 )
 
@@ -40,7 +40,7 @@ def main():
     spark = create_spark("load_dim_user")
 
     try:
-        user_df = read_latest_batch(
+        user_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "users",

@@ -11,7 +11,8 @@ Provides helpers for:
 import os
 
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import from_unixtime
+from pyspark.sql.functions import col, from_unixtime, row_number
+from pyspark.sql.window import Window
 
 MINIO_ENDPOINT = os.environ.get(
     "MINIO_ENDPOINT",
@@ -174,6 +175,56 @@ def read_latest_batch(
     return read_parquet(
         spark,
         f"{base_path}{latest_batch}",
+    )
+
+
+def read_current_snapshot(
+    spark: SparkSession,
+    bucket: str,
+    table_name: str,
+    primary_key: str = "id",
+    version_column: str = "updated_at",
+) -> DataFrame:
+    """
+    Reconstruct the current state of a source table.
+
+    Airflow writes only changed rows to each batch. Reading only the latest
+    batch therefore does not produce the current table state.
+
+    This helper reads every batch and keeps the latest version of each
+    primary key based on the version column.
+    """
+
+    base_path = f"s3a://{bucket}/raw/postgres/{table_name}/"
+
+    paths = [
+        f"{base_path}{batch}"
+        for batch in list_batches(
+            spark,
+            base_path,
+        )
+    ]
+
+    df = read_parquet(
+        spark,
+        *paths,
+    )
+
+    window = Window.partitionBy(
+        primary_key,
+    ).orderBy(
+        col(version_column).desc(),
+    )
+
+    return (
+        df.withColumn(
+            "_row_number",
+            row_number().over(window),
+        )
+        .filter(
+            col("_row_number") == 1,
+        )
+        .drop("_row_number")
     )
 
 

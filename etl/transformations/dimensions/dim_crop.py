@@ -4,14 +4,9 @@ Load the dim_crop warehouse dimension from incremental raw data.
 
 import os
 
-from pyspark.sql import DataFrame, SparkSession, Window
-from pyspark.sql.functions import col, current_timestamp, lit, row_number
-from transformations.common import (
-    create_spark,
-    list_batches,
-    read_parquet,
-    write_clickhouse,
-)
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import current_timestamp, lit
+from transformations.common import create_spark, read_current_snapshot, write_clickhouse
 
 MINIO_STAGING_BUCKET = os.environ.get(
     "MINIO_STAGING_BUCKET",
@@ -39,62 +34,6 @@ def transform_dim_crop(
         categories_df.name.alias("category_name"),
         lit(0).alias("is_high_value"),
         current_timestamp().alias("_loaded_at"),
-    )
-
-
-def read_current_snapshot(
-    spark: SparkSession,
-    bucket: str,
-    table_name: str,
-    primary_key: str = "id",
-    version_column: str = "updated_at",
-) -> DataFrame:
-    """
-    Reconstruct the current table state from all incremental batches.
-
-    Airflow stores only changed rows in each batch, so the latest batch is
-    not necessarily a complete snapshot. This helper reads every available
-    batch and keeps only the newest version of each primary key.
-
-    Example:
-
-        batch1
-        id=1
-        id=2
-
-        batch2
-        id=2 (updated)
-
-        result
-        id=1
-        id=2 (updated)
-    """
-
-    base_path = f"s3a://{bucket}/raw/postgres/{table_name}/"
-
-    batches = list_batches(
-        spark,
-        base_path,
-    )
-
-    paths = [f"{base_path}{batch}" for batch in batches]
-
-    df = read_parquet(
-        spark,
-        *paths,
-    )
-
-    window = Window.partitionBy(primary_key).orderBy(col(version_column).desc())
-
-    return (
-        df.withColumn(
-            "_row_number",
-            row_number().over(window),
-        )
-        .filter(
-            col("_row_number") == 1,
-        )
-        .drop("_row_number")
     )
 
 

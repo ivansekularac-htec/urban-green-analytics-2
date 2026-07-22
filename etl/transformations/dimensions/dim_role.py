@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import current_timestamp
 from transformations.common import (
     create_spark,
-    read_latest_batch,
+    read_current_snapshot,
     write_clickhouse,
 )
 
@@ -37,7 +37,7 @@ def main():
     spark = create_spark("load_dim_role")
 
     try:
-        roles_df = read_latest_batch(
+        roles_df = read_current_snapshot(
             spark,
             MINIO_STAGING_BUCKET,
             "roles",
