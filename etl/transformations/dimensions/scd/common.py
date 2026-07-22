@@ -3,7 +3,7 @@ Shared helpers for SCD2 dimension loaders.
 """
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import current_timestamp, lit
+from pyspark.sql.functions import col, concat_ws, current_timestamp, lit, sha2
 
 DEFAULT_VALID_TO = "2099-12-31 23:59:59"
 
@@ -13,14 +13,12 @@ def build_new_version(
     load_version: int,
 ) -> DataFrame:
     """
-    Create a new active SCD2 version.
-
-    Source rows already represent changed records because Airflow
-    extracts only rows whose updated_at changed.
+    Create active SCD2 versions from source rows.
     """
 
     return (
-        df.withColumn(
+        df.drop("_hash")
+        .withColumn(
             "valid_from",
             current_timestamp(),
         )
@@ -40,19 +38,17 @@ def build_new_version(
 
 
 def build_expired_version(
-    current_df: DataFrame,
+    df: DataFrame,
     load_version: int,
     surrogate_key: str,
 ) -> DataFrame:
     """
-    Expire the current SCD2 version.
-
-    The surrogate key is dropped so ClickHouse generates a new key
-    for the expired version.
+    Close existing active SCD2 versions.
     """
 
     return (
-        current_df.drop(
+        df.drop(
+            "_hash",
             surrogate_key,
         )
         .withColumn(
@@ -67,4 +63,40 @@ def build_expired_version(
             "_version",
             lit(load_version),
         )
+    )
+
+
+def add_hash(
+    df: DataFrame,
+    columns: list[str],
+) -> DataFrame:
+    """
+    Add a hash column used for SCD2 change detection.
+
+    The hash represents the current state of the dimension business
+    attributes. If the hash changes compared to the active warehouse
+    version, a new SCD2 version is created.
+
+    Example:
+
+        source:
+            name = Farm A
+            city = Belgrade
+
+        current:
+            name = Farm A
+            city = Novi Sad
+
+        hashes differ -> create new SCD2 version
+    """
+
+    return df.withColumn(
+        "_hash",
+        sha2(
+            concat_ws(
+                "||",
+                *[col(column).cast("string") for column in columns],
+            ),
+            256,
+        ),
     )

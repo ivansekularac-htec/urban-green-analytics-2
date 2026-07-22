@@ -129,53 +129,93 @@ def list_batches(
     return sorted(file.getPath().getName() for file in statuses if file.isDirectory())
 
 
-def get_latest_batch_path(
-    spark: SparkSession,
-    path: str,
-) -> str:
-    """
-    Return the latest available ingestion batch.
-
-    Batch folders are timestamp ranges:
-        start__end
-
-    Sorting lexicographically gives chronological order.
-    """
-
-    batches = list_batches(
-        spark,
-        path,
-    )
-
-    if not batches:
-        raise RuntimeError(f"No ingestion batches found in {path}")
-
-    return batches[-1]
-
-
-def read_latest_batch(
+def read_batches_since(
     spark: SparkSession,
     bucket: str,
     table_name: str,
-) -> DataFrame:
+    last_batch: str | None,
+) -> tuple[DataFrame, str | None]:
     """
-    Read the latest ingestion batch from MinIO.
+    Read every ingestion batch written after the supplied batch.
 
-    The batch contains records extracted since
-    the previous successful ingestion run.
+    Returns:
+        dataframe,
+        newest processed batch
     """
 
     base_path = f"s3a://{bucket}/raw/postgres/{table_name}/"
 
-    latest_batch = get_latest_batch_path(
+    batches = list_batches(
         spark,
         base_path,
     )
 
-    return read_parquet(
-        spark,
-        f"{base_path}{latest_batch}",
+    if last_batch is None:
+        batches_to_read = batches
+    else:
+        batches_to_read = [batch for batch in batches if batch > last_batch]
+
+    if not batches_to_read:
+        return (
+            None,
+            last_batch,
+        )
+
+    paths = [f"{base_path}{batch}" for batch in batches_to_read]
+
+    return (
+        read_parquet(
+            spark,
+            *paths,
+        ),
+        batches_to_read[-1],
     )
+
+
+def read_incremental_sources(
+    spark: SparkSession,
+    bucket: str,
+    state: dict | None,
+    tables: list[str],
+) -> dict[str, dict]:
+    """
+    Read new ingestion batches for multiple source tables.
+
+    Each table is processed independently using its stored watermark.
+
+    Returns:
+
+    {
+        "farms": {
+            "df": DataFrame | None,
+            "last_batch": str | None,
+            "changed": bool,
+        }
+    }
+    """
+
+    sources = {}
+
+    for table in tables:
+        last_batch = None
+
+        if state:
+            last_batch = state.get(table)
+
+        df, newest_batch = read_batches_since(
+            spark,
+            bucket,
+            table,
+            last_batch,
+        )
+
+        sources[table] = {
+            "df": df,
+            "last_batch": newest_batch,
+            "changed": df is not None,
+        }
+
+    return sources
 
 
 def read_current_snapshot(
