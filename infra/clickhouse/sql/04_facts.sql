@@ -52,7 +52,6 @@ ORDER BY (
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
-    reading_id UInt64 COMMENT 'Kafka: farm_sensor_reading_id',
     farm_key UInt64,
     farm_id UInt64,
     sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
@@ -68,7 +67,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_id, sensor_type_key, reading_ts, reading_id
+        farm_id, sensor_type_key, reading_ts, sensor_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
@@ -88,7 +87,11 @@ CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_id, date_key, farm_key);
+-- farm_key stays out of the sorting key: it is the SCD2 surrogate
+-- (cityHash64(farm_id, valid_from)) and changes on every farm version. The row
+-- identity is the business grain (farm per day); a later refresh that stamps a
+-- new farm_key must replace the previous row, not sit beside it.
+ORDER BY (farm_id, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
@@ -109,7 +112,8 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_id, date_key, farm_key);
+-- farm_key stays out of the sorting key - see fact_farm_leaderboard above.
+ORDER BY (farm_id, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     metric_date Date,
@@ -127,8 +131,9 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
+-- farm_key stays out of the sorting key - see fact_farm_leaderboard above.
 ORDER BY (
-        farm_id, date_key, sensor_type_key, farm_key
+        farm_id, date_key, sensor_type_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
@@ -143,6 +148,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
+-- farm_key stays out of the sorting key - see fact_farm_leaderboard above.
 ORDER BY (
-        farm_id, date_key, quality_grade_id, farm_key
+        farm_id, date_key, quality_grade_id
     );
