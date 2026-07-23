@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     user_role_key UInt64 DEFAULT cityHash64 (
         user_id,
         role_id,
-        farm_key,
+        farm_id,
         valid_from
     ) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt64,

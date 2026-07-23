@@ -166,6 +166,7 @@ services:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
       - ./infra/airflow/init:/scripts:ro
+      - ./etl/transformations:/opt/airflow/etl/transformations:ro
 
     networks:
       - urbangreen-network
@@ -375,6 +376,9 @@ services:
     build:
       context: .
       dockerfile: ./infra/jupyter/Dockerfile
+
+    env_file:
+      - .env
 
     ports:
       - "${JUPYTER_PORT:-8888}:8888"
