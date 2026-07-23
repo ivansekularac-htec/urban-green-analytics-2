@@ -33,6 +33,7 @@ CLICKHOUSE_JDBC_DRIVER = "com.clickhouse.jdbc.ClickHouseDriver"
 # --- SCD2 / refresh windows ---------------------------------------------------
 # Open-ended valid_to for the current SCD2 version (matches DDL DEFAULT).
 SCD_END = "2099-12-31 23:59:59"
+SCD_START = "1970-01-01 00:00:00"
 
 AGG_REFRESH_DAYS = int(os.environ.get("AGG_REFRESH_DAYS", "7"))
 

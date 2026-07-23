@@ -8,7 +8,7 @@ from __future__ import annotations
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
 
-from common.constants import RUN_VERSION, SCD_END
+from common.constants import RUN_VERSION, SCD_END, SCD_START
 
 
 def latest_by_key(
@@ -33,18 +33,18 @@ def build_scd2(
     natural_key: str,
     order_col: str = "updated_at",
 ) -> DataFrame:
-    """Build SCD2 version rows from a change-log DataFrame.
-
-    Each distinct ``order_col`` becomes a version:
-    ``valid_from`` = that timestamp, ``valid_to`` = next version (or open end),
-    ``is_current`` = 1 on the latest version. Deterministic from source data,
-    so re-runs produce identical (key, valid_from) rows and ReplacingMergeTree
-    converges without permanent duplicates.
-    """
     w = Window.partitionBy(natural_key).orderBy(F.col(order_col).asc())
     nxt = F.lead(order_col).over(w)
+    prev = F.lag(order_col).over(w)
+
     return (
-        df.withColumn("valid_from", F.timestamp_seconds(F.col(order_col)))
+        df.withColumn(
+            "valid_from",
+            F.when(
+                prev.isNull(),
+                F.to_timestamp(F.lit(SCD_START)),
+            ).otherwise(F.timestamp_seconds(F.col(order_col))),
+        )
         .withColumn(
             "valid_to",
             F.when(nxt.isNotNull(), F.timestamp_seconds(nxt)).otherwise(
