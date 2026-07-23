@@ -63,7 +63,14 @@ def write_table(df, table, mode="append"):
             "ClickHouse init scripts before loading"
         )
 
-    count = df.count()
-    df.write.jdbc(url=JDBC_URL, table=table, mode=mode, properties=_properties())
-    logger.info(f"wrote {count} row(s) -> {config.CLICKHOUSE_DB}.{table}")
-    return count
+    # Persist before counting: count and write are two separate actions, so
+    # without this the whole lineage (lake read, dimension joins) would be
+    # recomputed for each. The count is kept for the load log.
+    df = df.persist()
+    try:
+        count = df.count()
+        df.write.jdbc(url=JDBC_URL, table=table, mode=mode, properties=_properties())
+        logger.info(f"wrote {count} row(s) -> {config.CLICKHOUSE_DB}.{table}")
+        return count
+    finally:
+        df.unpersist()

@@ -111,30 +111,38 @@ def main():
             ],
         )
 
-        target = with_thresholds.withColumn(
-            "is_anomaly",
-            (
-                (F.col("value") < F.col("optimal_min"))
-                | (F.col("value") > F.col("optimal_max"))
-            ).cast("tinyint"),
-        ).select(
-            "reading_key",
-            "farm_key",
-            "farm_id",
-            "sensor_key",
-            "sensor_type_key",
-            "date_key",
-            "time_key",
-            "reading_ts",
-            "reading_date",
-            "value",
-            "is_anomaly",
-        )
+        # Persisted because both the write and the cursor high-water read from
+        # this frame; without it the as-of joins would run once per action. The
+        # ancestor is persisted rather than the projected target, so write_table
+        # can manage its own handle without evicting the frame the cursor needs.
+        with_thresholds = with_thresholds.persist()
+        try:
+            target = with_thresholds.withColumn(
+                "is_anomaly",
+                (
+                    (F.col("value") < F.col("optimal_min"))
+                    | (F.col("value") > F.col("optimal_max"))
+                ).cast("tinyint"),
+            ).select(
+                "reading_key",
+                "farm_key",
+                "farm_id",
+                "sensor_key",
+                "sensor_type_key",
+                "date_key",
+                "time_key",
+                "reading_ts",
+                "reading_date",
+                "value",
+                "is_anomaly",
+            )
 
-        clickhouse.write_table(target, TARGET_TABLE)
+            clickhouse.write_table(target, TARGET_TABLE)
 
-        high_water = target.agg(F.max("reading_date")).collect()[0][0]
-        state.write_cursor(spark, JOB_NAME, {"event_date": str(high_water)})
+            high_water = with_thresholds.agg(F.max("reading_date")).collect()[0][0]
+            state.write_cursor(spark, JOB_NAME, {"event_date": str(high_water)})
+        finally:
+            with_thresholds.unpersist()
     finally:
         spark.stop()
 

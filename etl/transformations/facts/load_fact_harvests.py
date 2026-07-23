@@ -73,32 +73,36 @@ def main():
             spark, "SELECT farm_id, farm_key, valid_from, valid_to FROM dim_farm FINAL"
         )
 
+        # Persisted because both the write and the cursor high-water read from
+        # this frame; without it the as-of join would run once per action.
         enriched = facts.as_of_version(
             harvests,
             farm_versions,
             "farm_id",
             "harvested_at",
             [("farm_key", "farm_key", UNKNOWN_FARM_KEY)],
-        )
+        ).persist()
+        try:
+            target = enriched.select(
+                "harvest_key",
+                "harvest_id",
+                "farm_key",
+                "farm_id",
+                "crop_id",
+                "quality_grade_id",
+                "date_key",
+                "time_key",
+                "harvested_at",
+                "harvest_date",
+                "weight_kg",
+            )
 
-        target = enriched.select(
-            "harvest_key",
-            "harvest_id",
-            "farm_key",
-            "farm_id",
-            "crop_id",
-            "quality_grade_id",
-            "date_key",
-            "time_key",
-            "harvested_at",
-            "harvest_date",
-            "weight_kg",
-        )
+            clickhouse.write_table(target, TARGET_TABLE)
 
-        clickhouse.write_table(target, TARGET_TABLE)
-
-        high_water = enriched.agg(F.max("_source_updated_at")).collect()[0][0]
-        state.write_cursor(spark, JOB_NAME, {"updated_at": int(high_water)})
+            high_water = enriched.agg(F.max("_source_updated_at")).collect()[0][0]
+            state.write_cursor(spark, JOB_NAME, {"updated_at": int(high_water)})
+        finally:
+            enriched.unpersist()
     finally:
         spark.stop()
 
