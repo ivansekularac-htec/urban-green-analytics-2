@@ -17,6 +17,7 @@ from transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
+    get_initial_valid_from,
     split_changes,
 )
 
@@ -132,11 +133,19 @@ def main():
             time.time() * 1000,
         )
 
+        # Return initial SCD2 valid_from date for the first load.
+
+        # On initial dimension load, historical compatibility is needed
+        # because fact records may exist before the warehouse dimension.
+        # For subsequent loads, new versions should use current_timestamp().
+        initial_valid_from = get_initial_valid_from(current_dim_sensor_type_df)
+
         rows_to_write = (
             build_new_version(
                 new_sensor_types_df,
                 load_version,
                 ["sensor_type_key"],
+                valid_from=initial_valid_from,
             )
             .unionByName(
                 build_expired_version(
@@ -150,6 +159,7 @@ def main():
                     new_sensor_types_version_df,
                     load_version,
                     ["sensor_type_key"],
+                    valid_from=None,
                 )
             )
         )

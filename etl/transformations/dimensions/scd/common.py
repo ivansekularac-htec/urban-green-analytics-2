@@ -154,3 +154,20 @@ def split_changes(
         new_rows_df,
         changed_rows_df,
     )
+
+
+def get_initial_valid_from(
+    current_dim_df: DataFrame,
+) -> str | None:
+    """
+    Return initial SCD2 valid_from date for the first load.
+
+    On initial dimension load, historical compatibility is needed
+    because fact records may exist before the warehouse dimension.
+    For subsequent loads, new versions should use current_timestamp().
+    """
+
+    if current_dim_df.isEmpty():
+        return "1970-01-01 00:00:00"
+
+    return None

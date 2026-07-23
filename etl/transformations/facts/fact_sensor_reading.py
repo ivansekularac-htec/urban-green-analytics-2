@@ -95,7 +95,7 @@ def add_anomaly_flag(
             (
                 (readings_df.value < dim_sensor_type_df.optimal_min)
                 | (readings_df.value > dim_sensor_type_df.optimal_max)
-            ).cast("uint8"),
+            ).cast("integer"),
         )
         .select(
             readings_df["*"],
@@ -154,7 +154,7 @@ def transform_fact_sensor_readings(
         "date_key",
         "time_key",
         "reading_ts",
-        "event_date",
+        "reading_date",
         "value",
         "is_anomaly",
     )

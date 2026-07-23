@@ -17,6 +17,7 @@ from transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
+    get_initial_valid_from,
     split_changes,
 )
 
@@ -24,10 +25,6 @@ MINIO_STAGING_BUCKET = os.environ.get(
     "MINIO_STAGING_BUCKET",
     "staging",
 )
-
-# Initial SCD2 load: historical facts exist before the warehouse.
-# Use beginning-of-time so facts can resolve the correct dimension version.
-INITIAL_VALID_FROM = "1970-01-01 00:00:00"
 
 
 def transform_dim_farm(
@@ -179,12 +176,12 @@ def main():
             time.time() * 1000,
         )
 
-        is_initial_load = current_dim_farm_df.isEmpty()
+        # Return initial SCD2 valid_from date for the first load.
 
-        if is_initial_load:
-            initial_valid_from = INITIAL_VALID_FROM
-        else:
-            initial_valid_from = None
+        # On initial dimension load, historical compatibility is needed
+        # because fact records may exist before the warehouse dimension.
+        # For subsequent loads, new versions should use current_timestamp().
+        initial_valid_from = get_initial_valid_from(current_dim_farm_df)
 
         rows_to_write = (
             build_new_version(

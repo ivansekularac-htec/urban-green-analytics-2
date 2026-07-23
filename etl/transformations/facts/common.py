@@ -49,7 +49,6 @@ def add_date_key(
     ).select(
         df["*"],
         dim_date_df.date_key,
-        dim_date_df.year_week,
     )
 
 
