@@ -245,7 +245,10 @@ def apply_scd2(
 
     # Expire old versions
     expired_rows = (
-        changed.select(*[col(f"d.{c}") for c in snapshot_df.columns])
+        changed.select(
+            *[col(f"d.{c}") for c in snapshot_df.columns],
+            col("d.valid_from"),
+        )
         .withColumn(
             "valid_to",
             load_time,

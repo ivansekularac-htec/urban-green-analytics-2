@@ -1,14 +1,4 @@
-# src/config.py
-
 import os
-
-# =====================
-# Kafka
-# =====================
-
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "urbangreen-kafka:9092")
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "sensor_readings")
-
 
 # =====================
 # MinIO / S3
@@ -37,7 +27,7 @@ CLICKHOUSE_URL = (
     f"jdbc:clickhouse://{CLICKHOUSE_HOST}:{CLICKHOUSE_PORT}/{CLICKHOUSE_DATABASE}"
 )
 
-AGG_REFRESH_DAYS = 366
+AGG_REFRESH_DAYS = 7
 
 # =====================
 # Spark
