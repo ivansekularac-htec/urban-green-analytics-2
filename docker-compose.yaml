@@ -262,10 +262,25 @@ services:
     environment:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
       SPARK_MASTER_UI_PORT: ${SPARK_MASTER_UI_PORT:-8090}
+      SPARK_MASTER: spark://urbangreen-spark-master:${SPARK_MASTER_PORT:-7077}
+      KAFKA_BOOTSTRAP_SERVERS: urbangreen-kafka:9092
+      KAFKA_TOPIC: sensor_readings
+      MINIO_ENDPOINT: http://urbangreen-minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      CLICKHOUSE_HOST: urbangreen-clickhouse
+      CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
+      CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE:-urbangreen_dw}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
     ports:
       - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
       - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
+
+    volumes:
+      - ./etl/transformations:/opt/spark/work-dir/etl/transformations
 
     networks:
       - urbangreen-network
@@ -422,7 +437,7 @@ services:
     restart: unless-stopped
 
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_analytics}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1

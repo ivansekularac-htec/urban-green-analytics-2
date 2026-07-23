@@ -1,0 +1,291 @@
+from pyspark.sql import DataFrame
+from pyspark.sql.column import Column
+from pyspark.sql.functions import (
+    coalesce,
+    col,
+    concat_ws,
+    current_timestamp,
+    lit,
+    sha2,
+    unix_timestamp,
+)
+from pyspark.sql.types import TimestampType
+
+INITIAL_VALID_FROM = "1900-01-01 00:00:00"
+FUTURE_DATE = "2099-12-31 23:59:59"
+
+
+def create_hash(
+    tracked_columns: list[str],
+) -> Column:
+    """
+    Creates a deterministic SHA-256 hash used for change detection.
+
+    The hash is generated from the provided business attributes. It is used
+    in SCD Type 2 processing to determine whether an existing dimension record
+    has changed compared to the latest source snapshot.
+
+    NULL values are replaced with a constant placeholder before hashing to
+    ensure consistent hash generation between source and target datasets.
+
+    Parameters
+    ----------
+    tracked_columns : list[str]
+        List of column names whose values should be included in the hash.
+
+        These columns represent business attributes that should trigger a new
+        dimension version when changed.
+
+    Returns
+    -------
+    Column
+        Spark SQL Column containing the generated SHA-256 hash.
+
+    Notes
+    -----
+    The hash is created by:
+        1. Casting all tracked columns to string.
+        2. Replacing NULL values with "__NULL__".
+        3. Concatenating values using "||".
+        4. Applying SHA-256 hashing.
+    """
+
+    return sha2(
+        concat_ws(
+            "||",
+            *[
+                coalesce(
+                    col(c).cast("string"),
+                    lit("__NULL__"),
+                )
+                for c in tracked_columns
+            ],
+        ),
+        256,
+    )
+
+
+def prepare_snapshot(
+    snapshot_df: DataFrame,
+    tracked_columns: list[str],
+) -> DataFrame:
+    """
+    Prepares the latest source snapshot for SCD2 comparison.
+
+    Adds a hash column representing the current state of each source record.
+    This hash is later compared with the active dimension record hash to detect
+    attribute changes.
+
+    Parameters
+    ----------
+    snapshot_df : DataFrame
+        Latest source snapshot containing business entities.
+
+    tracked_columns : list[str]
+        Business attributes used for change detection.
+
+    Returns
+    -------
+    DataFrame
+        Source snapshot enriched with an additional ``_hash`` column.
+    """
+
+    return snapshot_df.withColumn(
+        "_hash",
+        create_hash(tracked_columns),
+    )
+
+
+def prepare_current(
+    current_df: DataFrame,
+    tracked_columns: list[str],
+    surrogate_key: str | None = None,
+) -> DataFrame:
+    """
+    Prepares current dimension records for SCD2 comparison.
+
+    Only active dimension rows are selected (``is_current = 1``), because
+    only the latest version of an entity should be compared against the new
+    source snapshot.
+
+    A comparison hash is generated from tracked business attributes.
+
+    Parameters
+    ----------
+    current_df : DataFrame
+        Existing dimension table containing historical and current records.
+
+    tracked_columns : list[str]
+        Business attributes used for detecting changes.
+
+    surrogate_key : str, optional
+        Name of the surrogate key column to exclude from comparison.
+
+        Surrogate keys are generated internally by the warehouse and should
+        not participate in change detection.
+
+    Returns
+    -------
+    DataFrame
+        Current dimension records enriched with ``_hash``.
+    """
+
+    current = current_df.filter(col("is_current") == 1)
+
+    if surrogate_key and surrogate_key in current.columns:
+        current = current.drop(surrogate_key)
+
+    return current.withColumn(
+        "_hash",
+        create_hash(tracked_columns),
+    )
+
+
+def apply_scd2(
+    snapshot_df: DataFrame,
+    current_df: DataFrame,
+    business_key: str,
+    tracked_columns: list[str],
+    surrogate_key: str | None = None,
+) -> DataFrame:
+    """
+    Applies Slowly Changing Dimension Type 2 (SCD2) processing.
+
+    The function compares the latest source snapshot against currently active
+    dimension records and generates the rows required to update the dimension
+    history.
+
+    SCD2 behaviour:
+
+    - New business keys:
+        Creates a new active dimension record.
+
+    - Existing keys with changed attributes:
+        1. Closes the previous active version.
+        2. Creates a new active version.
+
+    - Existing keys without changes:
+        No output row is generated.
+
+    Parameters
+    ----------
+    snapshot_df : DataFrame
+        Latest source snapshot containing current business state.
+
+    current_df : DataFrame
+        Existing dimension table containing historical versions.
+
+    business_key : str
+        Natural/business key used to identify entities.
+
+        Example:
+            "role_id"
+
+    tracked_columns : list[str]
+        Columns used to detect changes between source and target.
+
+    surrogate_key : str, optional
+        Surrogate key column generated by the dimension table.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame containing only records that need to be written back:
+
+        - New entities.
+        - Expired historical versions.
+        - New active versions.
+    """
+
+    load_time = current_timestamp()
+
+    snapshot = prepare_snapshot(
+        snapshot_df,
+        tracked_columns,
+    )
+
+    current = prepare_current(
+        current_df,
+        tracked_columns,
+        surrogate_key,
+    )
+
+    joined = snapshot.alias("s").join(
+        current.alias("d"),
+        col(f"s.{business_key}") == col(f"d.{business_key}"),
+        "left",
+    )
+
+    # New records
+    new_rows = (
+        joined.filter(col(f"d.{business_key}").isNull())
+        .select(*[col(f"s.{c}") for c in snapshot_df.columns])
+        .withColumn(
+            "valid_from",
+            lit(INITIAL_VALID_FROM).cast(TimestampType()),
+        )
+        .withColumn(
+            "valid_to",
+            lit(FUTURE_DATE).cast(TimestampType()),
+        )
+        .withColumn(
+            "is_current",
+            lit(1),
+        )
+        .withColumn(
+            "_version",
+            (unix_timestamp(load_time) * 1000).cast("long"),
+        )
+    )
+
+    # Changed records
+    changed = joined.filter(
+        col(f"d.{business_key}").isNotNull() & (col("s._hash") != col("d._hash"))
+    )
+
+    # Expire old versions
+    expired_rows = (
+        changed.select(*[col(f"d.{c}") for c in snapshot_df.columns])
+        .withColumn(
+            "valid_to",
+            load_time,
+        )
+        .withColumn(
+            "is_current",
+            lit(0),
+        )
+        .withColumn(
+            "_version",
+            (unix_timestamp(load_time) * 1000).cast("long"),
+        )
+    )
+
+    # Insert new versions
+    new_versions = (
+        changed.select(*[col(f"s.{c}") for c in snapshot_df.columns])
+        .withColumn(
+            "valid_from",
+            load_time,
+        )
+        .withColumn(
+            "valid_to",
+            lit(FUTURE_DATE).cast(TimestampType()),
+        )
+        .withColumn(
+            "is_current",
+            lit(1),
+        )
+        .withColumn(
+            "_version",
+            (unix_timestamp(load_time) * 1000).cast("long"),
+        )
+    )
+
+    # Final output
+    return new_rows.unionByName(
+        expired_rows,
+        allowMissingColumns=True,
+    ).unionByName(
+        new_versions,
+        allowMissingColumns=True,
+    )

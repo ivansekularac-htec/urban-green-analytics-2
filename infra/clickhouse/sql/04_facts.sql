@@ -52,7 +52,6 @@ ORDER BY (
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
-    reading_id UInt64 COMMENT 'Kafka: farm_sensor_reading_id',
     farm_key UInt64,
     farm_id UInt64,
     sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
@@ -68,7 +67,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_id, sensor_type_key, reading_ts, reading_id
+        farm_id, sensor_type_key, reading_ts, sensor_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
@@ -88,7 +87,7 @@ CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_id, date_key, farm_key);
+ORDER BY (farm_id, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
     metric_date Date,
@@ -109,7 +108,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_metrics (
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 PARTITION BY
     toYYYYMM (metric_date)
-ORDER BY (farm_id, date_key, farm_key);
+ORDER BY (farm_id, date_key);
 
 CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     metric_date Date,
@@ -128,7 +127,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_id, date_key, sensor_type_key, farm_key
+        farm_id, date_key, sensor_type_key
     );
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
@@ -144,5 +143,5 @@ CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
 PARTITION BY
     toYYYYMM (metric_date)
 ORDER BY (
-        farm_id, date_key, quality_grade_id, farm_key
+        farm_id, date_key, quality_grade_id
     );
