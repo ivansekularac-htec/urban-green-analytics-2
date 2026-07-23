@@ -12,6 +12,7 @@ def build_new_version(
     df: DataFrame,
     load_version: int,
     generated_columns: list[str] | None = None,
+    valid_from=None,
 ) -> DataFrame:
     """
     Create active SCD2 versions.
@@ -28,7 +29,7 @@ def build_new_version(
     return (
         result.withColumn(
             "valid_from",
-            current_timestamp(),
+            lit(valid_from).cast("timestamp") if valid_from else current_timestamp(),
         )
         .withColumn(
             "valid_to",

@@ -196,18 +196,20 @@ def main():
             build_new_version(
                 new_sensors_df,
                 load_version,
+                ["sensor_key"],
             )
             .unionByName(
                 build_expired_version(
                     expired_sensors_df,
                     load_version,
-                    "sensor_key",
+                    ["sensor_key"],
                 )
             )
             .unionByName(
                 build_new_version(
                     new_sensors_version_df,
                     load_version,
+                    ["sensor_key"],
                 )
             )
         )

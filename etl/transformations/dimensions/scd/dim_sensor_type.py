@@ -13,8 +13,7 @@ from transformations.common import (
     read_current_snapshot,
     write_clickhouse,
 )
-
-from etl.transformations.dimensions.scd.common import (
+from transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
@@ -137,18 +136,20 @@ def main():
             build_new_version(
                 new_sensor_types_df,
                 load_version,
+                ["sensor_type_key"],
             )
             .unionByName(
                 build_expired_version(
                     expired_sensor_types_df,
                     load_version,
-                    "sensor_type_key",
+                    ["sensor_type_key"],
                 )
             )
             .unionByName(
                 build_new_version(
                     new_sensor_types_version_df,
                     load_version,
+                    ["sensor_type_key"],
                 )
             )
         )

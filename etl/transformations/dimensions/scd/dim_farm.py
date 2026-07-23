@@ -25,6 +25,10 @@ MINIO_STAGING_BUCKET = os.environ.get(
     "staging",
 )
 
+# Initial SCD2 load: historical facts exist before the warehouse.
+# Use beginning-of-time so facts can resolve the correct dimension version.
+INITIAL_VALID_FROM = "1970-01-01 00:00:00"
+
 
 def transform_dim_farm(
     farm_df: DataFrame,
@@ -175,11 +179,19 @@ def main():
             time.time() * 1000,
         )
 
+        is_initial_load = current_dim_farm_df.isEmpty()
+
+        if is_initial_load:
+            initial_valid_from = INITIAL_VALID_FROM
+        else:
+            initial_valid_from = None
+
         rows_to_write = (
             build_new_version(
                 new_farms_df,
                 load_version,
                 ["farm_key"],
+                valid_from=initial_valid_from,
             )
             .unionByName(
                 build_expired_version(
@@ -193,6 +205,7 @@ def main():
                     new_versions_df,
                     load_version,
                     ["farm_key"],
+                    valid_from=None,
                 )
             )
         )

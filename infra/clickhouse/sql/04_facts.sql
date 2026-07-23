@@ -51,7 +51,7 @@ ORDER BY (
     );
 
 CREATE TABLE IF NOT EXISTS fact_sensor_readings (
-    reading_key UInt64 DEFAULT cityHash64(farm_sensor_id, reading_ts),
+    reading_key UInt64 DEFAULT cityHash64(sensor_key, reading_ts),
     farm_key UInt64,
     farm_id UInt64,
     sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',

@@ -9,6 +9,7 @@ Provides helpers for:
 """
 
 import os
+from collections.abc import Callable
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col, from_unixtime, row_number
@@ -102,20 +103,25 @@ def read_parquet(
     return reader.parquet(*paths)
 
 
-def list_batches(
+def list_directories(
     spark: SparkSession,
     path: str,
 ) -> list[str]:
     """
-    Return batch directory names under a MinIO path.
+    Return directory names under a MinIO path.
 
-    Example:
-        s3a://staging/raw/postgres/crops/
+    Examples:
 
-    Returns:
+    PostgreSQL ingestion:
         [
-            "19700101T000000Z__20260720T141148Z",
-            "20260720T141148Z__20260721T083000Z",
+            "19700101T000000Z__20260722T172532Z",
+            "20260722T172532Z__20260723T090000Z",
+        ]
+
+    Kafka partitions:
+        [
+            "event_date=2025-09-27",
+            "event_date=2025-09-28",
         ]
     """
 
@@ -136,55 +142,77 @@ def list_batches(
     return sorted(file.getPath().getName() for file in statuses if file.isDirectory())
 
 
-def read_batches_since(
+def read_incremental_parquet(
     spark: SparkSession,
     base_path: str,
-    last_batch: str | None,
-    schema: StructType | None = None,
+    last_watermark: str | None,
+    watermark_parser: Callable[[str], str] = lambda value: value,
+    directory_prefix: str | None = None,
 ) -> tuple[DataFrame | None, str | None]:
     """
-    Read ingestion batches newer than the supplied watermark.
+    Read parquet directories after the supplied watermark.
 
-    Returns:
-        dataframe,
-        newest processed batch
+    The directory name represents an incremental unit.
+
+    Examples:
+
+    PostgreSQL:
+        directory:
+            20260722T172532Z__20260723T090000Z
+
+        watermark:
+            20260722T172532Z__20260723T090000Z
+
+
+    Kafka:
+        directory:
+            event_date=2025-09-28
+
+        parsed watermark:
+            2025-09-28
     """
 
-    batches = list_batches(
+    directories = list_directories(
         spark,
         base_path,
     )
 
-    if last_batch:
-        batches_to_read = [batch for batch in batches if batch > last_batch]
+    if directory_prefix:
+        directories = [
+            directory
+            for directory in directories
+            if directory.startswith(directory_prefix)
+        ]
+
+    directory_watermarks = [watermark_parser(directory) for directory in directories]
+
+    if last_watermark is None:
+        directories_to_read = directories
     else:
-        batches_to_read = batches
+        directories_to_read = [
+            directory
+            for directory, watermark in zip(
+                directories,
+                directory_watermarks,
+            )
+            if watermark > last_watermark
+        ]
 
-    if not batches_to_read:
-        return None, last_batch
-
-    paths = [f"{base_path}{batch}" for batch in batches_to_read]
-
-    df = None
-
-    for path in paths:
-        batch_df = read_parquet(
-            spark,
-            path,
-            schema=schema,
+    if not directories_to_read:
+        return (
+            None,
+            last_watermark,
         )
 
-        if df is None:
-            df = batch_df
-        else:
-            df = df.unionByName(
-                batch_df,
-                allowMissingColumns=True,
-            )
+    paths = [f"{base_path}{directory}" for directory in directories_to_read]
 
     return (
-        df,
-        batches_to_read[-1],
+        spark.read.parquet(
+            *paths,
+        ),
+        watermark_parser(
+            directories_to_read[-1],
+        ),
     )
 
 
@@ -210,7 +238,7 @@ def read_current_snapshot(
 
     paths = [
         f"{base_path}{batch}"
-        for batch in list_batches(
+        for batch in list_directories(
             spark,
             base_path,
         )
