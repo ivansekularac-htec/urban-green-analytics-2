@@ -16,7 +16,7 @@
 --
 -- Design notes:
 --   dim_user_farm_role.farm_id = 0 means system-wide role (Postgres NULL).
---   Manager history (e.g. Ivan → Stefan) is queried via dim_user_farm_role,
+--   Manager history is queried via dim_user_farm_role,
 --   not via attributes on dim_farm or dim_user.
 --   Surrogate keys (*_sk) are deterministic hashes of the version identity
 --   (natural key + valid_from), so SCD2 reloads are idempotent and the sk is
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     user_role_key UInt64 DEFAULT cityHash64 (
         user_id,
         role_id,
-        farm_key,
+        farm_id,
         valid_from
     ) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt64,
@@ -80,9 +80,7 @@ CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     is_current UInt8,
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
-ORDER BY (
-        user_role_id, valid_from
-    );
+ORDER BY (user_role_id, valid_from);
 
 CREATE TABLE IF NOT EXISTS dim_sensor (
     sensor_key UInt64 DEFAULT cityHash64 (sensor_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_id, valid_from)',

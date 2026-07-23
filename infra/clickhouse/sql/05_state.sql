@@ -1,10 +1,10 @@
 USE urbangreen_dw;
 
-CREATE TABLE IF NOT EXISTS warehouse_load_state (
+CREATE TABLE IF NOT EXISTS watermarks (
     job_name LowCardinality (String),
-    cursor_json String,
-    last_success_at DateTime64 (3, 'UTC'),
-    run_key UUID,
+    watermark_value Int64,
+    rows_loaded UInt64,
+    updated_at DateTime64 (3, 'UTC') DEFAULT now64 (3),
     _version UInt64
 ) ENGINE = ReplacingMergeTree (_version)
 ORDER BY job_name;

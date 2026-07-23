@@ -1,0 +1,43 @@
+"""Type-1 loader for dim_quality_grade.
+
+Ticket: T3.3.1 — Build Spark Jobs that Populate the Warehouse
+
+Source: raw/postgres/quality_grades/
+Target: urbangreen_dw.dim_quality_grade
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from common.clickhouse import write_table
+from common.jobs import run_job
+from common.lake import read_postgres
+from common.transforms import latest_by_key
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+
+def _load(spark: SparkSession) -> None:
+    """Load the latest quality-grade rows into dim_quality_grade."""
+    raw = read_postgres(spark, "quality_grades")
+    if raw is None:
+        print("no quality_grades data in lake; skipping")
+        return
+
+    out = latest_by_key(raw, "id").select(
+        F.col("id").alias("quality_grade_id"),
+        F.col("code"),
+        F.col("name"),
+        F.coalesce(F.col("description"), F.lit("")).alias("description"),
+        (F.col("code") == "A").cast("tinyint").alias("is_premium"),
+    )
+    write_table(out, "dim_quality_grade")
+    print(f"dim_quality_grade: wrote {out.count()} row(s)")
+
+
+if __name__ == "__main__":
+    run_job("load_dim_quality_grade", _load)
