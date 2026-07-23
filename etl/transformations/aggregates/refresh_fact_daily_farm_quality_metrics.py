@@ -8,7 +8,7 @@ from common.config import WarehouseSettings
 from common.spark_session import create_spark_session
 from pyspark.sql import functions as F
 
-JOB_NAME = "load_fact_daily_farm_quality_metrics"
+JOB_NAME = "refresh_fact_daily_farm_quality_metrics"
 TARGET_TABLE = "fact_daily_farm_quality_metrics"
 
 REFRESH_DAYS = 30
@@ -63,7 +63,7 @@ def main() -> None:
         )
 
         if output.isEmpty():
-            LOGGER.info("No quality metrics found for the last %s days.", REFRESH_DAYS)
+            LOGGER.info(f"No quality metrics found for the last {REFRESH_DAYS} days.")
             return
 
         write_clickhouse_table(

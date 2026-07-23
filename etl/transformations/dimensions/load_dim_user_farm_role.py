@@ -6,7 +6,11 @@ from common.clickhouse import (
     read_clickhouse_query,
     write_clickhouse_table,
 )
-from common.config import WarehouseSettings
+from common.config import (
+    INITIAL_VALID_FROM,
+    MAX_VALID_TO,
+    WarehouseSettings,
+)
 from common.minio import latest_rows, read_full_table
 from common.spark_session import create_spark_session
 from pyspark.sql import functions as F
@@ -15,8 +19,6 @@ JOB_NAME = "load_dim_user_farm_role"
 TARGET_TABLE = "dim_user_farm_role"
 
 LOGGER = logging.getLogger(JOB_NAME)
-
-MAX_VALID_TO = "2099-12-31 23:59:59"
 
 
 def main() -> None:
@@ -126,6 +128,9 @@ def main() -> None:
             """,
         )
 
+        # An empty target table indicates the initial load.
+        initial_load = current_user_roles.isEmpty()
+
         comparison = source_user_roles.alias("source").join(
             current_user_roles.alias("current"),
             F.col("source.user_role_id") == F.col("current.user_role_id"),
@@ -155,6 +160,8 @@ def main() -> None:
 
         run_version = time.time_ns()
 
+        new_valid_from = INITIAL_VALID_FROM if initial_load else load_time
+
         # Close the previous version of each changed assignment.
         closed_versions = changes.filter(
             F.col("current.user_role_id").isNotNull()
@@ -183,7 +190,7 @@ def main() -> None:
             F.col("source.user_full_name").alias("user_full_name"),
             F.col("source.role_name").alias("role_name"),
             F.col("source.farm_name").alias("farm_name"),
-            F.lit(load_time).cast("timestamp").alias("valid_from"),
+            F.lit(new_valid_from).cast("timestamp").alias("valid_from"),
             F.lit(MAX_VALID_TO).cast("timestamp").alias("valid_to"),
             F.lit(1).cast("byte").alias("is_current"),
             F.lit(run_version).cast("long").alias("_version"),

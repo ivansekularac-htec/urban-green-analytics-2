@@ -8,7 +8,7 @@ from common.config import WarehouseSettings
 from common.spark_session import create_spark_session
 from pyspark.sql import functions as F
 
-JOB_NAME = "load_fact_daily_farm_metrics"
+JOB_NAME = "refresh_fact_daily_farm_metrics"
 TARGET_TABLE = "fact_daily_farm_metrics"
 
 REFRESH_DAYS = 30
