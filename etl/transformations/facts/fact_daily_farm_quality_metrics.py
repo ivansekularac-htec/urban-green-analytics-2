@@ -66,16 +66,6 @@ def transform_daily_farm_quality_metrics(
 
     return metrics_df
 
-    # .select(
-    #     "metric_date",
-    #     "date_key",
-    #     "farm_key",
-    #     "farm_id",
-    #     "quality_grade_id",
-    #     "total_yield_kg",
-    #     "harvest_count",
-    # )
-
 
 def main():
     spark = create_spark(

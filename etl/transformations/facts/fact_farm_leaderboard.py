@@ -159,21 +159,6 @@ def transform_fact_farm_leaderboard(
 
     return leaderboard_df
 
-    # .select(
-    #     "metric_date",
-    #     "date_key",
-    #     "farm_key",
-    #     "farm_id",
-    #     "total_yield_kg",
-    #     "premium_yield_share",
-    #     "energy_efficiency_kwh_per_kg",
-    #     "yield_rank",
-    #     "quality_rank",
-    #     "energy_rank",
-    #     "composite_score",
-    #     "composite_rank",
-    # )
-
 
 def main():
 

@@ -93,23 +93,6 @@ def transform_daily_farm_metrics(
 
     return metrics_df
 
-    # .select(
-    #     "metric_date",
-    #     "date_key",
-    #     "farm_key",
-    #     "farm_id",
-    #     "year_week",
-    #     "total_yield_kg",
-    #     "harvest_count",
-    #     "premium_yield_kg",
-    #     "non_premium_yield_kg",
-    #     "energy_kwh",
-    #     "reading_count",
-    #     "anomaly_count",
-    #     "in_range_count",
-    #     "last_sensor_reading_ts",
-    # )
-
 
 def main():
 
