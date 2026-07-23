@@ -2,6 +2,8 @@
 Load fact_harvests incrementally into ClickHouse.
 """
 
+import logging
+
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from transformations.common import (
@@ -13,6 +15,8 @@ from transformations.common import (
 )
 from transformations.facts.common import add_date_key, add_farm_key, add_time_key
 from transformations.state import get_watermark, set_watermark
+
+logger = logging.getLogger(__name__)
 
 WATERMARK_PATH = "s3a://staging/_checkpoints/spark/fact_harvests/watermark.json"
 
@@ -84,7 +88,7 @@ def main():
         )
 
         if harvests_df is None:
-            print("No new harvest batches.")
+            logger.info("No new harvest batches.")
             return
 
         dim_date_df = read_clickhouse(

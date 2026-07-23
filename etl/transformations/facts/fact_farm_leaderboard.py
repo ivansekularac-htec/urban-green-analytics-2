@@ -136,11 +136,6 @@ def transform_fact_farm_leaderboard(
     leaderboard_df = build_leaderboard(
         harvest_metrics_df,
         energy_metrics_df,
-    )
-
-    leaderboard_df = leaderboard_df.withColumn(
-        "premium_yield_share",
-        col("premium_yield_kg") / col("total_yield_kg"),
     ).drop(
         "premium_yield_kg",
         "non_premium_yield_kg",

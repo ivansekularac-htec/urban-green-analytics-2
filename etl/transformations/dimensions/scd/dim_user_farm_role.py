@@ -14,16 +14,15 @@ from pyspark.sql.types import (
 )
 from transformations.common import (
     create_spark,
-    get_initial_valid_from,
     read_clickhouse,
     read_current_snapshot,
     write_clickhouse,
 )
-
-from etl.transformations.dimensions.scd.common import (
+from transformations.dimensions.scd.common import (
     add_hash,
     build_expired_version,
     build_new_version,
+    get_initial_valid_from,
     split_changes,
 )
 
