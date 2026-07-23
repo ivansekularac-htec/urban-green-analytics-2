@@ -11,7 +11,7 @@ from pyspark.sql import functions as F
 JOB_NAME = "load_fact_farm_leaderboard"
 TARGET_TABLE = "fact_farm_leaderboard"
 
-REFRESH_DAYS = 365
+REFRESH_DAYS = 30
 
 LOGGER = logging.getLogger(JOB_NAME)
 
