@@ -8,6 +8,7 @@ Run after load_fact_daily_farm_metrics.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -18,6 +19,8 @@ from common.constants import AGG_REFRESH_DAYS
 from common.jobs import run_job
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
+
+logger = logging.getLogger(__name__)
 
 
 def _load(spark: SparkSession) -> None:
@@ -96,7 +99,7 @@ def _load(spark: SparkSession) -> None:
     )
 
     write_table(out, "fact_farm_leaderboard")
-    print(f"fact_farm_leaderboard: refreshed over last {days} day(s)")
+    logger.info(f"fact_farm_leaderboard: refreshed over last {days} day(s)")
 
 
 if __name__ == "__main__":

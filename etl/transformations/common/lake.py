@@ -20,19 +20,15 @@ def _read_glob(spark: SparkSession, glob_path: str) -> DataFrame | None:
     try:
         return spark.read.parquet(glob_path)
     except AnalysisException:
-        logger.warning("no data under %s; skipping", glob_path)
+        logger.warning(f"no data under {glob_path}; skipping")
         return None
 
 
 def read_postgres(spark: SparkSession, table: str) -> DataFrame | None:
     """Read ``raw/postgres/<table>/<run_window>/*.parquet`` from the lake."""
-    return _read_glob(
-        spark, f"{LAKE_ROOT}/raw/postgres/{table}/*/*.parquet"
-    )
+    return _read_glob(spark, f"{LAKE_ROOT}/raw/postgres/{table}/*/*.parquet")
 
 
 def read_kafka(spark: SparkSession, topic: str) -> DataFrame | None:
     """Read ``raw/kafka/<topic>/event_date=*/*.parquet`` from the lake."""
-    return _read_glob(
-        spark, f"{LAKE_ROOT}/raw/kafka/{topic}/*/*.parquet"
-    )
+    return _read_glob(spark, f"{LAKE_ROOT}/raw/kafka/{topic}/*/*.parquet")

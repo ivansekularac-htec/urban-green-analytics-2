@@ -5,6 +5,10 @@ Ticket: T3.3.1 — Build Spark Jobs that Populate the Warehouse
 Source: raw/postgres/harvests/
 Target: urbangreen_dw.fact_harvests
 
+Source has no distinct harvest timestamp column (confirmed against
+``infra/postgres/init/01_schema.sql`` and the API Harvest schema); ``created_at``
+is the harvest event time used for ``harvested_at`` / date_key / time_key.
+
 Reads only rows with updated_at greater than the last successful watermark.
 Advances watermarks only after the JDBC write succeeds, and only when every
 row resolved farm_key (otherwise the same slice is replayed).
@@ -14,6 +18,7 @@ Run after load_dim_farm.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -27,6 +32,8 @@ from common.watermarks import get_watermark, set_watermark
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 JOB = "fact_harvests"
 
 
@@ -35,7 +42,7 @@ def _load(spark: SparkSession) -> None:
     wm = get_watermark(spark, JOB)
     raw = read_postgres_since(spark, "harvests", wm)
     if raw is None:
-        print(f"no new harvest run windows since watermark={wm}; skipping")
+        logger.info(f"no new harvest run windows since watermark={wm}; skipping")
         return
     slice_ = raw.filter(F.col("updated_at") > wm)
     latest = latest_by_key(slice_, "id", "updated_at").cache()
@@ -48,7 +55,7 @@ def _load(spark: SparkSession) -> None:
 
     if cnt == 0:
         latest.unpersist()
-        print(f"no new rows since watermark={wm}; skipping")
+        logger.info(f"no new rows since watermark={wm}; skipping")
         return
 
     farm_dim = read_sql(
@@ -90,7 +97,7 @@ def _load(spark: SparkSession) -> None:
 
     if unresolved > 0:
         out.unpersist()
-        print(
+        logger.warning(
             f"fact_harvests: wrote {cnt} rows but {unresolved} unresolved "
             f"farm_key(s); watermark left at {wm} — re-run after load_dim_farm"
         )
@@ -98,7 +105,7 @@ def _load(spark: SparkSession) -> None:
 
     set_watermark(spark, JOB, int(new_wm), cnt)
     out.unpersist()
-    print(f"fact_harvests: loaded {cnt} rows, watermark {wm} -> {new_wm}")
+    logger.info(f"fact_harvests: loaded {cnt} rows, watermark {wm} -> {new_wm}")
 
 
 if __name__ == "__main__":

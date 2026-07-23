@@ -10,6 +10,7 @@ sensor_type_key is left to ClickHouse DEFAULT.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -22,12 +23,14 @@ from common.transforms import build_scd2
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Build sensor-type SCD2 versions and write them to dim_sensor_type."""
     raw = read_postgres(spark, "sensor_types")
     if raw is None:
-        print("no sensor_types data in lake; skipping")
+        logger.info("no sensor_types data in lake; skipping")
         return
 
     out = build_scd2(raw, "id").select(
@@ -43,7 +46,7 @@ def _load(spark: SparkSession) -> None:
         F.col("_version"),
     )
     write_table(out, "dim_sensor_type")
-    print("dim_sensor_type: load complete")
+    logger.info("dim_sensor_type: load complete")
 
 
 if __name__ == "__main__":

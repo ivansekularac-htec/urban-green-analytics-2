@@ -67,7 +67,7 @@ def _read_paths(
     try:
         return spark.read.parquet(*globbed)
     except AnalysisException:
-        logger.warning("no readable parquet under %s; skipping", globbed)
+        logger.warning(f"no readable parquet under {globbed}; skipping")
         return None
 
 
@@ -82,14 +82,14 @@ def read_postgres_since(
 
     for name in sorted(_list_immediate_subdirs(spark, base_uri)):
         if "__" not in name:
-            logger.warning("skipping non run-window entry: %s/%s", base_uri, name)
+            logger.warning(f"skipping non run-window entry: {base_uri}/{name}")
             continue
 
         _, to_stamp = name.split("__", 1)
         try:
             window_to = _stamp_to_epoch(to_stamp)
         except ValueError:
-            logger.warning("skipping unparseable run window: %s/%s", base_uri, name)
+            logger.warning(f"skipping unparseable run window: {base_uri}/{name}")
             continue
 
         if window_to > watermark:
@@ -97,24 +97,18 @@ def read_postgres_since(
 
     if not selected:
         logger.info(
-            "no run windows for %s with window_to > watermark=%s",
-            table,
-            watermark,
+            f"no run windows for {table} with window_to > watermark={watermark}"
         )
         return None
 
+    windows = [p.rsplit("/", 1)[-1] for p in selected]
     logger.info(
-        "table=%s watermark=%s reading %d run window(s): %s",
-        table,
-        watermark,
-        len(selected),
-        [p.rsplit("/", 1)[-1] for p in selected],
+        f"table={table} watermark={watermark} "
+        f"reading {len(selected)} run window(s): {windows}"
     )
     # harvests: <window>/harvest_date=YYYY-MM-DD/*.parquet
     # other (flat) extract tables: <window>/*.parquet
-    glob_suffix = (
-        "harvest_date=*/*.parquet" if table == "harvests" else "*.parquet"
-    )
+    glob_suffix = "harvest_date=*/*.parquet" if table == "harvests" else "*.parquet"
     return _read_paths(spark, selected, glob_suffix)
 
 
@@ -142,7 +136,7 @@ def read_kafka_since(
     selected: list[str] = []
     for name in sorted(_list_immediate_subdirs(spark, base_uri)):
         if not name.startswith("event_date="):
-            logger.warning("skipping non event_date entry: %s/%s", base_uri, name)
+            logger.warning(f"skipping non event_date entry: {base_uri}/{name}")
             continue
         day = name.split("=", 1)[1]
         if day >= wm_day:
@@ -150,18 +144,13 @@ def read_kafka_since(
 
     if not selected:
         logger.info(
-            "no event_date partitions for %s on/after %s (watermark=%s)",
-            topic,
-            wm_day,
-            watermark,
+            f"no event_date partitions for {topic} on/after {wm_day} "
+            f"(watermark={watermark})"
         )
         return None
 
     logger.info(
-        "topic=%s watermark=%s wm_day=%s reading %d partition(s)",
-        topic,
-        watermark,
-        wm_day,
-        len(selected),
+        f"topic={topic} watermark={watermark} wm_day={wm_day} "
+        f"reading {len(selected)} partition(s)"
     )
     return _read_paths(spark, selected, "*.parquet")

@@ -8,6 +8,7 @@ Target: urbangreen_dw.dim_quality_grade
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -20,12 +21,14 @@ from common.transforms import latest_by_key
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Load the latest quality-grade rows into dim_quality_grade."""
     raw = read_postgres(spark, "quality_grades")
     if raw is None:
-        print("no quality_grades data in lake; skipping")
+        logger.info("no quality_grades data in lake; skipping")
         return
 
     out = latest_by_key(raw, "id").select(
@@ -36,7 +39,7 @@ def _load(spark: SparkSession) -> None:
         (F.col("code") == "A").cast("tinyint").alias("is_premium"),
     )
     write_table(out, "dim_quality_grade")
-    print(f"dim_quality_grade: wrote {out.count()} row(s)")
+    logger.info(f"dim_quality_grade: wrote {out.count()} row(s)")
 
 
 if __name__ == "__main__":

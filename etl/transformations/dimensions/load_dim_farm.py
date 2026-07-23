@@ -10,6 +10,7 @@ farm_key is left to ClickHouse DEFAULT cityHash64(farm_id, valid_from).
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -22,18 +23,20 @@ from common.transforms import build_scd2, latest_by_key
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Build farm SCD2 versions and write them to dim_farm."""
     farms = read_postgres(spark, "farms")
     if farms is None:
-        print("no farms data in lake; skipping")
+        logger.info("no farms data in lake; skipping")
         return
 
     infra_raw = read_postgres(spark, "farm_infrastructure_types")
     gs_raw = read_postgres(spark, "growing_system_types")
     if infra_raw is None or gs_raw is None:
-        print("missing farm lookup tables in lake; skipping")
+        logger.info("missing farm lookup tables in lake; skipping")
         return
 
     infra = latest_by_key(infra_raw, "id").select(
@@ -67,7 +70,7 @@ def _load(spark: SparkSession) -> None:
         )
     )
     write_table(out, "dim_farm")
-    print("dim_farm: load complete")
+    logger.info("dim_farm: load complete")
 
 
 if __name__ == "__main__":

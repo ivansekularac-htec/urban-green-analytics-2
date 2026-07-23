@@ -11,6 +11,7 @@ Run after load_dim_farm.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -23,18 +24,20 @@ from common.transforms import build_scd2, latest_by_key
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Build user-role-farm SCD2 versions and write them to dim_user_farm_role."""
     ur = read_postgres(spark, "user_roles")
     if ur is None:
-        print("no user_roles data in lake; skipping")
+        logger.info("no user_roles data in lake; skipping")
         return
 
     users_raw = read_postgres(spark, "users")
     roles_raw = read_postgres(spark, "roles")
     if users_raw is None or roles_raw is None:
-        print("missing users/roles in lake; skipping")
+        logger.info("missing users/roles in lake; skipping")
         return
 
     users = latest_by_key(users_raw, "id").select(
@@ -72,7 +75,7 @@ def _load(spark: SparkSession) -> None:
         )
     )
     write_table(out, "dim_user_farm_role")
-    print("dim_user_farm_role: load complete")
+    logger.info("dim_user_farm_role: load complete")
 
 
 if __name__ == "__main__":

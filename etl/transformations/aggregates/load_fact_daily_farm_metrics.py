@@ -9,6 +9,7 @@ refresh by design.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -19,6 +20,8 @@ from common.constants import AGG_REFRESH_DAYS
 from common.jobs import run_job
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
+
+logger = logging.getLogger(__name__)
 
 
 def _load(spark: SparkSession) -> None:
@@ -48,7 +51,7 @@ def _load(spark: SparkSession) -> None:
         "WHERE is_current = 1 AND name = 'Energy Usage'",
     ).collect()
     if not energy_rows:
-        print("warning: no current dim_sensor_type named 'Energy Usage'; energy_kwh=0")
+        logger.warning("no current dim_sensor_type named 'Energy Usage'; energy_kwh=0")
         energy_key = -1
     else:
         energy_key = energy_rows[0]["sensor_type_key"]
@@ -128,7 +131,7 @@ def _load(spark: SparkSession) -> None:
     )
 
     write_table(out, "fact_daily_farm_metrics")
-    print(f"fact_daily_farm_metrics: refreshed last {days} day(s)")
+    logger.info(f"fact_daily_farm_metrics: refreshed last {days} day(s)")
 
 
 if __name__ == "__main__":

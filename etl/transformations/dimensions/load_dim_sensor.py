@@ -11,6 +11,7 @@ Run after load_dim_farm and load_dim_sensor_type.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -23,12 +24,14 @@ from common.transforms import build_scd2
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Build sensor SCD2 versions and write them to dim_sensor."""
     sensors = read_postgres(spark, "sensors")
     if sensors is None:
-        print("no sensors data in lake; skipping")
+        logger.info("no sensors data in lake; skipping")
         return
 
     farm_keys = read_sql(
@@ -59,7 +62,7 @@ def _load(spark: SparkSession) -> None:
         )
     )
     write_table(out, "dim_sensor")
-    print("dim_sensor: load complete")
+    logger.info("dim_sensor: load complete")
 
 
 if __name__ == "__main__":

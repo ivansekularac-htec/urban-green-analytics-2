@@ -15,6 +15,7 @@ Run after load_dim_farm, load_dim_sensor, and load_dim_sensor_type.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -28,6 +29,8 @@ from common.watermarks import get_watermark, set_watermark
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 JOB = "fact_sensor_readings"
 
 
@@ -36,7 +39,7 @@ def _load(spark: SparkSession) -> None:
     wm = get_watermark(spark, JOB)
     raw = read_kafka_since(spark, "sensor_readings", wm)
     if raw is None:
-        print(f"no new sensor_readings partitions since watermark={wm}; skipping")
+        logger.info(f"no new sensor_readings partitions since watermark={wm}; skipping")
         return
     slice_ = (
         raw.filter(F.col("timestamp") > wm)
@@ -52,7 +55,7 @@ def _load(spark: SparkSession) -> None:
 
     if cnt == 0:
         slice_.unpersist()
-        print(f"no new rows since watermark={wm}; skipping")
+        logger.info(f"no new rows since watermark={wm}; skipping")
         return
 
     sensor_dim = read_sql(
@@ -117,7 +120,7 @@ def _load(spark: SparkSession) -> None:
     if unresolved > 0:
         out.unpersist()
         slice_.unpersist()
-        print(
+        logger.warning(
             f"fact_sensor_readings: wrote {cnt} rows but {unresolved} unresolved "
             f"dim key(s); watermark left at {wm} — re-run after dimensions"
         )
@@ -126,7 +129,7 @@ def _load(spark: SparkSession) -> None:
     set_watermark(spark, JOB, int(new_wm), cnt)
     out.unpersist()
     slice_.unpersist()
-    print(f"fact_sensor_readings: loaded {cnt} rows, watermark {wm} -> {new_wm}")
+    logger.info(f"fact_sensor_readings: loaded {cnt} rows, watermark {wm} -> {new_wm}")
 
 
 if __name__ == "__main__":

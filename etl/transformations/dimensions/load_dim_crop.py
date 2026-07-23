@@ -8,6 +8,7 @@ Target: urbangreen_dw.dim_crop
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -20,13 +21,15 @@ from common.transforms import latest_by_key
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+logger = logging.getLogger(__name__)
+
 
 def _load(spark: SparkSession) -> None:
     """Load crops with denormalized category_name into dim_crop."""
     crops = read_postgres(spark, "crops")
     cats = read_postgres(spark, "crop_categories")
     if crops is None or cats is None:
-        print("no crops/crop_categories data in lake; skipping")
+        logger.info("no crops/crop_categories data in lake; skipping")
         return
 
     cats = latest_by_key(cats, "id").select(
@@ -46,7 +49,7 @@ def _load(spark: SparkSession) -> None:
         )
     )
     write_table(out, "dim_crop")
-    print(f"dim_crop: wrote {out.count()} row(s)")
+    logger.info(f"dim_crop: wrote {out.count()} row(s)")
 
 
 if __name__ == "__main__":
