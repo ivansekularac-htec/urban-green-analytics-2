@@ -95,7 +95,7 @@ def commit_cursor(
             {_quote_string(job_name)},
             {_quote_string(cursor_json)},
             now64(3),
-            toUUID({_quote_string(run_key)}),
+            {_quote_string(run_key)},
             {version}
         )
         """,

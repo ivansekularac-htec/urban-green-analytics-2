@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 from pyspark.sql import DataFrame, Window
@@ -121,9 +122,7 @@ def determine_refresh_start(
     if target_is_empty:
         return date_range["min_date"]
 
-    return date_range["max_date"] - (refresh_days - 1) * __import__(
-        "datetime"
-    ).timedelta(days=1)
+    return date_range["max_date"] - timedelta(days=refresh_days - 1)
 
 
 def main() -> None:

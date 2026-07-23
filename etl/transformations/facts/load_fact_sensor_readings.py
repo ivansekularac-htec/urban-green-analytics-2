@@ -327,7 +327,7 @@ def main() -> None:
         ).cache()
 
         if new_source.isEmpty():
-            logging.info("No new %s files", SOURCE_TOPIC)
+            logging.info(f"No new {SOURCE_TOPIC} files")
             return
 
         next_cursor = build_next_cursor(
@@ -368,9 +368,7 @@ def main() -> None:
         )
 
         logging.info(
-            "Loaded %s; file cursor=%s",
-            TARGET_TABLE,
-            next_cursor["file_modified_at_ms"],
+            f"Loaded {TARGET_TABLE}; file cursor={next_cursor['file_modified_at_ms']}"
         )
 
     finally:

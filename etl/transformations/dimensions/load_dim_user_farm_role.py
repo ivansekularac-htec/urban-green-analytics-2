@@ -101,6 +101,8 @@ def transform(
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO)
+
     settings = load_settings()
     spark = build_spark_session(TARGET_TABLE, settings)
 
@@ -141,5 +143,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     main()
