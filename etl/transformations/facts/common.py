@@ -112,11 +112,7 @@ def build_daily_harvest_metrics(
                     lit(0),
                 )
             ).alias("non_premium_yield_kg"),
-            sum(
-                lit(1),
-            )
-            .cast("uint")
-            .alias("harvest_count"),
+            count("*").cast("integer").alias("harvest_count"),
         )
         .withColumnRenamed(
             "harvest_date",
@@ -140,7 +136,7 @@ def build_daily_sensor_metrics(
             "sensor_type_key",
         )
         .agg(
-            count("*").cast("ulong").alias("reading_count"),
+            count("*").cast("long").alias("reading_count"),
             sum("value").alias("sum_value"),
             min("value").alias("min_value"),
             max("value").alias("max_value"),

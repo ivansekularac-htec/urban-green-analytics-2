@@ -34,7 +34,7 @@ def build_daily_farm_quality_metrics(
                 "total_yield_kg",
             ),
             count("*")
-            .cast("uint")
+            .cast("integer")
             .alias(
                 "harvest_count",
             ),
@@ -101,7 +101,6 @@ def main():
         write_clickhouse(
             daily_quality_metrics_df,
             "fact_daily_farm_quality_metrics",
-            mode="overwrite",
         )
 
     finally:

@@ -32,21 +32,19 @@ def transform_daily_sensor_metrics(
         "metric_date",
     )
 
-    return metrics_df
-
-    # .select(
-    #     "metric_date",
-    #     "date_key",
-    #     "farm_key",
-    #     "farm_id",
-    #     "sensor_type_key",
-    #     "reading_count",
-    #     "sum_value",
-    #     "min_value",
-    #     "max_value",
-    #     "anomaly_count",
-    #     "in_range_count",
-    # )
+    return metrics_df.select(
+        "metric_date",
+        "date_key",
+        "farm_key",
+        "farm_id",
+        "sensor_type_key",
+        "reading_count",
+        "sum_value",
+        "min_value",
+        "max_value",
+        "anomaly_count",
+        "in_range_count",
+    )
 
 
 def main():
@@ -73,7 +71,6 @@ def main():
         write_clickhouse(
             daily_sensor_metrics_df,
             "fact_daily_sensor_metrics",
-            mode="overwrite",
         )
 
     finally:

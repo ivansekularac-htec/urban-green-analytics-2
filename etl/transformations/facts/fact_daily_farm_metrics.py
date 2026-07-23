@@ -154,7 +154,6 @@ def main():
         write_clickhouse(
             daily_metrics_df,
             "fact_daily_farm_metrics",
-            mode="overwrite",
         )
 
     finally:

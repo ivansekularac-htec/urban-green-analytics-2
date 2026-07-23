@@ -216,7 +216,6 @@ def main():
         write_clickhouse(
             leaderboard_df,
             "fact_farm_leaderboard",
-            mode="overwrite",
         )
 
     finally:
