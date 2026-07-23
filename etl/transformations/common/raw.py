@@ -231,6 +231,6 @@ def read_kafka_raw_parquet(
     df = spark.read.parquet(base_path)
 
     if last_event_date:
-        df = df.filter(col("event_date") > last_event_date)
+        df = df.filter(col("event_date") >= last_event_date)
 
     return df

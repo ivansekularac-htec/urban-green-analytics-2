@@ -75,8 +75,6 @@ def create_fact_sensor_readings(
         cursor["event_date"] if cursor else None,
     )
 
-    # if cursor:
-    #     readings = readings.filter(col("event_date") > cursor["event_date"])
     if cursor:
         readings = readings.filter(col("timestamp") > cursor["timestamp"])
 
@@ -186,9 +184,14 @@ def create_fact_sensor_readings(
 
     cursor_row = readings.select(spark_max("timestamp").alias("timestamp")).collect()[0]
 
+    max_timestamp = cursor_row["timestamp"]
+
+    if max_timestamp is None:
+        return df, cursor
+
     new_cursor = {
-        "timestamp": cursor_row["timestamp"],
-        "event_date": str(datetime.fromtimestamp(cursor_row["timestamp"]).date()),
+        "timestamp": max_timestamp,
+        "event_date": str(datetime.fromtimestamp(max_timestamp).date()),
     }
 
     return df, new_cursor
