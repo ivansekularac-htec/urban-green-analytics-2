@@ -1,3 +1,18 @@
+"""
+Hourly warehouse load DAG.
+
+Executes Spark batch jobs in dependency order:
+- Loads warehouse dimensions (including SCD2 dimensions)
+- Loads fact tables
+- Builds aggregate metrics
+- Updates the farm leaderboard
+
+Spark jobs run in client mode through SparkSubmitOperator.
+The DAG is intentionally serialized by Airflow concurrency settings
+to prevent multiple Spark drivers running simultaneously inside the
+Airflow container.
+"""
+
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.standard.operators.empty import EmptyOperator
 from airflow.sdk import dag
@@ -26,6 +41,11 @@ DRIVER_CONF = {
 
 
 def _submit(task_id: str, script: str) -> SparkSubmitOperator:
+    """
+    Creates a SparkSubmitOperator for a warehouse transformation job.
+
+    Scripts are mounted read-only from the ETL transformations directory.
+    """
     return SparkSubmitOperator(
         task_id=task_id,
         conn_id="urbangreen_spark",
@@ -42,7 +62,7 @@ def _submit(task_id: str, script: str) -> SparkSubmitOperator:
     schedule="@hourly",
     catchup=False,
     max_active_runs=1,
-    tags=["warehouse", "spark", "clickhouse"],
+    tags=["module-3", "warehouse", "spark", "clickhouse"],
 )
 def warehouse_load():
     # ------------------------------------------------------------------
@@ -138,7 +158,8 @@ def warehouse_load():
     )
 
     # ------------------------------------------------------------------
-    # Dimension dependencies
+    # Dimension dependencies:
+    # SCD2 dimensions must be loaded before dependent bridge dimensions.
     # ------------------------------------------------------------------
 
     load_dim_sensor_type >> load_dim_sensor
