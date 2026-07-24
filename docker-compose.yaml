@@ -2,6 +2,10 @@ services:
   urbangreen-postgres:
     image: postgres:16
     container_name: urbangreen-postgres
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     restart: unless-stopped
 
     environment:
@@ -32,6 +36,10 @@ services:
       context: ./api
       dockerfile: Dockerfile
     container_name: urbangreen-api
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     restart: unless-stopped
 
     environment:
@@ -70,6 +78,10 @@ services:
       context: ./infra/minio
       dockerfile: Dockerfile
     container_name: urbangreen-minio
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     restart: unless-stopped
 
     command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
@@ -145,6 +157,8 @@ services:
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: ${AIRFLOW_PORT:-8080}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      AIRFLOW__CORE__PARALLELISM: "2"
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "1"
 
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -155,17 +169,21 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniominio}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      MINIO_ENDPOINT: "http://urbangreen-minio:${MINIO_API_PORT:-9000}"
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
+      CLICKHOUSE_HOST: urbangreen-clickhouse
+      CLICKHOUSE_HTTP_PORT: "8123"
+      CLICKHOUSE_TCP_PORT: "9000"
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
-      - ./etl/transformations:/opt/airflow/transformations:ro
+      - ./etl/transformations:/opt/airflow/spark-jobs:ro
       - ./infra/airflow/init:/scripts:ro
 
     networks:
@@ -188,6 +206,10 @@ services:
   urbangreen-kafka:
     image: apache/kafka:latest
     container_name: urbangreen-kafka
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     restart: unless-stopped
 
     environment:
@@ -212,6 +234,7 @@ services:
 
       KAFKA_LOG_DIRS: /var/lib/kafka/data
       CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_HEAP_OPTS: "-Xmx1g -Xms512m"
 
     ports:
       - "${KAFKA_PORT_HOST:-29092}:${KAFKA_PORT_HOST:-29092}"
@@ -257,6 +280,10 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     container_name: urbangreen-spark-master
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
@@ -283,6 +310,10 @@ services:
       context: ./infra/spark
       dockerfile: Dockerfile
     container_name: urbangreen-spark-worker-1
+    deploy:
+      resources:
+        limits:
+          memory: 3G
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
 
@@ -305,6 +336,10 @@ services:
       context: ./infra/spark
       dockerfile: Dockerfile
     container_name: urbangreen-spark-worker-2
+    deploy:
+      resources:
+        limits:
+          memory: 3G
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
 
@@ -366,7 +401,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
         reservations:
           memory: 512M
 
@@ -395,6 +430,10 @@ services:
 
   urbangreen-sensor-simulator:
     container_name: urbangreen-sensor-simulator
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     build:
       context: ./simulator
       dockerfile: Dockerfile
