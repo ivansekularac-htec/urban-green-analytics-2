@@ -165,6 +165,7 @@ services:
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
+      - ./etl/transformations:/opt/airflow/transformations:ro
       - ./infra/airflow/init:/scripts:ro
 
     networks:
@@ -375,6 +376,12 @@ services:
     build:
       context: .
       dockerfile: ./infra/jupyter/Dockerfile
+
+    env_file:
+      - .env
+
+    environment:
+      MINIO_ENDPOINT: "http://urbangreen-minio:${MINIO_API_PORT:-9000}"
 
     ports:
       - "${JUPYTER_PORT:-8888}:8888"

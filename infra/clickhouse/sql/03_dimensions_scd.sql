@@ -16,10 +16,10 @@
 --
 -- Design notes:
 --   dim_user_farm_role.farm_id = 0 means system-wide role (Postgres NULL).
---   Manager history (e.g. Ivan → Stefan) is queried via dim_user_farm_role,
---   not via attributes on dim_farm or dim_user.
---   Surrogate keys (*_sk) are deterministic hashes of the version identity
---   (natural key + valid_from), so SCD2 reloads are idempotent and the sk is
+--   A farm's manager history is queried via dim_user_farm_role, not via
+--   attributes on dim_farm or dim_user.
+--   Surrogate keys (*_key) are deterministic hashes of the version identity
+--   (natural key + valid_from), so SCD2 reloads are idempotent and the key is
 --   stable for lineage / future equi-joins. ETL may omit it (DEFAULT computes
 --   it) or compute the identical value in Spark.
 --   Per-farm crop planting history lives in the source (Postgres farm_crops →
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS dim_user_farm_role (
     user_role_key UInt64 DEFAULT cityHash64 (
         user_id,
         role_id,
-        farm_key,
+        farm_id,
         valid_from
     ) COMMENT 'Deterministic SCD2 surrogate = cityHash64(user_id, role_id, farm_id, valid_from)',
     user_role_id UInt64,

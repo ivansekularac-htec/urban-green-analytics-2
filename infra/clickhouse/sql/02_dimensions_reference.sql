@@ -164,7 +164,6 @@ CREATE TABLE IF NOT EXISTS dim_crop (
     description String,
     crop_category_id UInt64,
     category_name LowCardinality (String),
-    is_high_value UInt8,
     _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (crop_id);
