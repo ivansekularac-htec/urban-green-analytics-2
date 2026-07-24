@@ -13,7 +13,12 @@ exec /opt/spark/bin/spark-submit \
   --master "spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT}" \
   --deploy-mode client \
   --name sensor_readings_stream \
+  --driver-memory 1g \
+  --executor-memory 512m \
   --conf spark.driver.host=urbangreen-spark-streaming \
+  --conf spark.driver.bindAddress=0.0.0.0 \
   --conf spark.ui.port=4050 \
   --conf spark.sql.session.timeZone=UTC \
+  --conf spark.executor.cores=1 \
+  --conf spark.cores.max=1 \
   /opt/spark/work-dir/ingestion/sensor_readings_stream.py
