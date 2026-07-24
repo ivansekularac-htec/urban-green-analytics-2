@@ -384,7 +384,7 @@ services:
       - .env
 
     volumes:
-      - ./notebooks:/home/jovyan/work
+      - ./:/home/jovyan/work
 
     networks:
       - urbangreen-network

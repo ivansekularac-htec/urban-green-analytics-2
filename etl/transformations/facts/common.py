@@ -33,23 +33,25 @@ def add_date_key(
     df: DataFrame,
     dim_date_df: DataFrame,
     date_column: str,
+    extra_columns: list[str] | None = None,
 ) -> DataFrame:
     """
-    Add date_key from dim_date.
-
-    date_column:
-        Name of the date column in the dataframe
-        that should match dim_date.full_date.
+    Add date_key and optionally additional date attributes.
     """
+
+    columns = [
+        df["*"],
+        dim_date_df.date_key,
+    ]
+
+    if extra_columns:
+        columns.extend(dim_date_df[column] for column in extra_columns)
 
     return df.join(
         dim_date_df,
         df[date_column] == dim_date_df.full_date,
         "left",
-    ).select(
-        df["*"],
-        dim_date_df.date_key,
-    )
+    ).select(*columns)
 
 
 def add_time_key(

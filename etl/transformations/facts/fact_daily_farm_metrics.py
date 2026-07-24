@@ -89,6 +89,7 @@ def transform_daily_farm_metrics(
         metrics_df,
         dim_date_df,
         "metric_date",
+        extra_columns=["year_week"],
     )
 
     return metrics_df
