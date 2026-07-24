@@ -27,6 +27,13 @@ services:
       retries: 5
       start_period: 10s
 
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
   urbangreen-api:
     build:
       context: ./api
@@ -65,6 +72,13 @@ services:
       retries: 5
       start_period: 15s
 
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
   urbangreen-minio:
     build:
       context: ./infra/minio
@@ -94,6 +108,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   urbangreen-minio-init:
     image: minio/mc:latest
@@ -145,6 +166,8 @@ services:
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: ${AIRFLOW_PORT:-8080}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      AIRFLOW__CORE__PARALLELISM: "2"
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "1"
 
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -155,17 +178,21 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-miniominio}
       MINIO_API_PORT: ${MINIO_API_PORT:-9000}
       MINIO_STAGING_BUCKET: ${MINIO_STAGING_BUCKET:-staging}
+      MINIO_ENDPOINT: http://urbangreen-minio:${MINIO_API_PORT:-9000}
 
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
 
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
+      CLICKHOUSE_HOST: urbangreen-clickhouse
+      CLICKHOUSE_HTTP_PORT: "8123"
+      CLICKHOUSE_TCP_PORT: "9000"
 
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
-      - ./etl/transformations:/opt/airflow/transformations:ro
+      - ./etl/transformations:/opt/airflow/spark-jobs:ro
       - ./infra/airflow/init:/scripts:ro
 
     networks:
@@ -229,6 +256,13 @@ services:
       retries: 10
       start_period: 45s
 
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
   urbangreen-kafka-init:
     image: apache/kafka:latest
     container_name: urbangreen-kafka-init
@@ -278,6 +312,13 @@ services:
       retries: 5
       start_period: 20s
 
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
   urbangreen-spark-worker-1:
     build:
       context: ./infra/spark
@@ -300,6 +341,13 @@ services:
     networks:
       - urbangreen-network
 
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 1G
+
   urbangreen-spark-worker-2:
     build:
       context: ./infra/spark
@@ -321,6 +369,13 @@ services:
 
     networks:
       - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 1G
 
   urbangreen-spark-streaming:
     container_name: urbangreen-spark-streaming
@@ -366,7 +421,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
         reservations:
           memory: 512M
 
@@ -420,6 +475,13 @@ services:
 
     networks:
       - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   urbangreen-clickhouse:
     build:
