@@ -21,11 +21,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pyspark.sql import Window
-from pyspark.sql import functions as F
-
 from common import clickhouse
 from common.spark import build_spark
+from pyspark.sql import Window
+from pyspark.sql import functions as F
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -46,11 +45,15 @@ def main():
         derived = (
             recent.withColumn(
                 "premium_yield_share",
-                F.when(has_yield, F.col("premium_yield_kg") / F.col("total_yield_kg")).otherwise(0.0),
+                F.when(
+                    has_yield, F.col("premium_yield_kg") / F.col("total_yield_kg")
+                ).otherwise(0.0),
             )
             .withColumn(
                 "energy_efficiency_kwh_per_kg",
-                F.when(has_yield, F.col("energy_kwh") / F.col("total_yield_kg")).otherwise(0.0),
+                F.when(
+                    has_yield, F.col("energy_kwh") / F.col("total_yield_kg")
+                ).otherwise(0.0),
             )
             # Farms without yield have no meaningful efficiency, so they are
             # pushed to the bottom of the energy ranking rather than counted as
@@ -62,9 +65,13 @@ def main():
         farm_count = F.count(F.lit(1)).over(by_day)
 
         yield_rank = F.rank().over(by_day.orderBy(F.col("total_yield_kg").desc()))
-        quality_rank = F.rank().over(by_day.orderBy(F.col("premium_yield_share").desc()))
+        quality_rank = F.rank().over(
+            by_day.orderBy(F.col("premium_yield_share").desc())
+        )
         energy_rank = F.rank().over(
-            by_day.orderBy(F.col("_no_yield").asc(), F.col("energy_efficiency_kwh_per_kg").asc())
+            by_day.orderBy(
+                F.col("_no_yield").asc(), F.col("energy_efficiency_kwh_per_kg").asc()
+            )
         )
 
         ranked = (
@@ -92,7 +99,9 @@ def main():
             "farm_id",
             F.col("total_yield_kg").cast("decimal(18,3)").alias("total_yield_kg"),
             F.col("premium_yield_share").cast("double").alias("premium_yield_share"),
-            F.col("energy_efficiency_kwh_per_kg").cast("double").alias("energy_efficiency_kwh_per_kg"),
+            F.col("energy_efficiency_kwh_per_kg")
+            .cast("double")
+            .alias("energy_efficiency_kwh_per_kg"),
             F.col("yield_rank").cast("int").alias("yield_rank"),
             F.col("quality_rank").cast("int").alias("quality_rank"),
             F.col("energy_rank").cast("int").alias("energy_rank"),
