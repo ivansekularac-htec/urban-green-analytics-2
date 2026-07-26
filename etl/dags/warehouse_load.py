@@ -29,9 +29,12 @@ DRIVER_CONF = {
     "spark.driver.host": "urbangreen-airflow",
     "spark.driver.bindAddress": "0.0.0.0",
     "spark.driver.memory": "512m",
-    "spark.executor.memory": "512m",
-    "spark.cores.max": "1",
+    "spark.executor.memory": "1g",
+    "spark.cores.max": "2",
     "spark.sql.session.timeZone": "UTC",
+    "spark.sql.shuffle.partitions": "16",
+    "spark.sql.adaptive.enabled": "true",
+    "spark.sql.adaptive.coalescePartitions.enabled": "true",
 }
 
 # Spark jobs directories
@@ -126,12 +129,13 @@ def warehouse_load():
         "load_dim_user_farm_role.py",
         DIMENSIONS_DIR,
     )
+
     dims_done = EmptyOperator(task_id="dims_done")
 
     # Fact loads
     facts = [
         _submit(
-            "load_fact_harvest",
+            "load_fact_harvests",
             "load_fact_harvests.py",
             FACTS_DIR,
         ),
