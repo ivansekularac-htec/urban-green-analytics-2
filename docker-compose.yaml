@@ -342,6 +342,13 @@ services:
     networks:
       - urbangreen-network
 
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 2G
+
   urbangreen-spark-worker-2:
     build:
       context: ./infra/spark
