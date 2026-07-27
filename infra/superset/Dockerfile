@@ -1,12 +1,14 @@
 FROM apache/superset:5.0.0
-
+ 
+USER root
+ 
 COPY requirements.txt /requirements.txt
+COPY superset_config.py /app/superset_config.py
+COPY init-superset.sh /app/init-superset.sh
+ 
+RUN . /app/.venv/bin/activate \
+    && uv pip install --no-cache-dir -r /requirements.txt \
+    && chmod +x /app/init-superset.sh
 
-RUN pip install --no-cache-dir -r /requirements.txt
+USER superset
 
-COPY --chown=superset superset_config.py /app/
-COPY --chown=superset docker-entrypoint.sh /app/
-
-RUN chmod +x /app/docker-entrypoint.sh
-
-ENV SUPERSET_CONFIG_PATH=/app/superset_config.py

@@ -544,7 +544,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
-    entrypoint: [ "/bin/sh", "/app/docker-entrypoint.sh" ]
+    entrypoint: [ "/bin/sh", "/app/init-superset.sh" ]
 
     environment:
       SUPERSET_UI_PORT: ${SUPERSET_UI_PORT:-8088}
@@ -555,7 +555,7 @@ services:
       SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME:-User}
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@urbangreen.com}
 
-      CLICKHOUSE_TCP_PORT_HOST: ${CLICKHOUSE_TCP_PORT_HOST:-9009}
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-urbangreen-clickhouse}
       CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}

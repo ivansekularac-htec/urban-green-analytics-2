@@ -18,7 +18,7 @@ else
         --firstname "${SUPERSET_ADMIN_FIRSTNAME:-Admin}" \
         --lastname "${SUPERSET_ADMIN_LASTNAME:-User}" \
         --email "${SUPERSET_ADMIN_EMAIL:-admin@urbangreen.com}" \
-        --password "${SUPERSET_ADMIN_PASSWORD:-admin}"
+        --password "${SUPERSET_ADMIN_PASSWORD}"
 
     echo "Initializing Superset roles and permissions..."
 
@@ -30,6 +30,4 @@ else
 fi
 
 echo "Starting Superset..."
-exec superset run \
-    --host 0.0.0.0 \
-    --port 8088
+exec /usr/bin/run-server.sh

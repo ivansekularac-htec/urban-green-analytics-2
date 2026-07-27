@@ -49,3 +49,15 @@ FEATURE_FLAGS = {
     "ENABLE_DASHBOARD_DOWNLOAD_WEBDRIVER_SCREENSHOT": False,
     "SQLLAB_BACKEND_PERSISTENCE": False,
 }
+
+# Create connection
+ch_user = os.getenv("CLICKHOUSE_USER", "urbangreen")
+ch_pass = os.getenv("CLICKHOUSE_PASSWORD", "")
+ch_host = os.getenv("CLICKHOUSE_HOST", "urbangreen-clickhouse")
+ch_port = os.getenv("CLICKHOUSE_HTTP_PORT", "8123")
+ch_db = os.getenv("CLICKHOUSE_DB", "urbangreen_dw")
+
+# Build the dynamic connection string
+CLICKHOUSE_CONNECTION_STRING = (
+    f"clickhousedb://{ch_user}:{ch_pass}@{ch_host}:{ch_port}/{ch_db}"
+)
