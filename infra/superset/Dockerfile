@@ -4,7 +4,8 @@ USER root
 
 COPY requirements.txt /tmp/requirements.txt
 
-RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+RUN . /app/.venv/bin/activate \
+    && uv pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
 COPY superset_config.py /app/pythonpath/superset_config.py
