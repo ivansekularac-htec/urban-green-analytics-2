@@ -523,6 +523,59 @@ services:
         reservations:
           memory: 1G
 
+  urbangreen-superset:
+    build:
+      context: ./infra/superset
+      dockerfile: Dockerfile
+    image: urbangreen-superset:5.0.0
+    container_name: urbangreen-superset
+    restart: unless-stopped
+
+    entrypoint: [ "/bin/sh", "/scripts/init-superset.sh" ]
+
+    ports:
+      - "${SUPERSET_PORT:-8088}:${SUPERSET_PORT:-8088}"
+
+    environment:
+      SUPERSET_PORT: ${SUPERSET_PORT:-8088}
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SUPERSET_LOAD_EXAMPLES: "${SUPERSET_LOAD_EXAMPLES:-no}"
+
+      SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD}
+      SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME}
+      SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME}
+      SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL}
+
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-urbangreen-clickhouse}
+      CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+      TZ: UTC
+
+    volumes:
+      - urbangreen-superset-volume:/app/superset_home
+      - ./infra/superset/init:/scripts:ro
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${SUPERSET_PORT:-8088}/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -541,6 +594,9 @@ volumes:
 
   urbangreen-clickhouse-volume:
     name: urbangreen-clickhouse-volume
+
+  urbangreen-superset-volume:
+    name: urbangreen-superset-volume
 
 networks:
   urbangreen-network:
