@@ -543,8 +543,17 @@ services:
       context: ./infra/superset
       dockerfile: Dockerfile
 
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+
+    ports:
+      - "${SUPERSET_UI_PORT:-8088}:8088"
+
     networks:
       - urbangreen-network
+
+    volumes:
+      - urbangreen-superset:/app/superset_home
 
 volumes:
   urbangreen-postgres-data:
@@ -564,6 +573,9 @@ volumes:
 
   urbangreen-clickhouse-volume:
     name: urbangreen-clickhouse-volume
+
+  urbangreen-superset:
+    name: urbangreen-superset
 
 networks:
   urbangreen-network:
