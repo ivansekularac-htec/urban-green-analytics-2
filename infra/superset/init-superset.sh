@@ -16,7 +16,7 @@ else
     superset fab create-admin \
         --username "${SUPERSET_ADMIN_USERNAME:-admin}" \
         --firstname "${SUPERSET_ADMIN_FIRSTNAME:-Admin}" \
-        --lastname "${SUPERSET_ADMIN_LASTNAME:-User}" \
+        --lastname "${SUPERSET_ADMIN_LASTNAME:-Admin}" \
         --email "${SUPERSET_ADMIN_EMAIL:-admin@urbangreen.com}" \
         --password "${SUPERSET_ADMIN_PASSWORD}"
 
