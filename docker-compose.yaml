@@ -2,6 +2,7 @@ services:
   urbangreen-postgres:
     image: postgres:16
     container_name: urbangreen-postgres
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
 
     environment:
@@ -39,6 +40,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     container_name: urbangreen-api
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
 
     environment:
@@ -84,6 +86,7 @@ services:
       context: ./infra/minio
       dockerfile: Dockerfile
     container_name: urbangreen-minio
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
 
     command: [ "server", "/data", "--address", ":${MINIO_API_PORT:-9000}", "--console-address", ":${MINIO_CONSOLE_PORT:-9001}" ]
@@ -119,6 +122,7 @@ services:
   urbangreen-minio-init:
     image: minio/mc:latest
     container_name: urbangreen-minio-init
+    profiles: [ "all", "backend" ]
 
     depends_on:
       urbangreen-minio:
@@ -145,6 +149,7 @@ services:
       context: ./infra/airflow
       dockerfile: Dockerfile
     container_name: urbangreen-airflow
+    profiles: [ "all", "backend" ]
     image: urbangreen-airflow:latest
     restart: unless-stopped
 
@@ -215,6 +220,7 @@ services:
   urbangreen-kafka:
     image: apache/kafka:latest
     container_name: urbangreen-kafka
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
 
     environment:
@@ -267,6 +273,7 @@ services:
   urbangreen-kafka-init:
     image: apache/kafka:latest
     container_name: urbangreen-kafka-init
+    profiles: [ "all", "backend" ]
 
     depends_on:
       urbangreen-kafka:
@@ -292,6 +299,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     container_name: urbangreen-spark-master
+    profiles: [ "all", "backend" ]
 
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-master.sh" ]
 
@@ -325,9 +333,10 @@ services:
       context: ./infra/spark
       dockerfile: Dockerfile
     container_name: urbangreen-spark-worker-1
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
-
+    
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -354,9 +363,10 @@ services:
       context: ./infra/spark
       dockerfile: Dockerfile
     container_name: urbangreen-spark-worker-2
+    profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
-
+    
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -380,6 +390,7 @@ services:
 
   urbangreen-spark-streaming:
     container_name: urbangreen-spark-streaming
+    profiles: [ "all", "backend" ]
     build:
       context: ./infra/spark
       dockerfile: Dockerfile
@@ -451,6 +462,7 @@ services:
 
   urbangreen-sensor-simulator:
     container_name: urbangreen-sensor-simulator
+    profiles: [ "all", "backend" ]
     build:
       context: ./simulator
       dockerfile: Dockerfile
@@ -489,6 +501,7 @@ services:
       context: ./infra/clickhouse
       dockerfile: Dockerfile
     container_name: urbangreen-clickhouse
+    profiles: [ "all", "backend", "analytics" ]
     restart: unless-stopped
 
     environment:
@@ -524,9 +537,14 @@ services:
           memory: 1G
 
   urbangreen-superset:
+    container_name: urbangreen-superset
+    profiles: [ "all", "analytics" ]
     build:
       context: ./infra/superset
       dockerfile: Dockerfile
+
+    networks:
+      - urbangreen-network
 
 volumes:
   urbangreen-postgres-data:
