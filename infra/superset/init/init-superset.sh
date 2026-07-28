@@ -3,7 +3,6 @@ set -eu
 
 SUPERSET_HOME="${SUPERSET_HOME:-/app/superset_home}"
 SENTINEL_FILE="${SUPERSET_HOME}/.urbangreen-superset-initialized"
-METADATA_DB="${SUPERSET_HOME}/superset.db"
 
 : "${SUPERSET_SECRET_KEY:?SUPERSET_SECRET_KEY is required}"
 
@@ -18,33 +17,21 @@ else
     : "${SUPERSET_ADMIN_LASTNAME:?SUPERSET_ADMIN_LASTNAME is required}"
     : "${SUPERSET_ADMIN_EMAIL:?SUPERSET_ADMIN_EMAIL is required}"
 
-    cleanup_failed_bootstrap() {
+    report_bootstrap_failure() {
         exit_code=$?
         trap - EXIT
 
         if [ "${exit_code}" -ne 0 ]; then
-            echo "[superset-init] Bootstrap failed with exit code ${exit_code}. Removing partial metadata state."
-
-            rm -f \
-                "${SENTINEL_FILE}" \
-                "${METADATA_DB}" \
-                "${METADATA_DB}-journal" \
-                "${METADATA_DB}-shm" \
-                "${METADATA_DB}-wal"
+            echo "[superset-init] Bootstrap failed with exit code ${exit_code}."
+            echo "[superset-init] Metadata was preserved and the sentinel was not created."
         fi
 
         exit "${exit_code}"
     }
 
-    trap cleanup_failed_bootstrap EXIT
+    trap report_bootstrap_failure EXIT
 
-    echo "[superset-init] Sentinel not found. Starting first-boot bootstrap."
-
-    rm -f \
-        "${METADATA_DB}" \
-        "${METADATA_DB}-journal" \
-        "${METADATA_DB}-shm" \
-        "${METADATA_DB}-wal"
+    echo "[superset-init] Sentinel not found. Starting bootstrap."
 
     echo "[superset-init] Step 1/3: Applying metadata database migrations."
     superset db upgrade
@@ -77,3 +64,4 @@ exec gunicorn \
     --access-logfile - \
     --error-logfile - \
     "superset.app:create_app()"
+    

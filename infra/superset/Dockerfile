@@ -9,5 +9,9 @@ RUN uv pip install \
     -r /app/requirements-drivers.txt
 
 COPY superset_config.py /app/pythonpath/superset_config.py
+COPY --chmod=755 init/init-superset.sh /app/docker/entrypoints/init-superset.sh
 
 USER superset
+
+ENTRYPOINT ["/app/docker/entrypoints/init-superset.sh"]
+CMD []
