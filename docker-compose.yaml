@@ -489,7 +489,6 @@ services:
       context: ./infra/clickhouse
       dockerfile: Dockerfile
     container_name: urbangreen-clickhouse
-
     restart: unless-stopped
 
     environment:
@@ -543,7 +542,6 @@ services:
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL}
       SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME}
       SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME}
-      SUPERSET_LOAD_EXAMPLES: "no"
 
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-urbangreen-clickhouse}
       CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
