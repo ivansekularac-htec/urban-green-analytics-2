@@ -43,6 +43,6 @@ echo "[INIT] Starting Superset server"
 
 # Replace the shell process with the Gunicorn server.
 exec gunicorn \
-    --bind 0.0.0.0:8088 \
+    --bind 0.0.0.0:${SUPERSET_PORT:-8088} \
     --workers 1 \
     "superset.app:create_app()"

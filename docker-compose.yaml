@@ -527,7 +527,6 @@ services:
     build:
       context: ./infra/superset
       dockerfile: Dockerfile
-    image: urbangreen-superset:latest
     container_name: urbangreen-superset
     restart: unless-stopped
 
