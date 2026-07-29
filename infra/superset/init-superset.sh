@@ -24,6 +24,10 @@ else
 
     superset init
 
+    echo "Creating demo roles and users..."
+
+    python /app/bootstrap_security.py
+
     touch "${SENTINEL_FILE}"
 
     echo "Superset initialization completed."
