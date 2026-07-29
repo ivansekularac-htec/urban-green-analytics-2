@@ -26,7 +26,7 @@ else
 
     echo "Creating demo roles and users..."
 
-    python /app/bootstrap_security.py
+    python /app/create_roles_users.py
 
     touch "${SENTINEL_FILE}"
 
