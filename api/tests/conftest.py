@@ -21,3 +21,13 @@ os.environ.setdefault("JWT_EXPIRES_MINUTES", "60")
 os.environ.setdefault("SUPERUSER_EMAIL", "admin@example.com")
 os.environ.setdefault("SUPERUSER_PASSWORD", "test-admin-password")
 os.environ.setdefault("SUPERUSER_FULL_NAME", "Test Administrator")
+
+os.environ.setdefault("DEMO_FARM_MANAGER_EMAIL", "manager1@urbangreen.com")
+os.environ.setdefault("DEMO_FARM_MANAGER_PASSWORD", "urbangreen_password")
+os.environ.setdefault("DEMO_FARM_MANAGER_FULL_NAME", "Test Farm Manager")
+os.environ.setdefault("DEMO_FARM_MANAGER_FARM_ID", "1")
+
+os.environ.setdefault("DEMO_OPS_EMAIL", "ops1@urbangreen.com")
+os.environ.setdefault("DEMO_OPS_PASSWORD", "urbangreen_password")
+os.environ.setdefault("DEMO_OPS_FULL_NAME", "Test Operations")
+os.environ.setdefault("DEMO_OPS_FARM_IDS", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15")

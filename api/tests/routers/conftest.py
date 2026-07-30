@@ -70,6 +70,7 @@ def client() -> TestClient:
         patch("app.main.verify_database_connection"),
         patch("app.main.SessionLocal"),
         patch("app.main.ensure_superuser"),
+        patch("app.main.ensure_demo_users"),
     ):
         yield TestClient(app)
 

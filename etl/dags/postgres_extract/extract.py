@@ -72,6 +72,9 @@ def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
     if df.empty:
         return 0, []
 
+    if table == "user_roles":
+        df["farm_id"] = df["farm_id"].astype("Int64")
+
     key = flat_key(table, run_window)
     write_parquet(s3, df, key)
     return len(df), [key]
