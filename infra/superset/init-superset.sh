@@ -32,15 +32,6 @@ else
 
     superset db upgrade
 
-    echo "Creating admin user..."
-
-    superset fab create-admin \
-        --username "${SUPERSET_ADMIN_USERNAME}" \
-        --firstname "${SUPERSET_ADMIN_FIRSTNAME}" \
-        --lastname "${SUPERSET_ADMIN_LASTNAME}" \
-        --email "${SUPERSET_ADMIN_EMAIL}" \
-        --password "${SUPERSET_ADMIN_PASSWORD}"
-
     echo "Initializing Superset application..."
 
     superset init
@@ -50,31 +41,19 @@ else
     superset fab import-roles \
         --path /app/roles.json
 
+    echo "Creating users..."
+
+    /app/create_users.sh
+
+    echo "Injecting ClickHouse password..."
+
+    /app/inject_db_password.sh
+
     echo "Importing dashboards and datasets..."
 
     superset import-dashboards \
         --path /app/dashboards_export.zip \
         -u "${SUPERSET_ADMIN_USERNAME}"
-
-    echo "Creating demo Farm Manager user..."
-
-    superset fab create-user \
-        --username "${DEMO_FARM_MANAGER_USERNAME}" \
-        --firstname "${DEMO_FARM_MANAGER_FIRSTNAME}" \
-        --lastname "${DEMO_FARM_MANAGER_LASTNAME}" \
-        --email "${DEMO_FARM_MANAGER_EMAIL}" \
-        --password "${DEMO_FARM_MANAGER_PASSWORD}" \
-        --role FarmManager
-
-    echo "Creating demo Operations Team user..."
-
-    superset fab create-user \
-        --username "${DEMO_OPERATIONS_USERNAME}" \
-        --firstname "${DEMO_OPERATIONS_FIRSTNAME}" \
-        --lastname "${DEMO_OPERATIONS_LASTNAME}" \
-        --email "${DEMO_OPERATIONS_EMAIL}" \
-        --password "${DEMO_OPERATIONS_PASSWORD}" \
-        --role OperationsTeam
 
     echo "Creating Row Level Security rules..."
 

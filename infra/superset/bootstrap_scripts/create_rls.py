@@ -1,5 +1,9 @@
+import logging
+
 from superset import db
 from superset.app import create_app
+
+logger = logging.getLogger(__name__)
 
 RLS_NAME = "Farm Access"
 
@@ -31,16 +35,6 @@ with app.app_context():
     from flask_appbuilder.security.sqla.models import Role
     from superset.connectors.sqla.models import RowLevelSecurityFilter, SqlaTable
 
-    existing = (
-        db.session.query(RowLevelSecurityFilter)
-        .filter(RowLevelSecurityFilter.name == RLS_NAME)
-        .first()
-    )
-
-    if existing:
-        print(f"RLS rule '{RLS_NAME}' already exists. Skipping.")
-        exit(0)
-
     roles = (
         db.session.query(Role)
         .filter(Role.name.in_(["FarmManager", "OperationsTeam"]))
@@ -52,32 +46,49 @@ with app.app_context():
 
     datasets = db.session.query(SqlaTable).all()
 
-    farm_datasets = []
+    if not datasets:
+        raise RuntimeError("No datasets found.")
 
-    for dataset in datasets:
-        columns = {column.column_name for column in dataset.columns}
-
-        if "farm_id" in columns:
-            farm_datasets.append(dataset)
-
-    if not farm_datasets:
-        raise RuntimeError("No datasets with farm_id column found.")
-
-    print("Applying RLS to:")
-
-    for dataset in farm_datasets:
-        print(f"- {dataset.table_name}")
-
-    rls = RowLevelSecurityFilter(
-        name=RLS_NAME,
-        filter_type="Regular",
-        clause=CLAUSE,
+    rls = (
+        db.session.query(RowLevelSecurityFilter)
+        .filter(RowLevelSecurityFilter.name == RLS_NAME)
+        .first()
     )
 
-    rls.roles = roles
-    rls.tables = farm_datasets
+    if rls:
+        logger.info(
+            "RLS rule '%s' already exists. Updating assignments.",
+            RLS_NAME,
+        )
 
-    db.session.add(rls)
+        rls.roles = roles
+        rls.tables = datasets
+
+        # Keep clause in sync if it was changed
+        rls.clause = CLAUSE
+
+    else:
+        logger.info(
+            "Creating RLS rule '%s'.",
+            RLS_NAME,
+        )
+
+        rls = RowLevelSecurityFilter(
+            name=RLS_NAME,
+            filter_type="Regular",
+            clause=CLAUSE,
+        )
+
+        rls.roles = roles
+        rls.tables = datasets
+
+        db.session.add(rls)
+
     db.session.commit()
 
-    print(f"Created RLS rule '{RLS_NAME}' for {len(farm_datasets)} datasets.")
+    logger.info(
+        "RLS rule '%s' applied to %s datasets and %s roles.",
+        RLS_NAME,
+        len(datasets),
+        len(roles),
+    )
