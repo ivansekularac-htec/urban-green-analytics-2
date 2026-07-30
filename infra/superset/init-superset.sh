@@ -34,20 +34,20 @@ else
 
     echo "Creating demo users..."
 
-    superset fab create-user \
-        --username "${SUPERSET_FARM_MANAGER_USERNAME:-fm1}" \
-        --firstname "${SUPERSET_FARM_MANAGER_FIRSTNAME:-Farm}" \
-        --lastname "${SUPERSET_FARM_MANAGER_LASTNAME:-Manager}" \
-        --email "${SUPERSET_FARM_MANAGER_EMAIL:-fm1@urbangreen.com}" \
-        --password "${SUPERSET_FARM_MANAGER_PASSWORD}" \
+    DEMO fab create-user \
+        --username "${DEMO_FARM_MANAGER_USERNAME:-fm1}" \
+        --firstname "${DEMO_FARM_MANAGER_FIRSTNAME:-Farm}" \
+        --lastname "${DEMO_FARM_MANAGER_LASTNAME:-Manager}" \
+        --email "${DEMO_FARM_MANAGER_EMAIL:-fm1@urbangreen.com}" \
+        --password "${DEMO_FARM_MANAGER_PASSWORD}" \
         --role FarmManager
 
-    superset fab create-user \
-        --username "${SUPERSET_FARM_MANAGER_USERNAME:-ot1}" \
-        --firstname "${SUPERSET_FARM_MANAGER_FIRSTNAME:-Operations}" \
-        --lastname "${SUPERSET_FARM_MANAGER_LASTNAME:-Team}" \
-        --email "${SUPERSET_FARM_MANAGER_EMAIL:-ot1@urbangreen.com}" \
-        --password "${SUPERSET_OPERATIONS_PASSWORD}" \
+    DEMO fab create-user \
+        --username "${DEMO_FARM_MANAGER_USERNAME:-ot1}" \
+        --firstname "${DEMO_FARM_MANAGER_FIRSTNAME:-Operations}" \
+        --lastname "${DEMO_FARM_MANAGER_LASTNAME:-Team}" \
+        --email "${DEMO_FARM_MANAGER_EMAIL:-ot1@urbangreen.com}" \
+        --password "${DEMO_OPERATIONS_PASSWORD}" \
         --role OperationsTeam
 
     touch "${SENTINEL_FILE}"

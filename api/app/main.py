@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from app.database import SessionLocal, settings, verify_database_connection
 from app.routers.v1.api import v1_router
 from app.security.superuser import ensure_superuser
+from app.seed.demo_users import ensure_demo_users
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 
     with SessionLocal() as db:
         ensure_superuser(db, settings)
+        ensure_demo_users(db, settings)
 
     yield
 
