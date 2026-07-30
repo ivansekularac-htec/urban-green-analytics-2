@@ -6,7 +6,8 @@ COPY requirements.txt /requirements.txt
 COPY superset_config.py /app/superset_config.py
 COPY init-superset.sh /app/init-superset.sh
 COPY exports/roles.json /app/roles.json
-COPY exports/datasources.yaml /app/datasources.yaml
+COPY exports/dashboards_export.zip /app/dashboards_export.zip
+COPY create_rls.py /app/create_rls.py
 
 ENV SUPERSET_CONFIG_PATH=/app/superset_config.py
  
