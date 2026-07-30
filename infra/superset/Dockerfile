@@ -5,9 +5,8 @@ USER root
 COPY requirements.txt /requirements.txt
 COPY superset_config.py /app/superset_config.py
 COPY init-superset.sh /app/init-superset.sh
-# COPY create_roles_users.py /app/create_roles_users.py
-# Copy Roles
 COPY exports/roles.json /app/roles.json
+COPY exports/datasources.yaml /app/datasources.yaml
 
 ENV SUPERSET_CONFIG_PATH=/app/superset_config.py
  

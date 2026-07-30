@@ -1,0 +1,46 @@
+databases:
+- database_name: ClickHouse Connect (Superset)
+  sqlalchemy_uri: clickhousedb+connect://urbangreen:urbangreen@urbangreen-clickhouse:8123/urbangreen_dw
+  tables:
+  - columns:
+    - column_name: last_sensor_reading_ts
+      is_dttm: true
+      type: NULLABLE(DATETIME64(3, 'UTC'))
+    - column_name: _loaded_at
+      is_dttm: true
+      type: DATETIME64(3, 'UTC')
+    - column_name: metric_date
+      is_dttm: true
+      type: DATE
+    - column_name: non_premium_yield_kg
+      type: DECIMAL(18, 3)
+    - column_name: total_yield_kg
+      type: DECIMAL(18, 3)
+    - column_name: premium_yield_kg
+      type: DECIMAL(18, 3)
+    - column_name: harvest_count
+      type: UINT32
+    - column_name: date_key
+      type: UINT32
+    - column_name: year_week
+      type: UINT32
+    - column_name: energy_kwh
+      type: FLOAT64
+    - column_name: in_range_count
+      type: UINT64
+    - column_name: anomaly_count
+      type: UINT64
+    - column_name: reading_count
+      type: UINT64
+    - column_name: farm_id
+      type: UINT64
+    - column_name: farm_key
+      type: UINT64
+    main_dttm_col: metric_date
+    metrics:
+    - expression: COUNT(*)
+      metric_name: count
+      metric_type: count
+      verbose_name: COUNT(*)
+    schema: urbangreen_dw
+    table_name: fact_daily_farm_metrics

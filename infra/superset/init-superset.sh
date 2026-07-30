@@ -20,9 +20,13 @@ else
         --email "${SUPERSET_ADMIN_EMAIL:-admin@urbangreen.com}" \
         --password "${SUPERSET_ADMIN_PASSWORD}"
 
-    echo "Initializing Superset roles and permissions..."
+    echo "Init the Superset application..."
 
     superset init
+
+    echo "Importing datasources (database connection and datasets)..."
+
+    superset legacy-import-datasources --path /app/datasources.yaml
 
     echo "Importing roles..."
 
@@ -31,24 +35,20 @@ else
     echo "Creating demo users..."
 
     superset fab create-user \
-        --username fm1 \
-        --firstname Farm \
-        --lastname Manager \
-        --email fm1.@urbangreen.com \
-        --password "${SUPERSET_FARM_MANAGER_PASSWORD:-fm1}" \
+        --username "${SUPERSET_FARM_MANAGER_USERNAME:-fm1}" \
+        --firstname "${SUPERSET_FARM_MANAGER_FIRSTNAME:-Farm}" \
+        --lastname "${SUPERSET_FARM_MANAGER_LASTNAME:-Manager}" \
+        --email "${SUPERSET_FARM_MANAGER_EMAIL:-fm1@urbangreen.com}" \
+        --password "${SUPERSET_FARM_MANAGER_PASSWORD}" \
         --role FarmManager
 
     superset fab create-user \
-        --username ot1 \
-        --firstname Operations \
-        --lastname Team \
-        --email ot1@urbangreen.com \
-        --password "${SUPERSET_OPERATIONS_PASSWORD:-ot1}" \
+        --username "${SUPERSET_FARM_MANAGER_USERNAME:-ot1}" \
+        --firstname "${SUPERSET_FARM_MANAGER_FIRSTNAME:-Operations}" \
+        --lastname "${SUPERSET_FARM_MANAGER_LASTNAME:-Team}" \
+        --email "${SUPERSET_FARM_MANAGER_EMAIL:-ot1@urbangreen.com}" \
+        --password "${SUPERSET_OPERATIONS_PASSWORD}" \
         --role OperationsTeam
-
-    # echo "Creating demo roles and users..."
-
-    # python /app/create_roles_users.py
 
     touch "${SENTINEL_FILE}"
 
