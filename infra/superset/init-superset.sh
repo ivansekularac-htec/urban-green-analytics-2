@@ -24,9 +24,31 @@ else
 
     superset init
 
-    echo "Creating demo roles and users..."
+    echo "Importing roles..."
 
-    python /app/create_roles_users.py
+    superset fab import-roles --path /app/roles.json
+
+    echo "Creating demo users..."
+
+    superset fab create-user \
+        --username fm1 \
+        --firstname Farm \
+        --lastname Manager \
+        --email fm1.@urbangreen.com \
+        --password "${SUPERSET_FARM_MANAGER_PASSWORD:-fm1}" \
+        --role FarmManager
+
+    superset fab create-user \
+        --username ot1 \
+        --firstname Operations \
+        --lastname Team \
+        --email ot1@urbangreen.com \
+        --password "${SUPERSET_OPERATIONS_PASSWORD:-ot1}" \
+        --role OperationsTeam
+
+    # echo "Creating demo roles and users..."
+
+    # python /app/create_roles_users.py
 
     touch "${SENTINEL_FILE}"
 
