@@ -43,21 +43,21 @@ else
 
     echo "Creating users..."
 
-    /app/create_users.sh
+    /app/bootstrap/create_users.sh
 
     echo "Injecting ClickHouse password..."
 
-    /app/inject_db_password.sh
+    PATCHED_EXPORT=$(/app/bootstrap/inject_db_password.sh)
 
     echo "Importing dashboards and datasets..."
 
     superset import-dashboards \
-        --path /app/dashboards_export.zip \
+        --path "${PATCHED_EXPORT}" \
         -u "${SUPERSET_ADMIN_USERNAME}"
 
     echo "Creating Row Level Security rules..."
 
-    python /app/create_rls.py
+    python /app/bootstrap/create_rls.py
 
     touch "${SENTINEL_FILE}"
 
