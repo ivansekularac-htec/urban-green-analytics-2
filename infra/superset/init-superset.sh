@@ -22,11 +22,11 @@ else
 
     echo "Creating users..."
 
-    /app/bootstrap/create_users.sh
+    /app/bootstrap/create-users.sh
 
     echo "Injecting ClickHouse password..."
 
-    PATCHED_EXPORT=$(/app/bootstrap/inject_db_password.sh)
+    PATCHED_EXPORT=$(/app/bootstrap/inject-db-password.sh)
 
     echo "Importing dashboards and datasets..."
 
