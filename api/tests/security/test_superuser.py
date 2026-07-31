@@ -12,7 +12,7 @@ import pytest
 
 from app.config import Settings
 from app.security.password import verify_password
-from app.security.superuser import ensure_superuser
+from app.security.users import ensure_superuser
 
 
 def _settings() -> Settings:

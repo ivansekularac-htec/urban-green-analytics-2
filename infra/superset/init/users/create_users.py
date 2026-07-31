@@ -19,6 +19,7 @@ from users.database import get_clickhouse_client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+ADMIN_EMAIL = os.getenv("SUPERSET_ADMIN_EMAIL", "admin@example.com")
 DEFAULT_PASSWORD = os.environ["SUPERSET_DEFAULT_USER_PASSWORD"]
 
 ROLE_MAPPING = {
@@ -64,7 +65,7 @@ def create_users(app):
     users = load_users()
 
     for user in users:
-        if user["email"] == "admin@example.com":
+        if user["email"] == ADMIN_EMAIL:
             continue
 
         username = user["email"]

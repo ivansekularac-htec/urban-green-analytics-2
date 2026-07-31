@@ -49,20 +49,6 @@ def inject_database_password():
         shutil.move(new_zip, ASSETS_PATH)
 
 
-def publish_dashboards():
-    """Publish all imported dashboards."""
-
-    from superset.extensions import db
-    from superset.models.dashboard import Dashboard
-
-    for dashboard in db.session.query(Dashboard).all():
-        dashboard.published = True
-
-    db.session.commit()
-
-    logger.info("Published all dashboards.")
-
-
 def import_assets():
     """Import the exported Superset assets bundle."""
 
@@ -86,3 +72,17 @@ def import_assets():
     )
 
     logger.info("Successfully imported Superset assets.")
+
+
+def publish_dashboards():
+    """Publish all imported dashboards."""
+
+    from superset.extensions import db
+    from superset.models.dashboard import Dashboard
+
+    for dashboard in db.session.query(Dashboard).all():
+        dashboard.published = True
+
+    db.session.commit()
+
+    logger.info("Published all dashboards.")
