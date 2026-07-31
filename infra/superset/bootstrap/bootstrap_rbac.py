@@ -11,11 +11,10 @@ from superset import db, security_manager
 
 from .bootstrap_common import (
     CLICKHOUSE_DATABASE_NAME,
-    EXPECTED_RLS_DATASETS,
     bump,
     env,
     get_database,
-    get_dataset,
+    get_farm_scoped_datasets,
     logger,
 )
 
@@ -207,23 +206,6 @@ def ensure_demo_users() -> None:
     db.session.commit()
 
 
-def _ensure_permission(role, permission: str, view_menu: str) -> str:
-    pv = _resolve_permission(permission, view_menu)
-    if pv is None:
-        logger.warning(
-            "Could not resolve permission (%s, %s); skipped",
-            permission,
-            view_menu,
-        )
-        return "skipped"
-
-    if pv in (role.permissions or []):
-        return "skipped"
-
-    security_manager.add_permission_role(role, pv)
-    return "created"
-
-
 def _custom_roles():
     roles = []
     for name in CUSTOM_ROLES:
@@ -235,50 +217,55 @@ def _custom_roles():
 
 
 def ensure_dataset_permissions() -> None:
-    """Grant custom roles datasource_access on expected farm-scoped datasets."""
+    """Grant custom roles datasource_access on farm-scoped datasets."""
     database = get_database()
     if database is None:
         raise RuntimeError(
             f"ClickHouse connection {CLICKHOUSE_DATABASE_NAME!r} not found."
         )
 
-    roles = _custom_roles()
-    for table_name in EXPECTED_RLS_DATASETS:
-        dataset = get_dataset(database, table_name)
-        if dataset is None:
-            logger.info(
-                "Dataset permission for %s skipped (not imported yet)",
-                table_name,
-            )
-            bump("skipped")
-            continue
+    datasets = get_farm_scoped_datasets(database)
+    if not datasets:
+        logger.info("No farm-scoped datasets found; skipping dataset permissions.")
+        bump("skipped")
+        return
 
-        if not dataset.perm:
-            db.session.refresh(dataset)
-        if not dataset.perm:
+    roles = _custom_roles()
+    for dataset in datasets:
+        perm = dataset.perm or dataset.get_perm()
+        if not perm:
             logger.warning(
                 "Dataset %s has no perm string; skipped",
-                table_name,
+                dataset.table_name,
             )
             bump("skipped")
             continue
 
         for role in roles:
-            result = _ensure_permission(role, "datasource_access", dataset.perm)
-            if result == "created":
-                logger.info(
-                    "%s datasource_access for %s created",
-                    role.name,
-                    table_name,
+            pv = _resolve_permission("datasource_access", perm)
+            if pv is None:
+                logger.warning(
+                    "Could not resolve permission (datasource_access, %s); skipped",
+                    perm,
                 )
-                bump("created")
-            else:
+                bump("skipped")
+                continue
+            if pv in (role.permissions or []):
                 logger.info(
                     "%s datasource_access for %s skipped",
                     role.name,
-                    table_name,
+                    dataset.table_name,
                 )
                 bump("skipped")
+                continue
+
+            security_manager.add_permission_role(role, pv)
+            logger.info(
+                "%s datasource_access for %s created",
+                role.name,
+                dataset.table_name,
+            )
+            bump("created")
 
     db.session.commit()
 

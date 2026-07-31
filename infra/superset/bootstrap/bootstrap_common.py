@@ -19,19 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger("bootstrap")
 
 CLICKHOUSE_DATABASE_NAME = "ClickHouse Connect (Superset)"
-
-# Stable dataset table_name values from the T4.2.6 export that expose farm_id.
-EXPECTED_RLS_DATASETS = (
-    "fact_daily_farm_metrics",
-    "ds_daily_farm_metrics_enriched",
-    "ds_daily_farm_quality",
-    "ds_harvests_enriched",
-    "ds_dim_farm_current",
-    "ds_farm_leaderboard",
-    "ds_sensor_readings",
-    "ds_daily_sensor_metrics",
-    "ds_sensor_inventory",
-)
+FARM_RLS_COLUMN = "farm_id"
 
 _summary = {"created": 0, "updated": 0, "skipped": 0}
 
@@ -76,15 +64,19 @@ def get_database(name: str = CLICKHOUSE_DATABASE_NAME) -> Database | None:
     )
 
 
-def get_dataset(database: Database, table_name: str) -> SqlaTable | None:
+def get_farm_scoped_datasets(database: Database) -> list[SqlaTable]:
+    """Return ClickHouse datasets that expose the farm RLS column."""
     from superset import db
-    from superset.connectors.sqla.models import SqlaTable
+    from superset.connectors.sqla.models import SqlaTable, TableColumn
 
     return (
         db.session.query(SqlaTable)
+        .join(TableColumn, TableColumn.table_id == SqlaTable.id)
         .filter(
             SqlaTable.database_id == database.id,
-            SqlaTable.table_name == table_name,
+            TableColumn.column_name == FARM_RLS_COLUMN,
         )
-        .one_or_none()
+        .order_by(SqlaTable.table_name)
+        .distinct()
+        .all()
     )

@@ -8,11 +8,10 @@ from typing import TYPE_CHECKING
 
 from .bootstrap_common import (
     CLICKHOUSE_DATABASE_NAME,
-    EXPECTED_RLS_DATASETS,
     bump,
     get_admin_role,
     get_database,
-    get_dataset,
+    get_farm_scoped_datasets,
     logger,
 )
 
@@ -41,7 +40,7 @@ def _get_rls_rule(name: str = RLS_RULE_NAME) -> RowLevelSecurityFilter | None:
 
 
 def ensure_farm_rls() -> None:
-    """Ensure exactly one Base farm RLS rule; Admin exempt; expected datasets only."""
+    """Ensure exactly one Base farm RLS rule; Admin exempt; farm-scoped datasets."""
     from superset import db
     from superset.connectors.sqla.models import RowLevelSecurityFilter
     from superset.utils.core import RowLevelSecurityFilterType
@@ -53,20 +52,11 @@ def ensure_farm_rls() -> None:
             f"ClickHouse connection {CLICKHOUSE_DATABASE_NAME!r} not found."
         )
 
-    target_tables = []
-    missing = []
-    for table_name in EXPECTED_RLS_DATASETS:
-        dataset = get_dataset(database, table_name)
-        if dataset is None:
-            missing.append(table_name)
-        else:
-            target_tables.append(dataset)
-
-    if missing:
-        logger.info(
-            "Farm RLS datasets not yet available: %s",
-            ", ".join(missing),
-        )
+    target_tables = get_farm_scoped_datasets(database)
+    if not target_tables:
+        logger.info("No farm-scoped datasets found; skipping RLS.")
+        bump("skipped")
+        return
 
     desired_role_ids = {admin_role.id}
     desired_table_ids = {t.id for t in target_tables}
