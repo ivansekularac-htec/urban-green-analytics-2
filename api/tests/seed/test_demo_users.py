@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.security.password import verify_password
@@ -16,7 +17,7 @@ def _settings() -> Settings:
 
 def _db_returning(*values):
     """Return successive values from scalars().one_or_none()."""
-    db = MagicMock()
+    db = MagicMock(spec=Session)
     db.scalars.return_value.one_or_none.side_effect = values
     return db
 

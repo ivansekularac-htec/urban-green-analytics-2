@@ -42,12 +42,17 @@ def ensure_demo_users(db: Session, settings: Settings) -> None:
     for email, password, full_name, role_name, farm_ids in users:
         user = db.scalars(select(User).where(User.email == email)).one_or_none()
         if user is not None:
-            logger.info("Demo user %s already exists.", email)
+            logger.info(f"Demo user {email} already exists.")
             continue
 
         role = db.scalars(select(Role).where(Role.name == role_name.value)).one_or_none()
         if role is None:
-            raise RuntimeError(f"Cannot create demo user: role '{role_name.value}' is missing.")
+            logger.warning(
+                "Skipping demo user %s: role '%s' does not exist.",
+                email,
+                role_name.value,
+            )
+            continue
 
         user = User(
             email=email,

@@ -24,15 +24,9 @@ else
 
     /app/bootstrap/create-users.sh
 
-    echo "Injecting ClickHouse password..."
-
-    PATCHED_EXPORT=$(/app/bootstrap/inject-db-password.sh)
-
     echo "Importing dashboards and datasets..."
 
-    superset import-dashboards \
-        --path "${PATCHED_EXPORT}" \
-        -u "${SUPERSET_ADMIN_USERNAME}"
+    python /app/bootstrap/import_dashboards.py
 
     echo "Creating Row Level Security rules..."
 

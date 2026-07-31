@@ -58,7 +58,15 @@ def window_sql(table, cursor_from, cursor_to):
     return sql, params
 
 
-def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
+def extract_single_file(
+    pg,
+    s3,
+    table,
+    cursor_from,
+    cursor_to,
+    run_window,
+    dtypes=None,
+):
     """Read the whole window for a small table and write it as one Parquet object."""
     sql, params = window_sql(table, cursor_from, cursor_to)
     conn = pg.get_conn()
@@ -75,8 +83,9 @@ def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
         return 0, []
 
     # Prevent dtype inference by explicitly casting farm_id to Int64.
-    if table == "user_roles":
-        df["farm_id"] = df["farm_id"].astype("Int64")
+    for column, dtype in (dtypes or {}).items():
+        if column in df.columns:
+            df[column] = df[column].astype(dtype)
 
     key = flat_key(table, run_window)
     write_parquet(s3, df, key)
@@ -127,7 +136,12 @@ def extract_partitioned(
     return total_rows, keys
 
 
-def run_extract(table, partition_by=None, partition_label=None):
+def run_extract(
+    table,
+    partition_by=None,
+    partition_label=None,
+    dtypes=None,
+):
     """Extract new rows for one table, write them, then advance the cursor on success."""
     pg = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
 
@@ -155,6 +169,7 @@ def run_extract(table, partition_by=None, partition_label=None):
             cursor_from,
             cursor_to,
             run_window,
+            dtypes=dtypes,
         )
     else:
         rows_written, keys = extract_single_file(
