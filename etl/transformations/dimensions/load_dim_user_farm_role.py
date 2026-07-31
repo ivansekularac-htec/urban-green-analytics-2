@@ -20,11 +20,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pyspark.sql import functions as F
-
 from common import clickhouse, scd2
 from common.spark import build_spark, read_raw_postgres
 from common.transform import epoch_to_ts, latest_per_key
+from pyspark.sql import functions as F
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -57,16 +56,25 @@ def main():
             logger.warning(f"nothing to load into {TARGET_TABLE}")
             return
 
-        assignments = latest_per_key(raw, "id").select(
-            F.col("id").cast("long").alias(NATURAL_KEY),
-            F.col("user_id").cast("long").alias("user_id"),
-            F.col("role_id").cast("long").alias("role_id"),
-            F.coalesce(F.col("farm_id"), F.lit(SYSTEM_WIDE_FARM)).cast("long").alias("farm_id"),
-            epoch_to_ts("updated_at").alias("valid_from"),
-        ).withColumn("farm_key", F.col("farm_id"))
+        assignments = (
+            latest_per_key(raw, "id")
+            .select(
+                F.col("id").cast("long").alias(NATURAL_KEY),
+                F.col("user_id").cast("long").alias("user_id"),
+                F.col("role_id").cast("long").alias("role_id"),
+                F.coalesce(F.col("farm_id"), F.lit(SYSTEM_WIDE_FARM))
+                .cast("long")
+                .alias("farm_id"),
+                epoch_to_ts("updated_at").alias("valid_from"),
+            )
+            .withColumn("farm_key", F.col("farm_id"))
+        )
 
         users = current_names(
-            spark, "SELECT user_id, full_name FROM dim_user FINAL", "user_id", "full_name"
+            spark,
+            "SELECT user_id, full_name FROM dim_user FINAL",
+            "user_id",
+            "full_name",
         ).withColumnRenamed("full_name", "user_full_name")
 
         roles = current_names(

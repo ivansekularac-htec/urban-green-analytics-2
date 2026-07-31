@@ -30,6 +30,7 @@ def _build_dag(cfg):
     table = cfg["name"]
     partition_by = cfg.get("partition_by")
     partition_label = cfg.get("partition_label")
+    dtypes = cfg.get("dtypes")
 
     @dag(
         dag_id=f"extract_{table}",
@@ -43,7 +44,7 @@ def _build_dag(cfg):
     def _dag():
         @task(task_id="extract")
         def extract():
-            run_extract(table, partition_by, partition_label)
+            run_extract(table, partition_by, partition_label, dtypes)
 
         extract()
 

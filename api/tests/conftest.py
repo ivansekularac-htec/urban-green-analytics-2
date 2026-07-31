@@ -21,3 +21,8 @@ os.environ.setdefault("JWT_EXPIRES_MINUTES", "60")
 os.environ.setdefault("SUPERUSER_EMAIL", "admin@example.com")
 os.environ.setdefault("SUPERUSER_PASSWORD", "test-admin-password")
 os.environ.setdefault("SUPERUSER_FULL_NAME", "Test Administrator")
+
+os.environ.setdefault("FARM_MANAGER_EMAIL", "manager-test@urbangreen.com")
+os.environ.setdefault("FARM_MANAGER_PASSWORD", "manager-test-password")
+os.environ.setdefault("OPERATIONS_TEAM_EMAIL", "operations-test@urbangreen.com")
+os.environ.setdefault("OPERATIONS_TEAM_PASSWORD", "operations-test-password")

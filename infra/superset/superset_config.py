@@ -34,6 +34,29 @@ CACHE_CONFIG = {
 }
 
 
+# Chart color schemes
+
+
+EXTRA_CATEGORICAL_COLOR_SCHEMES = [
+    {
+        "id": "urbangreen_colors",
+        "description": "UrbanGreen Analytics chart color palette",
+        "label": "UrbanGreen",
+        "isDefault": True,
+        "colors": [
+            "#4CBB8A",
+            "#28594F",
+            "#7EFFC6",
+            "#89BDB0",
+            "#000000",
+            "#757575",
+            "#FFFFFF",
+            "#89BDB0",
+        ],
+    },
+]
+
+
 # Feature flags
 #
 # These are already False by default in Superset 5.0.0, but we set them
@@ -49,4 +72,8 @@ FEATURE_FLAGS = {
     "ENABLE_DASHBOARD_DOWNLOAD_WEBDRIVER_SCREENSHOT": False,
     "GLOBAL_ASYNC_QUERIES": False,
     "SQLLAB_ASYNC_TIME_LIMIT_SEC": 0,
+    "DASHBOARD_RBAC": True,
+    "ENABLE_TEMPLATE_PROCESSING": True,
 }
+
+PUBLIC_ROLE_LIKE = "Public"
