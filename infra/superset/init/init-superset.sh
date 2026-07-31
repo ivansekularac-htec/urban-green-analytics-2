@@ -24,6 +24,10 @@ else
 
     superset init
 
+    echo "Initializing Urban Green..."
+
+    python /app/init/bootstrap.py
+
     touch "${SENTINEL_FILE}"
 
     echo "Superset initialization completed."

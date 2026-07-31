@@ -50,3 +50,39 @@ FEATURE_FLAGS = {
     "GLOBAL_ASYNC_QUERIES": False,
     "SQLLAB_ASYNC_TIME_LIMIT_SEC": 0,
 }
+
+EXTRA_CATEGORICAL_COLOR_SCHEMES = [
+    {
+        "id": "Urban Green",
+        "label": "Urban Green",
+        "description": "Urban Green Analytics palette",
+        "isDefault": False,
+        "colors": [
+            "#1B5E20",
+            "#2E7D32",
+            "#388E3C",
+            "#43A047",
+            "#66BB6A",
+            "#81C784",
+            "#A5D6A7",
+            "#C8E6C9",
+        ],
+    },
+]
+
+EXTRA_SEQUENTIAL_COLOR_SCHEMES = [
+    {
+        "id": "Urban Green Sequential",
+        "label": "Urban Green Sequential",
+        "colors": [
+            "#E8F5E9",
+            "#C8E6C9",
+            "#A5D6A7",
+            "#81C784",
+            "#66BB6A",
+            "#43A047",
+            "#2E7D32",
+            "#1B5E20",
+        ],
+    },
+]

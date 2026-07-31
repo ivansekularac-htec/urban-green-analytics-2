@@ -35,6 +35,18 @@ class Settings(BaseSettings):
     superuser_password: str
     superuser_full_name: str = "System Administrator"
 
+    # Operations Team
+    operations_email: EmailStr
+    operations_password: str
+    operations_full_name: str = "Operations Team"
+    operations_farm_ids: list[int]
+
+    # Farm Manager
+    farm_manager_email: EmailStr
+    farm_manager_password: str
+    farm_manager_full_name: str = "Farm Manager"
+    farm_manager_farm_ids: list[int]
+
     @property
     def database_url(self) -> str:
         """Build the PostgreSQL database connection URL.

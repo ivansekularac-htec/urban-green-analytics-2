@@ -21,34 +21,86 @@ from app.security.roles import RoleName
 logger = logging.getLogger(__name__)
 
 
-def ensure_superuser(db: Session, settings: Settings) -> User:
-    """Create the configured superuser if it doesn't already exist.
+def ensure_user(
+    db: Session,
+    *,
+    email: str,
+    password: str,
+    full_name: str,
+    role_name: RoleName,
+    farm_ids: list[int] | None = None,
+) -> User:
+    """Create a bootstrap user if it does not already exist."""
 
-    Returns the user (created or existing) for tests and logging.
-    """
-    user = db.scalars(select(User).where(User.email == settings.superuser_email)).one_or_none()
+    user = db.scalars(select(User).where(User.email == email)).one_or_none()
     if user is not None:
-        logger.info("Superuser %s already exists.", settings.superuser_email)
+        logger.info("Bootstrap user %s already exists.", email)
         return user
 
-    admin_role = db.scalars(select(Role).where(Role.name == RoleName.ADMIN.value)).one_or_none()
-    if admin_role is None:
-        raise RuntimeError(
-            f"Cannot create superuser: role '{RoleName.ADMIN.value}' is missing. "
-            "Run the seed migration first."
-        )
+    role = db.scalars(select(Role).where(Role.name == role_name.value)).one_or_none()
+    if role is None:
+        raise RuntimeError(f"Role '{role_name.value}' not found.")
 
     user = User(
-        email=settings.superuser_email,
-        password_hash=hash_password(settings.superuser_password),
-        full_name=settings.superuser_full_name,
+        email=email,
+        password_hash=hash_password(password),
+        full_name=full_name,
         is_active=True,
     )
     db.add(user)
     db.flush()
 
-    db.add(UserRole(user_id=user.id, role_id=admin_role.id, farm_id=None))
+    if farm_ids:
+        for farm_id in farm_ids:
+            db.add(
+                UserRole(
+                    user_id=user.id,
+                    role_id=role.id,
+                    farm_id=farm_id,
+                )
+            )
+    else:
+        db.add(
+            UserRole(
+                user_id=user.id,
+                role_id=role.id,
+                farm_id=None,
+            )
+        )
+
     db.commit()
 
-    logger.info("Superuser %s created.", settings.superuser_email)
+    logger.info("Bootstrap user %s created.", email)
     return user
+
+
+def ensure_superuser(db: Session, settings: Settings) -> User:
+    return ensure_user(
+        db,
+        email=settings.superuser_email,
+        password=settings.superuser_password,
+        full_name=settings.superuser_full_name,
+        role_name=RoleName.ADMIN,
+    )
+
+
+def ensure_operations_user(db: Session, settings: Settings) -> User:
+    return ensure_user(
+        db,
+        email=settings.operations_email,
+        password=settings.operations_password,
+        full_name=settings.operations_full_name,
+        role_name=RoleName.OPERATIONS_TEAM,
+        farm_ids=settings.operations_farm_ids,
+    )
+
+
+def ensure_farm_manager(db: Session, settings: Settings) -> User:
+    return ensure_user(
+        db,
+        email=settings.farm_manager_email,
+        password=settings.farm_manager_password,
+        full_name=settings.farm_manager_full_name,
+        role_name=RoleName.FARM_MANAGER,
+        farm_ids=settings.farm_manager_farm_ids,
+    )

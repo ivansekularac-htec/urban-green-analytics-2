@@ -56,6 +56,14 @@ services:
       SUPERUSER_EMAIL: ${API_SUPERUSER_EMAIL}
       SUPERUSER_PASSWORD: ${API_SUPERUSER_PASSWORD}
       SUPERUSER_FULL_NAME: ${API_SUPERUSER_FULL_NAME}
+      OPERATIONS_EMAIL: ${OPERATIONS_EMAIL}
+      OPERATIONS_PASSWORD: ${OPERATIONS_PASSWORD}
+      OPERATIONS_FULL_NAME: ${OPERATIONS_FULL_NAME}
+      OPERATIONS_FARM_IDS: ${OPERATIONS_FARM_IDS}
+      FARM_MANAGER_EMAIL: ${FARM_MANAGER_EMAIL}
+      FARM_MANAGER_PASSWORD: ${FARM_MANAGER_PASSWORD}
+      FARM_MANAGER_FULL_NAME: ${FARM_MANAGER_FULL_NAME}
+      FARM_MANAGER_FARM_IDS: ${FARM_MANAGER_FARM_IDS}
 
     ports:
       - "${API_PORT:-8000}:8000"
@@ -336,7 +344,7 @@ services:
     profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
-    
+
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -366,7 +374,7 @@ services:
     profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
-    
+
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -544,7 +552,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
-    entrypoint: [ "/bin/sh", "/app/init-superset.sh" ]
+    entrypoint: [ "/bin/sh", "/app/init/init-superset.sh" ]
 
     environment:
       SUPERSET_UI_PORT: ${SUPERSET_UI_PORT:-8088}
@@ -554,6 +562,7 @@ services:
       SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME:-Admin}
       SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME:-Admin}
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@urbangreen.com}
+      "SUPERSET_DEFAULT_USER_PASSWORD": ${SUPERSET_DEFAULT_USER_PASSWORD}
 
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-urbangreen-clickhouse}
       CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}

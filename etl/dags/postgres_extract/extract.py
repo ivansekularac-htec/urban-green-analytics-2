@@ -33,7 +33,9 @@ CHUNK_SIZE = int(os.environ.get("EXTRACT_CHUNK_SIZE", "200000"))
 
 def format_cursor(value):
     """Turn an epoch-seconds cursor into a compact UTC stamp used in object keys."""
-    return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime(
+        "%Y%m%dT%H%M%SZ"
+    )
 
 
 def high_watermark(pg, table, cursor_from):
@@ -74,6 +76,10 @@ def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
 
     key = flat_key(table, run_window)
     write_parquet(s3, df, key)
+
+    if table == "user_roles":
+        df["farm_id"] = df["farm_id"].astype("Int64")
+
     return len(df), [key]
 
 
