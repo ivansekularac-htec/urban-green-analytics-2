@@ -12,7 +12,7 @@ The bootstrap process:
 
 import logging
 
-from assets.import_assets import import_assets, publish_dashboards
+from assets.import_assets import import_assets
 from superset.app import create_app
 from users.asign_assets import assign_assets
 from users.create_rls import create_or_update_rls
@@ -29,7 +29,6 @@ def bootstrap():
 
     with app.app_context():
         import_assets()
-        publish_dashboards()
         create_roles(app)
         create_users(app)
         assign_assets(app)

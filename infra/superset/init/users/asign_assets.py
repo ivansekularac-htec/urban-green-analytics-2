@@ -33,6 +33,7 @@ def assign_assets(app):
     roles = [r for r in roles if r]
 
     for dashboard in db.session.query(Dashboard).all():
+        dashboard.published = True
         dashboard.roles = roles
 
     for dataset in db.session.query(SqlaTable).all():
