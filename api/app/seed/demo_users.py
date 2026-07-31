@@ -1,3 +1,11 @@
+"""
+Seed demo application users used for local development and demos.
+
+These accounts must mirror the demo users created in Superset
+(same email addresses, roles, and farm access) so authentication
+and Row-Level Security behave consistently across both systems.
+"""
+
 import logging
 
 from sqlalchemy import select

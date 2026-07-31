@@ -35,11 +35,13 @@ class Settings(BaseSettings):
     superuser_password: str
     superuser_full_name: str = "System Administrator"
 
+    demo_farm_manager_username: str
     demo_farm_manager_email: EmailStr
     demo_farm_manager_password: str
     demo_farm_manager_firstname: str
     demo_farm_manager_lastname: str
 
+    demo_operations_username: str
     demo_operations_email: EmailStr
     demo_operations_password: str
     demo_operations_firstname: str
