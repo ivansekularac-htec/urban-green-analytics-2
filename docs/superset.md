@@ -32,15 +32,6 @@ superset export-dashboards -f /tmp/<file-name>.zip
 
 The export is written to `/tmp` inside the container.
 
-Next, copy it to your local repository:
-
-```bash
-docker cp urbangreen-superset:/tmp/<file-name>.zip \
-infra/superset/exports/dashboards_export.zip
-```
-
-Commit the updated `infra/superset/exports/dashboards_export.zip` file to the repository.
-
 > **Note**
 >
 > Superset intentionally omits database passwords from exported database connections for security reasons.
@@ -52,13 +43,7 @@ Commit the updated `infra/superset/exports/dashboards_export.zip` file to the re
 
 # Step 2 — Copy the export from Docker
 
-If the export was created inside the Superset container, first copy it to a temporary location inside the container:
-
-```bash
-cp <export-file>.zip /tmp/<export-file>.zip
-```
-
-Then copy it to your local repository:
+Copy file to your local repository:
 
 ```bash
 docker cp urbangreen-superset:/tmp/<export-file>.zip \
