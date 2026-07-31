@@ -16,25 +16,31 @@ RLS_NAME = "Farm Access"
 # Grant access to all farms for users with a global assignment (farm_id = 0).
 # Otherwise, restrict access to the farms explicitly assigned to the user.
 CLAUSE = """
+farm_id IN
 (
-    EXISTS (
-        SELECT 1
-        FROM dim_user_farm_role FINAL ur
-        JOIN dim_user FINAL u
-          ON u.user_id = ur.user_id
-        WHERE u.email = '{{ current_user.email }}'
-          AND ur.farm_id = 0
-    )
-    OR
-    farm_id IN (
-        SELECT ur.farm_id
-        FROM dim_user_farm_role FINAL ur
-        JOIN dim_user FINAL u
-          ON u.user_id = ur.user_id
-        WHERE u.email = '{{ current_user.email }}'
-    )
+    SELECT access.farm_id
+    FROM
+    (
+        SELECT
+            user_id,
+            farm_id
+        FROM urbangreen_dw.dim_user_farm_role FINAL
+        WHERE is_current = 1
+          AND farm_id != 0
+    ) AS access
+    INNER JOIN
+    (
+        SELECT
+            user_id,
+            email
+        FROM urbangreen_dw.dim_user FINAL
+        WHERE is_active = 1
+    ) AS users
+        ON access.user_id = users.user_id
+    WHERE lowerUTF8(users.email) =
+          lowerUTF8('{{ current_user_email() }}')
 )
-"""
+""".strip()
 
 
 app = create_app()

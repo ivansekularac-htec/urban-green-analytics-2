@@ -49,4 +49,9 @@ FEATURE_FLAGS = {
     "ENABLE_DASHBOARD_DOWNLOAD_WEBDRIVER_SCREENSHOT": False,
     "GLOBAL_ASYNC_QUERIES": False,
     "SQLLAB_ASYNC_TIME_LIMIT_SEC": 0,
+    # Required for {{ current_email() }} in Row-Level Security clauses.
+    # Trusted editors only (Admin); custom roles only view assigned dashboards.
+    "ENABLE_TEMPLATE_PROCESSING": True,
+    # Restrict dashboard visibility to roles assigned on each dashboard.
+    "DASHBOARD_RBAC": True,
 }
