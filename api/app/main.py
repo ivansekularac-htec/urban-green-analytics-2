@@ -27,8 +27,16 @@ async def lifespan(app: FastAPI):
 
     with SessionLocal() as db:
         ensure_superuser(db, settings)
-        ensure_operations_user(db, settings)
-        ensure_farm_manager(db, settings)
+
+        try:
+            ensure_operations_user(db, settings)
+        except Exception:
+            logger.exception("Skipping demo Operations user bootstrap.")
+
+        try:
+            ensure_farm_manager(db, settings)
+        except Exception:
+            logger.exception("Skipping demo Farm Manager bootstrap.")
 
     yield
 

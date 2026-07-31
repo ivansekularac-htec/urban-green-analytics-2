@@ -12,6 +12,9 @@ tables:
   - name: users
   - name: crops
   - name: user_roles
+    schedule: "@hourly"
+    dtypes:
+      farm_id: Int64
   - name: farm_crops
   - name: sensors
 

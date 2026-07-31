@@ -55,7 +55,7 @@ SELECT
     q.name                 AS quality_grade_name,
     q.is_premium           AS is_premium,
     fh.weight_kg           AS weight_kg
-FROM fact_harvests fh
+FROM fact_harvests fh 
 INNER JOIN dim_farm f
     ON fh.farm_key = f.farm_key
    AND f.is_current = 1

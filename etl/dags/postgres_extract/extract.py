@@ -58,7 +58,19 @@ def window_sql(table, cursor_from, cursor_to):
     return sql, params
 
 
-def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
+def apply_dtypes(df: pd.DataFrame, dtypes: dict[str, str] | None) -> pd.DataFrame:
+    """Apply configured pandas dtypes to dataframe columns."""
+    if not dtypes:
+        return df
+
+    for column, dtype in dtypes.items():
+        if column in df.columns:
+            df[column] = df[column].astype(dtype)
+
+    return df
+
+
+def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window, dtypes=None):
     """Read the whole window for a small table and write it as one Parquet object."""
     sql, params = window_sql(table, cursor_from, cursor_to)
     conn = pg.get_conn()
@@ -71,14 +83,13 @@ def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
         conn.close()
 
     df = pd.DataFrame(rows, columns=columns)
+    df = apply_dtypes(df, dtypes)
+
     if df.empty:
         return 0, []
 
     key = flat_key(table, run_window)
     write_parquet(s3, df, key)
-
-    if table == "user_roles":
-        df["farm_id"] = df["farm_id"].astype("Int64")
 
     return len(df), [key]
 
@@ -93,7 +104,15 @@ def split_by_day(df, partition_by):
 
 
 def extract_partitioned(
-    pg, s3, table, partition_by, partition_label, cursor_from, cursor_to, run_window
+    pg,
+    s3,
+    table,
+    partition_by,
+    partition_label,
+    cursor_from,
+    cursor_to,
+    run_window,
+    dtypes=None,
 ):
     """Stream a large table in chunks and write one Parquet per day per chunk."""
     sql, params = window_sql(table, cursor_from, cursor_to)
@@ -114,6 +133,7 @@ def extract_partitioned(
                     columns = [desc[0] for desc in cur.description]
                 chunk_index += 1
                 df = pd.DataFrame(rows, columns=columns)
+                df = apply_dtypes(df, dtypes)
                 total_rows += len(df)
                 for day, group in split_by_day(df, partition_by).items():
                     key = partition_key(
@@ -126,7 +146,7 @@ def extract_partitioned(
     return total_rows, keys
 
 
-def run_extract(table, partition_by=None, partition_label=None):
+def run_extract(table, partition_by=None, partition_label=None, dtypes=None):
     """Extract new rows for one table, write them, then advance the cursor on success."""
     pg = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
 
@@ -154,10 +174,11 @@ def run_extract(table, partition_by=None, partition_label=None):
             cursor_from,
             cursor_to,
             run_window,
+            dtypes,
         )
     else:
         rows_written, keys = extract_single_file(
-            pg, s3, table, cursor_from, cursor_to, run_window
+            pg, s3, table, cursor_from, cursor_to, run_window, dtypes
         )
 
     set_cursor(table, cursor_to)

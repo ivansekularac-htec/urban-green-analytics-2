@@ -136,6 +136,11 @@ ORDER BY (
         farm_id, date_key, sensor_type_key
     );
 
+-- Daily crop yield by city.
+-- Aggregates harvested yield by harvest date, city and crop
+-- to support dashboard filtering before determining the
+-- top-performing crop for each city.
+
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
     metric_date Date,
     date_key UInt32,
