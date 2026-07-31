@@ -74,6 +74,7 @@ def extract_single_file(pg, s3, table, cursor_from, cursor_to, run_window):
     if df.empty:
         return 0, []
 
+    # Prevent dtype inference by explicitly casting farm_id to Int64.
     if table == "user_roles":
         df["farm_id"] = df["farm_id"].astype("Int64")
 
