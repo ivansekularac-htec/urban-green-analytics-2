@@ -10,18 +10,15 @@ user.
 
 import logging
 
-from users.database import get_clickhouse_client
+from users.common import execute_query, get_rls_filter_name, get_rls_role_name
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def load_user_farms():
     """Load active farm assignments grouped by user."""
 
-    client = get_clickhouse_client()
-
-    result = client.query(
+    result = execute_query(
         """
         SELECT
             u.user_id,
@@ -35,7 +32,7 @@ def load_user_farms():
             AND ufr.is_current = 1
             AND ufr.farm_id != 0
         """
-    ).named_results()
+    )
 
     users = {}
 
@@ -58,27 +55,11 @@ def get_rls_datasets():
 
     datasets = db.session.query(SqlaTable).all()
 
-    protected = []
-
-    for dataset in datasets:
-        columns = {column.column_name for column in dataset.columns}
-
-        if "farm_id" in columns:
-            protected.append(dataset)
-
-    return protected
-
-
-def get_rls_role_name(user_id):
-    """Return the RLS role name for a user."""
-
-    return f"RLS_USER_{user_id}"
-
-
-def get_rls_filter_name(user_id):
-    """Return the RLS filter name for a user."""
-
-    return f"Farm Access - {user_id}"
+    return [
+        dataset
+        for dataset in datasets
+        if any(column.column_name == "farm_id" for column in dataset.columns)
+    ]
 
 
 def build_clause(farm_ids):
@@ -105,25 +86,30 @@ def create_or_update_rls(app):
     datasets = get_rls_datasets()
 
     for user_id, user in users.items():
-        role = sm.find_role(get_rls_role_name(user_id))
+        role_name = get_rls_role_name(user_id)
+        filter_name = get_rls_filter_name(user_id)
+
+        role = sm.find_role(role_name)
 
         if role is None:
-            raise RuntimeError(f"RLS role '{get_rls_role_name(user_id)}' not found.")
+            raise RuntimeError(f"RLS role '{role_name}' not found.")
 
         clause = build_clause(user["farm_ids"])
 
         rls = (
             db.session.query(RowLevelSecurityFilter)
-            .filter_by(name=get_rls_filter_name(user_id))
+            .filter_by(name=filter_name)
             .one_or_none()
         )
 
         if rls is None:
             rls = RowLevelSecurityFilter(
-                name=get_rls_filter_name(user_id),
+                # name=get_rls_filter_name(user_id),
+                name=filter_name,
                 description=f"Farm access for {user['email']}",
                 filter_type="Regular",
-                group_key=get_rls_role_name(user_id),
+                # group_key=get_rls_role_name(user_id),
+                group_key=role_name,
                 clause=clause,
             )
 

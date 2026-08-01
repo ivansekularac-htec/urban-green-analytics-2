@@ -19,7 +19,10 @@ from users.create_rls import create_or_update_rls
 from users.create_roles import create_roles
 from users.create_users import create_users
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 
 def bootstrap():

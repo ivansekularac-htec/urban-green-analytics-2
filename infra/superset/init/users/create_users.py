@@ -14,27 +14,18 @@ Each user is assigned:
 import logging
 import os
 
-from users.database import get_clickhouse_client
+from users.common import ROLE_MAPPING, execute_query, get_rls_role_name
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ADMIN_EMAIL = os.getenv("SUPERSET_ADMIN_EMAIL", "admin@example.com")
 DEFAULT_PASSWORD = os.environ["SUPERSET_DEFAULT_USER_PASSWORD"]
 
-ROLE_MAPPING = {
-    "Admin": "Admin",
-    "Farm Manager": "FarmManager",
-    "Operations Team": "Operations",
-}
-
 
 def load_users():
     """Load active users and their current roles from ClickHouse."""
 
-    client = get_clickhouse_client()
-
-    result = client.query(
+    return execute_query(
         """
         SELECT
             u.user_id,
@@ -50,17 +41,10 @@ def load_users():
         """
     )
 
-    return result.named_results()
-
-
-def get_rls_role_name(user_id):
-    """Return the RLS role name for a user."""
-
-    return f"RLS_USER_{user_id}"
-
 
 def create_users(app):
     """Create missing Superset users."""
+    sm = app.appbuilder.sm
 
     users = load_users()
 
@@ -68,26 +52,24 @@ def create_users(app):
         if user["email"] == ADMIN_EMAIL:
             continue
 
-        username = user["email"]
-
-        sm = app.appbuilder.sm
-        superset_user = sm.find_user(username=username)
+        superset_user = sm.find_user(username=user["email"])
 
         parts = user["full_name"].split(maxsplit=1)
         first_name = parts[0]
         last_name = parts[1] if len(parts) > 1 else ""
 
-        business_role = sm.find_role(ROLE_MAPPING[user["role_name"]])
-        if business_role is None:
-            raise RuntimeError(
-                f"Business role '{ROLE_MAPPING[user['role_name']]}' not found."
-            )
+        role_name = ROLE_MAPPING.get(user["role_name"])
+        if role_name is None:
+            raise RuntimeError(f"Unknown role '{user['role_name']}'.")
 
-        rls_role = sm.find_role(get_rls_role_name(user["user_id"]))
+        business_role = sm.find_role(role_name)
+        if business_role is None:
+            raise RuntimeError(f"Business role '{role_name}' not found.")
+
+        rls_role_name = get_rls_role_name(user["user_id"])
+        rls_role = sm.find_role(rls_role_name)
         if rls_role is None:
-            raise RuntimeError(
-                f"RLS role '{get_rls_role_name(user['user_id'])}' not found."
-            )
+            raise RuntimeError(f"RLS role '{rls_role_name}' not found.")
 
         roles = [
             business_role,
@@ -96,7 +78,7 @@ def create_users(app):
 
         if superset_user is None:
             sm.add_user(
-                username=username,
+                username=user["email"],
                 first_name=first_name,
                 last_name=last_name,
                 email=user["email"],
@@ -104,7 +86,7 @@ def create_users(app):
                 password=DEFAULT_PASSWORD,
             )
 
-            logger.info(f"Created user {username}.")
+            logger.info(f"Created user {user['email']}.")
 
         else:
             superset_user.first_name = first_name
@@ -112,6 +94,6 @@ def create_users(app):
             superset_user.email = user["email"]
             superset_user.roles = roles
 
-            sm.get_session.commit()
+            logger.info(f"Updated user {user['email']}.")
 
-            logger.info(f"Updated user {username}.")
+    sm.get_session.commit()
