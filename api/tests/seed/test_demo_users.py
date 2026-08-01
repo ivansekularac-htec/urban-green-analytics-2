@@ -3,7 +3,6 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-import pytest
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -113,13 +112,17 @@ def test_ensure_demo_users_is_idempotent():
     db.commit.assert_not_called()
 
 
-def test_ensure_demo_users_raises_when_role_missing():
+def test_ensure_demo_users_skips_when_role_missing():
     settings = _settings()
 
     db = _db_returning(
-        None,
-        None,
+        None,  # farm manager user does not exist
+        None,  # farm manager role missing
+        None,  # operations user does not exist
+        None,  # operations role missing
     )
 
-    with pytest.raises(RuntimeError, match="Farm Manager"):
-        ensure_demo_users(db, settings)
+    ensure_demo_users(db, settings)
+
+    db.add.assert_not_called()
+    db.commit.assert_not_called()
