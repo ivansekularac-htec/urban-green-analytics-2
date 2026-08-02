@@ -16,7 +16,6 @@ CLICKHOUSE_CONFIG = {
 
 SUPERSET_DATABASE_NAME = "Urban Green DW"
 
-
 BUSINESS_ROLES = [
     "FarmManager",
     "Operations",
@@ -26,6 +25,25 @@ ROLE_MAPPING = {
     "Admin": "Admin",
     "Farm Manager": "FarmManager",
     "Operations Team": "Operations",
+}
+
+DASHBOARD_ROLE_MAPPING = {
+    "Executive Overview Dashboard": ["Admin"],
+    "Operations Overview Dashboard": ["Admin", "Operations"],
+    # "Farm Manager Overview Dashboard": ["Admin", "FarmManager"],
+}
+
+DATASET_ROLE_MAPPING = {
+    "vw_exec_overview": ["Admin"],
+    "vw_exec_harvest": ["Admin"],
+    "exec_top_crop_per_city": ["Admin"],
+    "exec_profitability_index": ["Admin"],
+    "vw_ops_leaderboard": ["Admin", "Operations"],
+    "vw_ops_sensor_anomalies": ["Admin", "Operations"],
+    "vw_ops_crop_yield": ["Admin", "Operations"],
+    "vw_ops_quality": ["Admin", "Operations"],
+    "vw_ops_data_freshness": ["Admin", "Operations"],
+    "vw_ops_sensor_inventory": ["Admin", "Operations"],
 }
 
 RLS_ROLE_PREFIX = "RLS_USER"

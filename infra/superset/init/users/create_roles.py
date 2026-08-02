@@ -11,6 +11,7 @@ import logging
 
 from users.common import (
     BUSINESS_ROLES,
+    DATASET_ROLE_MAPPING,
     SUPERSET_DATABASE_NAME,
     execute_query,
     get_rls_role_name,
@@ -66,39 +67,66 @@ def create_roles(app):
 
         if role is None:
             role = sm.add_role(role_name)
-            logger.info(f"Created role {role_name}.")
+            logger.info("Created role %s.", role_name)
 
         existing_permissions = {
-            (permission.permission.name, permission.view_menu.name)
+            (
+                permission.permission.name,
+                permission.view_menu.name,
+            )
             for permission in role.permissions
         }
 
+        # Inherit all Gamma permissions
         for permission in gamma.permissions:
             key = (
                 permission.permission.name,
                 permission.view_menu.name,
             )
-
             if key not in existing_permissions:
                 sm.add_permission_role(role, permission)
+                existing_permissions.add(key)
 
+        # Grant database access
         if database_permission:
-            sm.add_permission_role(role, database_permission)
-
-        for dataset in datasets:
-            permission = sm.find_permission_view_menu(
-                "datasource_access",
-                dataset.perm,
+            key = (
+                database_permission.permission.name,
+                database_permission.view_menu.name,
             )
 
-            if permission:
-                sm.add_permission_role(role, permission)
+            if key not in existing_permissions:
+                sm.add_permission_role(role, database_permission)
+                existing_permissions.add(key)
 
-        logger.info(f"Assigned permissions to role {role_name}.")
+        # Grant datasource access only to mapped datasets
+        for dataset in datasets:
+            allowed_roles = DATASET_ROLE_MAPPING.get(dataset.table_name, [])
+            if role_name not in allowed_roles:
+                continue
+
+            datasource_permission = sm.find_permission_view_menu(
+                "datasource_access", dataset.perm
+            )
+            if datasource_permission is None:
+                logger.warning(
+                    "Datasource permission not found for %s.",
+                    dataset.table_name,
+                )
+                continue
+
+            key = (
+                datasource_permission.permission.name,
+                datasource_permission.view_menu.name,
+            )
+            if key not in existing_permissions:
+                sm.add_permission_role(role, datasource_permission)
+                existing_permissions.add(key)
+
+        logger.info("Assigned permissions to role %s.", role_name)
 
     for user_id in load_user_ids():
         role_name = get_rls_role_name(user_id)
 
         if sm.find_role(role_name) is None:
             sm.add_role(role_name)
-            logger.info(f"Created RLS role {role_name}.")
+            logger.info("Created RLS role %s.", role_name)
