@@ -28,3 +28,18 @@ WHERE
     ufr.is_current = 1
     AND u.is_active = 1
     AND ufr.farm_id != 0;
+
+-- Helper view that centralizes the high-value crop classification.
+CREATE OR REPLACE VIEW bi_crop_classification AS
+SELECT
+    crop.crop_id,
+    crop.name AS crop_name,
+    crop.category_name,
+    CAST(
+        crop.category_name IN (
+            'Microgreens',
+            'Specialty Crops'
+        ),
+        'UInt8'
+    ) AS is_high_value
+FROM dim_crop AS crop FINAL;
