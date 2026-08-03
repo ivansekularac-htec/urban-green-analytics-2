@@ -13,7 +13,7 @@ _DAGS_DIR = str(Path(__file__).resolve().parent)
 if _DAGS_DIR not in sys.path:
     sys.path.insert(0, _DAGS_DIR)
 
-from postgres_extract.extract import run_extract  # noqa: E402
+from postgres_extract.extract import run_extract
 
 _TABLES_YAML = Path(__file__).resolve().parent / "postgres_extract" / "tables.yaml"
 
@@ -30,6 +30,7 @@ def _build_dag(cfg):
     table = cfg["name"]
     partition_by = cfg.get("partition_by")
     partition_label = cfg.get("partition_label")
+    dtypes = cfg.get("dtypes")
 
     @dag(
         dag_id=f"extract_{table}",
@@ -43,7 +44,7 @@ def _build_dag(cfg):
     def _dag():
         @task(task_id="extract")
         def extract():
-            run_extract(table, partition_by, partition_label)
+            run_extract(table, partition_by, partition_label, dtypes=dtypes)
 
         extract()
 
