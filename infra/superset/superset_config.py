@@ -57,8 +57,6 @@ FEATURE_FLAGS = {
 }
 
 # Chart color schemes
-
-
 EXTRA_CATEGORICAL_COLOR_SCHEMES = [
     {
         "id": "urbangreen_colors",
@@ -66,12 +64,27 @@ EXTRA_CATEGORICAL_COLOR_SCHEMES = [
         "label": "UrbanGreen",
         "isDefault": True,
         "colors": [
+            # Original
             "#4CBB8A",
             "#28594F",
             "#7EFFC6",
             "#89BDB0",
             "#000000",
             "#757575",
+            # Additional
+            "#2E8B57",  # Sea Green
+            "#5FAF72",  # Soft Green
+            "#3A7D6A",  # Muted Teal
+            "#6BAF92",  # Sage Green
+            "#A3D9A5",  # Light Sage
+            "#1F7A8C",  # Deep Cyan
+            "#5C9E8A",  # Dusty Teal
+            "#7A9E7E",  # Olive Sage
+            "#A0C49D",  # Pale Green
+            "#3E6B61",  # Dark Forest Teal
+            "#B7D3C0",  # Light Mint
+            "#556B2F",  # Dark Olive Green
+            "#4F6D5A",  # Moss Green
         ],
     },
 ]
