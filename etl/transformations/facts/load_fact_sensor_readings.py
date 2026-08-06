@@ -21,10 +21,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pyspark.sql import functions as F
-
 from common import clickhouse, facts, state
 from common.spark import build_spark, read_raw_kafka
+from pyspark.sql import functions as F
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -66,9 +65,9 @@ def main():
             return
 
         readings = window.select(
-            F.col("farm_sensor_id").cast("long").alias("sensor_key"),
+            F.col("farm_sensor_id").cast("long").alias("sensor_id"),
             F.col("farm_id").cast("long").alias("farm_id"),
-            F.col("sensor_type_id").cast("long").alias("sensor_type_key"),
+            F.col("sensor_type_id").cast("long").alias("sensor_type_id"),
             F.col("value").cast("double").alias("value"),
             F.col("timestamp").cast("long").cast("timestamp").alias("reading_ts"),
         )
@@ -78,7 +77,7 @@ def main():
             .withColumn("date_key", facts.date_key("reading_ts"))
             .withColumn("time_key", facts.time_key("reading_ts"))
             .withColumn(
-                "reading_key", F.xxhash64(F.col("sensor_key"), F.col("reading_ts"))
+                "reading_key", F.xxhash64(F.col("sensor_id"), F.col("reading_ts"))
             )
         )
 
@@ -96,14 +95,14 @@ def main():
 
         type_versions = clickhouse.read_query(
             spark,
-            "SELECT sensor_type_id AS sensor_type_key, optimal_min, optimal_max, "
+            "SELECT sensor_type_id, optimal_min, optimal_max, "
             "valid_from, valid_to FROM dim_sensor_type FINAL",
         )
 
         with_thresholds = facts.as_of_version(
             with_farm,
             type_versions,
-            "sensor_type_key",
+            "sensor_type_id",
             "reading_ts",
             [
                 ("optimal_min", "optimal_min", NO_ANOMALY_MIN),
@@ -127,8 +126,8 @@ def main():
                 "reading_key",
                 "farm_key",
                 "farm_id",
-                "sensor_key",
-                "sensor_type_key",
+                "sensor_id",
+                "sensor_type_id",
                 "date_key",
                 "time_key",
                 "reading_ts",

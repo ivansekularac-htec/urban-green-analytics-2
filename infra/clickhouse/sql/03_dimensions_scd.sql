@@ -87,8 +87,8 @@ ORDER BY (
 CREATE TABLE IF NOT EXISTS dim_sensor (
     sensor_key UInt64 DEFAULT cityHash64 (sensor_id, valid_from) COMMENT 'Deterministic SCD2 surrogate = cityHash64(sensor_id, valid_from)',
     sensor_id UInt64,
-    farm_key UInt64,
-    sensor_type_key UInt64,
+    farm_id UInt64,
+    sensor_type_id UInt64,
     serial_number String,
     status LowCardinality (String),
     installed_at Nullable (DateTime64 (3, 'UTC')),

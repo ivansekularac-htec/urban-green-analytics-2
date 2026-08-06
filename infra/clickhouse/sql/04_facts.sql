@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
     reading_key UInt64 COMMENT 'ETL: cityHash64(farm_sensor_id, timestamp)',
     farm_key UInt64,
     farm_id UInt64,
-    sensor_key UInt64 COMMENT 'Kafka: farm_sensor_id',
-    sensor_type_key UInt64,
+    sensor_id UInt64 COMMENT 'Kafka: farm_sensor_id',
+    sensor_type_id UInt64,
     date_key UInt32,
     time_key UInt32,
     reading_ts DateTime64 (3, 'UTC'),
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS fact_sensor_readings (
 PARTITION BY
     toYYYYMM (reading_date)
 ORDER BY (
-        farm_id, sensor_type_key, reading_ts, sensor_key
+        farm_id, sensor_type_id, reading_ts, sensor_id
     );
 
 CREATE TABLE IF NOT EXISTS fact_farm_leaderboard (
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS fact_daily_sensor_metrics (
     date_key UInt32,
     farm_key UInt64,
     farm_id UInt64,
-    sensor_type_key UInt64,
+    sensor_type_id UInt64,
     reading_count UInt64,
     sum_value Float64 COMMENT 'avg = sum_value / reading_count (re-aggregation safe)',
     min_value Float64,
@@ -133,7 +133,7 @@ PARTITION BY
     toYYYYMM (metric_date)
 -- farm_key stays out of the sorting key - see fact_farm_leaderboard above.
 ORDER BY (
-        farm_id, date_key, sensor_type_key
+        farm_id, date_key, sensor_type_id
     );
 
 CREATE TABLE IF NOT EXISTS fact_daily_farm_quality_metrics (
