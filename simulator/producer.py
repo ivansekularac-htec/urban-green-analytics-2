@@ -72,6 +72,22 @@ NUM_FARMS = 75
 SENSORS_PER_FARM = len(SENSOR_TYPES)
 TOTAL_SENSORS = NUM_FARMS * SENSORS_PER_FARM  # 450
 
+# Farm sensor IDs that intentionally simulate OFFLINE state and emit no data.
+# Keep this list in sync with the sensors seeded as OFFLINE in Postgres.
+# Added to run_backfill and run_live sensor loops
+DISABLED_SENSOR_IDS = {
+    5,
+    17,
+    42,
+    89,
+    113,
+    156,
+    201,
+    278,
+    344,
+    417,
+}
+
 STATE_PATH = Path("/state/.bootstrapped")
 
 
@@ -203,6 +219,10 @@ def run_backfill(producer: KafkaProducer, cfg: Config, rng: random.Random) -> No
         for tick_idx in range(cfg.backfill_events_per_day):
             when = day_start + timedelta(seconds=tick_idx * interval_seconds)
             for fs_id, farm_id, st_id, st in sensors:
+                # Skip ids of sensors that simulate disabled state
+                if fs_id in DISABLED_SENSOR_IDS:
+                    continue
+
                 value = generate_value(st, when, rng, outlier_prob=0.0)
                 send_event(
                     producer, cfg.topic, build_event(fs_id, farm_id, st_id, value, when)
@@ -226,6 +246,10 @@ def run_live(producer: KafkaProducer, cfg: Config, rng: random.Random) -> None:
     while True:
         when = datetime.now(timezone.utc).replace(microsecond=0)
         for fs_id, farm_id, st_id, st in iter_farm_sensors():
+            # Skip ids of sensors that simulate disabled state
+            if fs_id in DISABLED_SENSOR_IDS:
+                continue
+
             value = generate_value(st, when, rng, outlier_prob=cfg.outlier_probability)
             send_event(
                 producer, cfg.topic, build_event(fs_id, farm_id, st_id, value, when)
