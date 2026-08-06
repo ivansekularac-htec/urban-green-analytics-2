@@ -1,6 +1,6 @@
 <clickhouse>
-    <!-- Sized to sit alongside Postgres / MinIO / Kafka / Spark on a 16 GB laptop. -->
-    <max_server_memory_usage>1610612736</max_server_memory_usage>
-    <mark_cache_size>536870912</mark_cache_size> <!-- 512 MiB -->
+    <!-- Sized for 3G container limit. -->
+    <max_server_memory_usage>2684354560</max_server_memory_usage> <!-- 2.5 GiB -->
+    <mark_cache_size>268435456</mark_cache_size> <!-- 256 MiB -->
     <uncompressed_cache_size>0</uncompressed_cache_size>
 </clickhouse>
