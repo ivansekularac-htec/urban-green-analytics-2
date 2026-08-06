@@ -19,10 +19,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pyspark.sql import functions as F
-
 from common import clickhouse
 from common.spark import build_spark
+from pyspark.sql import functions as F
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -74,18 +73,18 @@ def sensor_side(spark):
     readings = clickhouse.read_query(
         spark,
         "SELECT r.farm_id AS farm_id, r.farm_key AS farm_key, r.reading_date AS reading_date, "
-        "r.date_key AS date_key, r.sensor_type_key AS sensor_type_key, r.value AS value, "
+        "r.date_key AS date_key, r.sensor_type_id, r.value AS value, "
         "r.is_anomaly AS is_anomaly, r.reading_ts AS reading_ts FROM fact_sensor_readings r FINAL",
     )
     recent = readings.withColumnRenamed("reading_date", "metric_date")
 
     energy_types = clickhouse.read_query(
         spark,
-        "SELECT sensor_type_id AS sensor_type_key FROM dim_sensor_type FINAL "
+        "SELECT sensor_type_id FROM dim_sensor_type FINAL "
         f"WHERE name = '{ENERGY_SENSOR_TYPE}'",
     )
-    energy_ids = [row["sensor_type_key"] for row in energy_types.collect()]
-    is_energy = F.col("sensor_type_key").isin(energy_ids) if energy_ids else F.lit(False)
+    energy_ids = [row["sensor_type_id"] for row in energy_types.collect()]
+    is_energy = F.col("sensor_type_id").isin(energy_ids) if energy_ids else F.lit(False)
     energy_value = F.when(is_energy, F.col("value")).otherwise(0.0)
 
     return recent.groupBy(*GRAIN).agg(
@@ -106,9 +105,7 @@ def main():
 
         combined = harvests.join(sensors, on=GRAIN, how="fullouter")
 
-        dates = clickhouse.read_query(
-            spark, "SELECT date_key, year_week FROM dim_date"
-        )
+        dates = clickhouse.read_query(spark, "SELECT date_key, year_week FROM dim_date")
         combined = combined.join(dates, on="date_key", how="left")
 
         target = combined.select(
@@ -116,17 +113,35 @@ def main():
             "date_key",
             # A farm-day may come from either side of the full outer join, so the
             # surrogate is taken from whichever side has it.
-            F.coalesce(F.col("h_farm_key"), F.col("s_farm_key"), F.lit(0)).alias("farm_key"),
+            F.coalesce(F.col("h_farm_key"), F.col("s_farm_key"), F.lit(0)).alias(
+                "farm_key"
+            ),
             "farm_id",
             F.coalesce(F.col("year_week"), F.lit(0)).alias("year_week"),
-            F.coalesce(F.col("total_yield_kg"), F.lit(0)).cast("decimal(18,3)").alias("total_yield_kg"),
-            F.coalesce(F.col("harvest_count"), F.lit(0)).cast("int").alias("harvest_count"),
-            F.coalesce(F.col("premium_yield_kg"), F.lit(0)).cast("decimal(18,3)").alias("premium_yield_kg"),
-            F.coalesce(F.col("non_premium_yield_kg"), F.lit(0)).cast("decimal(18,3)").alias("non_premium_yield_kg"),
-            F.coalesce(F.col("energy_kwh"), F.lit(0.0)).cast("double").alias("energy_kwh"),
-            F.coalesce(F.col("reading_count"), F.lit(0)).cast("long").alias("reading_count"),
-            F.coalesce(F.col("anomaly_count"), F.lit(0)).cast("long").alias("anomaly_count"),
-            F.coalesce(F.col("in_range_count"), F.lit(0)).cast("long").alias("in_range_count"),
+            F.coalesce(F.col("total_yield_kg"), F.lit(0))
+            .cast("decimal(18,3)")
+            .alias("total_yield_kg"),
+            F.coalesce(F.col("harvest_count"), F.lit(0))
+            .cast("int")
+            .alias("harvest_count"),
+            F.coalesce(F.col("premium_yield_kg"), F.lit(0))
+            .cast("decimal(18,3)")
+            .alias("premium_yield_kg"),
+            F.coalesce(F.col("non_premium_yield_kg"), F.lit(0))
+            .cast("decimal(18,3)")
+            .alias("non_premium_yield_kg"),
+            F.coalesce(F.col("energy_kwh"), F.lit(0.0))
+            .cast("double")
+            .alias("energy_kwh"),
+            F.coalesce(F.col("reading_count"), F.lit(0))
+            .cast("long")
+            .alias("reading_count"),
+            F.coalesce(F.col("anomaly_count"), F.lit(0))
+            .cast("long")
+            .alias("anomaly_count"),
+            F.coalesce(F.col("in_range_count"), F.lit(0))
+            .cast("long")
+            .alias("in_range_count"),
             F.col("last_sensor_reading_ts"),
         )
 

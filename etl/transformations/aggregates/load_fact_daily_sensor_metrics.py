@@ -15,10 +15,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pyspark.sql import functions as F
-
 from common import clickhouse
 from common.spark import build_spark
+from pyspark.sql import functions as F
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -31,14 +30,14 @@ def main():
     try:
         readings = clickhouse.read_query(
             spark,
-            "SELECT farm_id, farm_key, sensor_type_key, reading_date, date_key, "
+            "SELECT farm_id, farm_key, sensor_type_id, reading_date, date_key, "
             "value, is_anomaly FROM fact_sensor_readings FINAL",
         )
 
         # farm_key carried as a denormalized value, not part of the grain -
         # see load_fact_daily_farm_quality_metrics for why.
         rollup = readings.groupBy(
-            "farm_id", "sensor_type_key", "reading_date", "date_key"
+            "farm_id", "sensor_type_id", "reading_date", "date_key"
         ).agg(
             F.max("farm_key").alias("farm_key"),
             F.count(F.lit(1)).cast("long").alias("reading_count"),
@@ -54,7 +53,7 @@ def main():
             "date_key",
             "farm_key",
             "farm_id",
-            "sensor_type_key",
+            "sensor_type_id",
             "reading_count",
             "sum_value",
             "min_value",
