@@ -88,6 +88,16 @@ DISABLED_SENSOR_IDS = {
     417,
 }
 
+# Farm sensor IDs that occasionally emit anomalous (out-of-range) readings.
+# These IDs are fixed so demo data is deterministic.
+ANOMALY_SENSOR_IDS = {
+    12,
+    58,
+    140,
+    299,
+    401,
+}
+
 STATE_PATH = Path("/state/.bootstrapped")
 
 
@@ -144,12 +154,23 @@ def generate_value(
     mid = (gmin + gmax) / 2.0
     amp = 0.30 * half
     sigma = 0.05 * half
+
     seconds_of_day = when.hour * 3600 + when.minute * 60 + when.second
     cycle = math.sin(2 * math.pi * seconds_of_day / 86400.0)
+
     value = mid + amp * cycle + rng.gauss(0.0, sigma)
+
+    # Clamp normal readings to the expected operating range.
     value = max(gmin, min(gmax, value))
+
+    # Occasionally emit an anomalous reading outside the normal range.
     if outlier_prob > 0.0 and rng.random() < outlier_prob:
-        value = value * (1.0 + rng.choice((-0.20, 0.20)))
+        span = gmax - gmin
+        if rng.random() < 0.5:
+            value = gmin - rng.uniform(0.1, 0.3) * span
+        else:
+            value = gmax + rng.uniform(0.1, 0.3) * span
+
     return round(value, 3)
 
 
@@ -223,7 +244,10 @@ def run_backfill(producer: KafkaProducer, cfg: Config, rng: random.Random) -> No
                 if fs_id in DISABLED_SENSOR_IDS:
                     continue
 
-                value = generate_value(st, when, rng, outlier_prob=0.0)
+                # Only designated sensors emit occasional anomalous readings.
+                outlier_prob = 0.03 if fs_id in ANOMALY_SENSOR_IDS else 0.0
+
+                value = generate_value(st, when, rng, outlier_prob)
                 send_event(
                     producer, cfg.topic, build_event(fs_id, farm_id, st_id, value, when)
                 )
@@ -250,7 +274,12 @@ def run_live(producer: KafkaProducer, cfg: Config, rng: random.Random) -> None:
             if fs_id in DISABLED_SENSOR_IDS:
                 continue
 
-            value = generate_value(st, when, rng, outlier_prob=cfg.outlier_probability)
+            # Only designated sensors emit occasional anomalous readings.
+            outlier_prob = (
+                cfg.outlier_probability if fs_id in ANOMALY_SENSOR_IDS else 0.0
+            )
+
+            value = generate_value(st, when, rng, outlier_prob)
             send_event(
                 producer, cfg.topic, build_event(fs_id, farm_id, st_id, value, when)
             )
