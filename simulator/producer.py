@@ -124,7 +124,7 @@ def load_config() -> Config:
             os.environ.get("SIMULATOR_LIVE_INTERVAL_SECONDS", "600")
         ),
         outlier_probability=float(
-            os.environ.get("SIMULATOR_OUTLIER_PROBABILITY", "0.01")
+            os.environ.get("SIMULATOR_OUTLIER_PROBABILITY", "0.03")
         ),
         log_level=os.environ.get("SIMULATOR_LOG_LEVEL", "INFO").upper(),
     )
