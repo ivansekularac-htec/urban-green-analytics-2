@@ -245,7 +245,9 @@ def run_backfill(producer: KafkaProducer, cfg: Config, rng: random.Random) -> No
                     continue
 
                 # Only designated sensors emit occasional anomalous readings.
-                outlier_prob = 0.03 if fs_id in ANOMALY_SENSOR_IDS else 0.0
+                outlier_prob = (
+                    cfg.outlier_probability if fs_id in ANOMALY_SENSOR_IDS else 0.0
+                )
 
                 value = generate_value(st, when, rng, outlier_prob)
                 send_event(
