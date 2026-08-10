@@ -608,7 +608,7 @@ services:
   urbangreen-ollama:
     image: ollama/ollama:latest
     container_name: urbangreen-ollama
-    profiles: [ "all", "backend" ]
+    profiles: [ "all", "analytics" ]
     restart: unless-stopped
 
     environment:
@@ -641,7 +641,7 @@ services:
   urbangreen-ollama-init:
     image: ollama/ollama:latest
     container_name: urbangreen-ollama-init
-    profiles: [ "all", "backend" ]
+    profiles: [ "all", "analytics" ]
     restart: "no"
 
     depends_on:
