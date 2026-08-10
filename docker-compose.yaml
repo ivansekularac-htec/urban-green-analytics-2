@@ -612,16 +612,12 @@ services:
     restart: unless-stopped
 
     environment:
-      # No GPU is available under Docker here, so the runtime stays on CPU.
       OLLAMA_HOST: 0.0.0.0:11434
-      # One model resident, one request at a time: the memory limit below fits
-      # a single small model, not several.
       OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
       OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
       OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
-      # qwen3.5 advertises a 256K context window; left uncapped the KV cache
-      # alone would exceed the memory limit below, so the window is bounded to
-      # what a report prompt actually needs.
+      # qwen3.5 offers a 256K window; uncapped, the KV cache alone would
+      # exceed the memory limit below.
       OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-8192}
 
     ports:

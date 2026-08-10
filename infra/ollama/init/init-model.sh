@@ -1,14 +1,6 @@
 #!/bin/sh
-# Prepare the configured Ollama model for the Module 5 reporting automation.
+# Prepare the configured Ollama model for the reporting automation.
 # Runs inside the one-shot urbangreen-ollama-init container.
-#
-# Two steps, both idempotent - re-running this container is a no-op:
-#   1. Pull the base model, skipped when it is already in the cache volume so a
-#      normal restart does not re-download.
-#   2. Derive the served model with generation bounded by a Modelfile. This is
-#      what keeps an automated call from hanging: qwen3.5 is a thinking model,
-#      so it streams a reasoning block before answering. num_predict caps the
-#      response and the /no_think directive turns the reasoning off.
 set -eu
 
 BASE_MODEL="${OLLAMA_MODEL:-qwen3.5:2b}"
@@ -27,8 +19,8 @@ else
   ollama pull "${BASE_MODEL}"
 fi
 
-# Rebuilt on every run: a thin manifest over the already-pulled weights, so it
-# costs nothing and picks up changed bounds without a manual step.
+# qwen3.5 is a thinking model: without the cap and /no_think below it streams a
+# reasoning block first, which is how an automated call ends up hanging.
 MODELFILE="/tmp/${SERVED_MODEL}.Modelfile"
 
 cat > "${MODELFILE}" <<EOF
