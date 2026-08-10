@@ -605,6 +605,60 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-ollama:
+    build:
+      context: ./infra/ollama
+      dockerfile: Dockerfile
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+
+    volumes:
+      - urbangreen-ollama:/root/.ollama
+
+    ports:
+      - "${OLLAMA_PORT}:11434"
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:11434/api/tags >/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  urbangreen-ollama-init:
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama-init
+    profiles: [ "all", "analytics" ]
+    restart: "no"
+
+    entrypoint: ["/bin/bash", "/usr/local/bin/init-ollama.sh"]
+
+    environment:
+      OLLAMA_HOST: ${OLLAMA_API_URL:-http://urbangreen-ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+
+    volumes:
+      - urbangreen-ollama:/root/.ollama
+
+    networks:
+      - urbangreen-network
+
+    depends_on:
+      urbangreen-ollama:
+        condition: service_healthy
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -626,6 +680,9 @@ volumes:
 
   urbangreen-superset:
     name: urbangreen-superset
+
+  urbangreen-ollama:
+    name: urbangreen-ollama
 
 networks:
   urbangreen-network:
