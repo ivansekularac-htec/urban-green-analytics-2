@@ -605,6 +605,68 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-ollama:
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama
+    profiles: ["all", "analytics"]
+    restart: unless-stopped
+
+    environment:
+      OLLAMA_HOST: 0.0.0.0:${OLLAMA_API_PORT:-11434}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-4096}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-5m}
+
+    ports:
+      - "${OLLAMA_API_PORT:-11434}:${OLLAMA_API_PORT:-11434}"
+
+    volumes:
+      - urbangreen-ollama-models:/root/.ollama
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "OLLAMA_HOST=127.0.0.1:${OLLAMA_API_PORT:-11434} ollama list >/dev/null 2>&1 || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 3G
+
+
+  urbangreen-ollama-init:
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama-init
+    profiles: ["all", "analytics"]
+
+    depends_on:
+      urbangreen-ollama:
+        condition: service_healthy
+
+    environment:
+      OLLAMA_HOST: http://urbangreen-ollama:${OLLAMA_API_PORT:-11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+
+    entrypoint: ["/bin/sh", "/scripts/init-model.sh"]
+
+    volumes:
+      - ./infra/ollama/init:/scripts:ro
+
+    networks:
+      - urbangreen-network
+
+    restart: "no"
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -626,6 +688,9 @@ volumes:
 
   urbangreen-superset:
     name: urbangreen-superset
+
+  urbangreen-ollama-models:
+    name: urbangreen-ollama-models
 
 networks:
   urbangreen-network:
