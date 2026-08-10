@@ -344,7 +344,7 @@ services:
     profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-1
-    
+
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -374,7 +374,7 @@ services:
     profiles: [ "all", "backend" ]
     restart: unless-stopped
     hostname: urbangreen-spark-worker-2
-    
+
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-worker.sh" ]
 
     environment:
@@ -605,6 +605,62 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-ollama:
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: "-1"
+
+    ports:
+      - "${OLLAMA_API_PORT:-11434}:11434"
+
+    volumes:
+      - urbangreen-ollama-data:/root/.ollama
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD", "ollama", "list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  urbangreen-ollama-init:
+    image: ollama/ollama:latest
+    container_name: urbangreen-ollama-init
+    profiles: [ "all", "analytics" ]
+    restart: "no"
+
+    depends_on:
+      urbangreen-ollama:
+        condition: service_healthy
+
+    environment:
+      OLLAMA_HOST: http://urbangreen-ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+
+    entrypoint: [ "/bin/sh", "/scripts/init-model.sh" ]
+
+    volumes:
+      - urbangreen-ollama-data:/root/.ollama
+      - ./infra/ollama/init:/scripts:ro
+
+    networks:
+      - urbangreen-network
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -626,6 +682,9 @@ volumes:
 
   urbangreen-superset:
     name: urbangreen-superset
+
+  urbangreen-ollama-data:
+    name: urbangreen-ollama-data
 
 networks:
   urbangreen-network:
