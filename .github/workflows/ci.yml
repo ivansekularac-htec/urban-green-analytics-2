@@ -4,13 +4,40 @@ name: Urban Green Analytics
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  lint-and-test:
+  changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      mcp: ${{ steps.filter.outputs.mcp }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api:
+              - 'api/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/**'
+            mcp:
+              - 'mcp/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/**'
+
+  api-ci:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
 
     env:
@@ -22,11 +49,9 @@ jobs:
       POSTGRES_SCHEMA: app
 
     steps:
-      # 1. Check out your repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Install uv and enable automatic caching
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -34,13 +59,10 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "api/uv.lock"
 
-      # 3. Install project dependencies using uv sync
       - name: Install dependencies
-        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen --group dev
         working-directory: ./api
 
-      # 4. Execute test or linters using uv run
       - name: Run ruff check
         run: uv run ruff check app tests
         working-directory: ./api
@@ -52,3 +74,35 @@ jobs:
       - name: Run tests
         run: uv run pytest
         working-directory: ./api
+
+  mcp-ci:
+    needs: changes
+    if: needs.changes.outputs.mcp == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./mcp
+
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./mcp
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./mcp
+
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./mcp
