@@ -661,6 +661,47 @@ services:
     networks:
       - urbangreen-network
 
+  urbangreen-mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    container_name: urbangreen-mcp
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      MCP_HOST: ${MCP_HOST:-0.0.0.0}
+      MCP_PORT: ${MCP_PORT:-8001}
+      CLICKHOUSE_HOST: urbangreen-clickhouse
+      CLICKHOUSE_HTTP_PORT: 8123
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-urbangreen_dw}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-urbangreen}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+    ports:
+      - "${MCP_PORT:-8001}:${MCP_PORT:-8001}"
+
+    depends_on:
+      urbangreen-clickhouse:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MCP_PORT:-8001}/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data

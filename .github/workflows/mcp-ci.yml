@@ -1,0 +1,51 @@
+name: Urban Green MCP
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "mcp/**"
+      - "docker-compose.yaml"
+      - ".github/workflows/mcp-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+
+    env:
+      CLICKHOUSE_PASSWORD: test
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8001
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./mcp
+
+      - name: Run Ruff check
+        run: uv run ruff check app tests
+        working-directory: ./mcp
+
+      - name: Run Ruff format check
+        run: uv run ruff format --check app tests
+        working-directory: ./mcp
+
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./mcp
+
+      - name: Build MCP image
+        run: docker compose build urbangreen-mcp
