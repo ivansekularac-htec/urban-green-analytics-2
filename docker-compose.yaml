@@ -678,7 +678,7 @@ services:
       - "${MCP_PORT_HOST:-8001}:8000"
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MCP_PORT:-8000}/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
