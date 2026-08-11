@@ -605,6 +605,44 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    container_name: urbangreen-mcp
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      MCP_HOST: ${MCP_HOST:-0.0.0.0}
+      MCP_PORT: ${MCP_PORT:-8001}
+
+    ports:
+      # Bound to the loopback interface: the server is for local clients such
+      # as LM Studio, not for anything else on the network.
+      - "127.0.0.1:${MCP_PORT:-8001}:${MCP_PORT:-8001}"
+
+    depends_on:
+      urbangreen-clickhouse:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS --max-time 2 http://localhost:$${MCP_PORT:-8001}/health >/dev/null || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
   urbangreen-ollama:
     image: ollama/ollama:latest
     container_name: urbangreen-ollama

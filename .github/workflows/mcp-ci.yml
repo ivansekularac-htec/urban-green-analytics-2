@@ -1,11 +1,11 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# This workflow will install Python dependencies, run tests and lint the MCP service
 
-name: Urban Green Analytics
+name: Urban Green MCP
 
-# The workflow always runs, and the job below skips itself when the PR does not
-# touch api/. A path filter on the trigger would stop the workflow from running
-# at all, so a required status check would never be reported and the pull
-# request could not be merged.
+# The workflow always runs, and the jobs below skip themselves when the PR does
+# not touch mcp/. A path filter on the trigger would stop the workflow from
+# running at all, so a required status check would never be reported and the
+# pull request could not be merged.
 on:
   pull_request:
     branches: [ main ]
@@ -17,7 +17,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.filter.outputs.api }}
+      mcp: ${{ steps.filter.outputs.mcp }}
 
     steps:
       - name: Checkout code
@@ -28,22 +28,19 @@ jobs:
         id: filter
         with:
           filters: |
-            api:
-              - 'api/**'
-              - '.github/workflows/ci.yml'
+            mcp:
+              - 'mcp/**'
+              - 'docker-compose.yaml'
+              - '.github/workflows/mcp-ci.yml'
 
   lint-and-test:
     needs: changes
-    if: needs.changes.outputs.api == 'true'
+    if: needs.changes.outputs.mcp == 'true'
     runs-on: ubuntu-latest
 
     env:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: test
-      POSTGRES_SCHEMA: app
+      MCP_HOST: 127.0.0.1
+      MCP_PORT: 8001
 
     steps:
       # 1. Check out your repository code
@@ -56,23 +53,27 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-          cache-dependency-glob: "api/uv.lock"
+          cache-dependency-glob: "mcp/uv.lock"
 
       # 3. Install project dependencies using uv sync
       - name: Install dependencies
         # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen --group dev
-        working-directory: ./api
+        working-directory: ./mcp
 
       # 4. Execute test or linters using uv run
       - name: Run ruff check
         run: uv run ruff check app tests
-        working-directory: ./api
+        working-directory: ./mcp
 
       - name: Run ruff format
         run: uv run ruff format --check app tests
-        working-directory: ./api
+        working-directory: ./mcp
 
       - name: Run tests
         run: uv run pytest
-        working-directory: ./api
+        working-directory: ./mcp
+
+      # 5. Verify the image the compose stack will actually run
+      - name: Build MCP Docker image
+        run: docker compose build urbangreen-mcp

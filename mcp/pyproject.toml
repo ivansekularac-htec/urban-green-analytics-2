@@ -1,0 +1,55 @@
+[project]
+name = "urban-green-mcp"
+version = "1.0.0"
+description = "FastMCP server exposing the Urban Green ClickHouse warehouse"
+requires-python = ">=3.12.0"
+
+dependencies = [
+    "clickhouse-connect>=0.8.0",
+    "fastmcp>=3.4.0,<4",
+    "pydantic-settings>=2.14.1",
+    "sqlglot>=26.0.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+# Same starter set as the API service.
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+    "N",   # pep8-naming
+]
+ignore = [
+    "E501", # line length handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # allow unused imports for re-exports
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --cov=app --cov-report=term-missing"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.18",
+]

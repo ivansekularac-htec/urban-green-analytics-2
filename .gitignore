@@ -115,4 +115,6 @@ Urban Green API/opencollection.yml
 Urban Green API/Testing API.yml
 
 # Coverage
-api/.coverage
+.coverage
+.coverage.*
+htmlcov/
