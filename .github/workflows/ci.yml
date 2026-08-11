@@ -1,32 +1,42 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-
-name: Urban Green Analytics
+name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  lint-and-test:
+  changes:
     runs-on: ubuntu-latest
-
-    env:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: test
-      POSTGRES_SCHEMA: app
-
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      mcp: ${{ steps.filter.outputs.mcp }}
     steps:
-      # 1. Check out your repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Install uv and enable automatic caching
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api/**'
+              - '.github/workflows/ci.yml'
+            mcp:
+              - 'mcp/**'
+              - '.github/workflows/ci.yml'
+
+  api-lint:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -34,13 +44,10 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "api/uv.lock"
 
-      # 3. Install project dependencies using uv sync
       - name: Install dependencies
-        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen --group dev
         working-directory: ./api
 
-      # 4. Execute test or linters using uv run
       - name: Run ruff check
         run: uv run ruff check app tests
         working-directory: ./api
@@ -49,6 +56,82 @@ jobs:
         run: uv run ruff format --check app tests
         working-directory: ./api
 
+  api-test:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: test
+      POSTGRES_SCHEMA: app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "api/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./api
+
       - name: Run tests
         run: uv run pytest
         working-directory: ./api
+
+  mcp-lint:
+    needs: changes
+    if: needs.changes.outputs.mcp == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./mcp
+
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./mcp
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./mcp
+
+  mcp-test:
+    needs: changes
+    if: needs.changes.outputs.mcp == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./mcp
+
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./mcp
