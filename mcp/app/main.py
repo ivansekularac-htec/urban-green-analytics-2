@@ -11,7 +11,7 @@ settings = get_settings()
 
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(request):
-    return JSONResponse({"status": "healthy", "service": "mcp-server"})
+    return JSONResponse({"status": "healthy", "service": "urbangreen-mcp-server"})
 
 
 if __name__ == "__main__":
