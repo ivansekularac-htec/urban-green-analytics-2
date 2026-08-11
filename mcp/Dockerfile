@@ -9,7 +9,7 @@ RUN apt-get update \
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-dev
+RUN uv sync --frozen --no-dev
 
 COPY app ./app
 
