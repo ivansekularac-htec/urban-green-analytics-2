@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 
-name: Urban Green Analytics
+name: Urban Green Analytics API
 
 on:
   pull_request:

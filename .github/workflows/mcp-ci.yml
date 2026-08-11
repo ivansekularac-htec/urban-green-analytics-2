@@ -1,0 +1,42 @@
+name: Urban Green Analytics MCP 
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+        working-directory: ./mcp
+
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./mcp
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./mcp
+
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./mcp
+
+      - name: Build MCP Docker image
+        run: docker compose build urbangreen-mcp

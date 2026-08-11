@@ -1,0 +1,46 @@
+[project]
+name = "urbangreen-mcp"
+version = "0.1.0"
+description = "MCP service for Urban Green Analytics"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "fastmcp==3.4.7",
+    "clickhouse-connect==1.6.0",
+    "sqlglot==30.16.0",
+    "pydantic-settings==2.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "ruff==0.16.2",
+]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["app", "tests"]
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
