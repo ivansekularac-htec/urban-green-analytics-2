@@ -1,0 +1,18 @@
+[project]
+name = "urbangreen-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "clickhouse-connect>=1.6.0",
+    "fastmcp>=3.4.7",
+    "pydantic-settings>=2.15.0",
+    "sqlglot>=30.16.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.2",
+]
