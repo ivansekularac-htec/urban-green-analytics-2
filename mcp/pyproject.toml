@@ -1,7 +1,7 @@
 [project]
 name = "urbangreen-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server for the UrbanGreen Analytics platform"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
