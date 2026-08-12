@@ -12,7 +12,7 @@ def test_settings_load_from_environment(monkeypatch):
     monkeypatch.setenv("CLICKHOUSE_HOST", "ch.example")
     monkeypatch.setenv("CLICKHOUSE_HTTP_PORT", "8443")
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.mcp_host == "127.0.0.1"
     assert settings.mcp_port == 9000
@@ -40,7 +40,7 @@ def test_settings_use_default_values(monkeypatch):
     ):
         monkeypatch.delenv(key, raising=False)
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.mcp_host == "0.0.0.0"
     assert settings.mcp_port == 8001
@@ -57,6 +57,4 @@ def test_settings_use_default_values(monkeypatch):
 
 
 def test_get_settings_returns_cached_instance():
-    get_settings.cache_clear()
     assert get_settings() is get_settings()
-    get_settings.cache_clear()

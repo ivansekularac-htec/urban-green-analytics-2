@@ -1,3 +1,9 @@
+"""Shared read-only ClickHouse client for the MCP service.
+
+Opens one cached clickhouse-connect client with readonly=2, per-query
+timeout/memory caps, and no session id (safe for concurrent tool calls).
+"""
+
 from functools import lru_cache
 
 import clickhouse_connect
