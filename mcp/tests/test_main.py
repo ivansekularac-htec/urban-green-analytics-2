@@ -8,8 +8,8 @@ from app.main import main
 
 def test_main_starts_mcp_server_with_configured_settings():
     settings = SimpleNamespace(
-        host="127.0.0.1",
-        port=9000,
+        mcp_host="127.0.0.1",
+        mcp_port=9000,
     )
 
     with (
