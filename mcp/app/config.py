@@ -14,11 +14,7 @@ class Settings(BaseSettings):
     clickhouse_query_timeout: int = 30
     clickhouse_memory_limit: int = 1073741824
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-    )
+    model_config = SettingsConfigDict(case_sensitive=False, extra="ignore")
 
 
 @lru_cache

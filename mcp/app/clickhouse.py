@@ -1,3 +1,5 @@
+"""Provides a pre-configured read-only ClickHouse client for the MCP service."""
+
 import clickhouse_connect
 from clickhouse_connect.driver import Client
 
