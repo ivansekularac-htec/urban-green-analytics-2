@@ -5,6 +5,9 @@ name: Urban Green Analytics API
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - "api/**"
+      - ".github/workflows/api-ci.yml"
 
 permissions:
   contents: read

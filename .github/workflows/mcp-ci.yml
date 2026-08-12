@@ -1,8 +1,12 @@
-name: Urban Green Analytics MCP 
+name: Urban Green Analytics MCP
 
 on:
   pull_request:
     branches: [main]
+    paths:
+      - "mcp/**"
+      - "docker-compose.yaml"
+      - ".github/workflows/mcp-ci.yml"
 
 permissions:
   contents: read

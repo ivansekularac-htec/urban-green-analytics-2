@@ -1,2 +1,15 @@
+# Linux / Docker files
 *.sh text eol=lf
 Dockerfile text eol=lf
+**/Dockerfile text eol=lf
+
+# CI and configuration
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+
+# Environment templates
+.env.example text eol=lf
+
+# Python
+*.py text eol=lf

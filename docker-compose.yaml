@@ -690,7 +690,7 @@ services:
       - urbangreen-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:$${MCP_PORT:-8001}/health || exit 1" ]
+      test: [ "CMD-SHELL", "python -c \"import os, urllib.request; urllib.request.urlopen('http://localhost:' + os.environ.get('MCP_PORT', '8001') + '/health')\"" ]
       interval: 10s
       timeout: 5s
       retries: 5
