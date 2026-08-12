@@ -19,7 +19,7 @@ def test_settings_load_from_environment(monkeypatch):
     assert settings.mcp_host == "127.0.0.1"
     assert settings.mcp_port == 9000
     assert settings.clickhouse_host == "clickhouse-test"
-    assert settings.clickhouse_port == 8124
+    assert settings.clickhouse_http_port == 8124
     assert settings.clickhouse_db == "test_database"
     assert settings.clickhouse_user == "test_user"
     assert settings.clickhouse_password == "test_password"
@@ -43,7 +43,7 @@ def test_settings_use_default_values(monkeypatch):
     assert settings.mcp_host == "0.0.0.0"
     assert settings.mcp_port == 8001
     assert settings.clickhouse_host == "urbangreen-clickhouse"
-    assert settings.clickhouse_port == 8123
+    assert settings.clickhouse_http_port == 8123
     assert settings.clickhouse_db == "urbangreen_dw"
     assert settings.clickhouse_user == "urbangreen"
     assert settings.clickhouse_password == ""
