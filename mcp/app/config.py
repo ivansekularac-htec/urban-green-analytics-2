@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     port: int = 8001
 
     model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
         env_prefix="MCP_",
         case_sensitive=False,
     )

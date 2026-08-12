@@ -2,4 +2,4 @@
 
 set -eu
 
-exec /app/.venv/bin/python -m app.main
+exec python -m app.main

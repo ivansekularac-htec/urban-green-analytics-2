@@ -54,3 +54,4 @@ jobs:
       # 6. Verify that the MCP Docker image builds successfully
       - name: Build MCP Docker image
         run: docker compose build urbangreen-mcp
+        

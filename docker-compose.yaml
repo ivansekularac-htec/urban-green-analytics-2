@@ -669,6 +669,10 @@ services:
     profiles: [ "all", "analytics" ]
     restart: unless-stopped
 
+    depends_on:
+      urbangreen-clickhouse:
+        condition: service_healthy
+
     environment:
       MCP_HOST: ${MCP_HOST:-0.0.0.0}
       MCP_PORT: ${MCP_PORT:-8001}
