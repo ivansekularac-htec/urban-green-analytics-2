@@ -20,8 +20,8 @@ def test_settings_load_from_environment(monkeypatch):
     assert settings.mcp_port == 9000
     assert settings.clickhouse_host == "clickhouse-test"
     assert settings.clickhouse_port == 8124
-    assert settings.clickhouse_database == "test_database"
-    assert settings.clickhouse_username == "test_user"
+    assert settings.clickhouse_db == "test_database"
+    assert settings.clickhouse_user == "test_user"
     assert settings.clickhouse_password == "test_password"
     assert settings.clickhouse_query_timeout_seconds == 60
     assert settings.clickhouse_max_memory_usage == 268435456
@@ -30,6 +30,13 @@ def test_settings_load_from_environment(monkeypatch):
 def test_settings_use_default_values(monkeypatch):
     monkeypatch.delenv("MCP_HOST", raising=False)
     monkeypatch.delenv("MCP_PORT", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_HOST", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_HTTP_PORT", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_DB", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_USER", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_PASSWORD", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_QUERY_TIMEOUT_SECONDS", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_MAX_MEMORY_USAGE", raising=False)
 
     settings = Settings()
 
@@ -37,8 +44,8 @@ def test_settings_use_default_values(monkeypatch):
     assert settings.mcp_port == 8001
     assert settings.clickhouse_host == "urbangreen-clickhouse"
     assert settings.clickhouse_port == 8123
-    assert settings.clickhouse_database == "urbangreen_dw"
-    assert settings.clickhouse_username == "urbangreen"
+    assert settings.clickhouse_db == "urbangreen_dw"
+    assert settings.clickhouse_user == "urbangreen"
     assert settings.clickhouse_password == ""
     assert settings.clickhouse_query_timeout_seconds == 30
     assert settings.clickhouse_max_memory_usage == 1073741824
