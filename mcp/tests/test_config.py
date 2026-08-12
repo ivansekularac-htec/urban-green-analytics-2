@@ -11,8 +11,8 @@ def test_settings_load_from_environment(monkeypatch):
     monkeypatch.setenv("CLICKHOUSE_DB", "test_database")
     monkeypatch.setenv("CLICKHOUSE_USER", "test_user")
     monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
-    monkeypatch.setenv("CLICKHOUSE_QUERY_TIMEOUT_SECONDS", "60")
-    monkeypatch.setenv("CLICKHOUSE_MAX_MEMORY_USAGE", "268435456")
+    monkeypatch.setenv("CLICKHOUSE_QUERY_TIMEOUT", "60")
+    monkeypatch.setenv("CLICKHOUSE_MEMORY_LIMIT", "268435456")
 
     settings = Settings()
 
@@ -23,8 +23,8 @@ def test_settings_load_from_environment(monkeypatch):
     assert settings.clickhouse_db == "test_database"
     assert settings.clickhouse_user == "test_user"
     assert settings.clickhouse_password == "test_password"
-    assert settings.clickhouse_query_timeout_seconds == 60
-    assert settings.clickhouse_max_memory_usage == 268435456
+    assert settings.clickhouse_query_timeout == 60
+    assert settings.clickhouse_memory_limit == 268435456
 
 
 def test_settings_use_default_values(monkeypatch):
@@ -35,8 +35,8 @@ def test_settings_use_default_values(monkeypatch):
     monkeypatch.delenv("CLICKHOUSE_DB", raising=False)
     monkeypatch.delenv("CLICKHOUSE_USER", raising=False)
     monkeypatch.delenv("CLICKHOUSE_PASSWORD", raising=False)
-    monkeypatch.delenv("CLICKHOUSE_QUERY_TIMEOUT_SECONDS", raising=False)
-    monkeypatch.delenv("CLICKHOUSE_MAX_MEMORY_USAGE", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_QUERY_TIMEOUT", raising=False)
+    monkeypatch.delenv("CLICKHOUSE_MEMORY_LIMIT", raising=False)
 
     settings = Settings()
 
@@ -47,8 +47,8 @@ def test_settings_use_default_values(monkeypatch):
     assert settings.clickhouse_db == "urbangreen_dw"
     assert settings.clickhouse_user == "urbangreen"
     assert settings.clickhouse_password == ""
-    assert settings.clickhouse_query_timeout_seconds == 30
-    assert settings.clickhouse_max_memory_usage == 1073741824
+    assert settings.clickhouse_query_timeout == 30
+    assert settings.clickhouse_memory_limit == 1073741824
 
 
 def test_get_settings_returns_cached_instance():
