@@ -7,6 +7,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: PositiveInt = 8001
+    log_level: str = "INFO"
+    default_row_limit: PositiveInt = 100
+    max_row_limit: PositiveInt = 1000
+    query_timeout_seconds: PositiveInt = 30
+    query_max_memory_bytes: PositiveInt = 512 * 1024 * 1024
 
     clickhouse_host: str = Field(
         default="urbangreen-clickhouse",
@@ -27,14 +32,6 @@ class Settings(BaseSettings):
     clickhouse_password: str = Field(
         default="",
         validation_alias="CLICKHOUSE_PASSWORD",
-    )
-    clickhouse_query_timeout_seconds: PositiveInt = Field(
-        default=30,
-        validation_alias="CLICKHOUSE_QUERY_TIMEOUT_SECONDS",
-    )
-    clickhouse_max_memory_usage: PositiveInt = Field(
-        default=512 * 1024 * 1024,
-        validation_alias="CLICKHOUSE_MAX_MEMORY_USAGE",
     )
 
     model_config = SettingsConfigDict(

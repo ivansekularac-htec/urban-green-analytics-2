@@ -1,9 +1,12 @@
+from functools import lru_cache
+
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
 
 from app.config import get_settings
 
 
+@lru_cache
 def get_clickhouse_client() -> Client:
     config = get_settings()
 
@@ -15,7 +18,7 @@ def get_clickhouse_client() -> Client:
         database=config.clickhouse_database,
         settings={
             "readonly": 2,
-            "max_execution_time": config.clickhouse_query_timeout_seconds,
-            "max_memory_usage": config.clickhouse_max_memory_usage,
+            "max_execution_time": config.query_timeout_seconds,
+            "max_memory_usage": config.query_max_memory_bytes,
         },
     )
