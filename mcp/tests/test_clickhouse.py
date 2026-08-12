@@ -18,13 +18,13 @@ def clear_clickhouse_client_cache():
 def test_get_clickhouse_client(mock_get_settings, mock_get_client):
     """Verify that the client uses the configured connection and query settings."""
     settings = MagicMock(
+        mcp_clickhouse_query_timeout=15,
+        mcp_clickhouse_memory_limit=536_870_912,
         clickhouse_host="test-clickhouse",
         clickhouse_http_port=8123,
         clickhouse_user="test-user",
         clickhouse_password="test-password",
         clickhouse_db="test_db",
-        clickhouse_query_timeout=15,
-        clickhouse_memory_limit=512 * 1024 * 1024,
     )
     mock_get_settings.return_value = settings
 
@@ -39,7 +39,7 @@ def test_get_clickhouse_client(mock_get_settings, mock_get_client):
         settings={
             "readonly": 2,
             "max_execution_time": 15,
-            "max_memory_usage": 512 * 1024 * 1024,
+            "max_memory_usage": 536_870_912,
         },
     )
 
@@ -52,13 +52,13 @@ def test_get_clickhouse_client_returns_cached_instance(
 ):
     """Verify that the ClickHouse client is created only once per process."""
     settings = MagicMock(
+        mcp_clickhouse_query_timeout=30,
+        mcp_clickhouse_memory_limit=536_870_912,
         clickhouse_host="test-clickhouse",
         clickhouse_http_port=8123,
         clickhouse_user="test-user",
         clickhouse_password="test-password",
         clickhouse_db="test_db",
-        clickhouse_query_timeout=30,
-        clickhouse_memory_limit=1_073_741_824,
     )
     mock_get_settings.return_value = settings
 

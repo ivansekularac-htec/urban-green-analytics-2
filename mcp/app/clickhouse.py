@@ -21,7 +21,7 @@ def get_clickhouse_client() -> Client:
         database=settings.clickhouse_db,
         settings={
             "readonly": 2,
-            "max_execution_time": settings.clickhouse_query_timeout,
-            "max_memory_usage": settings.clickhouse_memory_limit,
+            "max_execution_time": settings.mcp_clickhouse_query_timeout,
+            "max_memory_usage": settings.mcp_clickhouse_memory_limit,
         },
     )
