@@ -1490,7 +1490,7 @@ wheels = [
 
 [[package]]
 name = "urban-green-mcp"
-version = "1.0.0"
+version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "clickhouse-connect" },

@@ -15,7 +15,6 @@ from starlette.responses import PlainTextResponse
 
 from app.config import get_settings
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("urbangreen-mcp")
@@ -31,9 +30,11 @@ async def health(_request: Request) -> PlainTextResponse:
 def main() -> None:
     """Start the MCP server using host and port from settings."""
 
+    logging.basicConfig(level=logging.INFO)
+
     settings = get_settings()
 
-    logger.info("Starting MCP server on %s:%s", settings.mcp_host, settings.mcp_port)
+    logger.info(f"Starting MCP server on {settings.mcp_host}:{settings.mcp_port}")
 
     # "http" is what the standalone FastMCP package calls the streamable-HTTP
     # transport; "streamable-http" is the older name from the in-SDK module.

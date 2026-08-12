@@ -71,7 +71,7 @@ jobs:
         working-directory: ./mcp
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run pytest --cov=app --cov-report=term-missing
         working-directory: ./mcp
 
       # 5. Verify the image the compose stack will actually run

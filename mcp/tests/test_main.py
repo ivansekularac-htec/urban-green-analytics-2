@@ -7,7 +7,13 @@ entry point hands it the transport and the settings it was given.
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from app.main import main
+from app.main import main, mcp
+
+
+def test_server_instance_is_named():
+    """The FastMCP instance exists and carries the service name."""
+
+    assert mcp.name == "urbangreen-mcp"
 
 
 def test_main_starts_server_with_configured_settings():
