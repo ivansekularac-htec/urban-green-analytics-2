@@ -7,8 +7,8 @@ def main() -> None:
 
     mcp.run(
         transport="http",
-        host=settings.host,
-        port=settings.port,
+        host=settings.mcp_host,
+        port=settings.mcp_port,
     )
 
 
