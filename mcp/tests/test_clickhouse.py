@@ -1,12 +1,57 @@
-"""Tests for application configuration."""
+"""Tests for ClickHouse client configuration."""
 
-from app.config import Settings, get_settings
+from types import SimpleNamespace
+from unittest.mock import Mock
+
+import pytest
+from pydantic import SecretStr
+
+import app.clickhouse as clickhouse
+from app.config import Settings
 
 
-def test_settings_load_from_environment(monkeypatch):
-    """Verify that settings are loaded from environment variables."""
-    monkeypatch.setenv("MCP_HOST", "127.0.0.1")
-    monkeypatch.setenv("MCP_PORT", "9000")
+@pytest.fixture(autouse=True)
+def clear_clickhouse_client_cache():
+    """Clear the ClickHouse client cache before and after each test."""
+    clickhouse.get_clickhouse_client.cache_clear()
+    yield
+    clickhouse.get_clickhouse_client.cache_clear()
+
+
+def test_clickhouse_client_uses_default_settings(monkeypatch):
+    """Verify that the client uses default connection and query settings."""
+    monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
+
+    settings = Settings(_env_file=None)
+
+    get_client_mock = Mock()
+
+    monkeypatch.setattr(clickhouse, "get_settings", lambda: settings)
+    monkeypatch.setattr(
+        clickhouse.clickhouse_connect,
+        "get_client",
+        get_client_mock,
+    )
+
+    clickhouse.get_clickhouse_client()
+
+    get_client_mock.assert_called_once_with(
+        host="urbangreen-clickhouse",
+        port=8123,
+        database="urbangreen_dw",
+        username="urbangreen",
+        password="test_password",
+        autogenerate_session_id=False,
+        settings={
+            "readonly": 2,
+            "max_execution_time": 30,
+            "max_memory_usage": 500_000_000,
+        },
+    )
+
+
+def test_clickhouse_client_uses_environment_overrides(monkeypatch):
+    """Verify that environment values override the ClickHouse defaults."""
     monkeypatch.setenv("CLICKHOUSE_HOST", "localhost")
     monkeypatch.setenv("CLICKHOUSE_HTTP_PORT", "9001")
     monkeypatch.setenv("CLICKHOUSE_DB", "test_db")
@@ -17,52 +62,56 @@ def test_settings_load_from_environment(monkeypatch):
 
     settings = Settings(_env_file=None)
 
-    assert settings.host == "127.0.0.1"
-    assert settings.port == 9000
+    get_client_mock = Mock()
 
-    assert settings.clickhouse_host == "localhost"
-    assert settings.clickhouse_http_port == 9001
-    assert settings.clickhouse_db == "test_db"
-    assert settings.clickhouse_user == "test_user"
-    assert settings.clickhouse_password.get_secret_value() == "test_password"
-    assert settings.clickhouse_query_timeout == 15
-    assert settings.clickhouse_max_memory_usage == 100_000_000
+    monkeypatch.setattr(clickhouse, "get_settings", lambda: settings)
+    monkeypatch.setattr(
+        clickhouse.clickhouse_connect,
+        "get_client",
+        get_client_mock,
+    )
 
+    clickhouse.get_clickhouse_client()
 
-def test_settings_use_default_values(monkeypatch):
-    """Verify that non-secret settings use their default values."""
-    env_vars = [
-        "MCP_HOST",
-        "MCP_PORT",
-        "CLICKHOUSE_HOST",
-        "CLICKHOUSE_HTTP_PORT",
-        "CLICKHOUSE_DB",
-        "CLICKHOUSE_USER",
-        "CLICKHOUSE_QUERY_TIMEOUT",
-        "CLICKHOUSE_MAX_MEMORY_USAGE",
-    ]
-
-    for env_var in env_vars:
-        monkeypatch.delenv(env_var, raising=False)
-
-    monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
-
-    settings = Settings(_env_file=None)
-
-    assert settings.host == "0.0.0.0"
-    assert settings.port == 8001
-    assert settings.clickhouse_host == "urbangreen-clickhouse"
-    assert settings.clickhouse_http_port == 8123
-    assert settings.clickhouse_db == "urbangreen_dw"
-    assert settings.clickhouse_user == "urbangreen"
-    assert settings.clickhouse_query_timeout == 30
-    assert settings.clickhouse_max_memory_usage == 500_000_000
+    get_client_mock.assert_called_once_with(
+        host="localhost",
+        port=9001,
+        database="test_db",
+        username="test_user",
+        password="test_password",
+        autogenerate_session_id=False,
+        settings={
+            "readonly": 2,
+            "max_execution_time": 15,
+            "max_memory_usage": 100_000_000,
+        },
+    )
 
 
-def test_get_settings_returns_cached_instance():
-    """Verify that application settings are cached."""
-    get_settings.cache_clear()
+def test_get_clickhouse_client_returns_cached_instance(monkeypatch):
+    """Verify that the ClickHouse client is created only once per process."""
+    settings = SimpleNamespace(
+        clickhouse_host="localhost",
+        clickhouse_http_port=8123,
+        clickhouse_db="test_db",
+        clickhouse_user="test_user",
+        clickhouse_password=SecretStr("test_password"),
+        clickhouse_query_timeout=30,
+        clickhouse_max_memory_usage=500_000_000,
+    )
 
-    assert get_settings() is get_settings()
+    client_mock = Mock()
+    get_client_mock = Mock(return_value=client_mock)
 
-    get_settings.cache_clear()
+    monkeypatch.setattr(clickhouse, "get_settings", lambda: settings)
+    monkeypatch.setattr(
+        clickhouse.clickhouse_connect,
+        "get_client",
+        get_client_mock,
+    )
+
+    first = clickhouse.get_clickhouse_client()
+    second = clickhouse.get_clickhouse_client()
+
+    assert first is second
+    get_client_mock.assert_called_once()
