@@ -1,0 +1,57 @@
+# This workflow will install Python dependencies, run tests and lint,
+# and verify that the MCP Docker image builds successfully.
+
+name: Urban Green Analytics MCP CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "mcp/**"
+      - "docker-compose.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install uv and enable automatic caching
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "mcp/uv.lock"
+
+      # 3. Install project dependencies using uv sync
+      - name: Install dependencies
+        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
+        run: uv sync --frozen --group dev
+        working-directory: ./mcp
+
+      # 4. Run lint and formatting checks
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./mcp
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./mcp
+
+      # 5. Run MCP tests
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./mcp
+
+      # 6. Verify that the MCP Docker image builds successfully
+      - name: Build MCP Docker image
+        run: docker compose build urbangreen-mcp
+        

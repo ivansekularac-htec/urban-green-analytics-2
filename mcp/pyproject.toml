@@ -1,0 +1,52 @@
+[project]
+name = "urbangreen-mcp"
+version = "0.1.0"
+description = "MCP server for the UrbanGreen Analytics platform"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastmcp==3.4.4",
+    "clickhouse-connect==1.5.0",
+    "sqlglot==30.13.0",
+    "pydantic-settings==2.14.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "ruff==0.15.22",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "build", "dist", "migrations"]
+
+[tool.ruff.lint]
+# A reasonable starter set
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+    "N",   # pep8-naming
+]
+ignore = [
+    "E501", # line length handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # allow unused imports for re-exports
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true

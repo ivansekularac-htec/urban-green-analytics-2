@@ -661,6 +661,35 @@ services:
     networks:
       - urbangreen-network
 
+  urbangreen-mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    container_name: urbangreen-mcp
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    depends_on:
+      urbangreen-clickhouse:
+        condition: service_healthy
+
+    environment:
+      MCP_HOST: ${MCP_HOST:-0.0.0.0}
+      MCP_PORT: ${MCP_PORT:-8001}
+
+    ports:
+      - "127.0.0.1:${MCP_PORT:-8001}:${MCP_PORT:-8001}"
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS --max-time 2 http://localhost:$${MCP_PORT:-8001}/health >/dev/null || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
