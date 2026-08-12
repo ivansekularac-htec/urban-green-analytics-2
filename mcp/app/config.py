@@ -11,6 +11,16 @@ class Settings(BaseSettings):
 
     host: str = Field(default="0.0.0.0", validation_alias="MCP_HOST")
     port: int = Field(default=8001, validation_alias="MCP_PORT")
+    log_level: str = Field(default="INFO", validation_alias="MCP_LOG_LEVEL")
+
+    query_timeout_seconds: int = Field(default=30, validation_alias="MCP_QUERY_TIMEOUT_SECONDS")
+    query_max_memory_bytes: int = Field(
+        default=500_000_000, validation_alias="MCP_QUERY_MAX_MEMORY_BYTES"
+    )
+    query_default_row_limit: int = Field(
+        default=100, validation_alias="MCP_QUERY_DEFAULT_ROW_LIMIT"
+    )
+    query_max_row_limit: int = Field(default=1000, validation_alias="MCP_QUERY_MAX_ROW_LIMIT")
 
     clickhouse_host: str = Field(
         default="urbangreen-clickhouse", validation_alias="CLICKHOUSE_HOST"
@@ -19,10 +29,6 @@ class Settings(BaseSettings):
     clickhouse_db: str = Field(default="urbangreen_dw", validation_alias="CLICKHOUSE_DB")
     clickhouse_user: str = Field(default="urbangreen", validation_alias="CLICKHOUSE_USER")
     clickhouse_password: SecretStr = Field(validation_alias="CLICKHOUSE_PASSWORD")
-    clickhouse_query_timeout: int = Field(default=30, validation_alias="CLICKHOUSE_QUERY_TIMEOUT")
-    clickhouse_max_memory_usage: int = Field(
-        default=500_000_000, validation_alias="CLICKHOUSE_MAX_MEMORY_USAGE"
-    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

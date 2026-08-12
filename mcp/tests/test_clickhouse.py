@@ -20,11 +20,24 @@ def clear_clickhouse_client_cache():
 
 def test_clickhouse_client_uses_default_settings(monkeypatch):
     """Verify that the client uses default connection and query settings."""
+    env_vars = [
+        "CLICKHOUSE_HOST",
+        "CLICKHOUSE_HTTP_PORT",
+        "CLICKHOUSE_DB",
+        "CLICKHOUSE_USER",
+        "MCP_QUERY_TIMEOUT_SECONDS",
+        "MCP_QUERY_MAX_MEMORY_BYTES",
+    ]
+
+    for env_var in env_vars:
+        monkeypatch.delenv(env_var, raising=False)
+
     monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
 
     settings = Settings(_env_file=None)
 
-    get_client_mock = Mock()
+    client_mock = Mock()
+    get_client_mock = Mock(return_value=client_mock)
 
     monkeypatch.setattr(clickhouse, "get_settings", lambda: settings)
     monkeypatch.setattr(
@@ -33,7 +46,9 @@ def test_clickhouse_client_uses_default_settings(monkeypatch):
         get_client_mock,
     )
 
-    clickhouse.get_clickhouse_client()
+    client = clickhouse.get_clickhouse_client()
+
+    assert client is client_mock
 
     get_client_mock.assert_called_once_with(
         host="urbangreen-clickhouse",
@@ -57,12 +72,13 @@ def test_clickhouse_client_uses_environment_overrides(monkeypatch):
     monkeypatch.setenv("CLICKHOUSE_DB", "test_db")
     monkeypatch.setenv("CLICKHOUSE_USER", "test_user")
     monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
-    monkeypatch.setenv("CLICKHOUSE_QUERY_TIMEOUT", "15")
-    monkeypatch.setenv("CLICKHOUSE_MAX_MEMORY_USAGE", "100000000")
+    monkeypatch.setenv("MCP_QUERY_TIMEOUT_SECONDS", "15")
+    monkeypatch.setenv("MCP_QUERY_MAX_MEMORY_BYTES", "100000000")
 
     settings = Settings(_env_file=None)
 
-    get_client_mock = Mock()
+    client_mock = Mock()
+    get_client_mock = Mock(return_value=client_mock)
 
     monkeypatch.setattr(clickhouse, "get_settings", lambda: settings)
     monkeypatch.setattr(
@@ -71,7 +87,9 @@ def test_clickhouse_client_uses_environment_overrides(monkeypatch):
         get_client_mock,
     )
 
-    clickhouse.get_clickhouse_client()
+    client = clickhouse.get_clickhouse_client()
+
+    assert client is client_mock
 
     get_client_mock.assert_called_once_with(
         host="localhost",
@@ -96,8 +114,8 @@ def test_get_clickhouse_client_returns_cached_instance(monkeypatch):
         clickhouse_db="test_db",
         clickhouse_user="test_user",
         clickhouse_password=SecretStr("test_password"),
-        clickhouse_query_timeout=30,
-        clickhouse_max_memory_usage=500_000_000,
+        query_timeout_seconds=30,
+        query_max_memory_bytes=500_000_000,
     )
 
     client_mock = Mock()
@@ -114,4 +132,5 @@ def test_get_clickhouse_client_returns_cached_instance(monkeypatch):
     second = clickhouse.get_clickhouse_client()
 
     assert first is second
+    assert first is client_mock
     get_client_mock.assert_called_once()

@@ -22,7 +22,7 @@ def get_clickhouse_client() -> Client:
         autogenerate_session_id=False,
         settings={
             "readonly": 2,
-            "max_execution_time": settings.clickhouse_query_timeout,
-            "max_memory_usage": settings.clickhouse_max_memory_usage,
+            "max_execution_time": settings.query_timeout_seconds,
+            "max_memory_usage": settings.query_max_memory_bytes,
         },
     )
