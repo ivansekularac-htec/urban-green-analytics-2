@@ -5,7 +5,7 @@ def test_settings_defaults():
     settings = Settings()
 
     assert settings.mcp_host == "0.0.0.0"
-    assert settings.mcp_port == 8000
+    assert settings.mcp_port == 8001
 
 
 def test_settings_from_environment(monkeypatch):

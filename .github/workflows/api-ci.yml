@@ -1,0 +1,51 @@
+name: API CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "docker-compose.yaml"
+      - ".github/workflows/api-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  api-ci:
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: test
+      POSTGRES_SCHEMA: app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "api/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+        working-directory: ./api
+
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./api
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./api
+
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./api

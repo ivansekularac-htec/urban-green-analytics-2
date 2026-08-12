@@ -13,6 +13,6 @@ RUN uv sync --frozen --no-dev
 
 COPY app ./app
 
-EXPOSE 8000
+EXPOSE 8001
 
 CMD ["uv", "run", "python", "-m", "app.main"]
