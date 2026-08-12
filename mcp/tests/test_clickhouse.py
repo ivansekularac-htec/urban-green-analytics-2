@@ -19,6 +19,7 @@ def test_settings_load_from_environment(monkeypatch):
 
     assert settings.host == "127.0.0.1"
     assert settings.port == 9000
+
     assert settings.clickhouse_host == "localhost"
     assert settings.clickhouse_http_port == 9001
     assert settings.clickhouse_db == "test_db"
@@ -58,15 +59,10 @@ def test_settings_use_default_values(monkeypatch):
     assert settings.clickhouse_max_memory_usage == 500_000_000
 
 
-def test_get_settings_returns_cached_instance(monkeypatch):
+def test_get_settings_returns_cached_instance():
     """Verify that application settings are cached."""
-    monkeypatch.setenv("CLICKHOUSE_PASSWORD", "test_password")
-
     get_settings.cache_clear()
 
-    first = get_settings()
-    second = get_settings()
-
-    assert first is second
+    assert get_settings() is get_settings()
 
     get_settings.cache_clear()
