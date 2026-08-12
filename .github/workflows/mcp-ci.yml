@@ -1,3 +1,4 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
 name: MCP CI
 
 on:
@@ -16,9 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Check out your repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Install uv and enable automatic caching
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -26,10 +29,13 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "mcp/uv.lock"
 
+      # 3. Install project dependencies using uv sync
       - name: Install dependencies
+        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
         run: uv sync --frozen --group dev
         working-directory: ./mcp
 
+      # 4. Execute test or linters using uv run
       - name: Run ruff check
         run: uv run ruff check app tests
         working-directory: ./mcp
