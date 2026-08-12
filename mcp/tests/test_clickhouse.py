@@ -1,11 +1,22 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.clickhouse import get_clickhouse_client
+
+
+@pytest.fixture(autouse=True)
+def clear_clickhouse_client_cache():
+    """Clear the ClickHouse client cache before and after each test."""
+    get_clickhouse_client.cache_clear()
+    yield
+    get_clickhouse_client.cache_clear()
 
 
 @patch("app.clickhouse.clickhouse_connect.get_client")
 @patch("app.clickhouse.get_settings")
 def test_get_clickhouse_client(mock_get_settings, mock_get_client):
+    """Verify that the client uses the configured connection and query settings."""
     settings = MagicMock(
         clickhouse_host="test-clickhouse",
         clickhouse_http_port=8123,
@@ -31,3 +42,31 @@ def test_get_clickhouse_client(mock_get_settings, mock_get_client):
             "max_memory_usage": 512 * 1024 * 1024,
         },
     )
+
+
+@patch("app.clickhouse.clickhouse_connect.get_client")
+@patch("app.clickhouse.get_settings")
+def test_get_clickhouse_client_returns_cached_instance(
+    mock_get_settings,
+    mock_get_client,
+):
+    """Verify that the ClickHouse client is created only once per process."""
+    settings = MagicMock(
+        clickhouse_host="test-clickhouse",
+        clickhouse_http_port=8123,
+        clickhouse_user="test-user",
+        clickhouse_password="test-password",
+        clickhouse_db="test_db",
+        clickhouse_query_timeout=30,
+        clickhouse_memory_limit=1_073_741_824,
+    )
+    mock_get_settings.return_value = settings
+
+    client = MagicMock()
+    mock_get_client.return_value = client
+
+    first = get_clickhouse_client()
+    second = get_clickhouse_client()
+
+    assert first is second
+    mock_get_client.assert_called_once()
