@@ -14,6 +14,8 @@ def get_client():
         username=settings.clickhouse_user,
         password=settings.clickhouse_password,
         database=settings.clickhouse_db,
+        connect_timeout=10,
+        send_receive_timeout=settings.mcp_query_timeout_seconds + 5,
         autogenerate_session_id=False,
         settings={
             "readonly": 2,

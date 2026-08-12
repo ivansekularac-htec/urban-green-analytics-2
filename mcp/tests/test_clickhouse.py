@@ -21,10 +21,12 @@ def test_get_client_passes_readonly_session_settings(monkeypatch):
 
     assert client is fake
     kwargs = mock_get.call_args.kwargs
+    assert kwargs["connect_timeout"] == 10
+    assert kwargs["send_receive_timeout"] == 20  # 15 + 5 headroom
+    assert kwargs["autogenerate_session_id"] is False
     assert kwargs["settings"]["readonly"] == 2
     assert kwargs["settings"]["max_execution_time"] == 15
     assert kwargs["settings"]["max_memory_usage"] == 1_048_576
-    assert kwargs["autogenerate_session_id"] is False
 
     get_client.cache_clear()
     get_settings.cache_clear()
