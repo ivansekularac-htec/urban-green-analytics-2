@@ -9,7 +9,7 @@ dependencies = [
     "clickhouse-connect==1.6.0",
     "sqlglot==30.16.0",
     "pydantic-settings==2.15.0",
-    "starlette==1.6.0",
+    "starlette>=1.0.1",
 ]
 
 [dependency-groups]

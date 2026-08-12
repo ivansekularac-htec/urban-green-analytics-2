@@ -1399,7 +1399,7 @@ requires-dist = [
     { name = "fastmcp", specifier = "==3.4.7" },
     { name = "pydantic-settings", specifier = "==2.15.0" },
     { name = "sqlglot", specifier = "==30.16.0" },
-    { name = "starlette", specifier = "==1.6.0" },
+    { name = "starlette", specifier = ">=1.0.1" },
 ]
 
 [package.metadata.requires-dev]
