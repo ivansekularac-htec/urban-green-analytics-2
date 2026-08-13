@@ -26,6 +26,20 @@ def test_empty_sql_is_rejected():
         validate_sql("   ")
 
 
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "-- list all tables\nSHOW TABLES FROM urbangreen_dw",
+        "-- explain the query\nEXPLAIN SELECT * FROM dim_farm",
+    ],
+)
+def test_metadata_commands_allow_leading_comments(sql):
+    rewritten_sql, limit = validate_sql(sql)
+
+    assert rewritten_sql
+    assert limit == 0
+
+
 def test_multiple_statements_are_rejected():
     with pytest.raises(SQLSafetyError, match="single SQL statement"):
         validate_sql("SELECT 1; SELECT 2")
@@ -131,3 +145,8 @@ def test_limit_clamp_preserves_offset():
 
     assert rewritten_sql == "SELECT * FROM dim_farm LIMIT 1000 OFFSET 5"
     assert limit == 1000
+
+
+def test_negative_limit_is_rejected():
+    with pytest.raises(SQLSafetyError, match="LIMIT cannot be negative"):
+        validate_sql("SELECT * FROM dim_farm LIMIT -5")

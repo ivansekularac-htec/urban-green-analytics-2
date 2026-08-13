@@ -17,7 +17,7 @@ def validate_sql(sql: str) -> tuple[str, int | None]:
     """Validate, normalize, and apply row limits to a single read-only SQL statement."""
     statement = _parse_single_statement(sql)
 
-    if _is_metadata_statement(statement, sql):
+    if _is_metadata_statement(statement):
         return statement.sql(dialect="clickhouse"), 0
 
     if not isinstance(statement, (exp.Select, exp.Union)):
@@ -52,15 +52,15 @@ def _parse_single_statement(sql: str) -> exp.Expression:
     return statements[0]
 
 
-def _is_metadata_statement(statement: exp.Expression, sql: str) -> bool:
+def _is_metadata_statement(statement: exp.Expression) -> bool:
     """Return whether the statement is an allowed read-only metadata command."""
     if isinstance(statement, exp.Describe):
         return True
 
     if isinstance(statement, exp.Command):
         # SQLGlot may fall back to Command for valid ClickHouse statements
-        # such as SHOW and EXPLAIN, so preserve a leading-keyword fallback.
-        keyword = sql.lstrip().split(None, 1)[0].upper()
+        # such as SHOW and EXPLAIN, so rely on the parsed command keyword.
+        keyword = str(statement.this).upper()
         return keyword in _SAFE_COMMANDS
 
     return False
@@ -79,6 +79,9 @@ def _apply_limit(
         return statement.sql(dialect="clickhouse"), default_limit
 
     limit_expression = limit.expression
+
+    if isinstance(limit_expression, exp.Neg):
+        raise SQLSafetyError("LIMIT cannot be negative.")
 
     if not isinstance(limit_expression, exp.Literal) or limit_expression.is_string:
         return statement.sql(dialect="clickhouse"), None
