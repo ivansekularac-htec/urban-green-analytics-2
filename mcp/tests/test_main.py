@@ -10,6 +10,7 @@ def test_main_starts_mcp_server_with_configured_settings():
     settings = SimpleNamespace(
         host="127.0.0.1",
         port=9000,
+        log_level="INFO",
     )
 
     with (
