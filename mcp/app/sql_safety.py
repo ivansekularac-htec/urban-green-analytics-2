@@ -6,6 +6,8 @@ from sqlglot.errors import ParseError
 
 from app.config import get_settings
 
+READ_ONLY_COMMANDS = {"SHOW", "DESCRIBE", "DESC", "EXPLAIN"}
+
 
 class SQLSafetyError(ValueError):
     """Raised when SQL does not satisfy the MCP safety rules."""
@@ -27,10 +29,10 @@ def validate_sql(sql: str) -> tuple[str, int | None]:
 
     statement = statements[0]
 
-    if not _is_read_only(statement, sql):
+    if not _is_read_only(statement):
         raise SQLSafetyError("Only read-only SQL queries are allowed.")
 
-    if _has_read_only_command_prefix(sql):
+    if _is_limitless_read_only(statement):
         return statement.sql(dialect="clickhouse"), 0
 
     settings = get_settings()
@@ -43,21 +45,24 @@ def validate_sql(sql: str) -> tuple[str, int | None]:
     return statement.sql(dialect="clickhouse"), effective_limit
 
 
-def _is_read_only(statement: exp.Expression, original_sql: str) -> bool:
-    if isinstance(statement, exp.Query):
+def _is_read_only(statement: exp.Expression) -> bool:
+    unwrapped = _unwrap_query(statement)
+
+    if isinstance(unwrapped, (exp.Query, exp.Describe, exp.Show)):
         return True
 
-    return _has_read_only_command_prefix(original_sql)
+    return _is_read_only_command(unwrapped)
 
 
-def _has_read_only_command_prefix(sql: str) -> bool:
-    # SQLGlot may represent valid SHOW/DESCRIBE/EXPLAIN statements differently
-    # across versions, including falling back to a generic Command node.
-    # Keep this leading-keyword fallback so these known read-only statements
-    # remain accepted even if their AST representation changes.
-    first_keyword = sql.lstrip().split(maxsplit=1)[0].upper()
+def _is_read_only_command(statement: exp.Expression) -> bool:
+    # SQLGlot may fall back to a generic Command node for valid
+    # dialect-specific statements. Inspect Command.this rather than the raw
+    # SQL so leading comments and formatting do not affect classification.
+    return isinstance(statement, exp.Command) and str(statement.this).upper() in READ_ONLY_COMMANDS
 
-    return first_keyword in {"SHOW", "DESCRIBE", "DESC", "EXPLAIN"}
+
+def _is_limitless_read_only(statement: exp.Expression) -> bool:
+    return isinstance(statement, (exp.Describe, exp.Show)) or _is_read_only_command(statement)
 
 
 def _apply_limit(
@@ -88,10 +93,19 @@ def _apply_limit(
 
 
 def _limit_target(statement: exp.Expression) -> exp.Query:
-    # In SQLGlot 30.13, a WITH clause is attached to the SELECT/UNION query
-    # through its `with_` argument rather than wrapping the query. Therefore
-    # the root Query is already the correct node for reading or setting LIMIT.
-    if isinstance(statement, exp.Query):
-        return statement
+    # Parenthesized queries may be wrapped in Paren/Subquery nodes.
+    # Unwrap them before reading or setting LIMIT so the limit applies
+    # to the actual SELECT/UNION query.
+    query = _unwrap_query(statement)
+
+    if isinstance(query, exp.Query):
+        return query
 
     raise SQLSafetyError("Unable to determine query LIMIT target.")
+
+
+def _unwrap_query(statement: exp.Expression) -> exp.Expression:
+    while isinstance(statement, (exp.Paren, exp.Subquery)):
+        statement = statement.this
+
+    return statement

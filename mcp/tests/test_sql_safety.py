@@ -175,3 +175,37 @@ def test_validate_sql_preserves_non_literal_limit():
 
     assert "LIMIT (SELECT 50)" in rewritten_sql
     assert limit is None
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "-- list tables\nSHOW TABLES FROM urbangreen_dw",
+        "-- inspect table\nDESCRIBE dim_farm",
+        "-- inspect table\nDESC dim_farm",
+        "-- inspect plan\nEXPLAIN SELECT * FROM dim_farm",
+    ],
+)
+def test_validate_sql_accepts_read_only_commands_with_leading_comment(sql):
+    rewritten_sql, limit = validate_sql(sql)
+
+    assert rewritten_sql
+    assert limit == 0
+
+
+def test_validate_sql_injects_limit_on_parenthesized_query():
+    sql = "(SELECT * FROM dim_farm)"
+
+    rewritten_sql, limit = validate_sql(sql)
+
+    assert "SELECT * FROM dim_farm LIMIT 100" in rewritten_sql
+    assert limit == 100
+
+
+def test_validate_sql_clamps_limit_on_parenthesized_query():
+    sql = "(SELECT * FROM dim_farm LIMIT 5000)"
+
+    rewritten_sql, limit = validate_sql(sql)
+
+    assert "SELECT * FROM dim_farm LIMIT 1000" in rewritten_sql
+    assert limit == 1000
