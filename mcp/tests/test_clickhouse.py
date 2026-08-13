@@ -16,6 +16,7 @@ def _settings() -> SimpleNamespace:
         clickhouse_connect_timeout=10,
         query_timeout_seconds=30,
         query_max_memory_bytes=536_870_912,
+        max_row_limit=1000,
     )
 
 
@@ -42,6 +43,18 @@ def test_client_session_enforces_readonly_and_query_caps():
     assert settings["readonly"] == 2
     assert settings["max_execution_time"] == 30
     assert settings["max_memory_usage"] == 536_870_912
+
+
+def test_client_caps_result_rows_server_side():
+    """The rewriter can only clamp a LIMIT it can read, so the ceiling is
+    enforced here too - and it throws rather than truncating silently."""
+
+    _, factory = _build_client()
+
+    settings = factory.call_args.kwargs["settings"]
+
+    assert settings["max_result_rows"] == 1000
+    assert settings["result_overflow_mode"] == "throw"
 
 
 def test_client_timeout_has_headroom_over_the_server_limit():

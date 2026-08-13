@@ -48,5 +48,12 @@ def get_client() -> Client:
             "readonly": 2,
             "max_execution_time": settings.query_timeout_seconds,
             "max_memory_usage": settings.query_max_memory_bytes,
+            # The rewriter can only clamp a LIMIT it can read as a number, so the
+            # same ceiling is enforced here for the ones it cannot: expressions,
+            # placeholders and subqueries. "throw" over "break" on purpose - a
+            # silently truncated result reads like a complete one, and an
+            # assistant would state the wrong total with full confidence.
+            "max_result_rows": settings.max_row_limit,
+            "result_overflow_mode": "throw",
         },
     )
