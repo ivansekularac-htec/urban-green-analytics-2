@@ -15,7 +15,7 @@ from clickhouse_connect.driver.exceptions import ClickHouseError
 
 from app.sql_safety import SQLSafetyError, validate_and_rewrite_sql
 
-ALLOWED_DATABASES = {"urbangreen_dw"}
+ALLOWED_DATABASES = {"urbangreen_dw", "etl"}
 
 
 def _validate_database(database: str) -> dict[str, str] | None:
@@ -78,7 +78,11 @@ def list_tables(client: Client, database: str) -> dict:
     }
 
 
-def describe_table(client: Client, database: str, table: str) -> dict:
+def describe_table(
+    client: Client,
+    table: str,
+    database: str = "urbangreen_dw",
+) -> dict:
     """
     Return column metadata for a table in an allowed warehouse database.
 
@@ -89,8 +93,9 @@ def describe_table(client: Client, database: str, table: str) -> dict:
 
     Args:
         client: ClickHouse client used to execute the metadata query.
-        database: Name of the warehouse database containing the table.
         table: Name of the table to describe.
+        database: Name of the warehouse database containing the table.
+            Defaults to ``urbangreen_dw``.
 
     Returns:
         A dictionary containing the database, table, and column metadata on

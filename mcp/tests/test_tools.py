@@ -48,7 +48,7 @@ def test_list_tables_rejects_disallowed_database():
     response = list_tables(client, "system")
 
     assert response == {
-        "error": ("Database 'system' is not allowed. Allowed databases: urbangreen_dw.")
+        "error": ("Database 'system' is not allowed. Allowed databases: etl, urbangreen_dw.")
     }
 
     client.query.assert_not_called()
@@ -116,7 +116,6 @@ def test_describe_table_returns_columns():
 
     response = describe_table(
         client,
-        "urbangreen_dw",
         "dim_farm",
     )
 
@@ -154,12 +153,12 @@ def test_describe_table_rejects_disallowed_database():
 
     response = describe_table(
         client,
-        "system",
         "tables",
+        database="system",
     )
 
     assert response == {
-        "error": ("Database 'system' is not allowed. Allowed databases: urbangreen_dw.")
+        "error": ("Database 'system' is not allowed. Allowed databases: etl, urbangreen_dw.")
     }
 
     client.query.assert_not_called()
@@ -173,7 +172,6 @@ def test_describe_table_returns_error_for_unknown_table():
 
     response = describe_table(
         client,
-        "urbangreen_dw",
         "missing_table",
     )
 
@@ -192,8 +190,8 @@ def test_describe_table_uses_bound_parameters():
 
     describe_table(
         client,
-        "urbangreen_dw",
         "dim_farm",
+        database="urbangreen_dw",
     )
 
     sql = client.query.call_args.args[0]
@@ -217,7 +215,6 @@ def test_describe_table_returns_clickhouse_error():
 
     response = describe_table(
         client,
-        "urbangreen_dw",
         "dim_farm",
     )
 
