@@ -1,4 +1,10 @@
-"""Unit tests for the core ClickHouse tools."""
+"""
+Unit tests for the core ClickHouse tools.
+
+Covers table discovery, schema metadata retrieval, SQL safety integration,
+query execution, result limits, truncation detection, and structured
+error handling.
+"""
 
 from unittest.mock import MagicMock
 
@@ -8,6 +14,10 @@ from app.tools import describe_table, execute_query, list_tables
 
 DEFAULT_LIMIT = 100
 MAX_LIMIT = 1000
+
+# ---------------------------------------------------------------------------
+# list_tables
+# ---------------------------------------------------------------------------
 
 
 def test_list_tables_returns_tables():
@@ -69,6 +79,11 @@ def test_list_tables_returns_clickhouse_error():
     assert response == {
         "error": "ClickHouse error: Query failed",
     }
+
+
+# ---------------------------------------------------------------------------
+# describe_table
+# ---------------------------------------------------------------------------
 
 
 def test_describe_table_returns_columns():
@@ -209,6 +224,11 @@ def test_describe_table_returns_clickhouse_error():
     assert response == {
         "error": "ClickHouse error: Query failed",
     }
+
+
+# ---------------------------------------------------------------------------
+# execute_query
+# ---------------------------------------------------------------------------
 
 
 def test_execute_query_returns_result():

@@ -1,5 +1,13 @@
 """
 Core read-only tools for accessing ClickHouse warehouse data.
+
+The functions in this module provide a small, model-facing data access layer
+over ClickHouse. They expose warehouse metadata and read-only query execution
+while enforcing database restrictions, SQL safety rules, and configured row
+limits.
+
+Errors are returned as structured dictionaries instead of being raised so that
+LLM callers can inspect the failure and attempt to correct their request.
 """
 
 from clickhouse_connect.driver.client import Client
@@ -11,7 +19,16 @@ ALLOWED_DATABASES = {"urbangreen_dw"}
 
 
 def _validate_database(database: str) -> dict[str, str] | None:
-    """Return a model-readable error when a database is not allowed."""
+    """
+    Validate that a database is available to the read-only tool layer.
+
+    Args:
+        database: Name of the ClickHouse database to validate.
+
+    Returns:
+        None when the database is allowed, otherwise a model-readable
+        dictionary containing an ``error`` message.
+    """
     if database in ALLOWED_DATABASES:
         return None
 
@@ -21,7 +38,22 @@ def _validate_database(database: str) -> dict[str, str] | None:
 
 
 def list_tables(client: Client, database: str) -> dict:
-    """List tables in an allowed ClickHouse warehouse database."""
+    """
+    List tables in an allowed ClickHouse warehouse database.
+
+    The database name is validated against the configured allow-list before
+    querying ``system.tables``. Query parameters are bound rather than
+    interpolated into SQL.
+
+    Args:
+        client: ClickHouse client used to execute the metadata query.
+        database: Name of the warehouse database whose tables should be listed.
+
+    Returns:
+        A dictionary containing the database name and table names on success,
+        or an ``error`` payload when the database is not allowed or ClickHouse
+        rejects the query.
+    """
     database_error = _validate_database(database)
 
     if database_error:
@@ -47,7 +79,24 @@ def list_tables(client: Client, database: str) -> dict:
 
 
 def describe_table(client: Client, database: str, table: str) -> dict:
-    """Describe columns for a table in an allowed ClickHouse database."""
+    """
+    Return column metadata for a table in an allowed warehouse database.
+
+    Metadata is read from ``system.columns`` and includes column names, data
+    types, default expressions, and comments. Column comments provide
+    additional schema context that can help an LLM understand the meaning of
+    fields when generating queries.
+
+    Args:
+        client: ClickHouse client used to execute the metadata query.
+        database: Name of the warehouse database containing the table.
+        table: Name of the table to describe.
+
+    Returns:
+        A dictionary containing the database, table, and column metadata on
+        success. Returns an ``error`` payload when the database is not allowed,
+        the table does not exist, or ClickHouse rejects the query.
+    """
     database_error = _validate_database(database)
 
     if database_error:
@@ -104,7 +153,27 @@ def execute_query(
     max_limit: int,
     limit: int | None = None,
 ) -> dict:
-    """Validate and execute a read-only ClickHouse query."""
+    """
+    Validate, limit, and execute a read-only ClickHouse query.
+
+    SQL is passed through the SQL safety layer before execution. The safety
+    layer rejects unsafe statements and injects or clamps result limits. When
+    a caller-supplied limit is provided, it acts as a per-query ceiling and is
+    itself clamped to ``max_limit``.
+
+    Args:
+        client: ClickHouse client used to execute the validated query.
+        sql: SQL statement supplied by the caller.
+        default_limit: Row limit applied when the query has no explicit limit.
+        max_limit: Maximum row limit permitted by the service.
+        limit: Optional caller-supplied per-query row limit.
+
+    Returns:
+        On success, a dictionary containing the rewritten SQL, applied limit,
+        column names, rows, row count, and truncation status. Validation and
+        ClickHouse errors are returned as structured ``error`` payloads rather
+        than raised to the caller.
+    """
     if limit is not None:
         if not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0:
             return {"error": "Limit must be a positive integer."}
