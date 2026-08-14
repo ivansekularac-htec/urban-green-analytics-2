@@ -48,5 +48,7 @@ def get_client() -> Client:
             "readonly": 2,
             "max_execution_time": settings.query_timeout_seconds,
             "max_memory_usage": settings.query_max_memory_bytes,
+            "max_result_rows": settings.max_row_limit,
+            "result_overflow_mode": "throw",
         },
     )
