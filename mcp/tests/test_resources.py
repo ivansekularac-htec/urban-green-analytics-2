@@ -1,6 +1,7 @@
 """Tests for the Markdown knowledge resources."""
 
 import re
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +12,8 @@ from app.resources import (
     render_schema_markdown,
     schema_resource,
 )
+
+RESOURCE_DOCS_DIR = Path(__file__).parents[1] / "app" / "resource_docs"
 
 
 def make_client(
@@ -101,6 +104,14 @@ def test_schema_is_lazy_and_cached():
     client.command.assert_not_called()
 
     schema_resource.cache_clear()
+
+
+def test_static_resources_match_bundled_markdown_docs():
+    expected_metrics = (RESOURCE_DOCS_DIR / "metrics.md").read_text(encoding="utf-8")
+    expected_conventions = (RESOURCE_DOCS_DIR / "conventions.md").read_text(encoding="utf-8")
+
+    assert metrics_resource() == expected_metrics
+    assert conventions_resource() == expected_conventions
 
 
 def test_metrics_document_canonical_dashboard_metrics():
