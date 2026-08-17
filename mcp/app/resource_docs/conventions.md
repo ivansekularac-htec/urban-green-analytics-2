@@ -9,7 +9,9 @@ patterns.
 The atomic and aggregate fact tables are rebuilt or refreshed idempotently and
 use `ReplacingMergeTree(_loaded_at)`. A replacement row can coexist with its
 older physical version until ClickHouse merges the parts. Use `FINAL` when
-querying facts so sums and counts do not include both versions.
+querying facts so sums and counts do not include both versions. `FINAL` selects
+the latest replacement for each sorting key; it does not filter dates or remove
+distinct historical events.
 
 ```sql
 SELECT sum(total_yield_kg) AS total_yield_kg
@@ -56,8 +58,8 @@ FROM urbangreen_dw.dim_farm FINAL
 WHERE is_current = 1;
 ```
 
-For historical attributes, join an event timestamp into the half-open validity
-interval rather than attaching today's dimension values:
+For historical attributes or relationships, join an event timestamp into the
+half-open validity interval rather than attaching today's dimension values:
 
 ```sql
 SELECT
@@ -71,6 +73,10 @@ INNER JOIN urbangreen_dw.dim_farm AS f FINAL
    AND h.harvested_at >= f.valid_from
    AND h.harvested_at < f.valid_to;
 ```
+
+When an SCD2 relationship can change within an aggregate period, use atomic
+fact timestamps for accurate attribution. An aggregate row cannot be divided
+reliably between multiple dimension versions.
 
 Current dashboards intentionally join aggregate facts to the current farm or
 sensor-type row on the natural key and `is_current = 1`.
@@ -165,44 +171,3 @@ WHERE harvest_date = today();
 - Rates are stored and queried as fractions from `0` to `1`; multiply by 100
   only when a percentage value is explicitly required.
 
-
-## `FINAL` preserves business history
-
-`FINAL` removes older physical copies of rows that share the same
-`ReplacingMergeTree` sorting key. It does not remove distinct business events,
-metric dates, or SCD2 validity periods.
-
-The warehouse therefore preserves historical business data while returning the
-latest corrected version of each row. It does not preserve superseded technical
-revisions of the same row; that would require a separate audit log.
-
-For historical ownership or responsibility, do not filter the SCD2 assignment
-to `is_current = 1`. Instead, join each event timestamp to the assignment whose
-half-open validity interval contains that event:
-
-```sql
-SELECT
-    ufr.user_id,
-    ufr.user_full_name,
-    h.farm_id,
-    sum(h.weight_kg) AS total_yield_kg
-FROM urbangreen_dw.fact_harvests AS h FINAL
-INNER JOIN urbangreen_dw.dim_user_farm_role AS ufr FINAL
-    ON h.farm_id = ufr.farm_id
-   AND h.harvested_at >= ufr.valid_from
-   AND h.harvested_at < ufr.valid_to
-WHERE ufr.role_name = 'Farm Manager'
-  AND ufr.user_id = {manager_id:UInt64}
-GROUP BY
-    ufr.user_id,
-    ufr.user_full_name,
-    h.farm_id;
-```
-
-Use `fact_harvests.harvested_at` for exact yield attribution and
-`fact_sensor_readings.reading_ts` for exact sensor-performance attribution.
-
-Daily aggregate facts can be joined using `metric_date` when manager
-assignments change only at day boundaries. If an assignment can change during a
-day, use the atomic facts because a single farm-day aggregate cannot be divided
-accurately between two managers.

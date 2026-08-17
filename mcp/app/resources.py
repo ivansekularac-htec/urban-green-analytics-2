@@ -5,12 +5,9 @@ by the schema, metrics, and conventions resources; the MCP server can expose
 these functions under stable resource URIs in a later integration ticket.
 """
 
-from functools import lru_cache
 from pathlib import Path
 
 from clickhouse_connect.driver.client import Client
-
-from app.clickhouse import get_client
 
 WAREHOUSE_DATABASE = "urbangreen_dw"
 INTERNAL_TABLE_PREFIX = ".inner"
@@ -20,45 +17,20 @@ RESOURCE_DOCS = Path(__file__).with_name("resource_docs")
 
 def _load_table_ddls(client: Client) -> list[tuple[str, str]]:
     """Return visible warehouse table names and their live ClickHouse DDL."""
-    tables_result = client.query(
+    result = client.query(
         """
-        SELECT name
+        SELECT
+            name,
+            create_table_query
         FROM system.tables
         WHERE database = {database:String}
-        AND NOT startsWith(name, {internal_prefix:String})
+        AND name NOT LIKE '.inner%'
         ORDER BY name
         """,
-        parameters={
-            "database": WAREHOUSE_DATABASE,
-            "internal_prefix": INTERNAL_TABLE_PREFIX,
-        },
+        parameters={"database": WAREHOUSE_DATABASE},
     )
 
-    # Keep the Python-side guard as a second line of defence. It also protects
-    # callers using a ClickHouse version or test double that does not apply the
-    # startsWith predicate as expected.
-    table_names = [
-        row[0] for row in tables_result.result_rows if not row[0].startswith(INTERNAL_TABLE_PREFIX)
-    ]
-
-    table_ddls = []
-    for table_name in table_names:
-        ddl_result = client.query(
-            "SHOW CREATE TABLE {database:Identifier}.{table:Identifier}",
-            parameters={
-                "database": WAREHOUSE_DATABASE,
-                "table": table_name,
-            },
-        )
-
-        if not ddl_result.result_rows:
-            raise RuntimeError(
-                f"ClickHouse returned no DDL for '{WAREHOUSE_DATABASE}.{table_name}'."
-            )
-
-        table_ddls.append((table_name, ddl_result.result_rows[0][0]))
-
-    return table_ddls
+    return [(table_name, ddl) for table_name, ddl in result.result_rows]
 
 
 def _render_schema_markdown(table_ddls: list[tuple[str, str]]) -> str:
@@ -90,10 +62,9 @@ def _render_schema_markdown(table_ddls: list[tuple[str, str]]) -> str:
     return "\n".join(sections) + "\n"
 
 
-@lru_cache(maxsize=1)
-def get_schema_markdown() -> str:
-    """Build the live warehouse schema once, then reuse it for this process."""
-    return _render_schema_markdown(_load_table_ddls(get_client()))
+def build_schema_markdown(client: Client) -> str:
+    """Build Markdown from the live warehouse schema."""
+    return _render_schema_markdown(_load_table_ddls(client))
 
 
 def get_metrics_markdown() -> str:

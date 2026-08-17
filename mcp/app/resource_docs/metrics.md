@@ -77,18 +77,25 @@ time. Apply the requested farm and date filters before aggregation.
 
 ### Farm Performance Leaderboard
 
-- Grain: one farm per day in `fact_farm_leaderboard FINAL`.
-- Yield rank: `total_yield_kg` descending.
-- Quality rank: `premium_yield_share` descending, where premium share is
-  `premium_yield_kg / total_yield_kg`, or `0` when yield is zero.
-- Energy rank: `energy_efficiency_kwh_per_kg` ascending. Farms with no yield
-  are placed after farms with a meaningful efficiency value.
-- Points per axis: `farm_count - axis_rank + 1`.
-- Composite score: the sum of yield, quality, and energy points; higher is
-  better.
-- Composite rank: composite score descending, with rank `1` representing the
-  best-performing farm for that day.
-- Current dashboard scope: the most recent date that contains positive yield.
+- Source: `fact_farm_leaderboard FINAL`.
+- Grain: one precomputed row per farm and day.
+- `yield_rank`, `quality_rank`, `energy_rank`, `composite_score`, and
+  `composite_rank` are calculated by the Spark leaderboard job across the
+  complete population of farms for each `metric_date`.
+- Query rule: read the stored rank and score columns. Do not recompute or rerank
+  farms from `fact_daily_farm_metrics`, especially after applying farm filters,
+  because that can produce results that differ from the dashboard.
+- Interpretation:
+
+  - Lower rank values are better; rank `1` is best.
+  - Higher `composite_score` values are better.
+  - `premium_yield_share` is the farm's premium-quality yield share.
+  - `energy_efficiency_kwh_per_kg` is lower-is-better for farms with positive
+    yield.
+- Current dashboard scope: use the rows for the most recent `metric_date` that
+  contains positive yield and order by the stored `composite_rank` ascending.
+- Rankings are date-specific and should not be averaged across multiple dates.
+
 
 ### Live Sensor Anomaly Alerts
 
@@ -235,11 +242,20 @@ All Farm Overview metrics must be filtered to the selected `farm_id`.
 
 ### Waste Reduction Progress (%)
 
-- Current implemented meaning: non-premium harvested weight as a share of all
-  harvested weight. Lower values represent less non-premium output.
-- Formula: `SUM(non_premium_yield_kg) / nullIf(SUM(total_yield_kg), 0)`.
+- Current implemented meaning: harvested weight from non-premium quality grades
+  as a share of all harvested weight. Lower values represent less non-premium
+  output.
+- Quality classification: `dim_quality_grade.is_premium` defines whether a
+  grade is premium. The current warehouse marks grade code `A` as premium;
+  every other grade code counts as non-premium.
+- Loader behavior: if a harvest has no matching quality-grade record, the Spark
+  aggregation currently defaults `is_premium` to `0`, so its weight is included
+  in non-premium yield.
+- Formula:
+  `SUM(non_premium_yield_kg) / nullIf(SUM(total_yield_kg), 0)`.
 - Source: `fact_daily_farm_metrics FINAL`.
 - Current dashboard default: the last year.
+
 
 ### CO2 Concentration Levels
 

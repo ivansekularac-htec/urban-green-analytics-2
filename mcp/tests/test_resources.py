@@ -1,13 +1,13 @@
 """Tests for the model-facing warehouse Markdown resources."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from app.resources import (
+    build_schema_markdown,
     get_conventions_markdown,
     get_metrics_markdown,
-    get_schema_markdown,
 )
 
 
@@ -17,62 +17,29 @@ def _query_result(*rows):
     return result
 
 
-@pytest.fixture(autouse=True)
-def clear_schema_cache():
-    """Keep the process-lifetime schema cache isolated between unit tests."""
-    get_schema_markdown.cache_clear()
-    yield
-    get_schema_markdown.cache_clear()
-
-
 # ---------------------------------------------------------------------------
 # Schema resource
 # ---------------------------------------------------------------------------
 
 
-def test_schema_is_loaded_lazily_and_cached_for_the_process():
+def test_schema_introspects_tables_and_renders_catalog_ddl():
     client = MagicMock()
-    client.query.side_effect = [
-        _query_result(("dim_farm",)),
-        _query_result(("CREATE TABLE urbangreen_dw.dim_farm (farm_id UInt64)",)),
-    ]
-
-    with patch("app.resources.get_client", return_value=client) as get_client:
-        get_client.assert_not_called()
-
-        first = get_schema_markdown()
-        second = get_schema_markdown()
-
-    assert first == second
-    get_client.assert_called_once_with()
-    assert client.query.call_count == 2
-
-
-def test_schema_introspects_tables_and_renders_show_create_output():
-    client = MagicMock()
-    client.query.side_effect = [
-        _query_result(
-            ("dim_farm",),
-            ("fact_harvests",),
+    client.query.return_value = _query_result(
+        (
+            "dim_farm",
+            "CREATE TABLE urbangreen_dw.dim_farm "
+            "(farm_id UInt64) ENGINE = ReplacingMergeTree(_version) "
+            "ORDER BY farm_id",
         ),
-        _query_result(
-            (
-                "CREATE TABLE urbangreen_dw.dim_farm "
-                "(farm_id UInt64) ENGINE = ReplacingMergeTree(_version) "
-                "ORDER BY farm_id",
-            )
+        (
+            "fact_harvests",
+            "CREATE TABLE urbangreen_dw.fact_harvests "
+            "(harvest_id UInt64) ENGINE = ReplacingMergeTree(_loaded_at) "
+            "ORDER BY harvest_id",
         ),
-        _query_result(
-            (
-                "CREATE TABLE urbangreen_dw.fact_harvests "
-                "(harvest_id UInt64) ENGINE = ReplacingMergeTree(_loaded_at) "
-                "ORDER BY harvest_id",
-            )
-        ),
-    ]
+    )
 
-    with patch("app.resources.get_client", return_value=client):
-        markdown = get_schema_markdown()
+    markdown = build_schema_markdown(client)
 
     assert markdown.startswith("# UrbanGreen ClickHouse schema\n")
     assert "Database: `urbangreen_dw`" in markdown
@@ -81,71 +48,59 @@ def test_schema_introspects_tables_and_renders_show_create_output():
     assert "```sql\nCREATE TABLE urbangreen_dw.dim_farm" in markdown
     assert markdown.index("## `dim_farm`") < markdown.index("## `fact_harvests`")
 
-    tables_call = client.query.call_args_list[0]
-    assert "FROM system.tables" in tables_call.args[0]
-    assert "NOT startsWith" in tables_call.args[0]
-    assert "ORDER BY name" in tables_call.args[0]
-    assert tables_call.kwargs["parameters"] == {
-        "database": "urbangreen_dw",
-        "internal_prefix": ".inner",
-    }
+    client.query.assert_called_once()
 
-    dim_ddl_call = client.query.call_args_list[1]
-    assert dim_ddl_call.args[0] == ("SHOW CREATE TABLE {database:Identifier}.{table:Identifier}")
-    assert dim_ddl_call.kwargs["parameters"] == {
-        "database": "urbangreen_dw",
-        "table": "dim_farm",
-    }
+    catalog_call = client.query.call_args
+    sql = catalog_call.args[0]
+
+    assert "create_table_query" in sql
+    assert "FROM system.tables" in sql
+    assert "SHOW CREATE TABLE" not in sql
+    assert catalog_call.kwargs["parameters"] == {"database": "urbangreen_dw"}
 
 
-def test_schema_defensively_filters_materialized_view_inner_tables():
+def test_schema_catalog_query_filters_internal_materialized_view_tables():
     client = MagicMock()
-    client.query.side_effect = [
-        _query_result(
-            (".inner.legacy_materialized_view",),
-            (".inner_id.12345678-1234-1234-1234-123456789abc",),
-            ("fact_daily_farm_metrics",),
-        ),
-        _query_result(("CREATE TABLE urbangreen_dw.fact_daily_farm_metrics (farm_id UInt64)",)),
-    ]
-
-    with patch("app.resources.get_client", return_value=client):
-        markdown = get_schema_markdown()
-
-    assert ".inner" not in markdown
-    assert "## `fact_daily_farm_metrics`" in markdown
-    assert client.query.call_count == 2
-    assert client.query.call_args_list[1].kwargs["parameters"]["table"] == (
-        "fact_daily_farm_metrics"
+    client.query.return_value = _query_result(
+        (
+            "fact_daily_farm_metrics",
+            "CREATE TABLE urbangreen_dw.fact_daily_farm_metrics (farm_id UInt64)",
+        )
     )
 
+    markdown = build_schema_markdown(client)
 
-def test_schema_does_not_cache_a_failed_build():
+    assert "## `fact_daily_farm_metrics`" in markdown
+    client.query.assert_called_once()
+
+    sql = " ".join(client.query.call_args.args[0].split())
+
+    assert sql == (
+        "SELECT name, create_table_query "
+        "FROM system.tables "
+        "WHERE database = {database:String} "
+        "AND name NOT LIKE '.inner%' "
+        "ORDER BY name"
+    )
+
+    assert client.query.call_args.kwargs["parameters"] == {"database": "urbangreen_dw"}
+
+
+def test_schema_builder_propagates_catalog_errors():
     client = MagicMock()
-    client.query.side_effect = [
-        _query_result(("dim_farm",)),
-        _query_result(),
-        _query_result(("dim_farm",)),
-        _query_result(("CREATE TABLE urbangreen_dw.dim_farm (farm_id UInt64)",)),
-    ]
+    client.query.side_effect = RuntimeError("Catalog query failed")
 
-    with patch("app.resources.get_client", return_value=client) as get_client:
-        with pytest.raises(RuntimeError, match="returned no DDL"):
-            get_schema_markdown()
+    with pytest.raises(RuntimeError, match="Catalog query failed"):
+        build_schema_markdown(client)
 
-        markdown = get_schema_markdown()
-
-    assert "## `dim_farm`" in markdown
-    assert get_client.call_count == 2
-    assert client.query.call_count == 4
+    client.query.assert_called_once()
 
 
 def test_schema_reports_when_no_visible_tables_exist():
     client = MagicMock()
     client.query.return_value = _query_result()
 
-    with patch("app.resources.get_client", return_value=client):
-        markdown = get_schema_markdown()
+    markdown = build_schema_markdown(client)
 
     assert "No user-visible tables were found." in markdown
     client.query.assert_called_once()
@@ -167,17 +122,23 @@ def test_metrics_document_current_dashboard_definitions():
     assert "### Profitability Index" in markdown
     assert "sumIf(weight_kg, is_high_value = 1)" in markdown
     assert "### Farm Performance Leaderboard" in markdown
-    assert "farm_count - axis_rank + 1" in markdown
+    assert "read the stored rank and score columns" in markdown
+    assert "Do not recompute or rerank" in markdown
+    assert "farm_count - axis_rank + 1" not in markdown
     assert "24 * SUM(in_range_count)" in markdown
     assert "SUM(non_premium_yield_kg)" in markdown
+    assert "grade code `A` as premium" in markdown
+    assert "every other grade code counts as non-premium" in markdown
 
 
 def test_metrics_distinguish_high_value_crops_from_premium_quality():
     markdown = get_metrics_markdown()
+    normalized = " ".join(markdown.split())
 
     assert "Do not substitute premium quality grades" in markdown
-    assert "premium share is" in markdown
-    assert "premium_yield_kg / total_yield_kg" in markdown
+    assert "`premium_yield_share` is the farm's premium-quality yield share" in normalized
+    assert "grade code `A` as premium" in normalized
+    assert "every other grade code counts as non-premium" in normalized
 
 
 # ---------------------------------------------------------------------------
@@ -187,6 +148,7 @@ def test_metrics_distinguish_high_value_crops_from_premium_quality():
 
 def test_conventions_match_the_current_replacing_merge_tree_design():
     markdown = get_conventions_markdown()
+    normalized = " ".join(markdown.split())
 
     assert markdown.startswith("# UrbanGreen ClickHouse query conventions\n")
     assert "ReplacingMergeTree(_loaded_at)" in markdown
@@ -196,6 +158,9 @@ def test_conventions_match_the_current_replacing_merge_tree_design():
     assert "WHERE is_current = 1" in markdown
     assert "h.harvested_at >= f.valid_from" in markdown
     assert "h.harvested_at < f.valid_to" in markdown
+    assert "For historical attributes or relationships" in normalized
+    assert "use atomic fact timestamps for accurate attribution" in normalized
+    assert "cannot be divided reliably between multiple dimension versions" in normalized
 
 
 def test_conventions_exempt_static_dimensions_and_define_safe_reaggregation():
@@ -206,14 +171,3 @@ def test_conventions_exempt_static_dimensions_and_define_safe_reaggregation():
     assert "sum(sum_value) / nullIf(sum(reading_count), 0)" in markdown
     assert "Do not average daily averages" in markdown
     assert "Use `nullIf(denominator, 0)`" in markdown
-
-
-def test_conventions_document_historical_manager_attribution():
-    markdown = get_conventions_markdown()
-
-    assert "## `FINAL` preserves business history" in markdown
-    assert "urbangreen_dw.dim_user_farm_role AS ufr FINAL" in markdown
-    assert "h.harvested_at >= ufr.valid_from" in markdown
-    assert "h.harvested_at < ufr.valid_to" in markdown
-    assert "do not filter the SCD2 assignment" in markdown
-    assert "fact_sensor_readings.reading_ts" in markdown
