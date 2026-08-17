@@ -255,25 +255,11 @@ def test_conventions_resource_reads_conventions_file(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def test_metrics_document_premium_yield_share():
+def test_metrics_document_shared_rules():
     result = get_metrics_resource()
 
-    assert "premium_yield_share" in result
-    assert "premium_yield_kg / total_yield_kg" in result
     assert "dim_quality_grade.is_premium = 1" in result
-
-
-def test_metrics_document_energy_efficiency():
-    result = get_metrics_resource()
-
-    assert "energy_efficiency_kwh_per_kg" in result
-    assert "energy_kwh / total_yield_kg" in result
-    assert "zero yield" in result.lower()
-
-
-def test_metrics_document_sensor_average_reaggregation():
-    result = get_metrics_resource()
-
+    assert "Energy Usage" in result
     assert "fact_daily_sensor_metrics" in result
     assert "sum(sum_value)" in result
     assert "sum(reading_count)" in result
@@ -281,24 +267,158 @@ def test_metrics_document_sensor_average_reaggregation():
     assert "average of daily averages" in result
 
 
+def test_metrics_document_executive_metrics():
+    result = get_metrics_resource()
+
+    assert "## Executive Overview" in result
+    assert "### Total Harvest Yield" in result
+    assert "### Yield Efficiency" in result
+    assert "### Weekly Yield Trend" in result
+    assert "### Harvest Quality Mix" in result
+    assert "### Profitability Index" in result
+    assert "### Farm Expansion Progress" in result
+    assert "### Energy Efficiency" in result
+    assert "### City/Region Performance" in result
+    assert "### Top Crop per City" in result
+
+
+def test_metrics_document_yield_efficiency():
+    result = get_metrics_resource()
+
+    assert "yield_efficiency" in result
+    assert "total_yield_kg / nullIf(size_m2, 0)" in result
+    assert "kg/m²" in result
+
+
+def test_metrics_document_energy_efficiency():
+    result = get_metrics_resource()
+
+    assert "energy_efficiency_kwh_per_kg" in result
+    assert "energy_kwh / nullIf(total_yield_kg, 0)" in result
+    assert "kWh/kg" in result
+
+
+def test_metrics_document_farm_expansion_target():
+    result = get_metrics_resource()
+
+    assert "Farm Expansion Progress" in result
+    assert "target of `100`" in result
+
+
+def test_metrics_document_operations_metrics():
+    result = get_metrics_resource()
+
+    assert "## Operations Overview" in result
+    assert "### Farm Performance Leaderboard" in result
+    assert "### Live Sensor Anomaly Alerts" in result
+    assert "### Sensor Anomaly Rate Trend" in result
+    assert "### Sensor Coverage Health Index" in result
+    assert "### Data Freshness Heatmap" in result
+    assert "### Environmental Compliance Rate" in result
+    assert "### Crop Yield by Farm" in result
+    assert "### Harvest Quality Breakdown" in result
+    assert "### Inactive/Faulty Sensors" in result
+
+
 def test_metrics_document_precomputed_leaderboard_rules():
     result = get_metrics_resource()
 
     assert "fact_farm_leaderboard" in result
+    assert "Use the stored leaderboard values" in result
+    assert "rather than recomputing ranks or scores" in result
     assert "yield_rank" in result
     assert "quality_rank" in result
     assert "energy_rank" in result
+    assert "composite_score" in result
     assert "composite_rank" in result
+    assert "premium_yield_share" in result
     assert "Spark `rank()`" in result
 
 
-def test_metrics_document_leaderboard_should_not_be_recomputed():
+def test_metrics_document_leaderboard_zero_yield_behavior():
     result = get_metrics_resource()
 
-    assert "Use the stored leaderboard values" in result
-    assert "rather than recomputing ranks or scores" in result
-    assert "composite_score" in result
-    assert "equal-weight score" in result
+    assert "premium_yield_share = 0.0" in result
+    assert "energy_efficiency_kwh_per_kg = 0.0" in result
+    assert "Zero-yield farms are explicitly ranked after farms with positive yield" in result
+    assert "Do not interpret the stored energy value as perfect" in result
+
+
+def test_metrics_document_anomaly_rate():
+    result = get_metrics_resource()
+
+    assert "anomaly_rate" in result
+    assert "anomaly_count / nullIf(reading_count, 0)" in result
+
+
+def test_metrics_document_sensor_coverage():
+    result = get_metrics_resource()
+
+    assert "sensor_coverage" in result
+    assert "active_sensor_count / nullIf(total_sensor_count, 0)" in result
+
+
+def test_metrics_document_environmental_compliance():
+    result = get_metrics_resource()
+
+    assert "compliance_rate" in result
+    assert "in_range_count / nullIf(reading_count, 0)" in result
+
+
+def test_metrics_document_data_freshness():
+    result = get_metrics_resource()
+
+    assert "Data Freshness Heatmap" in result
+    assert "latest sensor reading" in result
+    assert "Smaller time gaps indicate fresher data" in result
+
+
+def test_metrics_document_farm_overview_metrics():
+    result = get_metrics_resource()
+
+    assert "## Farm Overview" in result
+    assert "### Live Environmental Gauges" in result
+    assert "### Today's / This Week's Harvest" in result
+    assert "### Crop-Level Yield" in result
+    assert "### Best Performing Crop" in result
+    assert "### Yield-per-Bed" in result
+    assert "### Harvest Quality Report" in result
+    assert "### Resource Consumption Trend" in result
+    assert "### Light Hour Compliance" in result
+    assert "### Sensor Data History" in result
+
+
+def test_metrics_document_yield_per_bed():
+    result = get_metrics_resource()
+
+    assert "yield_per_bed" in result
+    assert "total_yield_kg / nullIf(growing_beds_count, 0)" in result
+
+
+def test_metrics_document_auditor_metrics():
+    result = get_metrics_resource()
+
+    assert "## Auditor Overview" in result
+    assert "### Total Energy Consumption" in result
+    assert "### Energy Efficiency" in result
+    assert "### Waste Reduction Progress" in result
+    assert "### CO2 Concentration Levels" in result
+    assert "### CO2 Compliance Rate" in result
+
+
+def test_metrics_document_waste_reduction():
+    result = get_metrics_resource()
+
+    assert "waste_reduction_progress" in result
+    assert "non_premium_yield_kg / nullIf(total_yield_kg, 0)" in result
+
+
+def test_metrics_document_co2_compliance():
+    result = get_metrics_resource()
+
+    assert "CO2 Compliance Rate" in result
+    assert "400–1200 ppm" in result
+    assert "compliant_co2_readings / nullIf(total_co2_readings, 0)" in result
 
 
 # ---------------------------------------------------------------------------
