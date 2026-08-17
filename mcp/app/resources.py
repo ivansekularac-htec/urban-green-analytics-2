@@ -8,7 +8,7 @@ from app.clickhouse import get_client
 from app.config import get_settings
 
 _SCHEMA_TABLES_SQL = """
-SELECT name
+SELECT name, create_table_query
 FROM system.tables
 WHERE database = {database:String}
   AND NOT startsWith(name, '.inner')
@@ -26,16 +26,10 @@ def load_schema_markdown(client: Client, database: str) -> str:
 
     # Keep the Python-side check as a defensive guard in case ClickHouse ever
     # returns internal materialized-view storage despite the query predicate.
-    table_names = [row[0] for row in result.result_rows if not row[0].startswith(".inner")]
-
     table_ddls = [
-        (
-            table_name,
-            client.command(
-                f"SHOW CREATE TABLE {_quote_identifier(database)}.{_quote_identifier(table_name)}"
-            ),
-        )
-        for table_name in table_names
+        (table_name, create_table_query)
+        for table_name, create_table_query in result.result_rows
+        if not table_name.startswith(".inner")
     ]
 
     return render_schema_markdown(database, table_ddls)
@@ -90,69 +84,245 @@ def conventions_resource() -> str:
     return CONVENTIONS_MARKDOWN
 
 
-def _quote_identifier(identifier: str) -> str:
-    """Quote a ClickHouse database or table identifier."""
-
-    return f"`{identifier.replace('`', '``')}`"
-
-
 METRICS_MARKDOWN = """\
-# UrbanGreen metric definitions
+# UrbanGreen canonical metric catalog
 
-## Daily farm metrics
+These definitions are canonical. Do not invent alternative formulas.
 
-Source: `fact_daily_farm_metrics`
+Unless explicitly stated otherwise, ratios return `NULL` when their
+denominator is zero or missing. Ratio values are fractions in the range
+`0.0` to `1.0`; multiply by `100` only when a percentage value is requested.
 
-Grain: one row per farm per day.
+## Total harvest yield
 
-- `total_yield_kg`: sum of `fact_harvests.weight_kg`.
-- `harvest_count`: number of harvest events.
-- `premium_yield_kg`: yield whose quality grade has `is_premium = 1`.
-- `non_premium_yield_kg`: yield whose quality grade has `is_premium = 0`.
-- `energy_kwh`: sum of sensor values for the `Energy Usage` sensor type.
-- `reading_count`: number of sensor readings.
-- `anomaly_count`: number of readings where `is_anomaly = 1`.
-- `in_range_count`: number of readings where `is_anomaly = 0`.
-- `last_sensor_reading_ts`: latest sensor reading timestamp.
+Business name: Total Harvest Yield
 
-## Daily sensor metrics
+Unit: kilograms
 
-Source: `fact_daily_sensor_metrics`
+Source: `urbangreen_dw.fact_daily_farm_metrics`
 
-Grain: one row per farm and sensor type per day.
+```sql
+SUM(total_yield_kg)
+```
 
-- Average sensor value: `sum(sum_value) / sum(reading_count)`.
-- Minimum value: `min(min_value)`.
-- Maximum value: `max(max_value)`.
-- Anomaly rate: `sum(anomaly_count) / sum(reading_count)`.
+## Yield efficiency
 
-Never calculate an average using `avg(sum_value / reading_count)` when
-combining multiple daily rows. Use the weighted formula above.
+Business name: Yield Efficiency
 
-## Daily quality metrics
+Unit: kilograms per square metre
 
-Source: `fact_daily_farm_quality_metrics`
+Sources:
 
-Grain: one row per farm, quality grade, and day.
+- `urbangreen_dw.fact_daily_farm_metrics`
+- Current version of `urbangreen_dw.dim_farm`
 
-- `total_yield_kg`: total harvested weight for the quality grade.
-- `harvest_count`: number of harvests for the quality grade.
+Calculate this metric per farm over the selected date range:
+
+```sql
+SUM(total_yield_kg) / nullIf(MAX(size_m2), 0)
+```
+
+Do not use `AVG(total_yield_kg / size_m2)`.
+
+## Yield per growing bed
+
+Business name: Yield-per-Bed
+
+Unit: kilograms per bed
+
+Sources:
+
+- `urbangreen_dw.fact_daily_farm_metrics`
+- Current version of `urbangreen_dw.dim_farm`
+
+```sql
+SUM(total_yield_kg) / nullIf(MAX(growing_beds_count), 0)
+```
+
+## Energy efficiency
+
+Business name: Energy Efficiency
+
+Unit: kilowatt-hours per kilogram
+
+Source: `urbangreen_dw.fact_daily_farm_metrics`
+
+```sql
+SUM(energy_kwh) / nullIf(SUM(total_yield_kg), 0)
+```
+
+Lower values indicate better energy efficiency.
+
+This definition applies outside the leaderboard. When reading
+`urbangreen_dw.fact_farm_leaderboard`, use the precomputed
+`energy_efficiency_kwh_per_kg` value instead of rebuilding it.
+
+## Total energy consumption
+
+Business name: Total Energy Consumption
+
+Unit: kilowatt-hours
+
+Source: `urbangreen_dw.fact_daily_farm_metrics`
+
+```sql
+SUM(energy_kwh)
+```
+
+## Farm expansion progress
+
+Business name: Farm Expansion Progress
+
+Source: current farms represented in the dashboard dataset
+
+Registered farm count:
+
+```sql
+COUNT(DISTINCT farm_id)
+```
+
+The dashboard target is `100` farms. Progress against the target is:
+
+```sql
+COUNT(DISTINCT farm_id) / 100.0
+```
+
+Multiply by `100` only when a percentage value is required.
+
+## Waste reduction progress
+
+Business name: Waste Reduction Progress
+
+Source: `urbangreen_dw.fact_daily_farm_metrics`
+
+The dashboard defines this metric as the non-premium share of harvested
+weight:
+
+```sql
+SUM(non_premium_yield_kg) / nullIf(SUM(total_yield_kg), 0)
+```
+
+Lower values indicate less non-premium output. This is the existing dashboard
+definition; it is not a comparison against a historical waste baseline.
+
+## Environmental compliance rate
+
+Business names:
+
+- Environmental Compliance Rate
+- Sensor Compliance Rate
+
+Sources:
+
+- `urbangreen_dw.fact_daily_farm_metrics`
+- `urbangreen_dw.fact_daily_sensor_metrics`
+
+```sql
+SUM(in_range_count) / nullIf(SUM(reading_count), 0)
+```
+
+Higher values indicate better compliance.
+
+## Sensor anomaly rate
+
+Business name: Sensor Anomaly Rate
+
+Source: `urbangreen_dw.fact_daily_sensor_metrics`
+
+```sql
+SUM(anomaly_count) / nullIf(SUM(reading_count), 0)
+```
+
+Lower values indicate fewer anomalous readings.
+
+## Average sensor value
+
+Business name: Average Sensor Value
+
+Source: `urbangreen_dw.fact_daily_sensor_metrics`
+
+```sql
+SUM(sum_value) / nullIf(SUM(reading_count), 0)
+```
+
+This is a weighted average. Never use:
+
+```sql
+AVG(sum_value / reading_count)
+```
+
+## Data freshness
+
+Business name: Data Freshness
+
+Unit: minutes since the most recent reading
+
+Source: `urbangreen_dw.fact_sensor_readings`
+
+Calculate freshness per farm and sensor type:
+
+```sql
+dateDiff(
+    'minute',
+    max(reading_ts),
+    now()
+)
+```
+
+Lower values mean fresher data. A missing value means that no sensor reading
+exists for the selected farm and sensor type.
 
 ## Farm leaderboard
 
-Source: `fact_farm_leaderboard`
+Source: `urbangreen_dw.fact_farm_leaderboard`
 
-Grain: one row per farm per day.
+Grain: one precomputed row per farm per day.
 
-- Premium yield share: `premium_yield_kg / total_yield_kg`.
-- Energy efficiency: `energy_kwh / total_yield_kg`.
-- `yield_rank`: descending total yield.
-- `quality_rank`: descending premium yield share.
-- `energy_rank`: ascending energy consumption per kilogram.
-- `composite_score`: sum of points awarded from the three rankings.
-- `composite_rank`: descending composite score.
+The following values and ranks are precomputed and must be read from the
+leaderboard table rather than rebuilt in an analytical query:
 
-Division by zero must return `0` when `total_yield_kg = 0`.
+- `total_yield_kg`
+- `premium_yield_share`
+- `energy_efficiency_kwh_per_kg`
+- `yield_rank`
+- `quality_rank`
+- `energy_rank`
+- `composite_score`
+- `composite_rank`
+
+The leaderboard is the only exception to the general ratio rule. Its ETL
+stores `0` for `premium_yield_share` and `energy_efficiency_kwh_per_kg` when
+`total_yield_kg = 0`. This zero is a storage fallback, not a measured
+efficiency. Zero-yield farms are explicitly placed after farms with yield when
+`energy_rank` is computed. Always read the precomputed leaderboard values and
+ranks; do not rank `energy_efficiency_kwh_per_kg` independently.
+
+For each ranking axis, the farm receives:
+
+```text
+farm_count - rank + 1
+```
+
+The composite score is:
+
+```text
+(farm_count - yield_rank + 1)
++ (farm_count - quality_rank + 1)
++ (farm_count - energy_rank + 1)
+```
+
+All ranks are computed independently per `metric_date` using `rank()`:
+
+- `yield_rank`: `total_yield_kg` descending.
+- `quality_rank`: `premium_yield_share` descending.
+- `energy_rank`: farms with yield first, then
+  `energy_efficiency_kwh_per_kg` ascending.
+- `composite_rank`: `composite_score` descending.
+
+Tied farms receive the same rank and the following rank contains a gap,
+matching `rank()` semantics.
+
+`composite_rank = 1` is the highest-ranked farm.
 """
 
 
@@ -169,7 +339,7 @@ Use `FINAL` for straightforward reads:
 
 ```sql
 SELECT crop_id, name, category_name
-FROM dim_crop FINAL;
+FROM urbangreen_dw.dim_crop FINAL;
 ```
 
 For larger aggregations, use `argMax` with the version timestamp and group by
@@ -180,21 +350,23 @@ SELECT
     crop_id,
     argMax(name, _loaded_at) AS name,
     argMax(category_name, _loaded_at) AS category_name
-FROM dim_crop
+FROM urbangreen_dw.dim_crop
 GROUP BY crop_id;
 ```
 
 ## Type-2 slowly changing dimensions
 
-Type-2 dimensions such as `dim_farm`, `dim_sensor`, `dim_sensor_type`, and
-`dim_user_farm_role` preserve history. They use `ReplacingMergeTree(_version)`
-with `valid_from`, `valid_to`, and `is_current` columns.
+Type-2 dimensions such as `urbangreen_dw.dim_farm`,
+`urbangreen_dw.dim_sensor`, `urbangreen_dw.dim_sensor_type`, and
+`urbangreen_dw.dim_user_farm_role` preserve history. They use
+`ReplacingMergeTree(_version)` with `valid_from`, `valid_to`, and `is_current`
+columns.
 
 Use `FINAL` before filtering for the current version:
 
 ```sql
 SELECT farm_id, name, city, status
-FROM dim_farm FINAL
+FROM urbangreen_dw.dim_farm FINAL
 WHERE is_current = 1;
 ```
 
@@ -204,13 +376,13 @@ event timestamp to the half-open validity interval `[valid_from, valid_to)`:
 ```sql
 WITH farm_history AS (
     SELECT farm_id, name, valid_from, valid_to
-    FROM dim_farm FINAL
+    FROM urbangreen_dw.dim_farm FINAL
 )
 SELECT
     h.harvest_id,
     h.harvested_at,
     f.name AS farm_name
-FROM fact_harvests FINAL AS h
+FROM urbangreen_dw.fact_harvests FINAL AS h
 INNER JOIN farm_history AS f
     ON h.farm_id = f.farm_id
    AND h.harvested_at >= f.valid_from
@@ -229,7 +401,7 @@ aggregation that must not double-count replayed rows.
 SELECT
     harvest_date,
     sum(weight_kg) AS total_yield_kg
-FROM fact_harvests FINAL
+FROM urbangreen_dw.fact_harvests FINAL
 GROUP BY harvest_date
 ORDER BY harvest_date;
 ```
