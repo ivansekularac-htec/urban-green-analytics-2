@@ -26,18 +26,13 @@ def load_schema_markdown(client: Client, database: str) -> str:
 
     # Keep the Python-side check as a defensive guard in case ClickHouse ever
     # returns internal materialized-view storage despite the query predicate.
-    table_names = [
-        row[0]
-        for row in result.result_rows
-        if not row[0].startswith(".inner")
-    ]
+    table_names = [row[0] for row in result.result_rows if not row[0].startswith(".inner")]
 
     table_ddls = [
         (
             table_name,
             client.command(
-                "SHOW CREATE TABLE "
-                f"{_quote_identifier(database)}.{_quote_identifier(table_name)}"
+                f"SHOW CREATE TABLE {_quote_identifier(database)}.{_quote_identifier(table_name)}"
             ),
         )
         for table_name in table_names

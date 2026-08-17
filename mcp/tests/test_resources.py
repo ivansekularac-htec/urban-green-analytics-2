@@ -18,14 +18,10 @@ def make_client(
 ) -> MagicMock:
     client = MagicMock()
 
-    client.query.return_value = SimpleNamespace(
-        result_rows=[(name,) for name in table_names]
-    )
+    client.query.return_value = SimpleNamespace(result_rows=[(name,) for name in table_names])
 
     client.command.side_effect = lambda sql: next(
-        ddl
-        for table_name, ddl in ddl_by_table.items()
-        if f"`{table_name}`" in sql
+        ddl for table_name, ddl in ddl_by_table.items() if f"`{table_name}`" in sql
     )
 
     return client
