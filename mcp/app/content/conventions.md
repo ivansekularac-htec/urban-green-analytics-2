@@ -15,7 +15,7 @@ validity window contains the event:
 
 ```sql
 SELECT h.harvest_id, h.weight_kg, f.name, f.city
-FROM fact_harvests h
+FROM fact_harvests AS h FINAL
 INNER JOIN (SELECT * FROM dim_farm FINAL) f
     ON  h.farm_id = f.farm_id
     AND h.harvested_at >= f.valid_from

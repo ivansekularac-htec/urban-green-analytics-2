@@ -74,8 +74,11 @@ def render_conventions() -> str:
     Return the query conventions as markdown.
 
     Returns:
-        Markdown describing the rules a model cannot derive from the DDL, such
-        as which tables need ``FINAL`` and which columns are safe to join on.
+        Markdown describing the rules that span more than one table, such as
+        joining a fact to the dimension version valid at the time and joining
+        on ``*_id`` rather than ``*_key``. Facts about a single table or column
+        belong in that object's ``COMMENT`` and reach the model through the
+        schema resource instead.
     """
     return _read_content("conventions.md")
 
