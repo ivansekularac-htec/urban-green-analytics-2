@@ -6,8 +6,9 @@ answers to the same question should be the same number.
 
 All examples read the daily aggregates where possible - they are pre-computed
 per farm and day, so they answer in milliseconds where the atomic facts would
-scan millions of rows. Each table's `COMMENT` in the schema explains why
-`FINAL` appears throughout.
+scan millions of rows. `FINAL` appears throughout because a reload replaces
+rows rather than adding them; the schema resource carries the engine behind
+each table.
 
 ## Yield
 
@@ -27,7 +28,7 @@ The same total grouped by ISO week, for trend charts.
 
 ```sql
 SELECT d.year_week, sum(m.total_yield_kg) AS total_yield_kg
-FROM fact_daily_farm_metrics FINAL m
+FROM fact_daily_farm_metrics AS m FINAL
 INNER JOIN dim_date d ON m.date_key = d.date_key
 GROUP BY d.year_week
 ORDER BY d.year_week
@@ -40,7 +41,7 @@ use the daily rollup.
 
 ```sql
 SELECT c.name AS crop, sum(h.weight_kg) AS total_yield_kg
-FROM fact_harvests FINAL h
+FROM fact_harvests AS h FINAL
 INNER JOIN (SELECT * FROM dim_crop FINAL) c ON h.crop_id = c.crop_id
 WHERE h.farm_id = {farm_id:UInt64}
 GROUP BY c.name
@@ -55,7 +56,7 @@ Yield normalised by the farm's growing capacity, in kg per bed.
 SELECT
     m.farm_id,
     sum(m.total_yield_kg) / any(f.growing_beds_count) AS yield_per_bed_kg
-FROM fact_daily_farm_metrics FINAL m
+FROM fact_daily_farm_metrics AS m FINAL
 INNER JOIN (SELECT * FROM dim_farm FINAL WHERE is_current = 1) f
     ON m.farm_id = f.farm_id
 GROUP BY m.farm_id
@@ -72,7 +73,7 @@ size so a large farm is not automatically the best performer.
 SELECT
     m.farm_id,
     sum(m.total_yield_kg) / any(f.size_m2) AS yield_kg_per_m2
-FROM fact_daily_farm_metrics FINAL m
+FROM fact_daily_farm_metrics AS m FINAL
 INNER JOIN (SELECT * FROM dim_farm FINAL WHERE is_current = 1) f
     ON m.farm_id = f.farm_id
 GROUP BY m.farm_id
@@ -113,7 +114,7 @@ SELECT
     g.name AS grade,
     sum(q.total_yield_kg) AS total_yield_kg,
     sum(q.total_yield_kg) / sum(sum(q.total_yield_kg)) OVER () AS share
-FROM fact_daily_farm_quality_metrics FINAL q
+FROM fact_daily_farm_quality_metrics AS q FINAL
 INNER JOIN (SELECT * FROM dim_quality_grade FINAL) g
     ON q.quality_grade_id = g.quality_grade_id
 GROUP BY g.name
@@ -153,7 +154,7 @@ is the view that carries the `is_high_value` flag.
 ```sql
 SELECT
     sumIf(h.weight_kg, c.is_high_value = 1) / nullIf(sum(h.weight_kg), 0) AS high_value_share
-FROM fact_harvests FINAL h
+FROM fact_harvests AS h FINAL
 INNER JOIN bi_crop_classification c ON h.crop_id = c.crop_id
 ```
 
@@ -300,7 +301,7 @@ The farm's highest-yielding crop and its yield per square metre.
 SELECT
     c.name AS crop,
     sum(h.weight_kg) / any(f.size_m2) AS kg_per_m2
-FROM fact_harvests FINAL h
+FROM fact_harvests AS h FINAL
 INNER JOIN (SELECT * FROM dim_crop FINAL) c ON h.crop_id = c.crop_id
 INNER JOIN (SELECT * FROM dim_farm FINAL WHERE is_current = 1) f
     ON h.farm_id = f.farm_id
@@ -316,7 +317,7 @@ Production compared across cities. `city` lives on the farm dimension.
 
 ```sql
 SELECT f.city, sum(m.total_yield_kg) AS total_yield_kg
-FROM fact_daily_farm_metrics FINAL m
+FROM fact_daily_farm_metrics AS m FINAL
 INNER JOIN (SELECT * FROM dim_farm FINAL WHERE is_current = 1) f
     ON m.farm_id = f.farm_id
 GROUP BY f.city

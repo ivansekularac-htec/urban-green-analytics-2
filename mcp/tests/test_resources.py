@@ -130,8 +130,6 @@ def test_render_schema_retries_after_a_failure():
     one blip would leave the resource broken until the process restarts."""
     _load_schema.cache_clear()
     client = MagicMock()
-    failure = MagicMock()
-    failure.result_rows = []
     client.query.side_effect = [
         DatabaseError("Connection refused"),
         _client([("dim_farm", DIM_FARM_DDL)]).query.return_value,

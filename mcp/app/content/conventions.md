@@ -1,10 +1,11 @@
 # Query conventions
 
-Rules that span more than one table. Everything that describes a single table
-or a single column lives in the DDL instead, as a `COMMENT`: each table says
-whether it needs `FINAL`, each column explains what it holds. Read the schema
-resource, or call `describe_table`, before writing SQL - this file only covers
-what a comment on one object cannot express.
+Rules that span more than one table. Anything that describes a single table or
+a single column belongs in the DDL instead, as a `COMMENT`, where it cannot
+drift from the object it describes; the schema resource renders those comments
+along with the rest of the DDL. Read the schema resource, or call
+`describe_table`, before writing SQL - this file only covers what a comment on
+one object cannot express.
 
 ## 1. Attributing a fact to the version that was valid at the time
 
