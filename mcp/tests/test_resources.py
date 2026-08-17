@@ -206,3 +206,14 @@ def test_conventions_exempt_static_dimensions_and_define_safe_reaggregation():
     assert "sum(sum_value) / nullIf(sum(reading_count), 0)" in markdown
     assert "Do not average daily averages" in markdown
     assert "Use `nullIf(denominator, 0)`" in markdown
+
+
+def test_conventions_document_historical_manager_attribution():
+    markdown = get_conventions_markdown()
+
+    assert "## `FINAL` preserves business history" in markdown
+    assert "urbangreen_dw.dim_user_farm_role AS ufr FINAL" in markdown
+    assert "h.harvested_at >= ufr.valid_from" in markdown
+    assert "h.harvested_at < ufr.valid_to" in markdown
+    assert "do not filter the SCD2 assignment" in markdown
+    assert "fact_sensor_readings.reading_ts" in markdown

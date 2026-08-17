@@ -164,3 +164,45 @@ WHERE harvest_date = today();
   `dim_sensor_type` record.
 - Rates are stored and queried as fractions from `0` to `1`; multiply by 100
   only when a percentage value is explicitly required.
+
+
+## `FINAL` preserves business history
+
+`FINAL` removes older physical copies of rows that share the same
+`ReplacingMergeTree` sorting key. It does not remove distinct business events,
+metric dates, or SCD2 validity periods.
+
+The warehouse therefore preserves historical business data while returning the
+latest corrected version of each row. It does not preserve superseded technical
+revisions of the same row; that would require a separate audit log.
+
+For historical ownership or responsibility, do not filter the SCD2 assignment
+to `is_current = 1`. Instead, join each event timestamp to the assignment whose
+half-open validity interval contains that event:
+
+```sql
+SELECT
+    ufr.user_id,
+    ufr.user_full_name,
+    h.farm_id,
+    sum(h.weight_kg) AS total_yield_kg
+FROM urbangreen_dw.fact_harvests AS h FINAL
+INNER JOIN urbangreen_dw.dim_user_farm_role AS ufr FINAL
+    ON h.farm_id = ufr.farm_id
+   AND h.harvested_at >= ufr.valid_from
+   AND h.harvested_at < ufr.valid_to
+WHERE ufr.role_name = 'Farm Manager'
+  AND ufr.user_id = {manager_id:UInt64}
+GROUP BY
+    ufr.user_id,
+    ufr.user_full_name,
+    h.farm_id;
+```
+
+Use `fact_harvests.harvested_at` for exact yield attribution and
+`fact_sensor_readings.reading_ts` for exact sensor-performance attribution.
+
+Daily aggregate facts can be joined using `metric_date` when manager
+assignments change only at day boundaries. If an assignment can change during a
+day, use the atomic facts because a single farm-day aggregate cannot be divided
+accurately between two managers.
