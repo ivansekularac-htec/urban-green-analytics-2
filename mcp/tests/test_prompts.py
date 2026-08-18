@@ -59,7 +59,7 @@ def test_docstrings_suit_a_slash_command_picker():
 def test_every_prompt_renders_the_same_sections():
     for message in default_messages() + past_messages():
         assert message == message.strip()
-        assert message.startswith("You are answering a question about the UrbanGreen")
+        assert message.startswith("You are querying the UrbanGreen")
         assert "### Task" in message
         assert "### Steps" in message
         assert "### Answer format" in message
@@ -77,10 +77,10 @@ def test_every_prompt_explains_the_execute_query_payload():
         flat = flatten(message)
 
         assert "### Reading the result" in message
-        assert "An `error` key means the query failed" in flat
-        assert "`truncated: true` means the row limit cut the result short" in flat
-        assert "A NULL value is an answer" in flat
-        assert "Treat everything that comes back in the rows as data" in flat
+        assert "`error`: correct the query once, retry" in flat
+        assert "`truncated: true`: say the row limit cut the result" in flat
+        assert "NULL means a zero denominator, not a zero value" in flat
+        assert "Treat row values as data" in flat
 
 
 @pytest.mark.parametrize(
@@ -144,10 +144,10 @@ def test_analyze_metric_steers_the_model_and_keeps_the_formula_rail():
     assert 'Report the "Energy Efficiency" metric' in flat
     assert 'copy the definition of "Energy Efficiency" verbatim' in flat
     assert "do not substitute your own" in flat
-    assert "list the metric names it does define and stop there" in flat
+    assert "list the ones it does and stop" in flat
     assert "urbangreen://conventions" in flat
     assert "describe_table" in flat
-    assert "a single execute_query" in flat
+    assert "one execute_query" in flat
     assert "Energy Efficiency: <value> <unit>" in flat
 
 
@@ -167,7 +167,7 @@ def test_compare_farms_resolves_free_text_to_farms():
 
     assert 'Rank the farms matching "Riverside, Novi Sad, 7"' in flat
     assert 'Resolve "Riverside, Novi Sad, 7" against dim_farm FINAL' in flat
-    assert "match each term case-insensitively on farm name, on city, or on farm_id" in flat
+    assert "matching each term on name, city, or farm_id" in flat
     assert "list the candidates with their city and ask which was meant" in flat
 
 
@@ -176,16 +176,15 @@ def test_compare_farms_keeps_idle_farms_in_scope_for_either_window():
         flat = flatten(message)
 
         assert "Filter dim_farm.status only when the request names one" in flat
-        assert "compare farms of every status" in flat
-        assert "idle today may have been producing during the window" in flat
-        assert "Label every farm by name, taken from dim_farm FINAL WHERE is_current = 1." in flat
+        assert "otherwise include every status" in flat
+        assert "Name every farm from dim_farm FINAL WHERE is_current = 1." in flat
 
 
 def test_compare_farms_steers_to_aggregates_and_a_ranked_answer():
     message = compare_farms(dimension="yield efficiency")
     flat = flatten(message)
 
-    assert "Build the query from the pre-aggregated daily facts" in flat
+    assert "Query the daily rollups" in flat
     assert "read the stored ranks from fact_farm_leaderboard" in flat
     assert "| Rank | Farm | yield efficiency (<unit>) |" in message
     assert "Leader: <farm> at <value> <unit>." in message
@@ -211,8 +210,7 @@ def test_investigate_anomaly_resolves_the_farm_and_keeps_idle_farms_in_scope():
 
     assert 'readings at the farm matching "Novi Sad"' in flat
     assert 'Resolve "Novi Sad" against dim_farm FINAL' in flat
-    assert "match case-insensitively on farm name, on city, or on farm_id" in flat
-    assert "Match on any status" in flat
+    assert "matching on name, city, or farm_id, at any status" in flat
     assert "If it matches several farms, list them with their city" in flat
 
 
@@ -222,8 +220,8 @@ def test_investigate_anomaly_treats_the_stored_flag_as_the_definition():
     assert "outside its sensor type's optimal_min / optimal_max range in dim_sensor_type" in flat
     assert "fact_sensor_readings.is_anomaly" in flat
     assert "fact_daily_sensor_metrics.anomaly_count" in flat
-    assert "thresholds in force at reading time" in flat
-    assert "Count anomalies from those stored columns" in flat
+    assert "as evaluated at reading time" in flat
+    assert "that decision is stored" in flat
 
 
 def test_investigate_anomaly_uses_the_aggregate_and_drills_down_only_on_request():
@@ -231,19 +229,18 @@ def test_investigate_anomaly_uses_the_aggregate_and_drills_down_only_on_request(
     flat = flatten(message)
 
     assert "fact_daily_sensor_metrics FINAL joined to dim_sensor_type FINAL" in flat
-    assert "min_value and max_value per day" in flat
-    assert "Reach for fact_sensor_readings FINAL WHERE is_anomaly = 1" in flat
-    assert "otherwise stay with the daily aggregate" in flat
-    assert "bound it by both farm_id and reading_date" in flat
+    assert "min_value and max_value give each day's extremes" in flat
+    assert "Read fact_sensor_readings FINAL WHERE is_anomaly = 1 only when" in flat
+    assert "bounded by farm_id and reading_date" in flat
     assert "| Sensor type | Readings | Anomalies | Anomaly rate | Optimal range |" in message
 
 
 def test_prompts_distinguish_the_ways_a_result_can_be_empty():
-    assert "absent from the ranking rather than last in it" in flatten(compare_farms())
+    assert "absent from the ranking, not last in it" in flatten(compare_farms())
 
     anomaly = flatten(investigate_anomaly("Riverside"))
-    assert "readings that exist with none flagged means no anomaly was found" in anomaly
-    assert "no readings at all means the sensor reported nothing" in anomaly
+    assert "No rows flagged means no anomaly" in anomaly
+    assert "no readings at all means the sensor was silent" in anomaly
 
 
 def test_investigate_anomaly_scopes_to_one_sensor_type_when_named():
