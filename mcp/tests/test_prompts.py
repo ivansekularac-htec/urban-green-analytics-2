@@ -134,23 +134,14 @@ def test_compare_farms_resolves_free_text_to_farms():
     assert "list the candidates with their city and ask which was meant" in flat
 
 
-def test_compare_farms_leaves_status_unfiltered_unless_asked():
-    flat = flatten(compare_farms())
+def test_compare_farms_keeps_idle_farms_in_scope_for_either_window():
+    for message in (compare_farms(), compare_farms(ending=PAST_WINDOW)):
+        flat = flatten(message)
 
-    assert "Filter dim_farm.status only when the request names one" in flat
-    assert "compare farms of every status" in flat
-
-
-def test_compare_farms_reads_the_farm_version_that_matches_the_window():
-    current = flatten(compare_farms())
-    historical = flatten(compare_farms(ending=PAST_WINDOW))
-
-    assert "Take each farm's name from dim_farm FINAL WHERE is_current = 1." in current
-    assert "farm_key" not in current
-
-    assert "join the fact's farm_key to dim_farm.farm_key" in historical
-    assert "the name, city, and status it had during the window" in historical
-    assert "fall back to dim_farm FINAL WHERE is_current = 1 matched on farm_id" in historical
+        assert "Filter dim_farm.status only when the request names one" in flat
+        assert "compare farms of every status" in flat
+        assert "idle today may have been producing during the window" in flat
+        assert "Label every farm by name, taken from dim_farm FINAL WHERE is_current = 1." in flat
 
 
 def test_compare_farms_steers_to_aggregates_and_a_ranked_answer():

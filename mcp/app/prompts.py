@@ -21,6 +21,10 @@ as actions to take rather than mistakes to avoid, which is the more reliable
 framing; the single exception is the rail against substituting an invented
 metric formula, where naming the failure mode is worth the cost.
 
+Instructions are kept to what the model should do. Explaining why a rule exists
+reads well but competes for the attention of a small local model, so the
+reasoning stays here in the source rather than in the rendered message.
+
 The resource URIs referenced here (``urbangreen://metrics``,
 ``urbangreen://conventions``) must match the URIs the resources are registered
 under when the server wires them up.
@@ -32,33 +36,6 @@ _ROLE = (
     "You are answering a question about the UrbanGreen ClickHouse warehouse "
     "using the MCP tools available to you."
 )
-
-# Farm attributes are a Type-2 dimension, so which version to read depends on
-# whether the window is the present or the past. The daily facts carry a
-# farm_key resolved as of the event, which makes the historical lookup a plain
-# equi-join rather than an interval join.
-_CURRENT_FRAME = "Take each farm's name from dim_farm FINAL WHERE is_current = 1."
-
-_HISTORICAL_FRAME = dedent("""\
-    The window is in the past, so join the fact's farm_key to dim_farm.farm_key:
-    each farm then carries the name, city, and status it had during the window
-    rather than the ones it has today. A farm_key of 0 means the version was
-    never resolved, so fall back to dim_farm FINAL WHERE is_current = 1 matched
-    on farm_id.""")
-
-_STATUS_RULE = dedent("""\
-    Farm status is ACTIVE, MAINTENANCE, or INACTIVE. Filter dim_farm.status only
-    when the request names one; otherwise compare farms of every status, since a
-    farm that is idle today may have been producing during the window.""")
-
-
-def _hanging(block: str, spaces: int = 11) -> str:
-    """Re-indent the continuation lines of a block to sit under a numbered step."""
-
-    lines = block.splitlines()
-    padding = " " * spaces
-
-    return "\n".join([lines[0]] + [padding + line for line in lines[1:]])
 
 
 def _window_phrase(days: int, ending: str) -> str:
@@ -98,8 +75,7 @@ def analyze_metric(metric: str, days: int = 30, ending: str = "") -> str:
            one for this metric; do not substitute your own. If the resource defines no
            such metric, list the metric names it does define and stop there.
         2. Read urbangreen://conventions and apply its FINAL / argMax rules to every
-           table you read. These tables keep replaced rows until merges complete, so an
-           aggregation without FINAL can double-count.
+           table you read.
         3. Call describe_table on every table the definition names, before you write SQL.
         4. Produce the answer with a single execute_query, restricted to the window by
            this filter, substituting the table and date column the definition named:
@@ -127,17 +103,14 @@ def compare_farms(
 
     if farms:
         scope = f'the farms matching "{farms}"'
-        resolution = dedent(f"""\
-            Resolve "{farms}" against dim_farm FINAL: match each term
-            case-insensitively on farm name, on city, or on farm_id, so the user can
-            name farms whichever way they know them. If a term matches nothing, or
-            matches several farms, list the candidates with their city and ask which
-            was meant before querying anything else.""")
+        resolution = (
+            f'Resolve "{farms}" against dim_farm FINAL: match each term case-insensitively '
+            "on farm name, on city, or on farm_id. If a term matches nothing, or matches "
+            "several farms, list the candidates with their city and ask which was meant."
+        )
     else:
         scope = "every farm"
         resolution = "Compare every farm that reported in the window."
-
-    frame = _HISTORICAL_FRAME if ending else _CURRENT_FRAME
 
     # Size the answer skeleton to the dimension name so the rendered table stays
     # aligned whatever the user asked to rank by.
@@ -152,21 +125,21 @@ def compare_farms(
         Rank {scope} by "{dimension}" over {_window_phrase(days, ending)}.
 
         ### Steps
-        1. {_hanging(resolution)}
-           {_hanging(_STATUS_RULE)}
-        2. Read urbangreen://metrics and copy the definition of "{dimension}" verbatim:
+        1. {resolution}
+        2. Farm status is ACTIVE, MAINTENANCE, or INACTIVE. Filter dim_farm.status only
+           when the request names one; otherwise compare farms of every status, since a
+           farm that is idle today may have been producing during the window.
+        3. Read urbangreen://metrics and copy the definition of "{dimension}" verbatim:
            its formula, its unit, and the tables it names. If the resource defines no
            such metric, list the metric names it does define and stop there.
-        3. Read urbangreen://conventions and apply its FINAL / argMax rules to every
+        4. Read urbangreen://conventions and apply its FINAL / argMax rules to every
            table you read.
-        4. Build the query from the pre-aggregated daily facts: fact_daily_farm_metrics,
+        5. Build the query from the pre-aggregated daily facts: fact_daily_farm_metrics,
            fact_daily_sensor_metrics, fact_daily_farm_quality_metrics. For a leaderboard
            measure or a rank, read the stored value from fact_farm_leaderboard.
-        5. Label every farm by name in the answer.
-           {_hanging(frame)}
-        6. Call describe_table on every table you are about to query.
-        7. Restrict the query to the window with this filter, substituting the table you
-           chose:
+        6. Label every farm by name, taken from dim_farm FINAL WHERE is_current = 1.
+        7. Call describe_table on every table you are about to query, then restrict it to
+           the window with this filter, substituting the table you chose:
 
                {_window_clause(days, ending, "fact_daily_farm_metrics")}
 
@@ -221,26 +194,23 @@ def investigate_anomaly(
 
         ### Steps
         1. Resolve "{farm}" against dim_farm FINAL: match case-insensitively on farm
-           name, on city, or on farm_id, so the user can name the farm whichever way
-           they know it. Match on any status, since a farm that is idle today may have
-           been reporting during the window. If it matches several farms, list them with
-           their city and ask which was meant before querying anything else.
+           name, on city, or on farm_id. Match on any status, since a farm that is idle
+           today may have been reporting during the window. If it matches several farms,
+           list them with their city and ask which was meant.
         2. Read urbangreen://conventions for the FINAL / argMax rules and
            urbangreen://metrics for the Sensor Anomaly Rate definition.
         3. For trend context, query fact_daily_sensor_metrics FINAL joined to
-           dim_sensor_type FINAL (WHERE is_current = 1) on sensor_type_id. The fact table
-           carries only sensor_type_id, so this join supplies the type name, its unit,
-           and its optimal range.
+           dim_sensor_type FINAL (WHERE is_current = 1) on sensor_type_id, which supplies
+           the type name, its unit, and its optimal range.
         4. {sensor_filter}
-        5. Call describe_table on every table you are about to query.
-        6. Restrict the query to the window with this filter:
+        5. Call describe_table on every table you are about to query, then restrict it to
+           the window with this filter:
 
                {_window_clause(days, ending, "fact_daily_sensor_metrics")}
 
-        7. Reach for fact_sensor_readings FINAL WHERE is_anomaly = 1 when the user wants
-           the actual offending readings; otherwise stay with the daily aggregate. It is
-           the raw per-reading table and is far larger.
-        8. If the query returns no rows, widen the window and say so in your answer.
+        6. Reach for fact_sensor_readings FINAL WHERE is_anomaly = 1 when the user wants
+           the actual offending readings; otherwise stay with the daily aggregate.
+        7. If the query returns no rows, widen the window and say so in your answer.
 
         ### Answer format
         | Sensor type | Readings | Anomalies | Anomaly rate | Optimal range |
