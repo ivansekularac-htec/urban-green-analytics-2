@@ -13,7 +13,7 @@ from pathlib import Path
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 
-SCHEMA_DATABASE = "urbangreen_dw"
+from app.config import get_settings
 
 CONTENT_DIRECTORY = Path(__file__).parent / "content"
 
@@ -50,7 +50,7 @@ def render_schema(client: Client) -> str:
         statement, or a short markdown notice when the schema cannot be read.
     """
     try:
-        return _load_schema(client)
+        return _load_schema(client, get_settings().clickhouse_db)
     except ClickHouseError as exc:
         # Deliberately outside the cached call: lru_cache does not store
         # exceptions, so a transient ClickHouse failure is retried on the next
@@ -84,12 +84,17 @@ def render_conventions() -> str:
 
 
 @lru_cache(maxsize=1)
-def _load_schema(client: Client) -> str:
+def _load_schema(client: Client, database: str) -> str:
     """
     Introspect the warehouse and render its DDL as markdown.
 
+    The database is part of the cache key rather than a module constant, so the
+    cached markdown cannot describe a different database than the one the
+    settings currently point at.
+
     Args:
         client: ClickHouse client used to introspect the warehouse.
+        database: Name of the warehouse database to introspect.
 
     Returns:
         Markdown listing every warehouse table with its ``CREATE TABLE``
@@ -101,14 +106,14 @@ def _load_schema(client: Client) -> str:
     result = client.query(
         _SCHEMA_QUERY,
         parameters={
-            "database": SCHEMA_DATABASE,
+            "database": database,
             "internal_prefix": INTERNAL_TABLE_PREFIX,
         },
     )
 
     sections = [
         "# Warehouse schema\n",
-        f"Database `{SCHEMA_DATABASE}`, read from the live server.\n",
+        f"Database `{database}`, read from the live server.\n",
     ]
 
     for name, create_table_query in result.result_rows:

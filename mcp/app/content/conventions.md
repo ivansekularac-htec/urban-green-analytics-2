@@ -7,7 +7,26 @@ along with the rest of the DDL. Read the schema resource, or call
 `describe_table`, before writing SQL - this file only covers what a comment on
 one object cannot express.
 
-## 1. Attributing a fact to the version that was valid at the time
+## 1. When `FINAL` is needed, and when it costs more than it is worth
+
+A reload replaces a row rather than adding one, but the replacement only takes
+effect once the parts are merged in the background. Until then both copies are
+readable and an aggregate counts the same business row twice. `FINAL` resolves
+that while the query runs, which is why it appears throughout the metric
+definitions.
+
+It is not free: it merges the matching parts on every read. On the atomic facts
+it is the most expensive shape in the warehouse, and `fact_sensor_readings`
+holds every reading ever taken.
+
+So use it when the number has to be exact and the table may have been reloaded
+recently. For anything spanning more than a few days, read the daily rollups
+instead - they are orders of magnitude smaller and already deduplicated to one
+row per grain, so they answer most questions without touching the atomic rows
+at all. Reach for `FINAL` on an atomic fact only when the question genuinely
+needs individual events, and bound it with a date range when you do.
+
+## 2. Attributing a fact to the version that was valid at the time
 
 The historical dimensions keep one row per version of an entity. A fact points
 at the entity, not at a version, so the join has to select the version whose
@@ -26,7 +45,7 @@ Without the window the join multiplies rows as soon as a farm has a second
 version. For a question about the present, filter `is_current = 1` instead of
 carrying the window.
 
-## 2. Join facts to dimensions on `*_id`, never on `*_key`
+## 3. Join facts to dimensions on `*_id`, never on `*_key`
 
 A `*_key` is a surrogate generated per version; a `*_id` is the id the source
 system uses. A fact carries the surrogate of the version valid at load time, so
@@ -36,7 +55,7 @@ The calendars are the exception: `date_key` and `time_key` are stable
 identifiers rather than surrogates, and are the correct join columns for
 `dim_date` and `dim_time`.
 
-## 3. Latest reading per sensor
+## 4. Latest reading per sensor
 
 The live values on a dashboard are the newest reading per sensor type, which is
 `argMax` over the timestamp - not `max(value)`, which returns the largest
@@ -52,7 +71,7 @@ WHERE farm_id = 1
 GROUP BY sensor_type_id
 ```
 
-## 4. Sensor type ids
+## 5. Sensor type ids
 
 Stable across the warehouse, so filtering on `sensor_type_id` needs no join:
 

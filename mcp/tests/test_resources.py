@@ -9,11 +9,12 @@ DDL cannot carry as a table or column COMMENT.
 
 from unittest.mock import MagicMock
 
+import pytest
 from clickhouse_connect.driver.exceptions import DatabaseError
 
+from app.config import get_settings
 from app.resources import (
     INTERNAL_TABLE_PREFIX,
-    SCHEMA_DATABASE,
     _load_schema,
     render_conventions,
     render_metrics,
@@ -24,6 +25,19 @@ DIM_FARM_DDL = "CREATE TABLE urbangreen_dw.dim_farm (farm_id UInt64) ENGINE = Re
 FACT_HARVESTS_DDL = (
     "CREATE TABLE urbangreen_dw.fact_harvests (harvest_id UInt64) ENGINE = ReplacingMergeTree"
 )
+
+
+@pytest.fixture(autouse=True)
+def clear_schema_cache():
+    """
+    Isolate the process-lifetime schema cache between tests.
+
+    Clearing on both sides of the yield matters: a test that fails partway
+    through would otherwise leak a cached schema into every test after it.
+    """
+    _load_schema.cache_clear()
+    yield
+    _load_schema.cache_clear()
 
 
 def _client(result_rows) -> MagicMock:
@@ -40,7 +54,6 @@ def _client(result_rows) -> MagicMock:
 
 
 def test_render_schema_lists_every_table_with_its_ddl():
-    _load_schema.cache_clear()
     client = _client(
         [
             ("dim_farm", DIM_FARM_DDL),
@@ -56,32 +69,30 @@ def test_render_schema_lists_every_table_with_its_ddl():
     assert DIM_FARM_DDL in schema
     assert FACT_HARVESTS_DDL in schema
 
-    _load_schema.cache_clear()
 
-
-def test_render_schema_binds_the_database_as_a_parameter():
-    _load_schema.cache_clear()
+def test_render_schema_introspects_the_configured_database():
+    """The database comes from settings rather than a constant, so one env
+    change moves both the client and the schema it describes."""
     client = _client([])
 
-    render_schema(client)
+    schema = render_schema(client)
 
+    database = get_settings().clickhouse_db
     sql = client.query.call_args.args[0]
     parameters = client.query.call_args.kwargs["parameters"]
 
     assert "{database:String}" in sql
     assert parameters == {
-        "database": SCHEMA_DATABASE,
+        "database": database,
         "internal_prefix": INTERNAL_TABLE_PREFIX,
     }
-    assert SCHEMA_DATABASE not in sql
-
-    _load_schema.cache_clear()
+    assert database not in sql
+    assert f"`{database}`" in schema
 
 
 def test_render_schema_excludes_materialized_view_inner_tables():
     """The `.inner` tables behind a materialized view are an implementation
     detail and must not reach the model."""
-    _load_schema.cache_clear()
     client = _client([("dim_farm", DIM_FARM_DDL)])
 
     render_schema(client)
@@ -93,13 +104,10 @@ def test_render_schema_excludes_materialized_view_inner_tables():
     assert parameters["internal_prefix"] == INTERNAL_TABLE_PREFIX
     assert INTERNAL_TABLE_PREFIX not in sql
 
-    _load_schema.cache_clear()
-
 
 def test_render_schema_is_built_once_and_cached():
     """The warehouse schema is static while the stack is up, so the second
     read must not hit ClickHouse again."""
-    _load_schema.cache_clear()
     client = _client([("dim_farm", DIM_FARM_DDL)])
 
     first = render_schema(client)
@@ -108,11 +116,8 @@ def test_render_schema_is_built_once_and_cached():
     assert first == second
     client.query.assert_called_once()
 
-    _load_schema.cache_clear()
-
 
 def test_render_schema_reports_a_failure_as_markdown():
-    _load_schema.cache_clear()
     client = MagicMock()
     client.query.side_effect = DatabaseError("Connection refused")
 
@@ -122,13 +127,10 @@ def test_render_schema_reports_a_failure_as_markdown():
     assert "could not be read" in schema
     assert "Connection refused" in schema
 
-    _load_schema.cache_clear()
-
 
 def test_render_schema_retries_after_a_failure():
     """A failure must not be cached: the next read has to try again, otherwise
     one blip would leave the resource broken until the process restarts."""
-    _load_schema.cache_clear()
     client = MagicMock()
     client.query.side_effect = [
         DatabaseError("Connection refused"),
@@ -141,8 +143,6 @@ def test_render_schema_retries_after_a_failure():
     assert "could not be read" in failed
     assert "## dim_farm" in recovered
     assert client.query.call_count == 2
-
-    _load_schema.cache_clear()
 
 
 # ---------------------------------------------------------------------------
@@ -199,6 +199,16 @@ def test_render_conventions_covers_the_cross_table_rules():
     assert "valid_to" in conventions
     assert "is_current" in conventions
     assert "argMax" in conventions
+
+
+def test_render_conventions_warn_about_the_cost_of_final():
+    """`FINAL` on an atomic fact is the most expensive shape in the warehouse,
+    and the model copies these examples verbatim."""
+    conventions = render_conventions()
+
+    assert "FINAL" in conventions
+    assert "fact_sensor_readings" in conventions
+    assert "daily rollups" in conventions
 
 
 def test_render_conventions_defers_per_table_facts_to_the_ddl():
