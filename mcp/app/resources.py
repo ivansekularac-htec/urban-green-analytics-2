@@ -10,6 +10,12 @@ from app.config import get_settings
 
 _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 
+# Addresses for the resources below. Publisher and readers import these rather
+# than retype them, since a mistyped URI reads as nothing instead of failing.
+SCHEMA_URI = "urbangreen://schema"
+METRICS_URI = "urbangreen://metrics"
+CONVENTIONS_URI = "urbangreen://conventions"
+
 _SCHEMA_TABLES_SQL = """
 SELECT name, create_table_query
 FROM system.tables
