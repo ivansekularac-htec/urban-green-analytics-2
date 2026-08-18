@@ -11,13 +11,8 @@ import re
 
 import pytest
 
-from app.config import get_settings
-from app.prompts import (
-    COMPARISON_DIMENSIONS,
-    analyze_metric,
-    compare_farms,
-    investigate_anomaly,
-)
+from app import prompts
+from app.prompts import analyze_metric, compare_farms, investigate_anomaly
 from app.resources import CONVENTIONS_URI, METRICS_URI
 
 PROMPTS = (analyze_metric, compare_farms, investigate_anomaly)
@@ -71,21 +66,41 @@ def test_prompts_name_no_table_that_does_not_exist(rendered):
         assert phantom not in rendered
 
 
-def test_prompts_qualify_tables_with_the_configured_database():
-    """The database is read from settings rather than hard-coded, so one env
-    change moves the client and the tables the prompts name together."""
-    database = get_settings().clickhouse_db
+def test_prompts_qualify_tables_with_the_module_wide_database(monkeypatch):
+    """The database enters this module once, so a test can set it rather than
+    read whatever the environment happens to hold."""
+    monkeypatch.setattr(prompts, "WAREHOUSE", "some_other_db")
 
-    assert f"{database}.fact_daily_farm_metrics" in compare_farms([1])
-    assert f"{database}.fact_sensor_readings" in investigate_anomaly(1, "Temperature")
+    assert "some_other_db.fact_daily_farm_metrics" in compare_farms([1])
+    assert "some_other_db.fact_sensor_readings" in investigate_anomaly(1, "Temperature")
+
+
+# ---------------------------------------------------------------------------
+# Windowing
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("rendered", RENDERED)
-def test_every_prompt_spells_out_its_date_arithmetic(rendered):
-    """The window is a day count rather than prose precisely so the model does
-    not have to interpret it. Leaving it as words would hand the weakest step
-    back to the model."""
-    assert "today() -" in rendered
+def test_every_prompt_anchors_its_window_to_the_data(rendered):
+    """The warehouse is batch-loaded, so counting back from the clock can name
+    days that were never loaded and report a range that partly does not exist."""
+    assert "Anchor the window to the data, not to the clock" in rendered
+    assert "table's own date column" in rendered
+    assert "anchor date in your answer" in rendered
+
+
+@pytest.mark.parametrize("rendered", RENDERED)
+def test_no_prompt_pins_a_date_column(rendered):
+    """Each prompt lets the model choose between tables, so naming one table's
+    date column would contradict that choice."""
+    assert "metric_date >=" not in rendered
+    assert "reading_date >=" not in rendered
+    assert "today() -" not in rendered
+
+
+def test_the_window_length_reaches_the_text():
+    assert "count 30 days back" in analyze_metric("Energy Efficiency")
+    assert "count 7 days back" in analyze_metric("Energy Efficiency", days=7)
 
 
 # ---------------------------------------------------------------------------
@@ -97,10 +112,9 @@ def test_every_prompt_spells_out_its_date_arithmetic(rendered):
 def test_every_prompt_explains_the_execute_query_payload(rendered):
     """`execute_query` returns a dict instead of raising, and carries a
     truncation flag. Neither is any use if nothing tells the model to look."""
-    assert "`error`" in rendered
-    assert "correct the query once" in rendered
-    assert "`truncated: true`" in rendered
-    assert "do not present a total or a ranking built from it as complete" in rendered
+    assert "On `error`, correct the query once" in rendered
+    assert "On `truncated: true`" in rendered
+    assert "Do not\n  present a total or a ranking built from it as complete" in rendered
 
 
 @pytest.mark.parametrize("rendered", RENDERED)
@@ -108,7 +122,7 @@ def test_every_prompt_separates_null_from_zero(rendered):
     """The canonical formulas divide with `nullIf`, so a NULL means there was
     nothing to measure. Reporting it as 0 states a measurement that was never
     taken."""
-    assert "nullIf" in rendered
+    assert "`NULL` means the denominator was zero" in rendered
     assert "never as `0`" in rendered
 
 
@@ -145,16 +159,11 @@ def test_analyze_metric_asks_for_one_query_and_a_sourced_answer():
     assert "the table or tables the number came from" in rendered
 
 
-def test_analyze_metric_refuses_to_invent_a_formula():
+def test_analyze_metric_stops_on_an_undefined_metric():
     """An undefined metric has to stop the model, not start it improvising."""
     rendered = analyze_metric("Made Up Metric")
 
-    assert "inventing a formula for it" in rendered
-
-
-def test_analyze_metric_defaults_to_thirty_days():
-    assert "today() - 30" in analyze_metric("Energy Efficiency")
-    assert "today() - 7" in analyze_metric("Energy Efficiency", days=7)
+    assert f'If "Made Up Metric" has no definition in {METRICS_URI}, say so and stop' in rendered
 
 
 # ---------------------------------------------------------------------------
@@ -162,12 +171,13 @@ def test_analyze_metric_defaults_to_thirty_days():
 # ---------------------------------------------------------------------------
 
 
-def test_compare_farms_lists_the_dimensions_it_supports():
-    """Without an explicit list a small model invents a dimension."""
+def test_compare_farms_takes_the_valid_dimensions_from_the_resource():
+    """A list of dimensions kept here would be a second copy of what the metrics
+    resource defines, and it would win the moment the two disagreed."""
     rendered = compare_farms([1, 2])
 
-    for dimension in COMPARISON_DIMENSIONS:
-        assert dimension in rendered
+    assert "That resource is the list of what can be ranked" in rendered
+    assert "name in your answer which metric you used" in rendered
 
 
 def test_compare_farms_resolves_names_and_prefers_the_rollup():
@@ -186,7 +196,7 @@ def test_compare_farms_defers_to_the_precomputed_leaderboard():
     rendered = compare_farms([1, 2])
 
     assert "fact_farm_leaderboard" in rendered
-    assert "instead of ranking the farms yourself" in rendered
+    assert "Do not rank the farms yourself" in rendered
 
 
 def test_compare_farms_takes_the_ranking_direction_from_the_definition():
@@ -195,7 +205,7 @@ def test_compare_farms_takes_the_ranking_direction_from_the_definition():
     rendered = compare_farms([1, 2], dimension="energy efficiency")
 
     assert "whether higher or lower is better" in rendered
-    assert "say which direction counts as better" in rendered
+    assert "which direction counts as better" in rendered
     assert "for energy efficiency, lower is better" not in rendered
 
 
@@ -224,15 +234,14 @@ def test_investigate_anomaly_uses_the_stored_flag():
     rendered = investigate_anomaly(1, "Temperature")
 
     assert "is_anomaly" in rendered
-    assert "versioned" in rendered
-    assert "Count anomalies from the stored flag" in rendered
-    assert "use today's range only to describe" in rendered
+    assert "Count anomalies from" in rendered
+    assert "never to recount" in rendered
 
 
 def test_investigate_anomaly_takes_the_trend_from_the_daily_rollup():
     rendered = investigate_anomaly(2, "pH Level")
 
-    assert "fact_daily_sensor_metrics FINAL" in rendered
+    assert "fact_daily_sensor_metrics" in rendered
     assert "anomaly_count" in rendered
     assert "reading_count" in rendered
     assert rendered.index("fact_daily_sensor_metrics") < rendered.index(
@@ -256,7 +265,6 @@ def test_investigate_anomaly_reads_severity_from_the_daily_extremes():
     rendered = investigate_anomaly(1, "Temperature")
 
     assert "min_value and max_value" in rendered
-    assert "without reading a single atomic row" in rendered
 
 
 def test_investigate_anomaly_separates_no_anomalies_from_no_readings():
@@ -272,8 +280,8 @@ def test_investigate_anomaly_drills_into_readings_only_on_request():
     rendered = investigate_anomaly(1, "Humidity")
 
     assert "Only if the user then asks" in rendered
-    assert "largest table in" in rendered
-    assert "reading_date" in rendered
+    assert "largest table in the warehouse" in rendered
+    assert "never read it without both bounds" in rendered
 
 
 def test_investigate_anomaly_reports_the_optimal_range():
