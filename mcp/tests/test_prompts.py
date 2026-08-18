@@ -29,9 +29,9 @@ RENDERED = (
 )
 
 # Tables the ticket names that this warehouse does not have. The ticket predates
-# the ETL work: there is no `agg_` prefix anywhere, no hourly sensor aggregate,
-# and the readings table is plural.
-PHANTOM_TABLES = ("agg_", "agg_hourly_farm_sensor", "fact_sensor_reading ")
+# the ETL work: there is no `agg_` prefix anywhere, so no hourly sensor
+# aggregate either, and the readings table is plural.
+PHANTOM_TABLES = ("agg_", "fact_sensor_reading ")
 
 
 # ---------------------------------------------------------------------------

@@ -13,7 +13,6 @@ _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 # The URIs these resources are published under. They live beside the resources
 # themselves so the prompts, which tell the model what to read, and the T5.2.8
 # registration, which decides what is readable, cannot drift apart.
-SCHEMA_URI = "urbangreen://schema"
 METRICS_URI = "urbangreen://metrics"
 CONVENTIONS_URI = "urbangreen://conventions"
 
