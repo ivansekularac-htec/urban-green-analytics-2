@@ -72,9 +72,7 @@ def test_investigate_anomaly_contract():
     assert f"{WAREHOUSE_DATABASE}.fact_daily_sensor_metrics FINAL" in prompt
     assert f"{WAREHOUSE_DATABASE}.dim_sensor_type FINAL" in prompt
     assert f"{WAREHOUSE_DATABASE}.fact_sensor_readings" in prompt
-    assert prompt.index("fact_daily_sensor_metrics") < prompt.index(
-        "fact_sensor_readings"
-    )
+    assert prompt.index("fact_daily_sensor_metrics") < prompt.index("fact_sensor_readings")
 
 
 def test_investigate_anomaly_renders_custom_window():
