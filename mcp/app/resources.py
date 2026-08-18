@@ -10,6 +10,9 @@ from app.config import get_settings
 
 _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 
+METRICS_URI = "urbangreen://metrics"
+CONVENTIONS_URI = "urbangreen://conventions"
+
 _SCHEMA_TABLES_SQL = """
 SELECT name, create_table_query
 FROM system.tables
