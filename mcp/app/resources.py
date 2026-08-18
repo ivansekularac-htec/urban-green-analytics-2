@@ -9,13 +9,13 @@ from pathlib import Path
 
 from clickhouse_connect.driver.client import Client
 
-WAREHOUSE_DATABASE = "urbangreen_dw"
-INTERNAL_TABLE_PREFIX = ".inner"
-
 RESOURCE_DOCS = Path(__file__).with_name("resource_docs")
 
 
-def _load_table_ddls(client: Client) -> list[tuple[str, str]]:
+def _load_table_ddls(
+    client: Client,
+    database: str,
+) -> list[tuple[str, str]]:
     """Return visible warehouse table names and their live ClickHouse DDL."""
     result = client.query(
         """
@@ -27,18 +27,21 @@ def _load_table_ddls(client: Client) -> list[tuple[str, str]]:
         AND name NOT LIKE '.inner%'
         ORDER BY name
         """,
-        parameters={"database": WAREHOUSE_DATABASE},
+        parameters={"database": database},
     )
 
     return [(table_name, ddl) for table_name, ddl in result.result_rows]
 
 
-def _render_schema_markdown(table_ddls: list[tuple[str, str]]) -> str:
+def _render_schema_markdown(
+    table_ddls: list[tuple[str, str]],
+    database: str,
+) -> str:
     """Render table names and DDL statements as deterministic Markdown."""
     sections = [
         "# UrbanGreen ClickHouse schema",
         "",
-        f"Database: `{WAREHOUSE_DATABASE}`",
+        f"Database: `{database}`",
         "",
         "The definitions below are read from ClickHouse at runtime. Internal "
         "materialized-view storage tables are omitted.",
@@ -62,9 +65,12 @@ def _render_schema_markdown(table_ddls: list[tuple[str, str]]) -> str:
     return "\n".join(sections) + "\n"
 
 
-def build_schema_markdown(client: Client) -> str:
+def build_schema_markdown(client: Client, database: str) -> str:
     """Build Markdown from the live warehouse schema."""
-    return _render_schema_markdown(_load_table_ddls(client))
+    return _render_schema_markdown(
+        _load_table_ddls(client, database),
+        database,
+    )
 
 
 def get_metrics_markdown() -> str:

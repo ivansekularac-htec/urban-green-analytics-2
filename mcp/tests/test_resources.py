@@ -39,7 +39,7 @@ def test_schema_introspects_tables_and_renders_catalog_ddl():
         ),
     )
 
-    markdown = build_schema_markdown(client)
+    markdown = build_schema_markdown(client, "urbangreen_dw")
 
     assert markdown.startswith("# UrbanGreen ClickHouse schema\n")
     assert "Database: `urbangreen_dw`" in markdown
@@ -68,7 +68,7 @@ def test_schema_catalog_query_filters_internal_materialized_view_tables():
         )
     )
 
-    markdown = build_schema_markdown(client)
+    markdown = build_schema_markdown(client, "urbangreen_dw")
 
     assert "## `fact_daily_farm_metrics`" in markdown
     client.query.assert_called_once()
@@ -91,7 +91,7 @@ def test_schema_builder_propagates_catalog_errors():
     client.query.side_effect = RuntimeError("Catalog query failed")
 
     with pytest.raises(RuntimeError, match="Catalog query failed"):
-        build_schema_markdown(client)
+        build_schema_markdown(client, "urbangreen_dw")
 
     client.query.assert_called_once()
 
@@ -100,7 +100,7 @@ def test_schema_reports_when_no_visible_tables_exist():
     client = MagicMock()
     client.query.return_value = _query_result()
 
-    markdown = build_schema_markdown(client)
+    markdown = build_schema_markdown(client, "urbangreen_dw")
 
     assert "No user-visible tables were found." in markdown
     client.query.assert_called_once()
