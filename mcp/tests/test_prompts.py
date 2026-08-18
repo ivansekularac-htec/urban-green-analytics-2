@@ -112,18 +112,17 @@ def test_only_the_metric_formula_rail_is_phrased_as_a_prohibition():
 
 # Reads the operator, anchor date, and day offset back out of the rendered SQL,
 # so flipping `>` to `>=` changes what these tests count.
-_COMPARISON = re.compile(r"metric_date (>=|>|<=|<) toDate\('(\d{4}-\d{2}-\d{2})'\)(?: - (\d+))?")
-_MAX_SUBQUERY = re.compile(r"\(SELECT max\(metric_date\) FROM \w+\)")
+_COMPARISON = re.compile(r"\w+ (>=|>|<=|<) toDate\('(\d{4}-\d{2}-\d{2})'\)(?: - (\d+))?")
+_MAX_SUBQUERY = re.compile(r"\(SELECT max\(\w+\) FROM \w+\)")
+# Slots the model fills in from the metric definition, standing in for a table
+# or column the prompt cannot know when it renders.
+_SLOT = re.compile(r"<(date_column|source_table|rollup)>")
 
 
 def window_clause_of(message: str) -> str:
     """Pull the date filter out of a rendered prompt."""
 
-    (clause,) = [
-        line.strip()
-        for line in message.splitlines()
-        if line.strip().startswith("WHERE metric_date")
-    ]
+    (clause,) = [line.strip() for line in message.splitlines() if line.strip().startswith("WHERE ")]
 
     return clause
 
@@ -132,11 +131,13 @@ def dates_covered(clause: str, latest: str) -> list[date]:
     """Every date the clause admits, evaluating the comparisons it actually renders.
 
     `latest` stands in for the newest date in the table, which is the implicit
-    upper bound when the clause anchors to max(metric_date).
+    upper bound when the clause anchors to a max(). Slots are filled first, the
+    way the model is told to fill them.
     """
 
     newest = date.fromisoformat(latest)
-    comparisons = _COMPARISON.findall(_MAX_SUBQUERY.sub(f"toDate('{latest}')", clause))
+    filled = _SLOT.sub("resolved", clause)
+    comparisons = _COMPARISON.findall(_MAX_SUBQUERY.sub(f"toDate('{latest}')", filled))
 
     assert comparisons, f"no comparison found in {clause!r}"
 
@@ -178,21 +179,38 @@ def test_a_window_covers_exactly_the_days_it_was_asked_for(days):
 
 def test_open_ended_window_anchors_to_the_latest_loaded_data():
     for message in default_messages():
-        flat = flatten(message)
-
-        assert "most recent" in flat
-        assert "(SELECT max(metric_date) FROM fact_daily" in flat
-        assert "toDate(" not in flat
+        assert "most recent" in flatten(message)
+        assert "SELECT max(" in window_clause_of(message)
+        assert "toDate(" not in window_clause_of(message)
 
 
 def test_past_window_is_pinned_to_the_date_the_user_named():
     for message in past_messages():
-        flat = flatten(message)
+        clause = window_clause_of(message)
 
-        assert f"days ending {PAST_WINDOW}" in flat
-        assert f"WHERE metric_date > toDate('{PAST_WINDOW}') -" in flat
-        assert f"AND metric_date <= toDate('{PAST_WINDOW}')" in flat
-        assert "SELECT max(metric_date)" not in flat
+        assert f"days ending {PAST_WINDOW}" in flatten(message)
+        assert f"> toDate('{PAST_WINDOW}') -" in clause
+        assert f"<= toDate('{PAST_WINDOW}')" in clause
+        assert "SELECT max(" not in clause
+
+
+def test_the_filter_is_concrete_only_where_the_table_is_known():
+    # analyze_metric cannot know either: the metric definition names the source.
+    analyze = window_clause_of(analyze_metric("Data Freshness"))
+    assert "<date_column>" in analyze
+    assert "<source_table>" in analyze
+    assert "metric_date" not in analyze
+
+    # Every rollup compare_farms may pick dates rows by metric_date; which one
+    # the model picks is still open.
+    compare = window_clause_of(compare_farms())
+    assert "metric_date" in compare
+    assert "<rollup>" in compare
+
+    # investigate_anomaly names its own table, so nothing is left to fill.
+    anomaly = window_clause_of(investigate_anomaly("Riverside"))
+    assert "(SELECT max(metric_date) FROM fact_daily_sensor_metrics)" in anomaly
+    assert "<" not in anomaly
 
 
 def test_windows_default_to_thirty_days_and_honour_the_argument():
@@ -278,7 +296,7 @@ def test_investigate_anomaly_resolves_the_farm_and_keeps_idle_farms_in_scope():
     assert 'readings at the farm matching "Novi Sad"' in flat
     assert 'Resolve "Novi Sad" against dim_farm FINAL' in flat
     assert "matching on name, city, or farm_id, at any status" in flat
-    assert "If it matches several farms, list them with their city" in flat
+    assert "If it is ambiguous or matches nothing, list the candidates with their city" in flat
 
 
 def test_investigate_anomaly_treats_the_stored_flag_as_the_definition():
@@ -318,4 +336,6 @@ def test_investigate_anomaly_scopes_to_one_sensor_type_when_named():
     assert "Cover every sensor type reporting at that farm." in every_type
 
     assert 'anomalous "temperature" readings' in one_type
-    assert 'Restrict to the sensor type named "temperature" in dim_sensor_type.name.' in one_type
+    assert 'Resolve "temperature" against dim_sensor_type FINAL' in one_type
+    assert "matching on name or sensor_type_id" in one_type
+    assert "list the type names it does hold and ask which was meant" in one_type

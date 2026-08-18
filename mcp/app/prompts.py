@@ -88,15 +88,18 @@ def _window_phrase(days: int, ending: str) -> str:
     return f"the most recent {days} days of data"
 
 
-def _window_clause(days: int, ending: str, table: str) -> str:
-    """Render the date filter for the window, anchored to the data when open-ended."""
+def _window_clause(days: int, ending: str, table: str, column: str = "metric_date") -> str:
+    """Render the date filter for the window, anchored to the data when open-ended.
+
+    Callers pass a slot such as ``<source_table>`` for whatever they cannot know
+    at render time. A plausible name the query will not use reads as an
+    instruction, and a wrong one costs more than an obvious blank.
+    """
 
     if ending:
-        return (
-            f"WHERE metric_date > toDate('{ending}') - {days} AND metric_date <= toDate('{ending}')"
-        )
+        return f"WHERE {column} > toDate('{ending}') - {days} AND {column} <= toDate('{ending}')"
 
-    return f"WHERE metric_date > (SELECT max(metric_date) FROM {table}) - {days}"
+    return f"WHERE {column} > (SELECT max({column}) FROM {table}) - {days}"
 
 
 def analyze_metric(metric: str, days: int = 30, ending: str = "") -> str:
@@ -122,10 +125,11 @@ def analyze_metric(metric: str, days: int = 30, ending: str = "") -> str:
            own. If it defines no such metric, list the ones it does and stop.
         2. Read {CONVENTIONS_URI} and apply its FINAL / argMax rules to every table.
         3. Call describe_table on each table the definition names before writing SQL.
-        4. Answer with one execute_query, windowed by this filter on the table and date
-           column the definition named:
+           Metrics sit on different tables, and each carries its own date column.
+        4. Answer with one execute_query, windowed by this filter with the table and
+           column from step 1 substituted for the slots:
 
-               {_window_clause(days, ending, "fact_daily_farm_metrics")}
+               {_window_clause(days, ending, "<source_table>", "<date_column>")}
 
         {_RESULT_RULES}
 
@@ -189,9 +193,10 @@ def compare_farms(
            fact_daily_farm_quality_metrics. For a single-day ranking, read the stored
            ranks from fact_farm_leaderboard.
         6. Name every farm from dim_farm FINAL WHERE is_current = 1.
-        7. Call describe_table on each table, then window it with this filter:
+        7. Call describe_table on each table, then window it with this filter, naming
+           the rollup you chose in the slot. Every rollup dates rows by metric_date:
 
-               {_window_clause(days, ending, "fact_daily_farm_metrics")}
+               {_window_clause(days, ending, "<rollup>")}
 
         {_RESULT_RULES}
 
@@ -228,7 +233,9 @@ def investigate_anomaly(
     if sensor_type:
         reading_scope = f'"{sensor_type}"'
         sensor_filter = (
-            f'Restrict to the sensor type named "{sensor_type}" in dim_sensor_type.name.'
+            f'Resolve "{sensor_type}" against dim_sensor_type FINAL, matching on name or '
+            "sensor_type_id. If nothing matches, list the type names it does hold and ask "
+            "which was meant."
         )
     else:
         reading_scope = "sensor"
@@ -243,18 +250,18 @@ def investigate_anomaly(
 
         ### Steps
         1. Resolve "{farm}" against dim_farm FINAL, matching on name, city, or farm_id,
-           at any status. If it matches several farms, list them with their city and ask
-           which was meant.
-        2. Read {CONVENTIONS_URI} for the FINAL / argMax rules and {METRICS_URI} for the
+           at any status. If it is ambiguous or matches nothing, list the candidates with
+           their city and ask which was meant.
+        2. {sensor_filter}
+        3. Read {CONVENTIONS_URI} for the FINAL / argMax rules and {METRICS_URI} for the
            Sensor Anomaly Rate definition.
-        3. An anomaly is a reading outside its sensor type's optimal_min / optimal_max
+        4. An anomaly is a reading outside its sensor type's optimal_min / optimal_max
            range in dim_sensor_type, and that decision is stored: count from
            fact_daily_sensor_metrics.anomaly_count, which aggregates
            fact_sensor_readings.is_anomaly as evaluated at reading time.
-        4. Query fact_daily_sensor_metrics FINAL joined to dim_sensor_type FINAL
+        5. Query fact_daily_sensor_metrics FINAL joined to dim_sensor_type FINAL
            (WHERE is_current = 1) on sensor_type_id for the type name, unit, and optimal
            range. Its min_value and max_value give each day's extremes.
-        5. {sensor_filter}
         6. Call describe_table on each table, then window it with this filter:
 
                {_window_clause(days, ending, "fact_daily_sensor_metrics")}
