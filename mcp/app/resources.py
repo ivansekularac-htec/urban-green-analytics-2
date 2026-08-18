@@ -8,6 +8,10 @@ from clickhouse_connect.driver.client import Client
 from app.clickhouse import get_client
 from app.config import get_settings
 
+WAREHOUSE_DATABASE = get_settings().clickhouse_db
+METRICS_RESOURCE_URI = "urbangreen://metrics"
+CONVENTIONS_RESOURCE_URI = "urbangreen://conventions"
+
 _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 
 _SCHEMA_TABLES_SQL = """

@@ -5,7 +5,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from app.config import get_settings
 from app.resources import (
+    CONVENTIONS_RESOURCE_URI,
+    METRICS_RESOURCE_URI,
+    WAREHOUSE_DATABASE,
     conventions_resource,
     load_schema_markdown,
     metrics_resource,
@@ -14,6 +18,12 @@ from app.resources import (
 )
 
 RESOURCE_DOCS_DIR = Path(__file__).parents[1] / "app" / "resource_docs"
+
+
+def test_public_resource_identifiers():
+    assert METRICS_RESOURCE_URI == "urbangreen://metrics"
+    assert CONVENTIONS_RESOURCE_URI == "urbangreen://conventions"
+    assert get_settings().clickhouse_db == WAREHOUSE_DATABASE
 
 
 def make_client(
