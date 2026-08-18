@@ -7,6 +7,7 @@ prompt is text, and pinning every phrase only reports that it was reworded.
 """
 
 import re
+from datetime import date, timedelta
 
 import pytest
 
@@ -107,6 +108,72 @@ def test_only_the_metric_formula_rail_is_phrased_as_a_prohibition():
 
 
 # --- window ----------------------------------------------------------------
+
+
+# Reads the operator, anchor date, and day offset back out of the rendered SQL,
+# so flipping `>` to `>=` changes what these tests count.
+_COMPARISON = re.compile(r"metric_date (>=|>|<=|<) toDate\('(\d{4}-\d{2}-\d{2})'\)(?: - (\d+))?")
+_MAX_SUBQUERY = re.compile(r"\(SELECT max\(metric_date\) FROM \w+\)")
+
+
+def window_clause_of(message: str) -> str:
+    """Pull the date filter out of a rendered prompt."""
+
+    (clause,) = [
+        line.strip()
+        for line in message.splitlines()
+        if line.strip().startswith("WHERE metric_date")
+    ]
+
+    return clause
+
+
+def dates_covered(clause: str, latest: str) -> list[date]:
+    """Every date the clause admits, evaluating the comparisons it actually renders.
+
+    `latest` stands in for the newest date in the table, which is the implicit
+    upper bound when the clause anchors to max(metric_date).
+    """
+
+    newest = date.fromisoformat(latest)
+    comparisons = _COMPARISON.findall(_MAX_SUBQUERY.sub(f"toDate('{latest}')", clause))
+
+    assert comparisons, f"no comparison found in {clause!r}"
+
+    def admits(candidate: date) -> bool:
+        for operator, anchor, offset in comparisons:
+            bound = date.fromisoformat(anchor) - timedelta(days=int(offset or 0))
+
+            if not {
+                ">": candidate > bound,
+                ">=": candidate >= bound,
+                "<": candidate < bound,
+                "<=": candidate <= bound,
+            }[operator]:
+                return False
+
+        return True
+
+    return sorted(d for d in (newest - timedelta(days=n) for n in range(400)) if admits(d))
+
+
+@pytest.mark.parametrize("days", [1, 7, 30, 90])
+def test_a_window_covers_exactly_the_days_it_was_asked_for(days):
+    latest = "2025-03-31"
+
+    for message in (
+        analyze_metric("Total Harvest Yield", days=days),
+        compare_farms(days=days),
+        investigate_anomaly("Riverside", days=days),
+        analyze_metric("Total Harvest Yield", days=days, ending=latest),
+        compare_farms(days=days, ending=latest),
+        investigate_anomaly("Riverside", days=days, ending=latest),
+    ):
+        covered = dates_covered(window_clause_of(message), latest)
+
+        assert len(covered) == days
+        assert covered[-1] == date.fromisoformat(latest)
+        assert covered[0] == date.fromisoformat(latest) - timedelta(days=days - 1)
 
 
 def test_open_ended_window_anchors_to_the_latest_loaded_data():
