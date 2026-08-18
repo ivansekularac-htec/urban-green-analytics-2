@@ -11,8 +11,10 @@ from pathlib import Path
 from typing import Final
 
 from clickhouse_connect.driver.client import Client
+from clickhouse_connect.driver.exceptions import DatabaseError, OperationalError
 
-WAREHOUSE_DATABASE: Final[str] = "urbangreen_dw"
+from app.config import get_settings
+
 _INTERNAL_TABLE_PREFIX: Final[str] = ".inner"
 
 _RESOURCE_DIR: Final[Path] = Path(__file__).resolve().parent / "resource_docs"
@@ -30,38 +32,48 @@ def get_schema_resource(client: Client) -> str:
     """Return the live warehouse schema as cached Markdown."""
     global _schema_cache
 
-    if _schema_cache is None:
-        # Cache only a fully successful schema build.
-        _schema_cache = _build_schema_markdown(client)
+    if _schema_cache is not None:
+        return _schema_cache
 
+    try:
+        schema = _build_schema_markdown(client)
+    except (DatabaseError, OperationalError) as exc:
+        return (
+            "# UrbanGreen ClickHouse Schema\n\n"
+            f"_The schema could not be read from ClickHouse: {exc}_"
+        )
+
+    _schema_cache = schema
     return _schema_cache
 
 
 def _build_schema_markdown(client: Client) -> str:
     """Build schema Markdown by introspecting ClickHouse."""
+    database = get_settings().clickhouse_db
+
     result = client.query(
         """
-        SELECT name
+        SELECT
+            name,
+            create_table_query
         FROM system.tables
         WHERE database = {database:String}
           AND NOT startsWith(name, {internal_prefix:String})
         ORDER BY name
         """,
         parameters={
-            "database": WAREHOUSE_DATABASE,
+            "database": database,
             "internal_prefix": _INTERNAL_TABLE_PREFIX,
         },
     )
 
-    table_names = [row[0] for row in result.result_rows]
-
     sections = [
         "# UrbanGreen ClickHouse Schema",
         "",
-        f"Live DDL for `{WAREHOUSE_DATABASE}`.",
+        f"Live DDL for `{database}`.",
     ]
 
-    if not table_names:
+    if not result.result_rows:
         sections.extend(
             [
                 "",
@@ -70,43 +82,19 @@ def _build_schema_markdown(client: Client) -> str:
         )
         return "\n".join(sections)
 
-    for table_name in table_names:
-        ddl = _show_create_table(
-            client=client,
-            database=WAREHOUSE_DATABASE,
-            table=table_name,
-        )
-
+    for table_name, ddl in result.result_rows:
         sections.extend(
             [
                 "",
-                f"## `{WAREHOUSE_DATABASE}.{table_name}`",
+                f"## `{database}.{table_name}`",
                 "",
                 "```sql",
-                ddl,
+                ddl.strip(),
                 "```",
             ]
         )
 
     return "\n".join(sections)
-
-
-def _show_create_table(
-    client: Client,
-    database: str,
-    table: str,
-) -> str:
-    """Return the ClickHouse DDL for one table."""
-    qualified_name = f"{_quote_identifier(database)}.{_quote_identifier(table)}"
-    ddl = client.command(f"SHOW CREATE TABLE {qualified_name}")
-
-    return str(ddl).strip()
-
-
-def _quote_identifier(identifier: str) -> str:
-    """Quote a ClickHouse identifier with backticks."""
-    escaped = identifier.replace("`", "``")
-    return f"`{escaped}`"
 
 
 # ---------------------------------------------------------------------------
