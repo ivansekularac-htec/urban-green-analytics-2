@@ -26,7 +26,7 @@ from app.server import create_server
 def build_server(client: MagicMock | None = None):
     """Build a fully registered server with no warehouse behind it."""
 
-    return create_server(client=client or MagicMock())
+    return create_server(client=client if client is not None else MagicMock())
 
 
 def query(server, call):
@@ -77,14 +77,20 @@ def test_resources_are_published_under_the_shared_uris():
     }
 
 
-def test_the_server_instructs_the_model_to_read_the_resources_first():
-    """The instructions are the first thing a client says about this server,
-    and naming the URIs is what makes them findable."""
+def test_the_server_advertises_resource_guidance_during_initialization():
+    """Instructions are MCP initialization metadata; the client decides whether
+    to place them in model context."""
     server = build_server()
 
-    assert SCHEMA_URI in server.instructions
-    assert METRICS_URI in server.instructions
-    assert CONVENTIONS_URI in server.instructions
+    async def initialize():
+        async with Client(server) as client:
+            return client.initialize_result.instructions
+
+    instructions = asyncio.run(initialize())
+
+    assert SCHEMA_URI in instructions
+    assert METRICS_URI in instructions
+    assert CONVENTIONS_URI in instructions
 
 
 # ---------------------------------------------------------------------------
@@ -156,21 +162,74 @@ def test_tools_query_the_client_the_factory_was_given():
     assert result.data["tables"] == ["dim_farm"]
 
 
-def test_prompts_render_as_a_user_message():
+def test_resources_read_through_mcp_and_schema_uses_the_factory_client():
+    client = MagicMock()
+    client.query.return_value = SimpleNamespace(
+        result_rows=[("dim_farm", "CREATE TABLE dim_farm (farm_id UInt64)")]
+    )
+    server = build_server(client)
+
+    schema = query(server, lambda session: session.read_resource(SCHEMA_URI))
+    metrics = query(server, lambda session: session.read_resource(METRICS_URI))
+    conventions = query(server, lambda session: session.read_resource(CONVENTIONS_URI))
+
+    assert "## `dim_farm`" in schema[0].text
+    assert "Yield Efficiency" in metrics[0].text
+    assert "ReplacingMergeTree" in conventions[0].text
+    assert schema[0].mimeType == "text/markdown"
+    assert metrics[0].mimeType == "text/markdown"
+    assert conventions[0].mimeType == "text/markdown"
+    client.query.assert_called_once()
+
+
+def test_live_schema_is_cached_per_server():
+    client = MagicMock()
+    client.query.return_value = SimpleNamespace(
+        result_rows=[("dim_farm", "CREATE TABLE dim_farm (farm_id UInt64)")]
+    )
+    server = build_server(client)
+
+    query(server, lambda session: session.read_resource(SCHEMA_URI))
+    query(server, lambda session: session.read_resource(SCHEMA_URI))
+
+    client.query.assert_called_once()
+
+
+def test_prompts_render_as_user_messages_through_mcp():
     """A prompt is filled in by the user and starts the conversation. Rendering
     it as anything else would make it an instruction the model attributes to
     the server."""
     server = build_server()
 
-    result = query(
+    analyze_result = query(
         server,
         lambda client: client.get_prompt("analyze_metric", {"metric": "Energy Efficiency"}),
     )
+    compare_result = query(
+        server,
+        lambda client: client.get_prompt(
+            "compare_farms",
+            {"farm_ids": [1, 2], "dimension": "yield", "days": 30},
+        ),
+    )
+    anomaly_result = query(
+        server,
+        lambda client: client.get_prompt(
+            "investigate_anomaly",
+            {"farm_id": 1, "sensor_type": "Temperature", "days": 7},
+        ),
+    )
 
-    (message,) = result.messages
+    (analyze_message,) = analyze_result.messages
+    (compare_message,) = compare_result.messages
+    (anomaly_message,) = anomaly_result.messages
 
-    assert message.role == "user"
-    assert "Energy Efficiency" in message.content.text
+    assert analyze_message.role == "user"
+    assert "Energy Efficiency" in analyze_message.content.text
+    assert compare_message.role == "user"
+    assert "farms 1, 2" in compare_message.content.text
+    assert anomaly_message.role == "user"
+    assert "Temperature" in anomaly_message.content.text
 
 
 # ---------------------------------------------------------------------------

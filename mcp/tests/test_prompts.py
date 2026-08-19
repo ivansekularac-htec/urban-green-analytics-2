@@ -1,5 +1,5 @@
 """
-Unit tests for the slash-command prompt templates.
+Unit tests for the reusable MCP prompt templates.
 
 These assert contracts rather than wording. A template is prose that will be
 reworded, so a test that pins a whole sentence fails on an edit that changed no
@@ -45,8 +45,8 @@ def order(rendered: str, *fragments: str) -> bool:
 
 @pytest.mark.parametrize("prompt", PROMPTS)
 def test_every_prompt_has_a_one_line_summary(prompt):
-    """FastMCP shows the text above `Args:` in the slash-command picker, so it
-    has to fit on one line."""
+    """FastMCP exposes the text above `Args:` as prompt metadata, so it has to
+    fit on one line in clients that display it."""
     summary = inspect.getdoc(prompt).split("Args:")[0].strip()
 
     assert summary

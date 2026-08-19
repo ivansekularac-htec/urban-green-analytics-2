@@ -23,9 +23,8 @@ rejects them again before they are sent.
 | Prompt | `investigate_anomaly` | Anomalous sensor readings at one farm |
 
 **Three tools, not four.** The ticket for this work counts four because it assumes
-T5.2.7, which has not been implemented. Three tools, three resources and three
-prompts is the correct, complete count today — if LM Studio shows `3 / 3 / 3`,
-nothing is missing.
+T5.2.7, which has not been implemented. At the MCP protocol level, three tools,
+three resources and three prompts is the correct, complete inventory today.
 
 ## Running it
 
@@ -73,15 +72,25 @@ LM Studio does not expand environment variables, so write the number. The `/mcp`
 path is the MCP endpoint; `/health` is a separate plain HTTP route and is not a
 valid value here.
 
-The server status should flip to **Connected**, showing **3 tools, 3 resources,
-3 prompts**. If it shows nothing, the container is not running or the port is
-wrong. If it connects but the counts are lower, the factory in `app/server.py`
-did not register everything — see T5.2.8.
+The server status should flip to **Connected**, with the three tools available to
+the model. The server also advertises three resources and three prompts through
+the MCP protocol, but whether LM Studio displays or injects those components is
+client-version dependent. FastMCP registration does not guarantee a particular
+LM Studio UI such as slash commands.
 
-## System prompt (paste into LM Studio)
+Use MCP Inspector or the in-memory integration tests in `tests/test_server.py`
+to verify the full `3 tools / 3 resources / 3 prompts` protocol inventory. If LM
+Studio cannot connect at all, check the container, port, and `/mcp` path first.
+
+## Optional LM Studio system prompt
 
 Open a new chat, paste this into the system-message field, and save it as a
 **Preset** so it carries across chats.
+
+This preset guides the model but cannot add client capabilities. The resource
+steps below work only when the LM Studio build makes MCP resources readable in
+the chat. If it exposes only tools, use MCP Inspector or another compatible MCP
+client for the resource- and prompt-driven workflows.
 
 ```text
 You answer questions about UrbanGreen, an urban-farming platform, by querying its
@@ -145,29 +154,35 @@ ANSWERING
 - Name farms by name, never by a bare farm id.
 - If the warehouse cannot answer the question, say so and say what is missing.
 
-SLASH COMMANDS
+MCP PROMPTS
 
-/analyze_metric, /compare_farms and /investigate_anomaly already carry these steps
-for the questions users ask most. Prefer them when one fits.
+The server advertises analyze_metric, compare_farms and investigate_anomaly as
+MCP prompts carrying these steps for common questions. A compatible client may
+present them as slash commands or another user-invoked action.
 ```
 
-## Smoke test
+## Smoke tests
 
-In a new chat with the preset applied:
+First verify the protocol surface with the integration suite:
 
-> What tools and resources do you have access to?
+```bash
+uv run pytest tests/test_server.py
+```
 
-The model should enumerate the three tools, three resources and three prompts, or
-most of them. If it reports none, the MCP wiring is broken rather than the prompt
-— re-check the LM Studio entry and that the container is running.
+It lists and reads all three resources, lists and renders all three prompts, and
+calls the registered tools through an in-memory MCP client.
 
-Then something end to end:
+In LM Studio, first confirm that `list_tables`, `describe_table`, and
+`execute_query` are available. If the client also exposes the MCP resources,
+try something end to end:
 
 > What was the total harvest yield last month?
 
-A correct answer reads `urbangreen://metrics` for the Total Harvest Yield formula,
-describes `fact_daily_farm_metrics`, and comes back with kilograms, a date range,
-and the table it used.
+A correct answer reads `urbangreen://metrics` for the Total Harvest Yield
+formula, describes `fact_daily_farm_metrics`, and comes back with kilograms, a
+date range, and the table it used. If the client does not provide resource
+access, failure to read the URI is a client capability limitation rather than a
+server registration failure.
 
 ## Local development
 

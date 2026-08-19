@@ -1,4 +1,8 @@
-"""Reusable prompt templates the MCP client surfaces as slash commands.
+"""Reusable message templates exposed through MCP prompts/list and prompts/get.
+
+A compatible MCP client may present them as slash commands, menu actions, or
+another user-invoked UI. Registration does not require a client to expose a
+particular interaction.
 
 A prompt runs no SQL. It returns the user message that starts the conversation,
 and its only job is to fix the procedure: which resource the model reads, which
@@ -48,7 +52,8 @@ severity of an excursion can be read without touching an atomic row.
 
 The functions are plain and return ``str`` so they can be tested directly; the
 MCP layer wraps them as ``@mcp.prompt`` handlers separately. Their names are the
-slash commands the user sees, so they are named for the command, not the module.
+identifiers clients receive through MCP, so they are named for the action, not
+the module.
 """
 
 from app.config import get_settings

@@ -15,6 +15,8 @@ wrapper docstrings are the descriptions the model reads; the ones in tools.py
 describe the same functions to a developer, down to the client argument itself.
 """
 
+from functools import lru_cache
+
 from clickhouse_connect.driver.client import Client
 from fastmcp import FastMCP
 from starlette.requests import Request
@@ -29,13 +31,12 @@ from app.resources import (
     METRICS_URI,
     SCHEMA_URI,
     conventions_resource,
+    load_schema_markdown,
     metrics_resource,
-    schema_resource,
 )
 
-# The first thing the client tells the model about this server. It names the
-# resources by URI, because a model that has been told they exist still has to
-# be told what to ask for.
+# Sent to the MCP client during initialization. Whether and how the client
+# includes these instructions in model context is controlled by the client.
 INSTRUCTIONS = """Read-only access to the UrbanGreen ClickHouse warehouse, which holds daily
 harvest and sensor metrics for the platform's farms.
 
@@ -51,9 +52,10 @@ The analyze_metric, compare_farms and investigate_anomaly prompts already
 carry these steps for the questions users ask most.
 """
 
-# Named for the client, not for the function that builds them.
-_RESOURCES = (
-    (SCHEMA_URI, "schema", schema_resource),
+# Static resources need no factory-owned dependency. The live schema resource
+# is registered separately inside create_server so it can close over the same
+# ClickHouse client as the tools.
+_STATIC_RESOURCES = (
     (METRICS_URI, "metrics", metrics_resource),
     (CONVENTIONS_URI, "conventions", conventions_resource),
 )
@@ -65,13 +67,13 @@ def create_server(client: Client | None = None) -> FastMCP:
     """Build the server with every tool, resource, prompt and route registered.
 
     Args:
-        client: ClickHouse client the tools should use. Defaults to the shared
-            read-only client, and is supplied by tests that build a server
-            without a warehouse behind it.
+        client: ClickHouse client the tools and live schema resource should
+            use. Defaults to the shared read-only client, and is supplied by
+            tests that build a server without a warehouse behind it.
     """
 
     settings = get_settings()
-    client = client or get_client()
+    client = client if client is not None else get_client()
 
     mcp = FastMCP("UrbanGreen MCP", instructions=INSTRUCTIONS)
 
@@ -116,7 +118,15 @@ def create_server(client: Client | None = None) -> FastMCP:
             limit=limit,
         )
 
-    for uri, name, resource in _RESOURCES:
+    @lru_cache(maxsize=1)
+    def schema_resource() -> str:
+        """Return the live warehouse DDL, cached for this server process."""
+
+        return load_schema_markdown(client, settings.clickhouse_db)
+
+    mcp.resource(SCHEMA_URI, name="schema", mime_type="text/markdown")(schema_resource)
+
+    for uri, name, resource in _STATIC_RESOURCES:
         mcp.resource(uri, name=name, mime_type="text/markdown")(resource)
 
     for prompt in _PROMPTS:
