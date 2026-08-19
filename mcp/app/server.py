@@ -8,17 +8,18 @@ It is a factory rather than a module-level server because building one opens
 the ClickHouse connection. A module-level instance would make importing this
 module - which the tests do - require a running warehouse.
 
-The tool functions take a ClickHouse client as their first argument. The model
+The query functions take a ClickHouse client as their first argument. The model
 must not see it, and FastMCP builds each schema from the signature it is given,
-so the tools are registered through wrappers that close over the client. The
-wrapper docstrings are the descriptions the model reads; the ones in tools.py
-describe the same functions to a developer, down to the client argument itself.
+so those tools are registered through wrappers that close over the client. The
+resource reader instead receives FastMCP's request context, which is also hidden
+from its schema, and delegates to the resources already registered here.
 """
 
 from functools import lru_cache
 
 from clickhouse_connect.driver.client import Client
 from fastmcp import FastMCP
+from fastmcp.server.context import Context
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -29,7 +30,9 @@ from app.prompts import analyze_metric, compare_farms, investigate_anomaly
 from app.resources import (
     CONVENTIONS_URI,
     METRICS_URI,
+    RESOURCE_URIS,
     SCHEMA_URI,
+    WarehouseResourceName,
     conventions_resource,
     load_schema_markdown,
     metrics_resource,
@@ -40,16 +43,19 @@ from app.resources import (
 INSTRUCTIONS = """Read-only access to the UrbanGreen ClickHouse warehouse, which holds daily
 harvest and sensor metrics for the platform's farms.
 
-Before writing SQL, read urbangreen://schema for the table definitions,
-urbangreen://metrics for the canonical metric formulas, and
-urbangreen://conventions for the ClickHouse rules the DDL does not show.
+Use read_warehouse_resource only when its guidance is relevant:
+- conventions: before the first SQL query unless already present in the conversation
+- metrics: for a KPI, metric, rate, efficiency, compliance, ranking, or formula
+- schema: only for a broad warehouse overview; normally inspect relevant tables
+  with list_tables and describe_table instead
 
-Confirm a table with describe_table before querying it, and send a single
-SELECT to execute_query. Every tool returns a payload rather than raising:
-check its `error` and `truncated` fields before reporting what came back.
+Do not reread a resource already present in the conversation. Confirm every
+table used in SQL with describe_table, then send one SELECT to execute_query.
+The query tools return payloads: check `error` and `truncated` before reporting
+what came back.
 
-The analyze_metric, compare_farms and investigate_anomaly prompts already
-carry these steps for the questions users ask most.
+The analyze_metric, compare_farms and investigate_anomaly prompts carry the
+same workflow for the questions users ask most.
 """
 
 # Static resources need no factory-owned dependency. The live schema resource
@@ -117,6 +123,28 @@ def create_server(client: Client | None = None) -> FastMCP:
             max_limit=settings.max_row_limit,
             limit=limit,
         )
+
+    @mcp.tool
+    async def read_warehouse_resource(
+        resource: WarehouseResourceName,
+        ctx: Context,
+    ) -> str:
+        """Read one registered UrbanGreen warehouse reference.
+
+        Choose `conventions` for ClickHouse query rules, `metrics` for canonical
+        KPI definitions, or `schema` only for a broad warehouse overview. For a
+        normal query, prefer `describe_table` over loading the complete schema.
+
+        Args:
+            resource: Which warehouse reference to read.
+        """
+
+        result = await ctx.read_resource(RESOURCE_URIS[resource])
+
+        if any(not isinstance(item.content, str) for item in result.contents):
+            raise TypeError("UrbanGreen warehouse resources must contain text")
+
+        return "\n\n".join(item.content for item in result.contents)
 
     @lru_cache(maxsize=1)
     def schema_resource() -> str:

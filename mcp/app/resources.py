@@ -1,6 +1,7 @@
 """Markdown knowledge resources for ClickHouse SQL generation."""
 
 from pathlib import Path
+from typing import Literal
 
 from clickhouse_connect.driver.client import Client
 
@@ -12,6 +13,17 @@ _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 SCHEMA_URI = "urbangreen://schema"
 METRICS_URI = "urbangreen://metrics"
 CONVENTIONS_URI = "urbangreen://conventions"
+
+type WarehouseResourceName = Literal["schema", "metrics", "conventions"]
+
+# The model-facing reader accepts stable names rather than arbitrary URIs. The
+# mapping stays beside the URI constants so registration and tool access cannot
+# disagree about which resource a name identifies.
+RESOURCE_URIS: dict[WarehouseResourceName, str] = {
+    "schema": SCHEMA_URI,
+    "metrics": METRICS_URI,
+    "conventions": CONVENTIONS_URI,
+}
 
 _SCHEMA_TABLES_SQL = """
 SELECT name, create_table_query

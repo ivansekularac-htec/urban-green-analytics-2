@@ -19,7 +19,7 @@ from fastmcp import Client
 
 from app import server as server_module
 from app.config import get_settings
-from app.resources import CONVENTIONS_URI, METRICS_URI, SCHEMA_URI
+from app.resources import CONVENTIONS_URI, METRICS_URI, RESOURCE_URIS, SCHEMA_URI
 from app.server import create_server
 
 
@@ -54,6 +54,7 @@ def test_the_server_registers_every_component_the_client_needs():
         "list_tables",
         "describe_table",
         "execute_query",
+        "read_warehouse_resource",
     ]
     assert [prompt.name for prompt in prompts] == [
         "analyze_metric",
@@ -88,9 +89,8 @@ def test_the_server_advertises_resource_guidance_during_initialization():
 
     instructions = asyncio.run(initialize())
 
-    assert SCHEMA_URI in instructions
-    assert METRICS_URI in instructions
-    assert CONVENTIONS_URI in instructions
+    assert "read_warehouse_resource" in instructions
+    assert all(resource in instructions for resource in RESOURCE_URIS)
 
 
 # ---------------------------------------------------------------------------
@@ -108,6 +108,27 @@ def test_no_tool_exposes_the_clickhouse_client():
 
     for tool in tools:
         assert "client" not in tool.inputSchema["properties"]
+        assert "ctx" not in tool.inputSchema["properties"]
+
+
+def test_resource_reader_exposes_only_the_three_stable_names():
+    """An enum prevents the model from inventing names or passing arbitrary
+    resource URIs."""
+    server = build_server()
+
+    (reader,) = [
+        tool
+        for tool in query(server, lambda client: client.list_tools())
+        if tool.name == "read_warehouse_resource"
+    ]
+
+    assert set(reader.inputSchema["properties"]) == {"resource"}
+    assert reader.inputSchema["properties"]["resource"]["enum"] == [
+        "schema",
+        "metrics",
+        "conventions",
+    ]
+    assert reader.inputSchema["required"] == ["resource"]
 
 
 def test_execute_query_applies_the_row_limits_the_model_cannot_set():
@@ -182,6 +203,34 @@ def test_resources_read_through_mcp_and_schema_uses_the_factory_client():
     client.query.assert_called_once()
 
 
+def test_model_facing_reader_delegates_to_the_registered_resources():
+    """The tool is a model-facing adapter, not a second implementation of the
+    resource loaders."""
+    client = MagicMock()
+    client.query.return_value = SimpleNamespace(
+        result_rows=[("dim_farm", "CREATE TABLE dim_farm (farm_id UInt64)")]
+    )
+    server = build_server(client)
+
+    schema = query(
+        server,
+        lambda session: session.call_tool("read_warehouse_resource", {"resource": "schema"}),
+    )
+    metrics = query(
+        server,
+        lambda session: session.call_tool("read_warehouse_resource", {"resource": "metrics"}),
+    )
+    conventions = query(
+        server,
+        lambda session: session.call_tool("read_warehouse_resource", {"resource": "conventions"}),
+    )
+
+    assert "## `dim_farm`" in schema.data
+    assert "Yield Efficiency" in metrics.data
+    assert "ReplacingMergeTree" in conventions.data
+    client.query.assert_called_once()
+
+
 def test_live_schema_is_cached_per_server():
     client = MagicMock()
     client.query.return_value = SimpleNamespace(
@@ -189,7 +238,10 @@ def test_live_schema_is_cached_per_server():
     )
     server = build_server(client)
 
-    query(server, lambda session: session.read_resource(SCHEMA_URI))
+    query(
+        server,
+        lambda session: session.call_tool("read_warehouse_resource", {"resource": "schema"}),
+    )
     query(server, lambda session: session.read_resource(SCHEMA_URI))
 
     client.query.assert_called_once()

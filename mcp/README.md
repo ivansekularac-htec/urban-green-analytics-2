@@ -15,6 +15,7 @@ rejects them again before they are sent.
 | Tool | `list_tables` | Table names in an allowed database |
 | Tool | `describe_table` | Columns, types and comments for one table |
 | Tool | `execute_query` | One read-only `SELECT`, with a row limit applied |
+| Tool | `read_warehouse_resource` | Model-facing access to registered warehouse guidance |
 | Resource | `urbangreen://schema` | Live `CREATE TABLE` DDL, introspected per process |
 | Resource | `urbangreen://metrics` | Canonical KPI formulas, units and directions |
 | Resource | `urbangreen://conventions` | Deduplication rules the DDL does not show |
@@ -22,9 +23,9 @@ rejects them again before they are sent.
 | Prompt | `compare_farms` | Farms ranked against each other |
 | Prompt | `investigate_anomaly` | Anomalous sensor readings at one farm |
 
-**Three tools, not four.** The ticket for this work counts four because it assumes
-T5.2.7, which has not been implemented. At the MCP protocol level, three tools,
-three resources and three prompts is the correct, complete inventory today.
+The server currently exposes three warehouse query tools plus one resource-reader
+tool. T5.2.7 remains unimplemented; `read_warehouse_resource` is the compatibility
+adapter that lets a model retrieve native MCP resources without user attachment.
 
 ## Running it
 
@@ -72,14 +73,13 @@ LM Studio does not expand environment variables, so write the number. The `/mcp`
 path is the MCP endpoint; `/health` is a separate plain HTTP route and is not a
 valid value here.
 
-The server status should flip to **Connected**, with the three tools available to
-the model. The server also advertises three resources and three prompts through
-the MCP protocol, but whether LM Studio displays or injects those components is
-client-version dependent. FastMCP registration does not guarantee a particular
-LM Studio UI such as slash commands.
+The server status should flip to **Connected**, with four tools available to the
+model. The server also advertises three resources and three prompts through the
+MCP protocol. Even when a client does not expose native resources in its UI, the
+model can retrieve them through `read_warehouse_resource`.
 
 Use MCP Inspector or the in-memory integration tests in `tests/test_server.py`
-to verify the full `3 tools / 3 resources / 3 prompts` protocol inventory. If LM
+to verify the full `4 tools / 3 resources / 3 prompts` protocol inventory. If LM
 Studio cannot connect at all, check the container, port, and `/mcp` path first.
 
 ## Optional LM Studio system prompt
@@ -87,10 +87,8 @@ Studio cannot connect at all, check the container, port, and `/mcp` path first.
 Open a new chat, paste this into the system-message field, and save it as a
 **Preset** so it carries across chats.
 
-This preset guides the model but cannot add client capabilities. The resource
-steps below work only when the LM Studio build makes MCP resources readable in
-the chat. If it exposes only tools, use MCP Inspector or another compatible MCP
-client for the resource- and prompt-driven workflows.
+This preset guides the model. Resource retrieval needs only tool support because
+`read_warehouse_resource` delegates to the server's native resources.
 
 ```text
 You answer questions about UrbanGreen, an urban-farming platform, by querying its
@@ -99,15 +97,16 @@ urbangreen_dw and your access is read-only.
 
 AT THE START OF A SESSION
 
-Read urbangreen://conventions once. It carries the deduplication rules that the
-table definitions do not show. Do not read it again for every question.
+Call read_warehouse_resource with resource="conventions" once. It carries the
+deduplication rules that table definitions do not show. Do not read it again for
+every question.
 
 FOR ANY QUESTION THAT NEEDS A NUMBER
 
 1. If the question names a KPI - yield, efficiency, anomaly rate, compliance,
-   freshness, leaderboard - read urbangreen://metrics and use the formula, unit
-   and direction exactly as written there. Do not derive your own version of a
-   metric that has a definition.
+   freshness, leaderboard - call read_warehouse_resource with resource="metrics"
+   and use the formula, unit and direction exactly as written there. Do not
+   derive your own version of a metric that has a definition.
 2. Call list_tables to see what exists.
 3. Call describe_table on each table you intend to read.
 4. Call execute_query once, with a single statement that answers the question.
@@ -172,17 +171,15 @@ uv run pytest tests/test_server.py
 It lists and reads all three resources, lists and renders all three prompts, and
 calls the registered tools through an in-memory MCP client.
 
-In LM Studio, first confirm that `list_tables`, `describe_table`, and
-`execute_query` are available. If the client also exposes the MCP resources,
-try something end to end:
+In LM Studio, first confirm that `list_tables`, `describe_table`,
+`read_warehouse_resource`, and `execute_query` are available. Then try something
+end to end:
 
 > What was the total harvest yield last month?
 
-A correct answer reads `urbangreen://metrics` for the Total Harvest Yield
-formula, describes `fact_daily_farm_metrics`, and comes back with kilograms, a
-date range, and the table it used. If the client does not provide resource
-access, failure to read the URI is a client capability limitation rather than a
-server registration failure.
+A correct answer calls `read_warehouse_resource(resource="metrics")` for the
+Total Harvest Yield formula, describes `fact_daily_farm_metrics`, and comes back
+with kilograms, a date range, and the table it used.
 
 ## Local development
 
