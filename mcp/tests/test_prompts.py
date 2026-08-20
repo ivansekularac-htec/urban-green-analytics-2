@@ -219,13 +219,14 @@ def test_compare_farms_excludes_an_unmeasured_farm_from_the_ranking():
     assert "not last in it" in rendered
 
 
-def test_compare_farms_names_no_metric_specific_direction():
-    """Which end of the scale wins is a fact about the metric and lives in the
-    metrics resource. An example here would be a second copy of it."""
+def test_compare_farms_gets_metric_direction_from_resource():
+    """Metric direction belongs to the canonical metrics resource and must not
+    be duplicated for a specific metric inside the prompt."""
     rendered = compare_farms([1, 2], dimension="energy efficiency")
 
+    assert METRICS_URI in rendered
     assert "for energy efficiency, lower is better" not in rendered
-    assert "higher or lower is better" in rendered
+    assert "which direction counts as better" in rendered
 
 
 # ---------------------------------------------------------------------------
@@ -249,13 +250,13 @@ def test_investigate_anomaly_counts_from_the_stored_flag():
     assert order(rendered, "is_anomaly", "optimal_min", "optimal_max")
 
 
-def test_investigate_anomaly_points_at_the_canonical_rate_by_name():
-    """The rate is defined in the metrics resource. Writing the ratio out here
-    would be a second copy that drifts the moment the definition changes."""
+def test_investigate_anomaly_uses_canonical_rate_definition():
+    """The anomaly-rate formula belongs to the metrics resource and must not be
+    duplicated inside the analytical prompt."""
     rendered = investigate_anomaly(1, "Temperature")
 
+    assert METRICS_URI in rendered
     assert '"Sensor anomaly rate"' in rendered
-    assert "ratio out from memory" in rendered
     assert "anomaly_count / reading_count" not in rendered
 
 
