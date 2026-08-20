@@ -3,14 +3,13 @@
 import re
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from app.resources import (
     conventions_resource,
     load_schema_markdown,
     metrics_resource,
     render_schema_markdown,
-    schema_resource,
 )
 
 RESOURCE_DOCS_DIR = Path(__file__).parents[1] / "app" / "resource_docs"
@@ -78,32 +77,6 @@ def test_schema_renderer_is_a_pure_markdown_function():
     assert "Database: `urbangreen_dw`" in first
     assert "## `dim_crop`" in first
     assert "```sql\nCREATE TABLE dim_crop (crop_id UInt64)\n```" in first
-
-
-def test_schema_is_lazy_and_cached():
-    client = make_client(
-        {
-            "dim_crop": "CREATE TABLE dim_crop (crop_id UInt64)",
-        },
-    )
-    settings = SimpleNamespace(clickhouse_db="urbangreen_dw")
-
-    schema_resource.cache_clear()
-
-    with (
-        patch("app.resources.get_client", return_value=client) as get_client,
-        patch("app.resources.get_settings", return_value=settings) as get_settings,
-    ):
-        first = schema_resource()
-        second = schema_resource()
-
-    assert first == second
-    get_client.assert_called_once_with()
-    get_settings.assert_called_once_with()
-    client.query.assert_called_once()
-    client.command.assert_not_called()
-
-    schema_resource.cache_clear()
 
 
 def test_static_resources_match_bundled_markdown_docs():

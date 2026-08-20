@@ -1,18 +1,21 @@
-"""Markdown knowledge resources for ClickHouse SQL generation."""
+"""Markdown knowledge resources for ClickHouse SQL generation.
 
-from functools import lru_cache
+Every function here takes what it needs and reaches for nothing. The schema is
+the only one that touches the warehouse, and it takes the client and the
+database as arguments, so `app.server` decides when it runs and how long its
+result is kept.
+"""
+
 from pathlib import Path
 
 from clickhouse_connect.driver.client import Client
-
-from app.clickhouse import get_client
-from app.config import get_settings
 
 _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 
 # The URIs these resources are published under. They live beside the resources
 # themselves so the prompts, which tell the model what to read, and the T5.2.8
 # registration, which decides what is readable, cannot drift apart.
+SCHEMA_URI = "urbangreen://schema"
 METRICS_URI = "urbangreen://metrics"
 CONVENTIONS_URI = "urbangreen://conventions"
 
@@ -67,18 +70,6 @@ def render_schema_markdown(database: str, table_ddls: list[tuple[str, str]]) -> 
         )
 
     return "\n".join(sections).rstrip() + "\n"
-
-
-@lru_cache(maxsize=1)
-def schema_resource() -> str:
-    """Build the schema lazily and cache it for the process lifetime."""
-
-    settings = get_settings()
-
-    return load_schema_markdown(
-        client=get_client(),
-        database=settings.clickhouse_db,
-    )
 
 
 def metrics_resource() -> str:
