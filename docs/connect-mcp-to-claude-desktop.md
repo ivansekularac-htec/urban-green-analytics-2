@@ -50,12 +50,10 @@ Open the file in a text editor and add an `mcpServers` block. **If the file alre
 If the file is empty or new, use exactly this:
 
 ```json
-{
-  "mcpServers": {
-    "urbangreen-mcp": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "http://localhost:8001/mcp"]
-    }
+"mcpServers": {
+  "urbangreen-mcp": {
+    "command": "npx",
+    "args": ["-y", "mcp-remote", "http://localhost:8001/mcp"]
   }
 }
 ```
