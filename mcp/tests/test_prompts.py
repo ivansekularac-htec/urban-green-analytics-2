@@ -82,6 +82,12 @@ def test_every_prompt_names_both_resources_before_the_query(rendered):
 
 
 @pytest.mark.parametrize("rendered", RENDERED)
+def test_every_prompt_reads_resources_through_the_compatibility_tool(rendered):
+    assert f'Call read_resource with uri="{CONVENTIONS_URI}"' in rendered
+    assert f'Call read_resource with uri="{METRICS_URI}"' in rendered
+
+
+@pytest.mark.parametrize("rendered", RENDERED)
 def test_every_prompt_describes_a_table_before_it_queries(rendered):
     assert order(rendered, "describe_table", "execute_query")
 

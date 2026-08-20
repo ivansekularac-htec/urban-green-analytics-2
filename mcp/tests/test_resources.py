@@ -6,9 +6,13 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from app.resources import (
+    CONVENTIONS_URI,
+    METRICS_URI,
+    SCHEMA_URI,
     conventions_resource,
     load_schema_markdown,
     metrics_resource,
+    read_warehouse_resource,
     render_schema_markdown,
     schema_resource,
 )
@@ -112,6 +116,65 @@ def test_static_resources_match_bundled_markdown_docs():
 
     assert metrics_resource() == expected_metrics
     assert conventions_resource() == expected_conventions
+
+
+def test_resource_reader_returns_metrics_document():
+    client = MagicMock()
+
+    response = read_warehouse_resource(client, "urbangreen_dw", METRICS_URI)
+
+    assert response == {
+        "uri": METRICS_URI,
+        "mime_type": "text/markdown",
+        "content": metrics_resource(),
+    }
+    client.query.assert_not_called()
+
+
+def test_resource_reader_returns_conventions_document():
+    client = MagicMock()
+
+    response = read_warehouse_resource(client, "urbangreen_dw", CONVENTIONS_URI)
+
+    assert response == {
+        "uri": CONVENTIONS_URI,
+        "mime_type": "text/markdown",
+        "content": conventions_resource(),
+    }
+    client.query.assert_not_called()
+
+
+def test_resource_reader_builds_schema_with_supplied_client():
+    client = make_client(
+        {
+            "dim_farm": "CREATE TABLE dim_farm (farm_id UInt64)",
+        },
+    )
+
+    response = read_warehouse_resource(client, "urbangreen_dw", SCHEMA_URI)
+
+    assert response["uri"] == SCHEMA_URI
+    assert response["mime_type"] == "text/markdown"
+    assert "## `dim_farm`" in response["content"]
+    client.query.assert_called_once()
+
+
+def test_resource_reader_rejects_unknown_uri_without_external_io():
+    client = MagicMock()
+
+    response = read_warehouse_resource(
+        client,
+        "urbangreen_dw",
+        "https://example.com/secret",
+    )
+
+    assert response == {
+        "error": (
+            "Unknown resource URI 'https://example.com/secret'. Available resources: "
+            "urbangreen://schema, urbangreen://metrics, urbangreen://conventions."
+        ),
+    }
+    client.query.assert_not_called()
 
 
 def test_metrics_document_canonical_dashboard_metrics():

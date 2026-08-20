@@ -13,8 +13,15 @@ _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 # The URIs these resources are published under. They live beside the resources
 # themselves so the prompts, which tell the model what to read, and the T5.2.8
 # registration, which decides what is readable, cannot drift apart.
+SCHEMA_URI = "urbangreen://schema"
 METRICS_URI = "urbangreen://metrics"
 CONVENTIONS_URI = "urbangreen://conventions"
+
+RESOURCE_URIS = (
+    SCHEMA_URI,
+    METRICS_URI,
+    CONVENTIONS_URI,
+)
 
 _SCHEMA_TABLES_SQL = """
 SELECT name, create_table_query
@@ -91,6 +98,38 @@ def conventions_resource() -> str:
     """Return ClickHouse rules that cannot be inferred from DDL alone."""
 
     return CONVENTIONS_MARKDOWN
+
+
+def read_warehouse_resource(
+    client: Client,
+    database: str,
+    uri: str,
+) -> dict[str, str]:
+    """Read one of the resources exposed to tool-only MCP clients.
+
+    The explicit URI allow-list prevents this adapter from becoming a generic
+    file or network reader. Static documents use the same in-memory content as
+    the native MCP resources, while the schema uses the factory's shared
+    ClickHouse client.
+    """
+
+    if uri == SCHEMA_URI:
+        content = load_schema_markdown(client=client, database=database)
+    elif uri == METRICS_URI:
+        content = metrics_resource()
+    elif uri == CONVENTIONS_URI:
+        content = conventions_resource()
+    else:
+        available = ", ".join(RESOURCE_URIS)
+        return {
+            "error": f"Unknown resource URI '{uri}'. Available resources: {available}.",
+        }
+
+    return {
+        "uri": uri,
+        "mime_type": "text/markdown",
+        "content": content,
+    }
 
 
 def _read_resource_doc(filename: str) -> str:
