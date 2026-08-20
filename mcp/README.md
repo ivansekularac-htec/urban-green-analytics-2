@@ -1,6 +1,6 @@
 # UrbanGreen MCP server
 
-A [FastMCP](https://gofastmcp.com) server that gives a local LLM read-only access to
+A [FastMCP](https://gofastmcp.com) server that gives an LLM read-only access to
 the UrbanGreen ClickHouse warehouse, so a platform user can ask about harvest and
 sensor metrics in natural language instead of writing SQL.
 
@@ -30,11 +30,8 @@ adapter that lets a model retrieve native MCP resources without user attachment.
 ## Running it
 
 ```bash
-docker compose --profile all up -d --build urbangreen-mcp
+docker compose up -d --build urbangreen-mcp
 ```
-
-`--profile` is required: the service is profiled `all` / `analytics`, like
-ClickHouse and Superset, so a bare `docker compose up` skips it.
 
 `--build` matters more than it looks. `docker compose up` reuses an existing image
 and only builds when none is present, so without it the container can come up
@@ -175,7 +172,7 @@ uv run pytest tests/test_server.py
 It lists and reads all three resources, lists and renders all three prompts, and
 calls the registered tools through an in-memory MCP client.
 
-In LM Studio, first confirm that `list_tables`, `describe_table`,
+In LLM, first confirm that `list_tables`, `describe_table`,
 `read_warehouse_resource`, and `execute_query` are available. Then try something
 end to end:
 
