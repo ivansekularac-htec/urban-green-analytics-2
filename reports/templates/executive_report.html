@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UrbanGreen Executive Report - {{ report_date }}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F3F8F5;
+            color: #000000;
+            font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            padding: 24px;
+        }
+
+        .report {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            border: 1px solid rgba(137, 189, 176, 0.42);
+            border-radius: 22px;
+            box-shadow: 0 12px 32px rgba(40, 89, 79, 0.09);
+            overflow: hidden;
+        }
+
+        /* Header */
+
+        .report-header {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 1px solid rgba(137, 189, 176, 0.42);
+        }
+
+        .report-header>tbody>tr>td {
+            padding: 22px 32px;
+            vertical-align: middle;
+        }
+
+        .header-left {
+            text-align: left;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .brand-table,
+        .meta-table {
+            border-collapse: collapse;
+        }
+
+        .brand-table td,
+        .meta-table td {
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .brand-icon-cell {
+            padding-right: 12px !important;
+        }
+
+        .meta-icon-cell {
+            padding-right: 12px !important;
+        }
+
+        .meta-copy {
+            padding-left: 13px !important;
+            border-left: 1px solid rgba(137, 189, 176, 0.42);
+            text-align: left;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .brand-table,
+        .meta-table,
+        .hero-table,
+        .summary-table,
+        .footer-table {
+            border-collapse: collapse;
+        }
+
+        .brand-icon-cell {
+            padding-right: 12px;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: inline-block;
+            line-height: 42px;
+            text-align: center;
+            border-radius: 11px;
+            background-color: #28594F;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 5px 12px rgba(40, 89, 79, 0.18);
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 750;
+            color: #28594F;
+            white-space: nowrap;
+        }
+
+        .meta-icon-cell {
+            padding-right: 12px;
+        }
+
+        .meta-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-block;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #EDF5F1;
+            border: 1px solid #B7D3C0;
+            color: #3A7D6A;
+        }
+
+        .meta-icon svg {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        .meta-copy {
+            padding-left: 13px;
+            border-left: 1px solid rgba(137, 189, 176, 0.42);
+            text-align: left;
+        }
+
+        .report-type {
+            margin-bottom: 3px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.09em;
+            color: #2E8B57;
+            text-transform: uppercase;
+        }
+
+        .report-date {
+            font-size: 13px;
+            color: #757575;
+        }
+
+        /* Content */
+
+        .content {
+            padding: 30px 32px;
+        }
+
+        .hero-table {
+            width: 100%;
+            border-bottom: 1px solid rgba(137, 189, 176, 0.42);
+        }
+
+        .hero-table td {
+            padding-bottom: 24px;
+            vertical-align: middle;
+        }
+
+        .hero-icon-cell {
+            width: 76px;
+            padding-right: 18px;
+        }
+
+        .hero-icon {
+            width: 58px;
+            height: 58px;
+            display: inline-block;
+            line-height: 58px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #EDF5F1;
+            color: #3A7D6A;
+        }
+
+        .hero-icon svg {
+            width: 29px;
+            height: 29px;
+            vertical-align: middle;
+        }
+
+        .hero-title {
+            margin: 0 0 5px;
+            font-size: 31px;
+            line-height: 1.15;
+            font-weight: 760;
+            color: #28594F;
+        }
+
+        .hero-text {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #757575;
+        }
+
+        /* Sections */
+
+        .section {
+            margin-top: 28px;
+        }
+
+        .section-title {
+            margin: 0 0 14px;
+            font-size: 19px;
+            font-weight: 750;
+            color: #28594F;
+        }
+
+        .section-bar {
+            display: inline-block;
+            width: 4px;
+            height: 19px;
+            margin-right: 9px;
+            border-radius: 4px;
+            background-color: #4CBB8A;
+            vertical-align: -3px;
+        }
+
+        /* KPI */
+
+        .kpi-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 7px;
+        }
+
+        .kpi-cell {
+            width: 25%;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .kpi-card {
+            width: 100%;
+            min-height: 112px;
+            border-collapse: collapse;
+            background-color: #FFFFFF;
+            border: 1px solid rgba(137, 189, 176, 0.42);
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(40, 89, 79, 0.07);
+        }
+
+        .kpi-card td {
+            padding-top: 17px;
+            padding-bottom: 17px;
+            vertical-align: middle;
+        }
+
+        .kpi-icon-cell {
+            width: 66px;
+            padding-left: 17px;
+            padding-right: 0;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            display: inline-block;
+            line-height: 48px;
+            text-align: center;
+            border-radius: 12px;
+            background-color: #EDF5F1;
+            color: #3A7D6A;
+        }
+
+        .kpi-icon svg {
+            width: 26px;
+            height: 26px;
+            vertical-align: middle;
+        }
+
+        .kpi-content {
+            padding-left: 10px;
+            padding-right: 15px;
+        }
+
+        .kpi-label {
+            margin-bottom: 7px;
+            font-size: 11px;
+            font-weight: 750;
+            line-height: 1.3;
+            letter-spacing: 0.04em;
+            color: #3E6B61;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 27px;
+            font-weight: 780;
+            line-height: 1.05;
+            color: #28594F;
+            white-space: nowrap;
+        }
+
+        .kpi-unit {
+            margin-left: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #757575;
+        }
+
+        /* Summary */
+
+        .summary-card {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #F0F7F3;
+            background: linear-gradient(120deg, rgba(183, 211, 192, 0.28), rgba(163, 217, 165, 0.15));
+            border: 1px solid #B7D3C0;
+            border-left: 5px solid #4CBB8A;
+            border-radius: 14px;
+        }
+
+        .summary-card td {
+            padding-top: 19px;
+            padding-bottom: 19px;
+            vertical-align: middle;
+        }
+
+        .summary-icon-cell {
+            width: 76px;
+            padding-left: 21px;
+        }
+
+        .summary-icon {
+            width: 52px;
+            height: 52px;
+            display: inline-block;
+            line-height: 52px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #28594F;
+            color: #FFFFFF;
+            box-shadow: 0 6px 14px rgba(40, 89, 79, 0.18);
+        }
+
+        .summary-icon svg {
+            width: 25px;
+            height: 25px;
+            vertical-align: middle;
+        }
+
+        .summary-text {
+            padding-left: 14px;
+            padding-right: 24px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #000000;
+        }
+
+        /* Insights */
+
+        .insight-list {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 9px;
+        }
+
+        .insight-row {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #FFFFFF;
+            border: 1px solid rgba(137, 189, 176, 0.42);
+            border-radius: 11px;
+            box-shadow: 0 2px 8px rgba(40, 89, 79, 0.04);
+        }
+
+        .insight-row td {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            vertical-align: middle;
+        }
+
+        .insight-icon-cell {
+            width: 50px;
+            padding-left: 14px;
+            text-align: center;
+        }
+
+        .insight-check {
+            width: 29px;
+            height: 29px;
+            display: inline-block;
+            line-height: 29px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #4CBB8A;
+            color: #FFFFFF;
+        }
+
+        .insight-check svg {
+            width: 15px;
+            height: 15px;
+            vertical-align: middle;
+        }
+
+        .insight-text {
+            padding-left: 14px;
+            padding-right: 16px;
+            border-left: 1px solid rgba(137, 189, 176, 0.42);
+            font-size: 15px;
+            line-height: 1.5;
+            color: #000000;
+        }
+
+        /* Top Farms */
+
+        .leaderboard {
+            overflow: hidden;
+            border: 1px solid rgba(137, 189, 176, 0.42);
+            border-radius: 13px;
+            box-shadow: 0 2px 8px rgba(40, 89, 79, 0.04);
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #FFFFFF;
+        }
+
+        .leaderboard-table th {
+            padding: 10px 14px;
+            background-color: #EDF5F1;
+            border-bottom: 1px solid rgba(137, 189, 176, 0.42);
+            color: #28594F;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid rgba(137, 189, 176, 0.30);
+            font-size: 14px;
+            line-height: 1.4;
+            color: #000000;
+        }
+
+        .rank-column {
+            width: 80px;
+            text-align: center;
+        }
+
+        .farm-column {
+            text-align: left;
+        }
+
+        .numeric-column {
+            text-align: right;
+        }
+
+        .rank-badge {
+            width: 28px;
+            height: 28px;
+            display: inline-block;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #E8F6EF;
+            color: #28594F;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .farm-name {
+            font-weight: 700;
+            color: #28594F;
+        }
+
+        /* Footer */
+
+        .report-footer {
+            width: 100%;
+            margin-top: 28px;
+            border-collapse: collapse;
+            border-top: 1px solid rgba(137, 189, 176, 0.42);
+        }
+
+        .report-footer td {
+            padding-top: 15px;
+            font-size: 11px;
+            color: #757575;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            color: #28594F;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        /* Responsive */
+
+        @media only screen and (max-width: 650px) {
+            body {
+                padding: 10px !important;
+            }
+
+            .content {
+                padding: 20px !important;
+            }
+
+            .report-header>tbody>tr>td {
+                padding: 18px 20px !important;
+            }
+
+            .brand-table td,
+            .meta-table td {
+                padding: 0 !important;
+            }
+
+            .brand-icon-cell {
+                padding-right: 12px !important;
+            }
+
+            .meta-icon-cell {
+                padding-right: 12px !important;
+            }
+
+            .meta-copy {
+                padding-left: 13px !important;
+            }
+
+            .hero-title {
+                font-size: 26px !important;
+            }
+
+            .kpi-table,
+            .kpi-table tbody,
+            .kpi-table tr,
+            .kpi-cell {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            .kpi-cell {
+                padding-bottom: 8px !important;
+            }
+
+            .leaderboard {
+                overflow-x: auto;
+            }
+
+            .leaderboard-table {
+                min-width: 650px;
+            }
+        }
+
+        @media print {
+
+            html,
+            body {
+                background-color: #FFFFFF;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .report {
+                max-width: none;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .kpi-card,
+            .summary-card,
+            .insight-row,
+            .leaderboard {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="report">
+
+        <table class="report-header" role="presentation" width="100%">
+            <tr>
+                <td class="header-left" width="50%" align="left">
+                    <table class="brand-table" role="presentation">
+                        <tr>
+                            <td class="brand-icon-cell">
+                                <span class="brand-mark">U</span>
+                            </td>
+                            <td class="brand-name">UrbanGreen</td>
+                        </tr>
+                    </table>
+                </td>
+
+                <td class="header-right" width="50%" align="right">
+                    <table class="meta-table" role="presentation" align="right">
+                        <tr>
+                            <td class="meta-icon-cell">
+                                <span class="meta-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h8" />
+                                        <path d="M8 9h2" />
+                                    </svg>
+                                </span>
+                            </td>
+
+                            <td class="meta-copy">
+                                <div class="report-type">Executive Report</div>
+                                <div class="report-date">{{ report_date }}</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <div class="content">
+
+            <table class="hero-table" role="presentation">
+                <tr>
+                    <td class="hero-icon-cell">
+                        <span class="hero-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 4.8 19 2 19 2c0 6.5-1.5 11.3-5 14" />
+                                <path d="M2 21c0-3 1.85-5.36 5.08-6.94C9.54 12.86 12.41 12 16 12" />
+                            </svg>
+                        </span>
+                    </td>
+                    <td>
+                        <h1 class="hero-title">Daily Executive Overview</h1>
+                        <p class="hero-text">Key operational and production indicators for {{ report_date }}</p>
+                    </td>
+                </tr>
+            </table>
+
+            <section class="section">
+                <h2 class="section-title"><span class="section-bar"></span>Key Performance Indicators</h2>
+
+                <table class="kpi-table" role="presentation">
+                    <tr>
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22V8" />
+                                                <path d="M7 13c-3 0-5-2-5-5 3 0 5 2 5 5z" />
+                                                <path d="M17 9c3 0 5-2 5-5-3 0-5 2-5 5z" />
+                                                <path d="M7 18c-2.5 0-4-1.5-4-4 2.5 0 4 1.5 4 4z" />
+                                                <path d="M17 15c2.5 0 4-1.5 4-4-2.5 0-4 1.5-4 4z" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Total Harvest Yield</div>
+                                        <div class="kpi-value">{{ metrics.total_yield_kg | number }}<span
+                                                class="kpi-unit">kg</span></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 21V11" />
+                                                <path d="M12 11C8 11 5 8 5 4c4 0 7 3 7 7z" />
+                                                <path d="M12 14c4 0 7-3 7-7-4 0-7 3-7 7z" />
+                                                <path d="M7 21h10" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Harvest Count</div>
+                                        <div class="kpi-value">{{ metrics.harvest_count | integer }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="8" r="5" />
+                                                <path d="M8.5 12 7 22l5-3 5 3-1.5-10" />
+                                                <path d="m10 8 1.3 1.3L14 6.5" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Premium Yield Share</div>
+                                        <div class="kpi-value">{{ metrics.premium_yield_share | percent }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 21V10l5-4 4 3 4-5 5 4v13" />
+                                                <path d="M3 21h18" />
+                                                <path d="M7 21v-4h3v4" />
+                                                <path d="M15 21v-6h3v6" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Farms Reporting</div>
+                                        <div class="kpi-value">{{ metrics.farms_reporting | integer }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Energy Consumption</div>
+                                        <div class="kpi-value">{{ metrics.energy_kwh | number }}<span
+                                                class="kpi-unit">kWh</span></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 17a8 8 0 1 1 16 0" />
+                                                <path d="m12 17 4-5" />
+                                                <path d="M7 14h.01" />
+                                                <path d="M12 9h.01" />
+                                                <path d="M17 14h.01" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Energy Efficiency</div>
+                                        <div class="kpi-value">{{ metrics.energy_efficiency_kwh_per_kg | number }}<span
+                                                class="kpi-unit">kWh/kg</span></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="9" />
+                                                <path d="M12 7v6" />
+                                                <path d="M12 17h.01" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Sensor Anomalies</div>
+                                        <div class="kpi-value">{{ metrics.anomaly_count | integer }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td class="kpi-cell">
+                            <table class="kpi-card" role="presentation">
+                                <tr>
+                                    <td class="kpi-icon-cell">
+                                        <span class="kpi-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path
+                                                    d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0z" />
+                                                <path d="M12 9v4" />
+                                                <path d="M12 17h.01" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="kpi-content">
+                                        <div class="kpi-label">Sensor Anomaly Rate</div>
+                                        <div class="kpi-value">{{ metrics.sensor_anomaly_rate | percent }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title"><span class="section-bar"></span>Executive Summary</h2>
+
+                <table class="summary-card" role="presentation">
+                    <tr>
+                        <td class="summary-icon-cell">
+                            <span class="summary-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 20V10" />
+                                    <path d="M10 20V4" />
+                                    <path d="M16 20v-7" />
+                                    <path d="M22 20V7" />
+                                    <path d="m3 8 6-5 6 5 6-5" />
+                                </svg>
+                            </span>
+                        </td>
+                        <td class="summary-text">{{ narrative }}</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title"><span class="section-bar"></span>Key Insights</h2>
+
+                <table class="insight-list" role="presentation">
+                    {% for insight in insights %}
+                    <tr>
+                        <td>
+                            <table class="insight-row" role="presentation">
+                                <tr>
+                                    <td class="insight-icon-cell">
+                                        <span class="insight-check">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m5 12 4 4L19 6" />
+                                            </svg>
+                                        </span>
+                                    </td>
+                                    <td class="insight-text">{{ insight }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title"><span class="section-bar"></span>Top Farms</h2>
+
+                <div class="leaderboard">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th class="rank-column">Rank</th>
+                                <th class="farm-column">Farm</th>
+                                <th class="numeric-column">Yield</th>
+                                <th class="numeric-column">Premium Share</th>
+                                <th class="numeric-column">Energy Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for farm in top_farms %}
+                            <tr>
+                                <td class="rank-column"><span class="rank-badge">{{ farm.rank }}</span></td>
+                                <td class="farm-column farm-name">{{ farm.farm_name }}</td>
+                                <td class="numeric-column">{{ farm.total_yield_kg | number }} kg</td>
+                                <td class="numeric-column">{{ farm.premium_yield_share | percent }}</td>
+                                <td class="numeric-column">{{ farm.energy_efficiency_kwh_per_kg | number }} kWh/kg</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <table class="report-footer" role="presentation">
+                <tr>
+                    <td><span class="footer-brand">UrbanGreen Analytics</span></td>
+                    <td class="footer-right">Daily Executive Report · {{ report_date }}</td>
+                </tr>
+            </table>
+
+        </div>
+    </main>
+</body>
+
+</html>
