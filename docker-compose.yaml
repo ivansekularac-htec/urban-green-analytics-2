@@ -709,6 +709,29 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-mailpit:
+    image: axllent/mailpit:latest
+    container_name: urbangreen-mailpit
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      MP_MAX_MESSAGES: 500
+
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+    networks:
+      - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
