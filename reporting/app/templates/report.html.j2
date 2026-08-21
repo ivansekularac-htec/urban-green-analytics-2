@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UrbanGreen Executive Report {{ metrics.day }}</title>
+<style>
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #f4f6f4;
+    color: #1c2b21;
+    font-family: Segoe UI, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+  }
+  .sheet {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #d9e2da;
+    border-radius: 6px;
+    padding: 28px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 21px;
+    color: #14532d;
+  }
+  .date {
+    margin: 4px 0 24px;
+    color: #5c6f61;
+  }
+  h2 {
+    margin: 28px 0 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #14532d;
+    border-bottom: 1px solid #d9e2da;
+    padding-bottom: 6px;
+  }
+  p {
+    margin: 0 0 12px;
+    line-height: 1.55;
+  }
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.55;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 7px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eaefeb;
+  }
+  th {
+    color: #5c6f61;
+    font-weight: 600;
+  }
+  td.figure {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .footer {
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px solid #d9e2da;
+    color: #7a8c80;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <h1>UrbanGreen Executive Report</h1>
+  <p class="date">{{ metrics.day }}</p>
+
+  <h2>Summary</h2>
+  <p>{{ summary.narrative }}</p>
+  {% if summary.insights %}
+  <ul>
+    {% for insight in summary.insights %}
+    <li>{{ insight }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h2>Key figures</h2>
+  <table>
+    <tr><th>Active farms</th><td class="figure">{{ totals.farms | number }}</td></tr>
+    <tr><th>Harvests</th><td class="figure">{{ totals.harvests | number }}</td></tr>
+    <tr><th>Total yield</th><td class="figure">{{ totals.yield_kg | number }} kg</td></tr>
+    <tr><th>Energy used</th><td class="figure">{{ totals.energy_kwh | number }} kWh</td></tr>
+    <tr><th>Energy per kilogram</th><td class="figure">{{ totals.energy_per_kg | number(2) }} kWh/kg</td></tr>
+    <tr><th>Sensor readings</th><td class="figure">{{ totals.readings | number }}</td></tr>
+    <tr><th>Anomalies</th><td class="figure">{{ totals.anomalies | number }}</td></tr>
+    <tr><th>Anomaly rate</th><td class="figure">{{ totals.anomaly_rate | percent }}</td></tr>
+  </table>
+
+  {% if metrics.leaderboard %}
+  <h2>Top farms</h2>
+  <table>
+    <tr><th>Rank</th><th>Farm</th><th>Yield</th><th>Premium share</th></tr>
+    {% for farm in metrics.leaderboard %}
+    <tr>
+      <td>{{ farm.rank }}</td>
+      <td>{{ farm.farm }}</td>
+      <td class="figure">{{ farm.yield_kg | number }} kg</td>
+      <td class="figure">{{ farm.premium_share | percent(1) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if metrics.sensors %}
+  <h2>Sensors</h2>
+  <table>
+    <tr><th>Type</th><th>Unit</th><th>Readings</th><th>Anomalies</th></tr>
+    {% for sensor in metrics.sensors %}
+    <tr>
+      <td>{{ sensor.sensor_type }}</td>
+      <td>{{ sensor.unit }}</td>
+      <td class="figure">{{ sensor.readings | number }}</td>
+      <td class="figure">{{ sensor.anomalies | number }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <p class="footer">
+    Generated {{ generated_at }}. Figures are read from the UrbanGreen warehouse;
+    the summary was written by {{ summary.source }}.
+  </p>
+
+</div>
+</body>
+</html>

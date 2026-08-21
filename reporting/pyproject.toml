@@ -1,0 +1,62 @@
+[project]
+name = "urbangreen-reporting"
+version = "0.1.0"
+description = "Automated executive reporting pipeline for the UrbanGreen Analytics platform"
+requires-python = ">=3.12,<3.13"
+# clickhouse-connect, pydantic-settings, pytest and ruff are held at the
+# versions mcp/ pins. The two services read the same warehouse and are linted by
+# the same rules, so a reviewer should not have to reconcile two of either.
+dependencies = [
+    "langgraph==1.2.11",
+    "clickhouse-connect==1.5.0",
+    "httpx==0.28.1",
+    "jinja2==3.1.6",
+    "boto3==1.43.77",
+    "pydantic-settings==2.14.2",
+    "fastapi==0.141.1",
+    "uvicorn==0.52.4",
+]
+
+[dependency-groups]
+dev = [
+    # starlette's TestClient prefers httpx2 and warns when it falls back to
+    # httpx. The service itself calls Ollama with httpx, a runtime dependency.
+    "httpx2==2.12.0",
+    "pytest==9.0.3",
+    "ruff==0.15.22",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "build", "dist", "migrations"]
+
+[tool.ruff.lint]
+# A reasonable starter set
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+    "N",   # pep8-naming
+]
+ignore = [
+    "E501", # line length handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # allow unused imports for re-exports
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true

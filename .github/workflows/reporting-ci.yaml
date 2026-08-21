@@ -1,0 +1,56 @@
+# This workflow will install Python dependencies, run tests and lint,
+# and verify that the reporting Docker image builds successfully.
+
+name: Urban Green Analytics Reporting CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "reporting/**"
+      - "docker-compose.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install uv and enable automatic caching
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "reporting/uv.lock"
+
+      # 3. Install project dependencies using uv sync
+      - name: Install dependencies
+        # --frozen ensures CI fails if uv.lock is out of sync with pyproject.toml
+        run: uv sync --frozen --group dev
+        working-directory: ./reporting
+
+      # 4. Run lint and formatting checks
+      - name: Run ruff check
+        run: uv run ruff check app tests
+        working-directory: ./reporting
+
+      - name: Run ruff format
+        run: uv run ruff format --check app tests
+        working-directory: ./reporting
+
+      # 5. Run reporting tests
+      - name: Run tests
+        run: uv run pytest
+        working-directory: ./reporting
+
+      # 6. Verify that the reporting Docker image builds successfully
+      - name: Build reporting Docker image
+        run: docker compose build urbangreen-reporting
