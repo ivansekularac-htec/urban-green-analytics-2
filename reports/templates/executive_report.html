@@ -43,9 +43,42 @@
             border-bottom: 1px solid rgba(137, 189, 176, 0.42);
         }
 
-        .report-header td {
+        .report-header>tbody>tr>td {
             padding: 22px 32px;
             vertical-align: middle;
+        }
+
+        .header-left {
+            text-align: left;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .brand-table,
+        .meta-table {
+            border-collapse: collapse;
+        }
+
+        .brand-table td,
+        .meta-table td {
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .brand-icon-cell {
+            padding-right: 12px !important;
+        }
+
+        .meta-icon-cell {
+            padding-right: 12px !important;
+        }
+
+        .meta-copy {
+            padding-left: 13px !important;
+            border-left: 1px solid rgba(137, 189, 176, 0.42);
+            text-align: left;
         }
 
         .header-right {
@@ -83,10 +116,6 @@
             font-weight: 750;
             color: #28594F;
             white-space: nowrap;
-        }
-
-        .meta-table {
-            margin-left: auto;
         }
 
         .meta-icon-cell {
@@ -495,8 +524,25 @@
                 padding: 20px !important;
             }
 
-            .report-header td {
+            .report-header>tbody>tr>td {
                 padding: 18px 20px !important;
+            }
+
+            .brand-table td,
+            .meta-table td {
+                padding: 0 !important;
+            }
+
+            .brand-icon-cell {
+                padding-right: 12px !important;
+            }
+
+            .meta-icon-cell {
+                padding-right: 12px !important;
+            }
+
+            .meta-copy {
+                padding-left: 13px !important;
             }
 
             .hero-title {
@@ -555,18 +601,21 @@
 <body>
     <main class="report">
 
-        <table class="report-header" role="presentation">
+        <table class="report-header" role="presentation" width="100%">
             <tr>
-                <td>
+                <td class="header-left" width="50%" align="left">
                     <table class="brand-table" role="presentation">
                         <tr>
-                            <td class="brand-icon-cell"><span class="brand-mark">U</span></td>
+                            <td class="brand-icon-cell">
+                                <span class="brand-mark">U</span>
+                            </td>
                             <td class="brand-name">UrbanGreen</td>
                         </tr>
                     </table>
                 </td>
-                <td class="header-right">
-                    <table class="meta-table" role="presentation">
+
+                <td class="header-right" width="50%" align="right">
+                    <table class="meta-table" role="presentation" align="right">
                         <tr>
                             <td class="meta-icon-cell">
                                 <span class="meta-icon">
@@ -580,6 +629,7 @@
                                     </svg>
                                 </span>
                             </td>
+
                             <td class="meta-copy">
                                 <div class="report-type">Executive Report</div>
                                 <div class="report-date">{{ report_date }}</div>
@@ -605,7 +655,7 @@
                     </td>
                     <td>
                         <h1 class="hero-title">Daily Executive Overview</h1>
-                        <p class="hero-text">Key operational and production indicators for {{ report_date }}.</p>
+                        <p class="hero-text">Key operational and production indicators for {{ report_date }}</p>
                     </td>
                 </tr>
             </table>
