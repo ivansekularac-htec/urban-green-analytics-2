@@ -1,8 +1,13 @@
-"""Reusable prompt templates the MCP client surfaces as slash commands.
+"""Reusable message templates exposed through MCP prompts/list and prompts/get.
+
+A compatible MCP client may present them as slash commands, menu actions, or
+another user-invoked UI. Registration does not require a client to expose a
+particular interaction.
 
 A prompt runs no SQL. It returns the user message that starts the conversation,
-and its only job is to fix the procedure: which resource the model reads, which
-tool it calls, in what order, and how it reports what came back.
+and its only job is to fix the procedure: which warehouse resource the model
+reads through the model-facing tool, which query tool it calls, in what order,
+and how it reports what came back.
 
 The templates below carry rules and no reasoning, because every sentence in them
 competes for the attention of a 2B model. The reasoning is here instead.
@@ -48,11 +53,11 @@ severity of an excursion can be read without touching an atomic row.
 
 The functions are plain and return ``str`` so they can be tested directly; the
 MCP layer wraps them as ``@mcp.prompt`` handlers separately. Their names are the
-slash commands the user sees, so they are named for the command, not the module.
+identifiers clients receive through MCP, so they are named for the action, not
+the module.
 """
 
 from app.config import get_settings
-from app.resources import CONVENTIONS_URI, METRICS_URI
 
 # Resolved once, so there is a single place the environment enters this module
 # and a single name for a test to set. The templates themselves stay pure.
@@ -86,12 +91,12 @@ def analyze_metric(metric: str, days: int = 30) -> str:
 
 Work through these steps in order:
 
-1. Read {METRICS_URI} and take the definition of "{metric}" as written there:
-   its formula, its source tables, its unit, and whether higher or lower is
-   better. Restate none of them from memory. If it is not defined there, say so
-   and stop.
-2. Read {CONVENTIONS_URI} and apply it, in particular whether those tables need
-   FINAL or argMax deduplication.
+1. Call read_warehouse_resource with resource="metrics" and take the definition
+   of "{metric}" as written there: its formula, its source tables, its unit, and
+   whether higher or lower is better. Restate none of them from memory. If it
+   is not defined there, say so and stop.
+2. Call read_warehouse_resource with resource="conventions" and apply it, in
+   particular whether those tables need FINAL or argMax deduplication.
 3. Call describe_table on every table you are about to read.
 4. {_WINDOW_RULE.format(days=days)}
 5. Call execute_query once, with a single query that produces the whole answer.
@@ -126,10 +131,12 @@ def compare_farms(
 
 Work through these steps in order:
 
-1. Read {METRICS_URI} and match "{dimension}" to one of the metrics defined
-   there. Use the closest match and name it in your answer. Take its formula,
-   its unit, and whether higher or lower is better from the same entry.
-2. Read {CONVENTIONS_URI} before you write any SQL.
+1. Call read_warehouse_resource with resource="metrics" and match "{dimension}"
+   to one of the metrics defined there. Use the closest match and name it in
+   your answer. Take its formula, its unit, and whether higher or lower is better
+   from the same entry.
+2. Call read_warehouse_resource with resource="conventions" before you write
+   any SQL.
 3. For a ranking on a single day, read the stored ranks from
    {WAREHOUSE}.fact_farm_leaderboard rather than ranking the farms yourself.
    Otherwise take the measure from {WAREHOUSE}.fact_daily_farm_metrics rather
@@ -178,9 +185,11 @@ of bounds the farm is now, never to recount.
 
 Work through these steps in order:
 
-1. Read {CONVENTIONS_URI} before you write any SQL.
-2. Read {METRICS_URI} and use the definition named "Sensor anomaly rate" for the
-   trend. Do not write the ratio out from memory.
+1. Call read_warehouse_resource with resource="conventions" before you write
+   any SQL.
+2. Call read_warehouse_resource with resource="metrics" and use the definition
+   named "Sensor anomaly rate" for the trend.
+   Do not write the ratio out from memory.
 3. Resolve "{sensor_type}" to its sensor_type_id from {WAREHOUSE}.dim_sensor_type
    FINAL with is_current = 1, and keep its unit, optimal_min and optimal_max.
 4. Call describe_table on {WAREHOUSE}.fact_daily_sensor_metrics, then read it

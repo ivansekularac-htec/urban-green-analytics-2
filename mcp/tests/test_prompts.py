@@ -1,5 +1,5 @@
 """
-Unit tests for the slash-command prompt templates.
+Unit tests for the reusable MCP prompt templates.
 
 These assert contracts rather than wording. A template is prose that will be
 reworded, so a test that pins a whole sentence fails on an edit that changed no
@@ -16,7 +16,6 @@ import pytest
 
 from app import prompts
 from app.prompts import analyze_metric, compare_farms, investigate_anomaly
-from app.resources import CONVENTIONS_URI, METRICS_URI
 
 PROMPTS = (analyze_metric, compare_farms, investigate_anomaly)
 
@@ -45,8 +44,8 @@ def order(rendered: str, *fragments: str) -> bool:
 
 @pytest.mark.parametrize("prompt", PROMPTS)
 def test_every_prompt_has_a_one_line_summary(prompt):
-    """FastMCP shows the text above `Args:` in the slash-command picker, so it
-    has to fit on one line."""
+    """FastMCP exposes the text above `Args:` as prompt metadata, so it has to
+    fit on one line in clients that display it."""
     summary = inspect.getdoc(prompt).split("Args:")[0].strip()
 
     assert summary
@@ -75,10 +74,10 @@ def test_no_placeholder_survives_rendering(rendered):
 
 @pytest.mark.parametrize("rendered", RENDERED)
 def test_every_prompt_names_both_resources_before_the_query(rendered):
-    """Reading the canonical definition after running the query would defeat the
-    point of having one."""
-    assert order(rendered, CONVENTIONS_URI, "execute_query")
-    assert order(rendered, METRICS_URI, "execute_query")
+    """Reading canonical guidance after querying would defeat its purpose."""
+    assert order(rendered, 'resource="conventions"', "execute_query")
+    assert order(rendered, 'resource="metrics"', "execute_query")
+    assert rendered.count("read_warehouse_resource") == 2
 
 
 @pytest.mark.parametrize("rendered", RENDERED)
@@ -174,7 +173,7 @@ def test_analyze_metric_stops_when_the_metric_is_undefined():
     """An undefined metric has to stop the model, not start it improvising."""
     rendered = analyze_metric("Made Up Metric")
 
-    assert order(rendered, METRICS_URI, "stop", "describe_table")
+    assert order(rendered, 'resource="metrics"', "stop", "describe_table")
 
 
 # ---------------------------------------------------------------------------

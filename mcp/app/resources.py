@@ -1,20 +1,29 @@
 """Markdown knowledge resources for ClickHouse SQL generation."""
 
-from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from clickhouse_connect.driver.client import Client
-
-from app.clickhouse import get_client
-from app.config import get_settings
 
 _RESOURCE_DOCS_DIR = Path(__file__).with_name("resource_docs")
 
 # The URIs these resources are published under. They live beside the resources
-# themselves so the prompts, which tell the model what to read, and the T5.2.8
+# themselves so the prompts, which tell the model what to read, and the server
 # registration, which decides what is readable, cannot drift apart.
+SCHEMA_URI = "urbangreen://schema"
 METRICS_URI = "urbangreen://metrics"
 CONVENTIONS_URI = "urbangreen://conventions"
+
+type WarehouseResourceName = Literal["schema", "metrics", "conventions"]
+
+# The model-facing reader accepts stable names rather than arbitrary URIs. The
+# mapping stays beside the URI constants so registration and tool access cannot
+# disagree about which resource a name identifies.
+RESOURCE_URIS: dict[WarehouseResourceName, str] = {
+    "schema": SCHEMA_URI,
+    "metrics": METRICS_URI,
+    "conventions": CONVENTIONS_URI,
+}
 
 _SCHEMA_TABLES_SQL = """
 SELECT name, create_table_query
@@ -33,15 +42,7 @@ def load_schema_markdown(client: Client, database: str) -> str:
         parameters={"database": database},
     )
 
-    # Keep the Python-side check as a defensive guard in case ClickHouse ever
-    # returns internal materialized-view storage despite the query predicate.
-    table_ddls = [
-        (table_name, create_table_query)
-        for table_name, create_table_query in result.result_rows
-        if not table_name.startswith(".inner")
-    ]
-
-    return render_schema_markdown(database, table_ddls)
+    return render_schema_markdown(database, result.result_rows)
 
 
 def render_schema_markdown(database: str, table_ddls: list[tuple[str, str]]) -> str:
@@ -67,18 +68,6 @@ def render_schema_markdown(database: str, table_ddls: list[tuple[str, str]]) -> 
         )
 
     return "\n".join(sections).rstrip() + "\n"
-
-
-@lru_cache(maxsize=1)
-def schema_resource() -> str:
-    """Build the schema lazily and cache it for the process lifetime."""
-
-    settings = get_settings()
-
-    return load_schema_markdown(
-        client=get_client(),
-        database=settings.clickhouse_db,
-    )
 
 
 def metrics_resource() -> str:
