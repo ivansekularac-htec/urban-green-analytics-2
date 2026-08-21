@@ -173,6 +173,7 @@ services:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
 
     environment:
+      PYTHONPATH: /opt/airflow
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW_PORT: ${AIRFLOW_PORT:-8080}
       AIRFLOW__API__PORT: ${AIRFLOW_PORT:-8080}
@@ -202,11 +203,23 @@ services:
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_TCP_PORT: 9000
 
+      OLLAMA_HOST: urbangreen-ollama
+      OLLAMA_API_PORT: ${OLLAMA_API_PORT:-11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+      OLLAMA_MAX_TOKENS: ${OLLAMA_MAX_TOKENS:-500}
+
+      SMTP_HOST: urbangreen-mailpit
+      SMTP_PORT: ${MAILPIT_SMTP_PORT:-1025}
+      SMTP_FROM: ${SMTP_FROM:-reports@urbangreen.local}
+      REPORT_EMAIL_TO: ${REPORT_EMAIL_TO:-executives@urbangreen.local}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
       - ./etl/transformations:/opt/airflow/spark-jobs:ro
       - ./infra/airflow/init:/scripts:ro
+      - ./reports:/opt/airflow/reports:ro
 
     networks:
       - urbangreen-network

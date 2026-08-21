@@ -4,3 +4,9 @@ apache-airflow-providers-apache-spark
 pyarrow
 pandas
 pyspark==4.0.2
+clickhouse-connect>=1.7.2
+langgraph>=1.2.11
+ollama>=0.6.2
+jinja2>=3.1.6
+minio>=7.2.20
+pydantic>=2.13.4

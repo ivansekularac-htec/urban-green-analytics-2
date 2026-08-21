@@ -1,8 +1,9 @@
 """Models used by the executive report pipeline."""
 
-from typing import Required, TypedDict
+from typing import TypedDict
 
 from pydantic import BaseModel, Field
+from typing_extensions import Required
 
 
 class ExecutiveMetrics(TypedDict):
