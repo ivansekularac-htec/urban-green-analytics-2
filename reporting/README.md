@@ -25,7 +25,7 @@ published either way, and its footer names which of the two wrote the summary.
 ## Running it
 
 ```bash
-docker compose up -d --build urbangreen-reporting urbangreen-mailpit
+docker compose --profile analytics up -d --build urbangreen-reporting urbangreen-mailpit urbangren-airflow urbangreen-minio
 curl http://localhost:8002/health
 ```
 

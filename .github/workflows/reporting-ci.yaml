@@ -54,4 +54,3 @@ jobs:
       # 6. Verify that the reporting Docker image builds successfully
       - name: Build reporting Docker image
         run: docker compose build urbangreen-reporting
-        
