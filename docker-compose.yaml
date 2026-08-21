@@ -202,6 +202,8 @@ services:
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_TCP_PORT: 9000
 
+      REPORTING_URL: http://urbangreen-reporting:${REPORTING_PORT:-8002}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags

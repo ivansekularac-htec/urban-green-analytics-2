@@ -7,6 +7,7 @@ report date, and records the object key the run published.
 
 import json
 import logging
+import os
 import urllib.request
 from datetime import timedelta
 
@@ -15,7 +16,7 @@ from airflow.sdk import dag
 
 logger = logging.getLogger(__name__)
 
-REPORTING_URL = "http://urbangreen-reporting:8002"
+REPORTING_URL = os.environ.get("REPORTING_URL", "http://urbangreen-reporting:8002")
 
 # The first inference after a container start loads the model, which takes far
 # longer than a warm run.
