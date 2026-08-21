@@ -52,7 +52,6 @@ def build_report(day: str) -> str:
 
 @dag(
     dag_id="daily_executive_report",
-    schedule="0 6 * * *",
     catchup=False,
     max_active_runs=1,
     default_args={
