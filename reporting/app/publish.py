@@ -34,14 +34,14 @@ def publish(html: str, day: date) -> dict:
         _store(html, day)
         result["stored"] = True
     except Exception as exc:
-        logger.warning("could not store the report (%s)", exc)
+        logger.warning(f"could not store the report ({exc})")
         result["warnings"].append(f"storage: {exc}")
 
     try:
         _email(html, day)
         result["emailed"] = True
     except Exception as exc:
-        logger.warning("could not email the report (%s)", exc)
+        logger.warning(f"could not email the report ({exc})")
         result["warnings"].append(f"email: {exc}")
 
     return result

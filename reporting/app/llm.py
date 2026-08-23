@@ -79,7 +79,7 @@ def summarize(metrics: dict) -> dict:
         # Every failure lands here on purpose - timeout, refused connection,
         # bad status, unparseable JSON, missing field. None of them should cost
         # us the report.
-        logger.warning("summary failed (%s); using the fallback narrative", exc)
+        logger.warning(f"summary failed ({exc}); using the fallback narrative")
 
         return fallback(metrics)
 

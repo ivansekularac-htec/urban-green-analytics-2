@@ -45,10 +45,10 @@ def build_report(day: str) -> str:
     with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         result = json.load(response)
 
-    logger.info("stored=%s emailed=%s", result["stored"], result["emailed"])
+    logger.info(f"stored={result['stored']} emailed={result['emailed']}")
 
     for warning in result["warnings"]:
-        logger.warning("publish warning: %s", warning)
+        logger.warning(f"publish warning: {warning}")
 
     # The service degrades so a manual run still delivers the report one way or
     # the other. The scheduled run has to be stricter: the object is what this
@@ -59,7 +59,7 @@ def build_report(day: str) -> str:
             f"the report for {result['day']} was not stored at {result['key']}"
         )
 
-    logger.info("report for %s published to %s", result["day"], result["key"])
+    logger.info(f"report for {result['day']} published to {result['key']}")
 
     return result["key"]
 
