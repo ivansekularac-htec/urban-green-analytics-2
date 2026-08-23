@@ -25,7 +25,6 @@ def client_returning(*results) -> MagicMock:
 
 def totals(**overrides) -> dict:
     row = {
-        "farms": 15,
         "yield_kg": Decimal("1200.500"),
         "harvests": 42,
         "energy_kwh": 2400.0,
@@ -37,9 +36,10 @@ def totals(**overrides) -> dict:
     return row
 
 
-def collect(totals_row=None, sensors=None, leaderboard=None) -> dict:
+def collect(totals_row=None, farms=15, sensors=None, leaderboard=None) -> dict:
     client = client_returning(
         result([totals_row if totals_row is not None else totals()]),
+        result([{"farms": farms}]),
         result(sensors if sensors is not None else []),
         result(leaderboard if leaderboard is not None else []),
     )
@@ -83,6 +83,13 @@ def test_a_ratio_with_no_denominator_is_none_not_zero():
     assert collected["totals"]["anomaly_rate"] is None
 
 
+def test_active_farms_comes_from_the_dimension_not_the_fact_rollup():
+    # A farm with no harvest and no reading that day is still an active farm.
+    collected = collect(farms=75)
+
+    assert collected["totals"]["farms"] == 75
+
+
 def test_collect_returns_the_sensor_and_leaderboard_breakdowns():
     collected = collect(
         sensors=[{"sensor_type": "Temperature", "unit": "C", "readings": 100, "anomalies": 9}],
@@ -95,7 +102,7 @@ def test_collect_returns_the_sensor_and_leaderboard_breakdowns():
 
 
 def test_collect_binds_the_day_rather_than_formatting_it():
-    client = client_returning(result([totals()]), result([]), result([]))
+    client = client_returning(result([totals()]), result([{"farms": 15}]), result([]), result([]))
 
     metrics.collect(client, DAY)
 

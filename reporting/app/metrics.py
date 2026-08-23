@@ -24,7 +24,6 @@ FROM fact_daily_farm_metrics
 # The alias goes before FINAL; ClickHouse rejects `table FINAL AS alias`.
 _TOTALS = """
 SELECT
-    count(DISTINCT d.farm_id) AS farms,
     sum(d.total_yield_kg) AS yield_kg,
     sum(d.harvest_count) AS harvests,
     sum(d.energy_kwh) AS energy_kwh,
@@ -32,6 +31,21 @@ SELECT
     sum(d.anomaly_count) AS anomalies
 FROM fact_daily_farm_metrics AS d FINAL
 WHERE d.metric_date = {day:Date}
+"""
+
+# Counted from the dimension, not from the fact rollup: a farm that recorded
+# neither a harvest nor a reading is still an active farm, and counting fact
+# rows would quietly drop it from the headline.
+#
+# dim_farm is SCD-2 over the half-open interval [valid_from, valid_to), so this
+# reads the state at the close of the report day rather than the state today.
+# Using is_current would report today's farms on a report about a past date.
+_ACTIVE_FARMS = """
+SELECT count() AS farms
+FROM dim_farm FINAL
+WHERE status = 'ACTIVE'
+    AND valid_from <= toDateTime64({day:Date}, 3) + toIntervalDay(1)
+    AND valid_to > toDateTime64({day:Date}, 3) + toIntervalDay(1)
 """
 
 _SENSORS = """
@@ -102,6 +116,7 @@ def collect(client: Client, day: date) -> dict:
     """Read every figure the report needs for one day."""
 
     totals = _rows(client.query(_TOTALS, parameters={"day": day}))[0]
+    totals["farms"] = _rows(client.query(_ACTIVE_FARMS, parameters={"day": day}))[0]["farms"]
 
     # Ratios are derived here rather than in SQL: ClickHouse will not divide a
     # Decimal by a Float64, and a zero denominator means nothing was measured.
