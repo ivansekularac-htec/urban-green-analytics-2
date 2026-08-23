@@ -14,6 +14,9 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Measured against qwen3.5:2b: ~16s warm, ~20s cold, the model load itself
+# costing about 4s. This leaves room for a slower host without letting a hung
+# request hold the daily run open.
 TIMEOUT_SECONDS = 120
 NUM_PREDICT = 400
 TEMPERATURE = 0.2

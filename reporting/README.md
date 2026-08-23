@@ -65,12 +65,13 @@ the key is derived from the date, so there is no path that can duplicate.
 ## Schedule
 
 The `daily_executive_report` DAG runs at 06:00 and posts its logical date to
-this service. It retries twice, because the first inference after a restart has
-to load the model and takes considerably longer than a warm run. The published
-object key is the task result.
+this service. The published object key is the task result.
 
-The DAG fails the task if the report was not stored, so a green run always means
-there is an object at the key it reported. A failed email is logged as a warning
+The DAG fails the task, and so retries it, when either the report was not stored
+or the summary fell back to the fixed narrative. A green run therefore means
+there is an object at the reported key and the model wrote the prose. Retrying
+is safe because the key is derived from the date, so a later attempt overwrites
+the earlier report rather than adding one. A failed email is logged as a warning
 and does not fail the run.
 
 ## Local development
