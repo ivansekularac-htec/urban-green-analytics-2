@@ -18,9 +18,14 @@ logger = logging.getLogger(__name__)
 
 REPORTING_URL = os.environ.get("REPORTING_URL", "http://urbangreen-reporting:8002")
 
-# The first inference after a container start loads the model, which takes far
-# longer than a warm run.
+# One request covers the warehouse queries, the inference and both publish
+# sinks. Generous on purpose: the service has its own, shorter timeout on the
+# model, so this bound should never be the one that trips.
 REQUEST_TIMEOUT_SECONDS = 600
+
+# app.llm marks the summary with the model that wrote it, or with this when it
+# gave up and used the fixed narrative.
+FALLBACK_SUMMARY_SOURCE = "fallback"
 
 
 def build_report(day: str) -> str:
@@ -34,7 +39,8 @@ def build_report(day: str) -> str:
         the task result.
 
     Raises:
-        RuntimeError: If the report was not stored in the bucket.
+        RuntimeError: If the report was not stored, or was published with the
+            fallback narrative instead of a model-written one.
     """
 
     request = urllib.request.Request(
@@ -45,7 +51,10 @@ def build_report(day: str) -> str:
     with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         result = json.load(response)
 
-    logger.info(f"stored={result['stored']} emailed={result['emailed']}")
+    logger.info(
+        f"stored={result['stored']} emailed={result['emailed']} "
+        f"summary_source={result['summary_source']}"
+    )
 
     for warning in result["warnings"]:
         logger.warning(f"publish warning: {warning}")
@@ -57,6 +66,16 @@ def build_report(day: str) -> str:
     if not result["stored"]:
         raise RuntimeError(
             f"the report for {result['day']} was not stored at {result['key']}"
+        )
+
+    # The report is published either way, so this is not a lost run - but a
+    # fallback narrative is a degraded one, and retrying is free: the key is
+    # derived from the date, so a later attempt overwrites rather than
+    # duplicates. This is what the retries below are actually for.
+    if result["summary_source"] == FALLBACK_SUMMARY_SOURCE:
+        raise RuntimeError(
+            f"the report for {result['day']} was published with the fallback "
+            f"narrative; the model did not answer"
         )
 
     logger.info(f"report for {result['day']} published to {result['key']}")
