@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import urllib.request
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import dag
@@ -53,6 +53,8 @@ def build_report(day: str) -> str:
 
 @dag(
     dag_id="daily_executive_report",
+    schedule="0 6 * * *",
+    start_date=datetime(2024, 1, 1),
     catchup=False,
     max_active_runs=1,
     default_args={
