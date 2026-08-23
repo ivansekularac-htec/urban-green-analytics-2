@@ -25,7 +25,7 @@ published either way, and its footer names which of the two wrote the summary.
 ## Running it
 
 ```bash
-docker compose --profile analytics up -d --build urbangreen-reporting urbangreen-mailpit urbangren-airflow urbangreen-minio
+docker compose --profile analytics up -d --build urbangreen-reporting urbangreen-mailpit urbangreen-airflow urbangreen-minio
 curl http://localhost:8002/health
 ```
 
@@ -69,6 +69,10 @@ this service. It retries twice, because the first inference after a restart has
 to load the model and takes considerably longer than a warm run. The published
 object key is the task result.
 
+The DAG fails the task if the report was not stored, so a green run always means
+there is an object at the key it reported. A failed email is logged as a warning
+and does not fail the run.
+
 ## Local development
 
 ```bash
@@ -93,4 +97,5 @@ uv run python -m app.main                     # serve on 8002
 - MinIO belongs to the `backend` compose profile while this service belongs to
   `analytics`. It is deliberately not a startup dependency, so this service can
   run under `--profile analytics` alone; without MinIO the report is emailed
-  and the missing object is reported as a warning.
+  and the missing object is reported as a warning. That degradation is for
+  manual runs — the DAG treats a missing object as a failure.

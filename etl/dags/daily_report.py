@@ -32,6 +32,9 @@ def build_report(day: str) -> str:
     Returns:
         The object key the report was published under, which Airflow stores as
         the task result.
+
+    Raises:
+        RuntimeError: If the report was not stored in the bucket.
     """
 
     request = urllib.request.Request(
@@ -42,11 +45,21 @@ def build_report(day: str) -> str:
     with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         result = json.load(response)
 
-    logger.info("report for %s published to %s", result["day"], result["key"])
     logger.info("stored=%s emailed=%s", result["stored"], result["emailed"])
 
     for warning in result["warnings"]:
         logger.warning("publish warning: %s", warning)
+
+    # The service degrades so a manual run still delivers the report one way or
+    # the other. The scheduled run has to be stricter: the object is what this
+    # DAG exists to produce, so a green task with nothing at the key would be a
+    # lie. A failed email alone stays a warning.
+    if not result["stored"]:
+        raise RuntimeError(
+            f"the report for {result['day']} was not stored at {result['key']}"
+        )
+
+    logger.info("report for %s published to %s", result["day"], result["key"])
 
     return result["key"]
 
