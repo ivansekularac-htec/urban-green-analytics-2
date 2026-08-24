@@ -1,4 +1,4 @@
-# UrbanGreen reporting service
+# UrbanGreen reporting pipeline
 
 Builds the daily executive report: it reads the day's KPIs from the ClickHouse
 warehouse, has the local Ollama model write a short narrative, renders one
@@ -12,6 +12,11 @@ graph:
 fetch_metrics -> summarize -> render -> publish
 ```
 
+It runs inside Airflow. `app/` is mounted into the scheduler at
+`/opt/airflow/reporting/app` and its dependencies are installed in the Airflow
+image, so the `daily_executive_report` DAG imports `run_report` and calls it in
+process. There is no separate service and no HTTP hop.
+
 ## The model never chooses a number
 
 The KPI queries in `app/metrics.py` are fixed, and every figure in the report
@@ -24,22 +29,25 @@ published either way, and its footer names which of the two wrote the summary.
 
 ## Running it
 
-```bash
-docker compose --profile analytics up -d --build urbangreen-reporting urbangreen-mailpit urbangreen-airflow urbangreen-minio
-curl http://localhost:8002/health
-```
-
-Build a report:
+The report needs ClickHouse and MinIO (`backend`) as well as Ollama and Mailpit
+(`analytics`), so it needs both profiles:
 
 ```bash
-# a specific day
-curl -X POST http://localhost:8002/reports/2026-08-15
-
-# the newest day loaded in the warehouse
-curl -X POST http://localhost:8002/reports/latest
+docker compose --profile all up -d
+# or, equivalently
+docker compose --profile backend --profile analytics up -d
 ```
 
-The response carries the object key and what happened:
+Under `--profile backend` alone the DAG parses and runs but has no model and no
+mail sink, and the task fails on the fallback narrative.
+
+Trigger the DAG from <http://localhost:8080>, or run one day directly:
+
+```bash
+docker compose exec urbangreen-airflow python -m app.main --date 2026-08-15
+```
+
+Either way the run reports what it published:
 
 ```json
 {
@@ -64,8 +72,8 @@ the key is derived from the date, so there is no path that can duplicate.
 
 ## Schedule
 
-The `daily_executive_report` DAG runs at 06:00 and posts its logical date to
-this service. The published object key is the task result.
+The `daily_executive_report` DAG runs at 06:00 and builds the report for its
+logical date. The published object key is the task result.
 
 The DAG fails the task, and so retries it, when either the report was not stored
 or the summary fell back to the fixed narrative. A green run therefore means
@@ -76,6 +84,8 @@ and does not fail the run.
 
 ## Local development
 
+The package is tested on its own, without Airflow:
+
 ```bash
 cd reporting
 uv sync --frozen --group dev
@@ -83,20 +93,22 @@ uv run ruff check app tests && uv run ruff format --check app tests
 uv run pytest
 ```
 
-To run against the containerised stack from the host, copy `.env.example` to
-`.env` (it points at `localhost` rather than the container names) and:
+To run the pipeline against the containerised stack from the host, copy
+`.env.example` to `.env` (it points at `localhost` rather than the container
+names) and:
 
 ```bash
-uv run python -m app.main --date 2026-08-15   # one run, no server
-uv run python -m app.main                     # serve on 8002
+uv run python -m app.main --date 2026-08-15   # one specific day
+uv run python -m app.main                     # the newest loaded day
 ```
 
 ## Notes
 
 - The warehouse is loaded in batches, so `latest` means the newest day that was
-  loaded, not today.
-- MinIO belongs to the `backend` compose profile while this service belongs to
-  `analytics`. It is deliberately not a startup dependency, so this service can
-  run under `--profile analytics` alone; without MinIO the report is emailed
-  and the missing object is reported as a warning. That degradation is for
-  manual runs — the DAG treats a missing object as a failure.
+  loaded, not today. A date with no rows produces an honest empty report.
+- The dependency pins in `pyproject.toml` are mirrored in
+  `infra/airflow/requirements.txt`. They have to agree: the tests run against
+  the pins here, and the DAG runs against the pins there.
+- The package requires Python 3.10, not because it wants to, but because the
+  Airflow image is `apache/airflow:3.1.1-python3.10` and the pipeline is
+  imported into it.

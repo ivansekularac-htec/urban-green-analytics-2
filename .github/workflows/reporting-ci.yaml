@@ -1,5 +1,6 @@
-# This workflow will install Python dependencies, run tests and lint,
-# and verify that the reporting Docker image builds successfully.
+# This workflow will install Python dependencies and run tests and lint for
+# the reporting pipeline. The pipeline runs inside Airflow, so there is no
+# image of its own to build.
 
 name: Urban Green Analytics Reporting CI
 
@@ -10,12 +11,16 @@ on:
     paths:
       - "reporting/**"
       - "docker-compose.yaml"
+      # The DAG imports the package, and these pins have to match the ones
+      # in reporting/pyproject.toml.
+      - "etl/dags/daily_report.py"
+      - "infra/airflow/requirements.txt"
 
 permissions:
   contents: read
 
 jobs:
-  lint-test-and-build:
+  lint-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +32,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
+          python-version: "3.10"
           enable-cache: true
           cache-dependency-glob: "reporting/uv.lock"
 
@@ -50,7 +55,3 @@ jobs:
       - name: Run tests
         run: uv run pytest
         working-directory: ./reporting
-
-      # 6. Verify that the reporting Docker image builds successfully
-      - name: Build reporting Docker image
-        run: docker compose build urbangreen-reporting
