@@ -4,3 +4,6 @@ apache-airflow-providers-apache-spark
 pyarrow
 pandas
 pyspark==4.0.2
+langgraph
+clickhouse-connect
+jinja2

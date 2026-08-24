@@ -13,4 +13,7 @@ dependencies = [
     "pyarrow",
     "pandas",
     "apache-airflow-providers-apache-spark>=6.1.0",
+    "langgraph",
+    "clickhouse-connect",
+    "jinja2",
 ]

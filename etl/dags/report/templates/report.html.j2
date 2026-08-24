@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UrbanGreen Executive Report — {{ report_date }}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+         margin: 0; background: #eef1ee; color: #1c2b21; }
+  .sheet { max-width: 860px; margin: 24px auto; background: #fff; border-radius: 16px;
+           box-shadow: 0 6px 24px rgba(31,81,50,0.10); overflow: hidden; }
+  header { display: flex; align-items: center; justify-content: space-between;
+           padding: 20px 32px; border-bottom: 1px solid #e6ece7; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .name { font-size: 18px; font-weight: 700; color: #1f5132; }
+  .eyebrow { text-align: right; }
+  .eyebrow .tag { font-size: 11px; letter-spacing: 0.14em; color: #6b7a6f; font-weight: 700; }
+  .eyebrow .date { font-size: 13px; color: #1f5132; font-weight: 600; }
+  .body { padding: 28px 32px 8px; }
+  h1 { font-size: 24px; margin: 0 0 4px; color: #16351f; }
+  .subtitle { color: #5c6b60; margin: 0 0 20px; font-size: 14px; }
+  section { margin: 26px 0; }
+  h2 { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+       color: #1f5132; margin: 0 0 12px; padding-left: 10px; border-left: 3px solid #3f9d5f; }
+  .summary { background: #f3f8f4; border: 1px solid #e0ece3; border-left: 4px solid #3f9d5f;
+             border-radius: 10px; padding: 16px 18px; line-height: 1.6; }
+  .insights { display: flex; flex-direction: column; gap: 8px; }
+  .insight { display: flex; align-items: flex-start; gap: 10px; background: #fff;
+             border: 1px solid #e6ece7; border-radius: 10px; padding: 12px 14px; line-height: 1.5; }
+  .insight svg { flex: 0 0 auto; margin-top: 1px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi { background: #fff; border: 1px solid #e6ece7; border-radius: 12px; padding: 14px 16px; }
+  .kpi-label { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+               color: #6b7a6f; font-weight: 600; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: #16351f; margin-top: 6px; }
+  .kpi-unit { font-size: 12px; font-weight: 600; color: #6b7a6f; margin-left: 3px; }
+  table { width: 100%; border-collapse: collapse; border: 1px solid #e6ece7; border-radius: 12px;
+          overflow: hidden; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid #eef2ee; font-size: 14px; }
+  th { background: #f3f8f4; color: #1f5132; font-size: 12px; letter-spacing: 0.04em;
+       text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  td.figure, th.figure { text-align: right; }
+  td.figure { font-variant-numeric: tabular-nums; }
+  td.rank span { display: inline-flex; align-items: center; justify-content: center;
+                 width: 24px; height: 24px; border-radius: 50%; background: #e7f1ea;
+                 color: #1f5132; font-weight: 700; font-size: 12px; }
+  td.empty { color: #8a978c; text-align: center; }
+  footer { display: flex; justify-content: space-between; gap: 16px; padding: 18px 32px 26px;
+           color: #8a978c; font-size: 12px; border-top: 1px solid #e6ece7; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+        <rect width="40" height="40" rx="10" fill="#1f5132"/>
+        <text x="20" y="27" text-anchor="middle" font-size="22" font-weight="700"
+              fill="#fff" font-family="Segoe UI, Arial, sans-serif">U</text>
+      </svg>
+      <span class="name">UrbanGreen</span>
+    </div>
+    <div class="eyebrow">
+      <div class="tag">EXECUTIVE REPORT</div>
+      <div class="date">{{ report_date }}</div>
+    </div>
+  </header>
+  <div class="body">
+    <h1>Daily Executive Overview</h1>
+    <p class="subtitle">Key operational and production figures for {{ report_date }}</p>
+
+    <section>
+      <h2>Summary</h2>
+      <div class="summary">{{ narrative }}</div>
+    </section>
+
+    {% if insights %}
+    <section>
+      <h2>Key insights</h2>
+      <div class="insights">
+        {% for item in insights %}
+        <div class="insight">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="#1f5132"/>
+            <path d="M7 12.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>{{ item }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section>
+      <h2>Key figures</h2>
+      <div class="kpis">
+        {% for card in kpis %}
+        <div class="kpi">
+          <div class="kpi-label">{{ card.label }}</div>
+          <div class="kpi-value">{{ card.value }}{% if card.unit %}<span class="kpi-unit">{{ card.unit }}</span>{% endif %}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      <h2>Top farms</h2>
+      <table>
+        <thead><tr><th>Rank</th><th>Farm</th><th>City</th><th class="figure">Yield</th><th class="figure">Premium share</th></tr></thead>
+        <tbody>
+          {% for row in top_farms %}
+          <tr>
+            <td class="rank"><span>{{ row.rank }}</span></td>
+            <td>{{ row.farm }}</td>
+            <td>{{ row.city }}</td>
+            <td class="figure">{{ row.yield }}</td>
+            <td class="figure">{{ row.premium }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="empty">No leaderboard rows for this date.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Sensors</h2>
+      <table>
+        <thead><tr><th>Type</th><th>Unit</th><th class="figure">Readings</th><th class="figure">Anomalies</th></tr></thead>
+        <tbody>
+          {% for row in sensors %}
+          <tr>
+            <td>{{ row.type }}</td>
+            <td>{{ row.unit }}</td>
+            <td class="figure">{{ row.readings }}</td>
+            <td class="figure">{{ row.anomalies }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No sensor metrics for this date.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+  <footer>
+    <span>UrbanGreen Analytics — figures are read from the warehouse; {{ footer_note }}.</span>
+    <span>Generated {{ generated_at }}</span>
+  </footer>
+</div>
+</body>
+</html>

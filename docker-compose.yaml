@@ -202,6 +202,15 @@ services:
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_TCP_PORT: 9000
 
+      # Daily executive report DAG (module 5.3). Ollama and the mail sink have no
+      # seeded Airflow connection, so the DAG reads them from here.
+      OLLAMA_HOST: ${OLLAMA_HOST:-urbangreen-ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+      SMTP_HOST: ${SMTP_HOST:-urbangreen-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      REPORT_EMAIL_FROM: ${REPORT_EMAIL_FROM:-urbangreen-reports@urbangreen.local}
+      REPORT_EMAIL_TO: ${REPORT_EMAIL_TO:-executives@urbangreen.local}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
@@ -660,6 +669,29 @@ services:
 
     networks:
       - urbangreen-network
+
+  urbangreen-mailpit:
+    image: axllent/mailpit:latest
+    container_name: urbangreen-mailpit
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    # SMTP sink for the daily executive report. 1025 receives mail from the
+    # report DAG; 8025 serves the web inbox for the demo.
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
+    networks:
+      - urbangreen-network
+
+    # No healthcheck: the image ships without a shell, so a CMD-SHELL test has
+    # nothing to run. The report DAG treats a failed send as a warning anyway.
+
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   urbangreen-mcp:
     build:
