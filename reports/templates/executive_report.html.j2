@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UrbanGreen Executive Report — {{ report_date.isoformat() }}</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef4f0;
+            color: #17372a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px 16px;
+            background: #eef4f0;
+            color: #17372a;
+        }
+
+        .report {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #d7e4dc;
+            border-radius: 18px;
+            box-shadow: 0 16px 42px rgba(22, 64, 44, 0.12);
+        }
+
+        .header {
+            padding: 30px 34px;
+            color: #ffffff;
+            background: #165c3b;
+        }
+
+        .header-table,
+        .kpi-table,
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-mark {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            margin-right: 10px;
+            border-radius: 50%;
+            background: #dff5e8;
+            color: #165c3b;
+            font-size: 21px;
+            line-height: 36px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .report-meta {
+            color: #dff5e8;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: right;
+        }
+
+        .report-meta strong {
+            display: block;
+            color: #ffffff;
+            font-size: 17px;
+        }
+
+        .content {
+            padding: 34px;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: #248458;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            color: #17372a;
+            font-size: 30px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin: 9px 0 28px;
+            color: #658073;
+            font-size: 15px;
+        }
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            margin: 0 0 14px;
+            color: #234d39;
+            font-size: 17px;
+        }
+
+        .kpi-table td {
+            width: 25%;
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        .kpi-card {
+            min-height: 112px;
+            padding: 17px;
+            border: 1px solid #dfeae3;
+            border-radius: 12px;
+            background: #f8fbf9;
+        }
+
+        .kpi-label {
+            min-height: 32px;
+            color: #668073;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            line-height: 1.35;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            margin-top: 8px;
+            color: #17372a;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .kpi-unit {
+            margin-left: 4px;
+            color: #668073;
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        .summary {
+            padding: 22px 24px;
+            border-left: 5px solid #35a66f;
+            border-radius: 10px;
+            background: #eff8f3;
+            color: #244d3a;
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        .insights {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .insights li {
+            position: relative;
+            margin: 9px 0;
+            padding: 13px 16px 13px 42px;
+            border: 1px solid #e0eae4;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #385c49;
+            line-height: 1.5;
+        }
+
+        .insights li::before {
+            position: absolute;
+            top: 13px;
+            left: 15px;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #dff5e8;
+            color: #187247;
+            content: "✓";
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 19px;
+            text-align: center;
+        }
+
+        .leaderboard {
+            overflow: hidden;
+            border: 1px solid #dfe9e3;
+            border-radius: 10px;
+        }
+
+        .leaderboard th,
+        .leaderboard td {
+            padding: 13px 14px;
+            border-bottom: 1px solid #e5eee8;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .leaderboard th {
+            background: #f1f7f3;
+            color: #547064;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .leaderboard tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .numeric {
+            text-align: right !important;
+            white-space: nowrap;
+        }
+
+        .rank {
+            display: inline-block;
+            min-width: 27px;
+            padding: 5px;
+            border-radius: 14px;
+            background: #dff5e8;
+            color: #176943;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .footer {
+            padding: 18px 34px;
+            border-top: 1px solid #e2ebe5;
+            background: #f8fbf9;
+            color: #71867a;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 0;
+            }
+
+            .report {
+                border: 0;
+                border-radius: 0;
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-right: 20px;
+                padding-left: 20px;
+            }
+
+            .kpi-table,
+            .kpi-table tbody,
+            .kpi-table tr,
+            .kpi-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .report-meta {
+                padding-top: 12px;
+                text-align: left;
+            }
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: #ffffff;
+            }
+
+            .report {
+                border: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="report">
+        <header class="header">
+            <table class="header-table" role="presentation">
+                <tr>
+                    <td class="brand">
+                        <span class="brand-mark">U</span>UrbanGreen
+                    </td>
+                    <td class="report-meta">
+                        <strong>Executive Report</strong>
+                        {{ report_date.strftime("%B %d, %Y") }}
+                    </td>
+                </tr>
+            </table>
+        </header>
+
+        <div class="content">
+            <p class="eyebrow">Daily operations snapshot</p>
+            <h1>Executive overview</h1>
+            <p class="subtitle">Verified warehouse metrics for {{ report_date.isoformat() }}</p>
+
+            <section aria-labelledby="kpi-heading">
+                <h2 class="section-title" id="kpi-heading">Key performance indicators</h2>
+                <table class="kpi-table" role="presentation">
+                    <tr>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Total yield</div>
+                                <div class="kpi-value">{{ metrics.total_yield_kg | number }}<span class="kpi-unit">kg</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Harvests</div>
+                                <div class="kpi-value">{{ metrics.harvest_count | integer }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Premium yield</div>
+                                <div class="kpi-value">{{ metrics.premium_yield_share | percent }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Farms reporting</div>
+                                <div class="kpi-value">{{ metrics.farms_reporting | integer }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Energy used</div>
+                                <div class="kpi-value">{{ metrics.energy_kwh | number }}<span class="kpi-unit">kWh</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Energy efficiency</div>
+                                <div class="kpi-value">{{ metrics.energy_efficiency_kwh_per_kg | number }}<span class="kpi-unit">kWh/kg</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Sensor readings</div>
+                                <div class="kpi-value">{{ metrics.reading_count | integer }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Anomaly rate</div>
+                                <div class="kpi-value">{{ metrics.anomaly_rate | percent }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="section" aria-labelledby="summary-heading">
+                <h2 class="section-title" id="summary-heading">Executive summary</h2>
+                <div class="summary">{{ narrative }}</div>
+            </section>
+
+            <section class="section" aria-labelledby="insights-heading">
+                <h2 class="section-title" id="insights-heading">Key insights</h2>
+                <ul class="insights">
+                    {% for insight in insights %}
+                    <li>{{ insight }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            {% if top_farms %}
+            <section class="section" aria-labelledby="leaderboard-heading">
+                <h2 class="section-title" id="leaderboard-heading">Top farms</h2>
+                <table class="leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Farm</th>
+                            <th class="numeric">Yield</th>
+                            <th class="numeric">Premium share</th>
+                            <th class="numeric">Energy efficiency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for farm in top_farms %}
+                        <tr>
+                            <td><span class="rank">{{ farm.rank }}</span></td>
+                            <td>{{ farm.farm_name }}</td>
+                            <td class="numeric">{{ farm.total_yield_kg | number }} kg</td>
+                            <td class="numeric">{{ farm.premium_yield_share | percent }}</td>
+                            <td class="numeric">{{ farm.energy_efficiency_kwh_per_kg | number }} kWh/kg</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
+        </div>
+
+        <footer class="footer">
+            Generated by UrbanGreen Analytics from pre-aggregated warehouse data.
+            The narrative was produced by the local Ollama model; displayed KPI figures remain authoritative warehouse values.
+        </footer>
+    </main>
+</body>
+</html>

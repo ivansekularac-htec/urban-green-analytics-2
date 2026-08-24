@@ -164,6 +164,14 @@ services:
     depends_on:
       urbangreen-postgres:
         condition: service_healthy
+      urbangreen-clickhouse:
+        condition: service_healthy
+      urbangreen-minio-init:
+        condition: service_completed_successfully
+      urbangreen-ollama-init:
+        condition: service_completed_successfully
+      urbangreen-mailpit:
+        condition: service_started
 
     entrypoint: [ "/bin/sh", "/scripts/init-airflow.sh" ]
 
@@ -173,6 +181,7 @@ services:
       - "${AIRFLOW_PORT:-8080}:${AIRFLOW_PORT:-8080}"
 
     environment:
+      PYTHONPATH: /opt/airflow
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW_PORT: ${AIRFLOW_PORT:-8080}
       AIRFLOW__API__PORT: ${AIRFLOW_PORT:-8080}
@@ -202,11 +211,23 @@ services:
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_TCP_PORT: 9000
 
+      OLLAMA_HOST: http://urbangreen-ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+      OLLAMA_MAX_TOKENS: ${OLLAMA_MAX_TOKENS:-400}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-120}
+
+      SMTP_HOST: urbangreen-mailpit
+      SMTP_PORT: 1025
+      SMTP_TIMEOUT_SECONDS: ${SMTP_TIMEOUT_SECONDS:-15}
+      REPORT_EMAIL_FROM: ${REPORT_EMAIL_FROM:-reports@urbangreen.local}
+      REPORT_EMAIL_TO: ${REPORT_EMAIL_TO:-executives@urbangreen.local}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
       - ./etl/transformations:/opt/airflow/spark-jobs:ro
       - ./infra/airflow/init:/scripts:ro
+      - ./reports:/opt/airflow/reports:ro
 
     networks:
       - urbangreen-network
@@ -608,7 +629,7 @@ services:
   urbangreen-ollama:
     image: ollama/ollama:latest
     container_name: urbangreen-ollama
-    profiles: [ "all", "analytics" ]
+    profiles: [ "all", "backend", "analytics" ]
     restart: unless-stopped
 
     environment:
@@ -641,7 +662,7 @@ services:
   urbangreen-ollama-init:
     image: ollama/ollama:latest
     container_name: urbangreen-ollama-init
-    profiles: [ "all", "analytics" ]
+    profiles: [ "all", "backend", "analytics" ]
     restart: "no"
 
     depends_on:
@@ -660,6 +681,29 @@ services:
 
     networks:
       - urbangreen-network
+
+  urbangreen-mailpit:
+    image: axllent/mailpit:latest
+    container_name: urbangreen-mailpit
+    profiles: [ "all", "backend", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      MP_MAX_MESSAGES: 500
+
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+    networks:
+      - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   urbangreen-mcp:
     build:
