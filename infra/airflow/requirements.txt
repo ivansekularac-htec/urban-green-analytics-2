@@ -4,3 +4,13 @@ apache-airflow-providers-apache-spark
 pyarrow
 pandas
 pyspark==4.0.2
+
+# The daily executive report runs in process on the scheduler. Pinned to the
+# versions reporting/pyproject.toml locks, so the versions CI tests are the
+# versions the DAG runs.
+langgraph==1.2.11
+clickhouse-connect==1.5.0
+httpx==0.28.1
+jinja2==3.1.6
+boto3==1.43.77
+pydantic-settings==2.14.2
