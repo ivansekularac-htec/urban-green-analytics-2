@@ -1,12 +1,12 @@
-"""Tests for the reporting application entry point."""
+"""Tests for the reporting pipeline entry point."""
 
 from datetime import date
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+import pytest
 
-from app.main import create_app, main, resolve_day
+from app.main import main, resolve_day, run_report
 
 DAY = date(2026, 8, 15)
 
@@ -21,24 +21,12 @@ STATE = {
 }
 
 
-def test_health_reports_the_service_is_alive():
-    client = TestClient(create_app())
-
-    response = client.get("/health")
-
-    assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
-
-
-def test_a_report_request_returns_the_published_key():
-    client = TestClient(create_app())
-
+def test_a_run_reports_what_was_published():
     with patch("app.main.graph.run", return_value=STATE) as run:
-        response = client.post("/reports/2026-08-15")
+        result = run_report("2026-08-15")
 
     run.assert_called_once_with(DAY)
-    assert response.status_code == 200
-    assert response.json() == {
+    assert result == {
         "day": "2026-08-15",
         "key": "reports/executive/date=2026-08-15/report.html",
         "stored": True,
@@ -49,11 +37,10 @@ def test_a_report_request_returns_the_published_key():
 
 
 def test_an_unreadable_day_is_rejected():
-    client = TestClient(create_app())
-
-    response = client.post("/reports/not-a-date")
-
-    assert response.status_code == 400
+    # The caller is the DAG, so this has to raise rather than report a
+    # published key for a day nobody asked for.
+    with pytest.raises(ValueError):
+        run_report("not-a-date")
 
 
 def test_latest_resolves_to_the_newest_loaded_day():
@@ -65,38 +52,33 @@ def test_latest_resolves_to_the_newest_loaded_day():
 
 
 def test_latest_fails_when_the_warehouse_is_empty():
-    client = TestClient(create_app())
-
     with (
         patch("app.main.metrics.get_client"),
         patch("app.main.metrics.latest_date", return_value=None),
+        pytest.raises(ValueError),
     ):
-        response = client.post("/reports/latest")
-
-    assert response.status_code == 400
+        resolve_day("latest")
 
 
-def test_the_cli_runs_one_day_and_exits():
+def test_the_cli_runs_the_day_it_is_given():
     with (
         patch("sys.argv", ["main", "--date", "2026-08-15"]),
         patch("app.main.get_settings", return_value=SimpleNamespace(log_level="INFO")),
-        patch("app.main.graph.run", return_value=STATE),
-        patch("app.main.uvicorn.run") as serve,
+        patch("app.main.graph.run", return_value=STATE) as run,
     ):
         main()
 
-    serve.assert_not_called()
+    run.assert_called_once_with(DAY)
 
 
-def test_serving_uses_the_configured_host_and_port():
-    settings = SimpleNamespace(host="127.0.0.1", port=9002, log_level="INFO")
-
+def test_the_cli_defaults_to_the_newest_loaded_day():
     with (
         patch("sys.argv", ["main"]),
-        patch("app.main.get_settings", return_value=settings),
-        patch("app.main.uvicorn.run") as serve,
+        patch("app.main.get_settings", return_value=SimpleNamespace(log_level="INFO")),
+        patch("app.main.metrics.get_client"),
+        patch("app.main.metrics.latest_date", return_value=DAY),
+        patch("app.main.graph.run", return_value=STATE) as run,
     ):
         main()
 
-    assert serve.call_args.kwargs["host"] == "127.0.0.1"
-    assert serve.call_args.kwargs["port"] == 9002
+    run.assert_called_once_with(DAY)

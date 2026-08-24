@@ -1,24 +1,24 @@
-"""Tests for reporting service configuration."""
+"""Tests for reporting pipeline configuration."""
 
 from app.config import Settings, get_settings
 
 
 def test_settings_use_default_values(monkeypatch):
-    monkeypatch.delenv("REPORTING_PORT", raising=False)
+    monkeypatch.delenv("REPORTING_LOG_LEVEL", raising=False)
 
     # _env_file=None ignores a developer's local .env.
     settings = Settings(_env_file=None)
 
-    assert settings.port == 8002
+    assert settings.log_level == "INFO"
     assert settings.clickhouse_db == "urbangreen_dw"
     assert settings.ollama_model == "qwen3.5:2b"
     assert settings.minio_bucket == "staging"
 
 
-def test_service_settings_read_the_reporting_prefix(monkeypatch):
-    monkeypatch.setenv("REPORTING_PORT", "9002")
+def test_pipeline_settings_read_the_reporting_prefix(monkeypatch):
+    monkeypatch.setenv("REPORTING_LOG_LEVEL", "DEBUG")
 
-    assert Settings().port == 9002
+    assert Settings().log_level == "DEBUG"
 
 
 def test_stack_settings_read_their_shared_names(monkeypatch):

@@ -1,6 +1,6 @@
-"""Settings for the reporting service.
+"""Settings for the reporting pipeline.
 
-Service settings are read from REPORTING_*. Connection details are shared with
+Pipeline settings are read from REPORTING_*. Connection details are shared with
 the rest of the stack, so they keep the names the other services already use.
 """
 
@@ -11,8 +11,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    host: str = "0.0.0.0"
-    port: int = 8002
     log_level: str = "INFO"
 
     clickhouse_host: str = Field("urbangreen-clickhouse", validation_alias="CLICKHOUSE_HOST")

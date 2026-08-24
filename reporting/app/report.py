@@ -4,7 +4,7 @@ The layout lives in a template so every day's report has the same shape and
 only the values change.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
@@ -45,5 +45,5 @@ def render(metrics: dict, summary: dict) -> str:
         metrics=metrics,
         totals=metrics["totals"],
         summary=summary,
-        generated_at=datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
+        generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
     )

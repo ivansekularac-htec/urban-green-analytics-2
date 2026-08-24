@@ -1,16 +1,14 @@
-"""The reporting service entry point.
+"""The reporting pipeline entry point.
 
-POST /reports/{day} runs the pipeline for one day. The day is a date, or
-"latest" for the newest day loaded in the warehouse. The same run is available
-from the command line with --date, so the pipeline does not need a scheduler.
+run_report() builds and publishes the report for one day. The day is a date, or
+"latest" for the newest day loaded in the warehouse. The Airflow DAG imports
+this function and calls it in process; --date runs the same pipeline from the
+command line, so the pipeline can be run without a scheduler.
 """
 
 import argparse
 import logging
 from datetime import date
-
-import uvicorn
-from fastapi import FastAPI, HTTPException
 
 from app import graph, metrics
 from app.config import get_settings
@@ -49,50 +47,20 @@ def run_report(value: str) -> dict:
     }
 
 
-def create_app() -> FastAPI:
-    """Build the FastAPI application."""
-
-    app = FastAPI(title="UrbanGreen Reporting", version="0.1.0")
-
-    @app.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "healthy"}
-
-    @app.post("/reports/{day}")
-    def create_report(day: str) -> dict:
-        try:
-            return run_report(day)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    return app
-
-
-app = create_app()
-
-
 def main() -> None:
     settings = get_settings()
 
     logging.basicConfig(level=settings.log_level)
 
-    parser = argparse.ArgumentParser(description="UrbanGreen reporting service")
+    parser = argparse.ArgumentParser(description="UrbanGreen reporting pipeline")
     parser.add_argument(
         "--date",
-        help="run the pipeline once for this day (YYYY-MM-DD or 'latest') and exit",
+        default="latest",
+        help="the day to report on (YYYY-MM-DD, or 'latest' for the newest loaded day)",
     )
     arguments = parser.parse_args()
 
-    if arguments.date:
-        print(run_report(arguments.date)["key"])
-        return
-
-    uvicorn.run(
-        app,
-        host=settings.host,
-        port=settings.port,
-        log_level=settings.log_level.lower(),
-    )
+    print(run_report(arguments.date)["key"])
 
 
 if __name__ == "__main__":

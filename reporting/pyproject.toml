@@ -2,7 +2,7 @@
 name = "urbangreen-reporting"
 version = "0.1.0"
 description = "Automated executive reporting pipeline for the UrbanGreen Analytics platform"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.10"
 # clickhouse-connect, pydantic-settings, pytest and ruff are held at the
 # versions mcp/ pins. The two services read the same warehouse and are linted by
 # the same rules, so a reviewer should not have to reconcile two of either.
@@ -13,15 +13,10 @@ dependencies = [
     "jinja2==3.1.6",
     "boto3==1.43.77",
     "pydantic-settings==2.14.2",
-    "fastapi==0.141.1",
-    "uvicorn==0.52.4",
 ]
 
 [dependency-groups]
 dev = [
-    # starlette's TestClient prefers httpx2 and warns when it falls back to
-    # httpx. The service itself calls Ollama with httpx, a runtime dependency.
-    "httpx2==2.12.0",
     "pytest==9.0.3",
     "ruff==0.15.22",
 ]
@@ -32,7 +27,7 @@ pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py310"
 extend-exclude = [".venv", "build", "dist", "migrations"]
 
 [tool.ruff.lint]
