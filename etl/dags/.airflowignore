@@ -2,3 +2,4 @@
 # Airflow 3 defaults .airflowignore to glob syntax (not regexp), so a glob is
 # what excludes the subtree from DAG scanning while leaving it importable.
 postgres_extract/*
+report/*

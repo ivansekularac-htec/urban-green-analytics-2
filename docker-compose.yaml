@@ -202,6 +202,15 @@ services:
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_TCP_PORT: 9000
 
+      OLLAMA_BASE_URL: http://urbangreen-ollama:${OLLAMA_API_PORT:-11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:2b}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-120}
+
+      REPORT_SMTP_HOST: urbangreen-mailpit
+      REPORT_SMTP_PORT: 1025
+      REPORT_EMAIL_FROM: ${REPORT_EMAIL_FROM:-reports@urbangreen.local}
+      REPORT_EMAIL_TO: ${REPORT_EMAIL_TO:-executive@urbangreen.local}
+
     volumes:
       - urbangreen-airflow-logs-volume:/opt/airflow/logs
       - ./etl/dags:/opt/airflow/dags
@@ -708,6 +717,18 @@ services:
           memory: 512M
         reservations:
           memory: 512M
+
+  urbangreen-mailpit:
+    image: axllent/mailpit:latest
+    container_name: urbangreen-mailpit
+    profiles: [ "all", "analytics" ]
+    restart: unless-stopped
+
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
+    networks:
+      - urbangreen-network
 
 volumes:
   urbangreen-postgres-data:

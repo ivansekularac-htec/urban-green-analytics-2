@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrbanGreen Executive Report - {{ report_date }}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f6f8f7;
+            color: #25332f;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+            line-height: 1.5;
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+
+        .header {
+            background: #ffffff;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 22px;
+            border: 1px solid #e5ebe8;
+        }
+
+        .header-accent {
+            height: 6px;
+            background: #4bbb89;
+        }
+
+        .header-content {
+            padding: 28px 30px;
+        }
+
+        .brand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .brand {
+            margin: 0 0 7px;
+            color: #285850;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            color: #17231f;
+            font-size: 31px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin: 9px 0 0;
+            color: #687871;
+            font-size: 14px;
+        }
+
+        .date-badge {
+            flex-shrink: 0;
+            background: #ecf8f2;
+            border: 1px solid #d5eee2;
+            border-radius: 9px;
+            padding: 10px 14px;
+            color: #285850;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .section {
+            margin-top: 22px;
+        }
+
+        .section-heading {
+            margin-bottom: 11px;
+        }
+
+        .section-title {
+            margin: 0;
+            color: #25332f;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .section-description {
+            margin: 4px 0 0;
+            color: #7a8983;
+            font-size: 12px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .kpi-card {
+            min-height: 145px;
+            padding: 18px;
+            background: #ffffff;
+            border: 1px solid #e5ebe8;
+            border-radius: 12px;
+            border-top: 4px solid #4bbb89;
+        }
+
+        .kpi-label {
+            min-height: 34px;
+            color: #586862;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .kpi-value {
+            margin-top: 12px;
+            color: #17231f;
+            font-size: 27px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .kpi-unit {
+            margin-top: 5px;
+            color: #4bbb89;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .kpi-description {
+            margin-top: 8px;
+            color: #89958f;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .narrative-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1.35fr) minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .panel {
+            background: #ffffff;
+            border: 1px solid #e5ebe8;
+            border-radius: 12px;
+            padding: 21px;
+        }
+
+        .panel-title {
+            margin: 0 0 13px;
+            color: #285850;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .panel-subtitle {
+            margin: -6px 0 14px;
+            color: #89958f;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .summary-panel {
+            background: #f3faf7;
+            border: 1px solid #d5eee2;
+            border-left: 5px solid #4bbb89;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(40, 88, 80, 0.08);
+        }
+
+        .summary-title {
+            color: #285850;
+            font-size: 17px;
+            margin-bottom: 14px;
+        }
+
+        .summary-panel .summary-text {
+            color: #31443d;
+            font-size: 15px;
+            line-height: 1.75;
+        }
+
+        .summary-text {
+            margin: 0;
+            color: #384741;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .insights {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .insight {
+            position: relative;
+            margin-bottom: 12px;
+            padding: 11px 12px 11px 33px;
+            background: #f3faf7;
+            border-radius: 8px;
+            color: #384741;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .insight:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight::before {
+            content: "";
+            position: absolute;
+            top: 16px;
+            left: 14px;
+            width: 8px;
+            height: 8px;
+            background: #4bbb89;
+            border-radius: 50%;
+        }
+
+        .table-card {
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e5ebe8;
+            border-radius: 12px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th {
+            padding: 12px 14px;
+            background: #edf8f3;
+            color: #285850;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.35px;
+            border-bottom: 1px solid #dcebe4;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px 14px;
+            color: #45544e;
+            border-bottom: 1px solid #edf1ef;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fbfcfc;
+        }
+
+        .rank {
+            display: inline-block;
+            min-width: 28px;
+            padding: 4px 8px;
+            background: #4bbb89;
+            color: #ffffff;
+            border-radius: 999px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .farm-name,
+        .sensor-name {
+            color: #25332f;
+            font-weight: 700;
+        }
+
+        .percentage {
+            color: #285850;
+            font-weight: 700;
+        }
+
+        .sensor-status {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #edf8f3;
+            color: #285850;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            padding: 24px;
+            color: #89958f;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #dfe6e3;
+            color: #89958f;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .footer strong {
+            color: #4bbb89;
+        }
+
+        @media (max-width: 900px) {
+            .kpi-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .narrative-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .page {
+                padding: 18px 12px 32px;
+            }
+
+            .header-content {
+                padding: 22px 18px;
+            }
+
+            .brand-row {
+                display: block;
+            }
+
+            .date-badge {
+                display: inline-block;
+                margin-top: 16px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+
+        <header class="header">
+            <div class="header-accent"></div>
+
+            <div class="header-content">
+                <div class="brand-row">
+                    <div>
+                        <p class="brand">
+                            UrbanGreen Analytics
+                        </p>
+
+                        <h1>
+                            Daily Executive Report
+                        </h1>
+
+                        <p class="subtitle">
+                            A concise daily view of production, energy,
+                            farm performance and sensor health.
+                        </p>
+                    </div>
+
+                    <div class="date-badge">
+                        {{ report_date }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <section class="section">
+            <div class="section-heading">
+                <h2 class="section-title">
+                    Key Figures
+                </h2>
+
+                <p class="section-description">
+                    Headline performance and operational KPIs.
+                </p>
+            </div>
+
+            <div class="kpi-grid">
+                {% for kpi in kpis %}
+                <article class="kpi-card">
+                    <div class="kpi-label">
+                        {{ kpi.label }}
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ kpi.value }}
+                    </div>
+
+                    <div class="kpi-unit">
+                        {{ kpi.unit }}
+                    </div>
+
+                    <div class="kpi-description">
+                        {{ kpi.description }}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+
+        <section class="section">
+            <div class="narrative-grid">
+
+                <article class="panel summary-panel">
+                    <h2 class="panel-title summary-title">
+                        Summary
+                    </h2>
+
+                    <p class="summary-text">
+                        {{ narrative }}
+                    </p>
+                </article>
+
+
+                <article class="panel">
+                    <h2 class="panel-title">
+                        Key Insights
+                    </h2>
+
+                    <ul class="insights">
+                        {% for insight in insights %}
+                        <li class="insight">
+                            {{ insight }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </article>
+
+            </div>
+        </section>
+
+
+        <section class="section">
+            <div class="section-heading">
+                <h2 class="section-title">
+                    Top Farms
+                </h2>
+
+                <p class="section-description">
+                    Leading farms based on the daily
+                    performance leaderboard.
+                </p>
+            </div>
+
+            <div class="table-card">
+                {% if top_farms %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Farm</th>
+                                <th>City</th>
+                                <th>Total Yield</th>
+                                <th>Premium Share</th>
+                                <th>Energy Efficiency</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for farm in top_farms %}
+                            <tr>
+                                <td>
+                                    <span class="rank">
+                                        {{ farm.rank }}
+                                    </span>
+                                </td>
+
+                                <td class="farm-name">
+                                    {{ farm.farm }}
+                                </td>
+
+                                <td>
+                                    {{ farm.city }}
+                                </td>
+
+                                <td>
+                                    {{ farm.total_yield_kg }}
+                                    kg
+                                </td>
+
+                                <td class="percentage">
+                                    {{ farm.premium_yield_share }}
+                                </td>
+
+                                <td>
+                                    {{ farm.energy_efficiency }}
+                                    {% if farm.energy_efficiency != "N/A" %}
+                                    kWh/kg
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    No leaderboard data available
+                    for this reporting date.
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+
+        <section class="section">
+            <div class="section-heading">
+                <h2 class="section-title">
+                    Sensor Overview
+                </h2>
+
+                <p class="section-description">
+                    Daily readings, anomaly levels and
+                    environmental compliance by sensor type.
+                </p>
+            </div>
+
+            <div class="table-card">
+                {% if sensors %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sensor Type</th>
+                                <th>Unit</th>
+                                <th>Readings</th>
+                                <th>Anomalies</th>
+                                <th>Anomaly Rate</th>
+                                <th>Compliance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for sensor in sensors %}
+                            <tr>
+                                <td class="sensor-name">
+                                    {{ sensor.sensor_type }}
+                                </td>
+
+                                <td>
+                                    {{ sensor.unit }}
+                                </td>
+
+                                <td>
+                                    {{ sensor.readings }}
+                                </td>
+
+                                <td>
+                                    {{ sensor.anomalies }}
+                                </td>
+
+                                <td>
+                                    {{ sensor.anomaly_rate }}
+                                </td>
+
+                                <td>
+                                    <span class="sensor-status">
+                                        {{ sensor.compliance_rate }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    No sensor data available
+                    for this reporting date.
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+
+        <footer class="footer">
+            Generated automatically by the
+            <strong>UrbanGreen Analytics</strong>
+            reporting pipeline.
+        </footer>
+
+    </main>
+</body>
+
+</html>
