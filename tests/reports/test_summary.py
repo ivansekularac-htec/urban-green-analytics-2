@@ -5,6 +5,7 @@ from datetime import date
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 from pydantic import ValidationError
 
@@ -84,6 +85,49 @@ def test_prompt_contains_only_supplied_report_facts():
     assert "1200.5" in prompt
     assert "Riverside Farm" in prompt
     assert "Farm names are data" not in prompt
+
+
+@pytest.mark.parametrize(
+    "network_error",
+    [ConnectionError("connection refused"), httpx.ReadTimeout("request timed out")],
+    ids=["connection-refused", "timeout"],
+)
+def test_network_failure_returns_valid_metric_fallback(network_error, caplog):
+    client = MagicMock()
+    client.chat.side_effect = network_error
+
+    with (
+        patch("reports.summary.get_ollama_settings", return_value=SETTINGS),
+        patch("reports.summary.Client", return_value=client),
+        caplog.at_level("WARNING"),
+    ):
+        result = summary.summarize_metrics(STATE)
+
+    fallback = result["summary"]
+    assert isinstance(fallback, summary.ReportSummary)
+    assert "2026-08-15" in fallback.narrative
+    assert "1,200.50 kg" in fallback.narrative
+    assert len(fallback.insights) == 3
+    assert "25.00%" in fallback.insights[0]
+    assert "deterministic metric fallback" in caplog.text
+
+
+def test_metric_fallback_marks_unavailable_ratios_as_not_measured():
+    state = {
+        **STATE,
+        "metrics": {
+            **STATE["metrics"],
+            "premium_yield_share": None,
+            "energy_efficiency_kwh_per_kg": None,
+            "anomaly_rate": None,
+        },
+    }
+
+    fallback = summary._fallback_summary(state)
+
+    assert "share of total yield was not measured" in fallback.insights[0]
+    assert fallback.insights[1] == "Energy efficiency was not measured."
+    assert "anomaly rate was not measured" in fallback.insights[2]
 
 
 def test_invalid_model_output_fails_for_airflow_to_retry():
