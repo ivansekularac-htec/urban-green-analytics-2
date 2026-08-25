@@ -92,20 +92,24 @@
         }
 
         .section-heading {
-            margin-bottom: 11px;
+            margin-bottom: 14px;
+            padding-left: 14px;
+            border-left: 5px solid #4bbb89;
         }
 
         .section-title {
             margin: 0;
-            color: #25332f;
-            font-size: 18px;
+            color: #285850;
+            font-size: 19px;
             font-weight: 700;
+            line-height: 1.2;
         }
 
         .section-description {
-            margin: 4px 0 0;
-            color: #7a8983;
+            margin: 5px 0 0;
+            color: #687871;
             font-size: 12px;
+            line-height: 1.4;
         }
 
         .kpi-grid {
@@ -155,9 +159,9 @@
 
         .narrative-grid {
             display: grid;
-            grid-template-columns:
-                minmax(0, 1.35fr) minmax(0, 1fr);
-            gap: 14px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            align-items: stretch;
         }
 
         .panel {
@@ -167,11 +171,19 @@
             padding: 21px;
         }
 
+        .narrative-grid>.panel {
+            display: flex;
+            flex-direction: column;
+        }
+
         .panel-title {
-            margin: 0 0 13px;
+            margin: 0 0 16px;
+            padding-bottom: 10px;
             color: #285850;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 700;
+            line-height: 1.2;
+            border-bottom: 2px solid #d5eee2;
         }
 
         .panel-subtitle {
@@ -182,17 +194,18 @@
         }
 
         .summary-panel {
+            grid-column: span 2;
             background: #f3faf7;
             border: 1px solid #d5eee2;
             border-left: 5px solid #4bbb89;
             padding: 24px;
             box-shadow: 0 4px 14px rgba(40, 88, 80, 0.08);
+            border-radius: 12px;
+            height: 100%;
         }
 
         .summary-title {
             color: #285850;
-            font-size: 17px;
-            margin-bottom: 14px;
         }
 
         .summary-panel .summary-text {
@@ -209,24 +222,32 @@
         }
 
         .insights {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
             margin: 0;
             padding: 0;
             list-style: none;
         }
 
+        .insights-panel {
+            grid-column: span 2;
+            background: #ffffff;
+            border: 1px solid #d5eee2;
+            padding: 24px;
+            border-radius: 12px;
+            height: 100%;
+        }
+
         .insight {
             position: relative;
-            margin-bottom: 12px;
             padding: 11px 12px 11px 33px;
             background: #f3faf7;
             border-radius: 8px;
             color: #384741;
             font-size: 13px;
             line-height: 1.5;
-        }
-
-        .insight:last-child {
-            margin-bottom: 0;
         }
 
         .insight::before {
@@ -345,6 +366,11 @@
             .narrative-grid {
                 grid-template-columns: 1fr;
             }
+
+            .summary-panel,
+            .insights-panel {
+                grid-column: span 1;
+            }
         }
 
         @media (max-width: 560px) {
@@ -456,7 +482,7 @@
                 </article>
 
 
-                <article class="panel">
+                <article class="panel insights-panel">
                     <h2 class="panel-title">
                         Key Insights
                     </h2>
