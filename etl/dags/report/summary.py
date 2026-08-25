@@ -3,6 +3,7 @@
 import json
 import logging
 from typing import Any
+from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from report.config import (
@@ -89,6 +90,48 @@ def _summary_prompt(
     """.strip()
 
 
+def _fallback_summary(
+    state: ReportState,
+) -> dict[str, Any]:
+    """Build a deterministic summary when Ollama is unavailable."""
+    metrics = state["metrics"]
+
+    reporting_farms = metrics["reporting_farms"]
+    total_yield = metrics["total_harvest_yield_kg"]
+    total_energy = metrics["total_energy_kwh"]
+    compliance = metrics["environmental_compliance_rate"]
+    anomaly_rate = metrics["sensor_anomaly_rate"]
+
+    yield_text = f"{total_yield:,.1f} kg" if total_yield is not None else "unavailable"
+
+    energy_text = (
+        f"{total_energy:,.1f} kWh" if total_energy is not None else "unavailable"
+    )
+
+    compliance_text = (
+        f"{compliance * 100:.1f}%" if compliance is not None else "unavailable"
+    )
+
+    anomaly_text = (
+        f"{anomaly_rate * 100:.1f}%" if anomaly_rate is not None else "unavailable"
+    )
+
+    narrative = (
+        f"The daily report represents {reporting_farms} farms, "
+        f"with total harvest yield of {yield_text} and total energy "
+        f"consumption of {energy_text}. Environmental compliance "
+        f"was {compliance_text}, while the sensor anomaly rate "
+        f"was {anomaly_text}."
+    )
+
+    insights = [
+        f"Environmental compliance was {compliance_text}.",
+        f"Sensor anomaly rate was {anomaly_text}.",
+    ]
+
+    return {"narrative": narrative, "insights": insights}
+
+
 def summarize_metrics(
     state: ReportState,
     model=ollama_model(),
@@ -126,21 +169,33 @@ def summarize_metrics(
         method="POST",
     )
 
-    with urlopen(
-        request,
-        timeout=ollama_timeout_seconds(),
-    ) as response:
-        body = json.loads(response.read().decode("utf-8"))
+    try:
+        with urlopen(
+            request,
+            timeout=ollama_timeout_seconds(),
+        ) as response:
+            body = json.loads(response.read().decode("utf-8"))
 
-    summary = json.loads(body["message"]["content"])
+        summary = json.loads(body["message"]["content"])
 
-    narrative = summary["narrative"].strip()
+        narrative = summary["narrative"].strip()
 
-    insights = [item.strip() for item in summary["insights"] if item.strip()]
+        insights = [item.strip() for item in summary["insights"] if item.strip()]
 
-    if not narrative or len(insights) < 2:
-        raise ValueError("Ollama returned an incomplete executive summary.")
+        if not narrative or len(insights) < 2:
+            raise ValueError("Ollama returned an incomplete executive summary.")
 
-    logger.info(f"Generated executive summary with {model}.")
+    except (
+        URLError,
+        TimeoutError,
+        ValueError,
+        KeyError,
+        TypeError,
+    ) as exc:
+        logger.warning(f"Ollama summary failed; using deterministic fallback: {exc}")
+
+        return _fallback_summary(state)
+
+        logger.info(f"Generated executive summary with {model}.")
 
     return {"narrative": narrative, "insights": insights[:3]}

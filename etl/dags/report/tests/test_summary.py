@@ -3,6 +3,7 @@
 import json
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from urllib.error import URLError
 
 from report.summary import (
     _summary_prompt,
@@ -143,27 +144,61 @@ class SummarizeMetricsTests(TestCase):
         self.assertIn("UG Farm 01", prompt)
         self.assertIn("Temperature", prompt)
 
-    def test_summarize_metrics_rejects_incomplete_response(self):
-        ollama_response = self._ollama_response(
-            {
-                "narrative": "",
-                "insights": ["Only one insight."],
-            }
-        )
+    def test_summarize_metrics_uses_fallback_for_incomplete_response(self):
+        response = MagicMock()
+        response.read.return_value = json.dumps(
+            {"message": {"content": json.dumps({"narrative": "", "insights": []})}}
+        ).encode("utf-8")
 
-        with patch(
-            "report.summary.urlopen",
-            return_value=ollama_response,
-        ):
-            with self.assertRaisesRegex(
-                ValueError,
-                "incomplete executive summary",
-            ):
-                summarize_metrics(
-                    {
-                        "report_date": "2026-08-20",
-                        "metrics": {"reporting_farms": 75},
-                        "top_farms": [],
-                        "sensors": [],
-                    }
-                )
+        response.__enter__.return_value = response
+
+        state = {
+            "report_date": "2026-08-20",
+            "metrics": {
+                "reporting_farms": 75,
+                "total_harvest_yield_kg": 1200.0,
+                "total_energy_kwh": 2400.0,
+                "energy_efficiency_kwh_per_kg": 2.0,
+                "waste_reduction_progress": 0.10,
+                "environmental_compliance_rate": 0.95,
+                "sensor_anomaly_rate": 0.01,
+                "total_sensor_readings": 18000,
+            },
+            "top_farms": [],
+            "sensors": [],
+        }
+
+        with patch("report.summary.urlopen", return_value=response):
+            result = summarize_metrics(state)
+
+        self.assertIn("75 farms", result["narrative"])
+        self.assertIn("95.0%", result["narrative"])
+        self.assertEqual(len(result["insights"]), 2)
+
+
+def test_summarize_metrics_uses_fallback_when_ollama_is_unavailable(self):
+    state = {
+        "report_date": "2026-08-20",
+        "metrics": {
+            "reporting_farms": 75,
+            "total_harvest_yield_kg": 1200.0,
+            "total_energy_kwh": 2400.0,
+            "energy_efficiency_kwh_per_kg": 2.0,
+            "waste_reduction_progress": 0.10,
+            "environmental_compliance_rate": 0.95,
+            "sensor_anomaly_rate": 0.01,
+            "total_sensor_readings": 18000,
+        },
+        "top_farms": [],
+        "sensors": [],
+    }
+
+    with patch(
+        "report.summary.urlopen",
+        side_effect=URLError("Ollama unavailable"),
+    ):
+        result = summarize_metrics(state)
+
+    self.assertIn("75 farms", result["narrative"])
+    self.assertIn("1.0%", result["narrative"])
+    self.assertEqual(len(result["insights"]), 2)

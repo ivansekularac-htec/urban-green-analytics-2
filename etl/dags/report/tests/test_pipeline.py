@@ -62,8 +62,7 @@ class ReportPipelineTests(TestCase):
         )
 
         self.assertEqual(
-            result["object_key"],
-            ("reports/executive/date=2026-08-20/report.html"),
+            result["object_key"], ("reports/executive/date=2026-08-20/report.html")
         )
 
     def test_run_report_passes_report_date_to_graph(self):
@@ -78,10 +77,7 @@ class ReportPipelineTests(TestCase):
 
         graph.invoke.assert_called_once_with({"report_date": "2026-08-20"})
 
-        self.assertEqual(
-            result,
-            ("reports/executive/date=2026-08-20/report.html"),
-        )
+        self.assertEqual(result, ("reports/executive/date=2026-08-20/report.html"))
 
     def test_run_report_rejects_invalid_date(self):
         graph = MagicMock()
@@ -91,3 +87,21 @@ class ReportPipelineTests(TestCase):
                 pipeline.run_report("invalid-date")
 
         graph.invoke.assert_not_called()
+
+    def test_main_runs_report_for_cli_date(self):
+        expected_key = "reports/executive/date=2026-08-20/report.html"
+
+        with (
+            patch("sys.argv", ["report.pipeline", "--date", "2026-08-20"]),
+            patch.object(
+                pipeline,
+                "run_report",
+                return_value=expected_key,
+            ) as run_report,
+            patch("builtins.print") as print_mock,
+        ):
+            pipeline.main()
+
+        run_report.assert_called_once_with("2026-08-20")
+
+        print_mock.assert_called_once_with(expected_key)

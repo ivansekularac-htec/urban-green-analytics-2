@@ -1,5 +1,6 @@
 """LangGraph pipeline for the daily executive report."""
 
+import argparse
 from datetime import date
 
 from langgraph.graph import END, START, StateGraph
@@ -39,3 +40,26 @@ def run_report(report_date: str) -> str:
     result = REPORT_GRAPH.invoke({"report_date": report_date})
 
     return result["object_key"]
+
+
+def main() -> None:
+    """Run the executive report pipeline from the command line."""
+    parser = argparse.ArgumentParser(
+        description="Generate an UrbanGreen executive report."
+    )
+
+    parser.add_argument(
+        "--date",
+        required=True,
+        help="Report date in YYYY-MM-DD format.",
+    )
+
+    args = parser.parse_args()
+
+    object_key = run_report(args.date)
+
+    print(object_key)
+
+
+if __name__ == "__main__":
+    main()
