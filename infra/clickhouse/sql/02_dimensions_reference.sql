@@ -16,7 +16,7 @@
 -- Design notes:
 --   Pure star: farm/crop reference lookups (infrastructure type, growing system
 --   type, crop category) are denormalized directly onto dim_farm / dim_crop
---   (*_name, is_high_value), so no standalone snowflake lookup tables are kept.
+--   (*_name), so no standalone snowflake lookup tables are kept.
 --
 -- Data sources (Module 3 ETL):
 --   Postgres app.* tables → MinIO Parquet (raw/postgres/) → Spark → ClickHouse
@@ -24,15 +24,15 @@
 --
 -- Dashboard use:
 --   dim_date/dim_time — GROUP BY year_week, month_name, part_of_day without
---   runtime date functions. dim_quality_grade.is_premium, dim_crop.is_high_value
---   support quality mix and profitability metrics.
+--   runtime date functions. dim_quality_grade.is_premium supports quality mix
+--   metrics; high-value crop classification is on bi_crop_classification.
 --
 -- Dependencies: 01_database.sql (USE urbangreen_dw).
 -- =============================================================================
 USE urbangreen_dw;
 
 CREATE TABLE IF NOT EXISTS dim_date (
-    date_key UInt32,
+    date_key UInt32 COMMENT 'YYYYMMDD-encoded date key; joins to fact_*.date_key',
     full_date Date,
     year UInt16,
     quarter UInt8,
@@ -40,15 +40,15 @@ CREATE TABLE IF NOT EXISTS dim_date (
     month_name LowCardinality (String),
     week UInt8,
     day UInt8,
-    day_of_week UInt8,
+    day_of_week UInt8 COMMENT 'ISO day of week: Monday = 1 ... Sunday = 7 (ClickHouse toDayOfWeek default mode)',
     day_name LowCardinality (String),
     day_of_year UInt16,
-    year_month UInt32,
-    year_week UInt32,
+    year_month UInt32 COMMENT 'year * 100 + month, e.g. 202608',
+    year_week UInt32 COMMENT 'ISO year * 100 + ISO week, e.g. 202635',
     week_start Date,
     month_start Date,
     quarter_start Date,
-    is_weekend UInt8,
+    is_weekend UInt8 COMMENT '1 when day_of_week is Saturday or Sunday',
     is_month_start UInt8,
     is_month_end UInt8,
     is_quarter_start UInt8,
@@ -108,9 +108,9 @@ CREATE TABLE IF NOT EXISTS dim_time (
     hour UInt8,
     minute UInt8,
     quarter_hour_bucket UInt8 COMMENT '0-3, 15-min quarter within the hour',
-    part_of_day LowCardinality (String),
+    part_of_day LowCardinality (String) COMMENT 'Morning 06:00-11:59, Afternoon 12:00-17:59, Evening 18:00-21:59, Night otherwise',
     am_pm LowCardinality (String),
-    is_business_hours UInt8
+    is_business_hours UInt8 COMMENT '1 for hours 08:00-17:59'
 ) ENGINE = MergeTree ()
 ORDER BY (time_key);
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS dim_role (
     role_id UInt64,
     name LowCardinality (String),
     description String,
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3) COMMENT 'Load timestamp; ReplacingMergeTree version — FINAL returns the latest row per sorting key'
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (role_id);
 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS dim_quality_grade (
     name LowCardinality (String),
     description String,
     is_premium UInt8 COMMENT '1 when code = A',
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3) COMMENT 'Load timestamp; ReplacingMergeTree version — FINAL returns the latest row per sorting key'
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (quality_grade_id);
 
@@ -162,18 +162,18 @@ CREATE TABLE IF NOT EXISTS dim_crop (
     crop_id UInt64,
     name String,
     description String,
-    crop_category_id UInt64,
+    crop_category_id UInt64 COMMENT 'Source crop category ID; category name is denormalized onto category_name',
     category_name LowCardinality (String),
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3) COMMENT 'Load timestamp; ReplacingMergeTree version — FINAL returns the latest row per sorting key'
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (crop_id);
 
 CREATE TABLE IF NOT EXISTS dim_user (
     user_id UInt64,
-    email String,
+    email String COMMENT 'Used as the Superset RLS username via lower(email); see v_user_farm_permissions',
     full_name String,
-    is_active UInt8,
+    is_active UInt8 COMMENT '1 = active; v_user_farm_permissions includes only active users',
     created_at DateTime64 (3, 'UTC'),
-    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3)
+    _loaded_at DateTime64 (3, 'UTC') DEFAULT now64 (3) COMMENT 'Load timestamp; ReplacingMergeTree version — FINAL returns the latest row per sorting key'
 ) ENGINE = ReplacingMergeTree (_loaded_at)
 ORDER BY (user_id);

@@ -19,7 +19,10 @@
 -- =============================================================================
 USE urbangreen_dw;
 
-CREATE OR REPLACE VIEW v_user_farm_permissions AS
+CREATE OR REPLACE VIEW v_user_farm_permissions (
+    username String COMMENT 'lower(dim_user.email); must exactly match the Superset Gamma username',
+    farm_id UInt64 COMMENT 'Farm the user may access under RLS; system-wide rows (farm_id = 0) are excluded — Superset Admin bypasses this view entirely'
+) AS
 SELECT lower(u.email) AS username, ufr.farm_id AS farm_id
 FROM
     dim_user_farm_role AS ufr FINAL
@@ -30,7 +33,12 @@ WHERE
     AND ufr.farm_id != 0;
 
 -- Helper view that centralizes the high-value crop classification.
-CREATE OR REPLACE VIEW bi_crop_classification AS
+CREATE OR REPLACE VIEW bi_crop_classification (
+    crop_id UInt64,
+    crop_name String,
+    category_name LowCardinality(String),
+    is_high_value UInt8 COMMENT '1 when category_name is Microgreens or Specialty Crops'
+) AS
 SELECT
     crop.crop_id,
     crop.name AS crop_name,
