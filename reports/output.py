@@ -78,6 +78,8 @@ def render_html(state: ReportState) -> dict[str, str]:
         top_farms=state["top_farms"],
         narrative=state["narrative"],
         insights=state["insights"],
+        sensor_analysis=state["sensor_analysis"],
+        sensor_metrics=state["sensor_metrics"],
     )
 
     return {"html": html}

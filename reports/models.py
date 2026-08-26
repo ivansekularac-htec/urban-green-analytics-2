@@ -1,8 +1,8 @@
 """Models used by the executive report pipeline."""
 
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 from typing_extensions import Required
 
 
@@ -32,6 +32,24 @@ class TopFarm(TypedDict):
     composite_score: float
 
 
+class SensorMetric(TypedDict):
+    """Daily sensor-type metrics aggregated across reporting farms."""
+
+    sensor_type_id: int
+    sensor_name: str
+    unit: str
+    farms_reporting: int
+    farms_with_anomalies: int
+    reading_count: int
+    average_value: float | None
+    min_value: float | None
+    max_value: float | None
+    anomaly_count: int
+    anomaly_rate: float | None
+    in_range_count: int
+    in_range_rate: float | None
+
+
 class ReportState(TypedDict, total=False):
     """State passed between LangGraph report stages."""
 
@@ -40,7 +58,9 @@ class ReportState(TypedDict, total=False):
     top_farms: list[TopFarm]
     top_rank: int | None
     top_rank_count: int
+    sensor_metrics: list[SensorMetric]
     narrative: str
+    sensor_analysis: str
     insights: list[str]
     html: str
     published_bucket: str
@@ -48,11 +68,19 @@ class ReportState(TypedDict, total=False):
     email_sent: bool
 
 
+Insight = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=220,
+    ),
+]
+
+
 class ReportSummary(BaseModel):
     """Structured summary returned by the local language model."""
 
-    narrative_production: str = Field(min_length=1)
-    narrative_energy: str = Field(min_length=1)
-    premium_insight: str = Field(min_length=1)
-    leaderboard_insight: str = Field(min_length=1)
-    sensor_insight: str = Field(min_length=1)
+    narrative: str = Field(min_length=1, max_length=1400)
+    sensor_analysis: str = Field(min_length=1, max_length=900)
+    insights: list[Insight] = Field(min_length=1, max_length=3)

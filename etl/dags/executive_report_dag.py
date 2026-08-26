@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 @dag(
     dag_id="executive_report",
-    schedule="@daily",
-    start_date=pendulum.datetime(2026, 8, 1, tz="UTC"),
+    schedule="0 2 * * *",
+    start_date=pendulum.datetime(2026, 8, 1, tz="Europe/Belgrade"),
     catchup=False,
     max_active_runs=1,
     max_active_tasks=1,
@@ -29,7 +29,6 @@ def executive_report():
 
         context = get_current_context()
         report_date = (context["logical_date"].date() - timedelta(days=1)).isoformat()
-
         logger.info(f"Running executive report for {report_date}")
 
         result = run_report(report_date)
