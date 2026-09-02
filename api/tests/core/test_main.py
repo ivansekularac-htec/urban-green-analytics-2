@@ -59,6 +59,7 @@ def test_lifespan_ensures_demo_users_on_startup():
 
     ensure_demo.assert_called_once()
 
+
 def test_metrics_endpoint_returns_prometheus_exposition():
     with (
         patch("app.main.verify_database_connection"),
