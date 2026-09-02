@@ -58,3 +58,20 @@ def test_lifespan_ensures_demo_users_on_startup():
         pass
 
     ensure_demo.assert_called_once()
+
+
+def test_metrics_endpoint_returns_prometheus_exposition():
+    with (
+        patch("app.main.verify_database_connection"),
+        patch("app.main.SessionLocal"),
+        patch("app.main.ensure_superuser"),
+        patch("app.main.ensure_demo_users"),
+    ):
+        client = TestClient(app)
+        client.get("/health")
+        response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "text/plain" in response.headers["content-type"]
+    assert "http_requests_total" in response.text
+    assert "/metrics" not in app.openapi()["paths"]
