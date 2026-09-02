@@ -12,6 +12,7 @@ dependencies = [
     "pyjwt>=2.9",
     "python-multipart>=0.0.20",
     "sqlalchemy>=2.0.50",
+    "prometheus-fastapi-instrumentator==8.1.0",
 ] # Add more dependencies
 
 [tool.ruff]

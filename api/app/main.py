@@ -8,8 +8,10 @@ root health-check endpoint.
 
 import logging
 from contextlib import asynccontextmanager
+from time import perf_counter
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import SessionLocal, settings, verify_database_connection
 from app.routers.v1.api import v1_router
@@ -38,6 +40,32 @@ app = FastAPI(
     description="Backend API for the Urban Green Analytics platform.",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log the method, path, status, and duration of each HTTP request."""
+    started_at = perf_counter()
+
+    try:
+        response = await call_next(request)
+    except Exception:
+        duration_ms = (perf_counter() - started_at) * 1000
+        logger.exception(f"{request.method} {request.url.path} failed after {duration_ms:.2f} ms")
+        raise
+
+    duration_ms = (perf_counter() - started_at) * 1000
+    logger.info(
+        f"{request.method} {request.url.path} -> {response.status_code} in {duration_ms:.2f} ms"
+    )
+    return response
+
+
+Instrumentator().instrument(app).expose(
+    app,
+    endpoint="/metrics",
+    include_in_schema=False,
 )
 
 app.include_router(v1_router, prefix=settings.api_v1_prefix)
