@@ -61,7 +61,7 @@ class Settings(BaseSettings):
             f"{self.postgres_db}"
         )
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env")
     api_v1_prefix: str = "/api/v1"
 
 
