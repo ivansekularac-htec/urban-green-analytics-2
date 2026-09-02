@@ -68,11 +68,12 @@ def test_metrics_endpoint_returns_prometheus_exposition():
         patch("app.main.ensure_demo_users"),
     ):
         client = TestClient(app)
+        client.get("/health")
         response = client.get("/metrics")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/plain")
-    assert "http_requests_total" in response.text
+    assert 'http_requests_total{handler="/health",method="GET",status="2xx"}' in response.text
 
 
 def test_metrics_endpoint_excluded_from_openapi_schema():
