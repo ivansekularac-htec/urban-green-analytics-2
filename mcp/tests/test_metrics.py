@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 from unittest.mock import MagicMock
 
 import httpx
@@ -31,6 +32,17 @@ def test_ok_outcome_on_normal_return():
     assert "mcp_tool_duration_seconds" in body
 
 
+def test_ok_outcome_on_async_return():
+    @track_tool("async_demo")
+    async def async_demo() -> dict:
+        return {"tables": []}
+
+    result = asyncio.run(async_demo())
+
+    assert result == {"tables": []}
+    assert 'mcp_tool_calls_total{outcome="ok",tool="async_demo"} 1.0' in _body()
+
+
 def test_error_outcome_on_error_dict():
     @track_tool("demo")
     def demo() -> dict:
@@ -52,6 +64,16 @@ def test_error_outcome_on_raise_and_exception_propagates():
 
     body = _body()
     assert 'mcp_tool_calls_total{outcome="error",tool="demo"} 1.0' in body
+
+
+def test_decorator_preserves_tool_signature():
+    def sample_tool(table: str, database: str = "urbangreen_dw") -> dict:
+        return {}
+
+    wrapped = track_tool("sample_tool")(sample_tool)
+
+    assert inspect.signature(wrapped) == inspect.signature(sample_tool)
+    assert wrapped.__name__ == sample_tool.__name__
 
 
 def test_metrics_route_renders_metric_names():
