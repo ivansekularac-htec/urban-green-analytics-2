@@ -1535,7 +1535,7 @@ dev = [
 requires-dist = [
     { name = "email-validator", specifier = ">=2.3.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115" },
-    { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.0" },
+    { name = "prometheus-fastapi-instrumentator", specifier = ">=8.1.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.12" },
     { name = "pydantic-settings", specifier = ">=2.14.1" },
     { name = "pyjwt", specifier = ">=2.9" },
