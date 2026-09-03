@@ -311,3 +311,40 @@ def test_health_answers_without_touching_the_warehouse():
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
     client.query.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# /metrics
+# ---------------------------------------------------------------------------
+
+
+def get_metrics(server) -> httpx.Response:
+    """Send a GET to /metrics through the server's ASGI app."""
+
+    async def request():
+        transport = httpx.ASGITransport(app=server.http_app())
+
+        async with httpx.AsyncClient(transport=transport, base_url="http://mcp") as http:
+            return await http.get("/metrics")
+
+    return asyncio.run(request())
+
+
+def test_metrics_reflects_a_real_tool_call_end_to_end():
+    """Proves the wiring, not just the pieces in isolation: track_tool sits
+    correctly between @mcp.tool and the function, and /metrics is registered
+    and reads the same registry track_tool writes to."""
+    client = MagicMock()
+    client.query.return_value = SimpleNamespace(result_rows=[("dim_farm",)])
+    server = build_server(client)
+
+    query(
+        server,
+        lambda session: session.call_tool("list_tables", {"database": "urbangreen_dw"}),
+    )
+
+    response = get_metrics(server)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert 'mcp_tool_calls_total{outcome="ok",tool="list_tables"} 1.0' in response.text
