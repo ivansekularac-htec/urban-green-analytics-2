@@ -20,12 +20,14 @@ from functools import lru_cache
 from clickhouse_connect.driver.client import Client
 from fastmcp import FastMCP
 from fastmcp.server.context import Context
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 
 from app import tools
 from app.clickhouse import get_client
 from app.config import get_settings
+from app.metrics import track_tool
 from app.prompts import analyze_metric, compare_farms, investigate_anomaly
 from app.resources import (
     CONVENTIONS_URI,
@@ -83,7 +85,10 @@ def create_server(client: Client | None = None) -> FastMCP:
 
     mcp = FastMCP("UrbanGreen MCP", instructions=INSTRUCTIONS)
 
+    # Keep track_tool below @mcp.tool so FastMCP receives the instrumented
+    # callable while functools.wraps preserves the original tool signature.
     @mcp.tool
+    @track_tool("list_tables")
     def list_tables(database: str = "urbangreen_dw") -> dict:
         """List the tables in a warehouse database.
 
@@ -94,6 +99,7 @@ def create_server(client: Client | None = None) -> FastMCP:
         return tools.list_tables(client, database)
 
     @mcp.tool
+    @track_tool("describe_table")
     def describe_table(table: str, database: str = "urbangreen_dw") -> dict:
         """Describe one table: column names, types, defaults and comments.
 
@@ -104,6 +110,7 @@ def create_server(client: Client | None = None) -> FastMCP:
         return tools.describe_table(client, table, database)
 
     @mcp.tool
+    @track_tool("execute_query")
     def execute_query(sql: str, limit: int | None = None) -> dict:
         """Run one read-only SELECT against the warehouse.
 
@@ -125,6 +132,7 @@ def create_server(client: Client | None = None) -> FastMCP:
         )
 
     @mcp.tool
+    @track_tool("read_warehouse_resource")
     async def read_warehouse_resource(
         resource: WarehouseResourceName,
         ctx: Context,
@@ -166,5 +174,15 @@ def create_server(client: Client | None = None) -> FastMCP:
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check(_request: Request) -> JSONResponse:
         return JSONResponse({"status": "healthy"})
+
+    # Prometheus exposition is an HTTP concern rather than an MCP primitive,
+    # so expose it as a Starlette route alongside the existing health route.
+    @mcp.custom_route("/metrics", methods=["GET"])
+    async def metrics(_request: Request) -> Response:
+        """Expose the current Prometheus metrics."""
+        return Response(
+            content=generate_latest(),
+            media_type=CONTENT_TYPE_LATEST,
+        )
 
     return mcp
