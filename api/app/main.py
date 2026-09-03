@@ -10,6 +10,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import SessionLocal, settings, verify_database_connection
 from app.routers.v1.api import v1_router
@@ -38,6 +39,12 @@ app = FastAPI(
     description="Backend API for the Urban Green Analytics platform.",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+Instrumentator().instrument(app).expose(
+    app,
+    endpoint="/metrics",
+    include_in_schema=False,
 )
 
 app.include_router(v1_router, prefix=settings.api_v1_prefix)
