@@ -1,0 +1,15 @@
+<clickhouse>
+    <!--
+      CH 25.x spawns a separate listener for <prometheus>.
+      Do NOT reuse HTTP port 8123: the two listeners collide, config
+      merges in the logs, "Ready for connections" never appears, and
+      TCP 9000 also refuses. Use the standard exporter port 9363.
+    -->
+    <prometheus>
+        <port>9363</port>
+        <endpoint>/metrics</endpoint>
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+    </prometheus>
+</clickhouse>
