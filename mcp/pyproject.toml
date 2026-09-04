@@ -8,6 +8,7 @@ dependencies = [
     "clickhouse-connect==1.5.0",
     "sqlglot==30.13.0",
     "pydantic-settings==2.14.2",
+    "prometheus-client==0.26.0",
 ]
 
 [dependency-groups]

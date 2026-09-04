@@ -285,18 +285,18 @@ def test_prompts_render_as_user_messages_through_mcp():
 
 
 # ---------------------------------------------------------------------------
-# /health
+# Plain HTTP routes
 # ---------------------------------------------------------------------------
 
 
-def get_health(server) -> httpx.Response:
-    """Send a GET to /health through the server's ASGI app."""
+def get_route(server, path: str) -> httpx.Response:
+    """Send a GET to a custom route through the server's ASGI app."""
 
     async def request():
         transport = httpx.ASGITransport(app=server.http_app())
 
         async with httpx.AsyncClient(transport=transport, base_url="http://mcp") as http:
-            return await http.get("/health")
+            return await http.get(path)
 
     return asyncio.run(request())
 
@@ -306,8 +306,17 @@ def test_health_answers_without_touching_the_warehouse():
     not whether ClickHouse is."""
     client = MagicMock()
 
-    response = get_health(build_server(client))
+    response = get_route(build_server(client), "/health")
 
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
     client.query.assert_not_called()
+
+
+def test_metrics_route_exposes_tool_metrics_in_prometheus_format():
+    response = get_route(build_server(), "/metrics")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "mcp_tool_calls_total" in response.text
+    assert "mcp_tool_duration_seconds" in response.text
