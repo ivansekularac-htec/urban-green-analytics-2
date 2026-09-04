@@ -546,6 +546,7 @@ services:
     volumes:
       - urbangreen-clickhouse-volume:/var/lib/clickhouse
       - ./infra/clickhouse/config/99-low-memory.xml:/etc/clickhouse-server/config.d/99-low-memory.xml:ro
+      - ./infra/clickhouse/config/10-prometheus.xml:/etc/clickhouse-server/config.d/10-prometheus.xml:ro
       - ./infra/clickhouse/users/99-default-quota.xml:/etc/clickhouse-server/users.d/99-default-quota.xml:ro
 
     networks:
