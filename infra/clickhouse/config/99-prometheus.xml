@@ -1,0 +1,14 @@
+<clickhouse>
+    <!-- Own port, not 8123: <prometheus> spawns a separate listener from
+         <http_port>. Reusing 8123 collides - the server hangs in "starting"
+         forever instead of failing cleanly. 9363 is ClickHouse's standard
+         exporter port; exposed (not published) below so only containers on
+         the compose network can reach it, not the host. -->
+    <prometheus>
+        <port>9363</port>
+        <endpoint>/metrics</endpoint>
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+    </prometheus>
+</clickhouse>
