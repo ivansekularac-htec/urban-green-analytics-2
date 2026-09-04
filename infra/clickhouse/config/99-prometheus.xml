@@ -1,0 +1,15 @@
+<clickhouse>
+    <!--
+      IMPORTANT: Prometheus must use its dedicated port 9363, never 8123.
+      ClickHouse 25.x starts a separate listener for this block. Reusing the
+      HTTP interface port 8123 causes a port collision and prevents the server
+      from reaching "Ready for connections".
+    -->
+    <prometheus>
+        <endpoint>/metrics</endpoint>
+        <port>9363</port>
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+    </prometheus>
+</clickhouse>
