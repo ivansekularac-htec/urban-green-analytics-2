@@ -543,9 +543,13 @@ services:
       - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
       - "${CLICKHOUSE_TCP_PORT_HOST:-9009}:9000"
 
+    expose:
+      - "9363"
+
     volumes:
       - urbangreen-clickhouse-volume:/var/lib/clickhouse
       - ./infra/clickhouse/config/99-low-memory.xml:/etc/clickhouse-server/config.d/99-low-memory.xml:ro
+      - ./infra/clickhouse/config/99-prometheus.xml:/etc/clickhouse-server/config.d/99-prometheus.xml:ro
       - ./infra/clickhouse/users/99-default-quota.xml:/etc/clickhouse-server/users.d/99-default-quota.xml:ro
 
     networks:
