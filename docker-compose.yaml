@@ -340,6 +340,9 @@ services:
       - "${SPARK_MASTER_PORT:-7077}:${SPARK_MASTER_PORT:-7077}"
       - "${SPARK_MASTER_UI_PORT:-8090}:${SPARK_MASTER_UI_PORT:-8090}"
 
+    volumes:
+      - ./infra/spark/metrics.properties:/opt/spark/conf/metrics.properties:ro
+
     networks:
       - urbangreen-network
 
@@ -373,6 +376,9 @@ services:
       SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-1}
       SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-1g}
 
+    volumes:
+      - ./infra/spark/metrics.properties:/opt/spark/conf/metrics.properties:ro
+
     depends_on:
       urbangreen-spark-master:
         condition: service_healthy
@@ -402,6 +408,9 @@ services:
       SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
       SPARK_WORKER_CORES: ${SPARK_WORKER_CORES:-2}
       SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY:-2g}
+    
+    volumes:
+      - ./infra/spark/metrics.properties:/opt/spark/conf/metrics.properties:ro
 
     depends_on:
       urbangreen-spark-master:
@@ -450,6 +459,7 @@ services:
 
     volumes:
       - ./etl/ingestion:/opt/spark/work-dir/ingestion:ro
+      - ./infra/spark/metrics.properties:/opt/spark/conf/metrics.properties:ro
 
     entrypoint: [ "/bin/sh", "/opt/spark/init/init-driver.sh" ]
 
