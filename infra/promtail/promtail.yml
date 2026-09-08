@@ -20,13 +20,14 @@ scrape_configs:
       - source_labels: ["__meta_docker_container_name"]
         regex: "/(.*)"
         target_label: service
+        replacement: "$1"
 
   - job_name: airflow
     static_configs:
       - targets: ["localhost"]
         labels:
           service: urbangreen-airflow
-          __path__: /var/log/airflow/**/*.log
+          __path__: /opt/airflow/logs/**/*.log
     pipeline_stages:
       - regex:
           source: filename

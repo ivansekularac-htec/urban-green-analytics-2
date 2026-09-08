@@ -870,7 +870,7 @@ services:
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - urbangreen-airflow-logs-volume:/var/log/airflow:ro
+      - urbangreen-airflow-logs-volume:/opt/airflow/logs:ro
 
     networks:
       - urbangreen-network
