@@ -1,0 +1,59 @@
+# Prometheus scrape configuration for the Urban Green stack.
+# Every target is reached by its compose service name over urbangreen-network;
+# no host ports are used. MinIO is intentionally absent until it is
+# instrumented (T6.1.5).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  # Tags every series so a future federated / multi-cluster view is unambiguous.
+  external_labels:
+    cluster: urbangreen
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: api
+    static_configs:
+      - targets: ["urbangreen-api:8000"]
+
+  - job_name: mcp
+    static_configs:
+      - targets: ["urbangreen-mcp:8001"]
+
+  - job_name: clickhouse
+    # Dedicated exporter listener (not the 8123 HTTP interface).
+    static_configs:
+      - targets: ["urbangreen-clickhouse:9363"]
+
+  # Spark's PrometheusServlet serves each instance on its own Web UI port and
+  # path. The master answers /metrics/master/prometheus and, for the
+  # applications instance, /metrics/applications/prometheus; workers and the
+  # driver answer /metrics/prometheus. Prometheus follows the Jetty 302
+  # trailing-slash redirect by default.
+  - job_name: spark-master
+    metrics_path: /metrics/master/prometheus
+    static_configs:
+      - targets: ["urbangreen-spark-master:8090"]
+
+  - job_name: spark-applications
+    metrics_path: /metrics/applications/prometheus
+    static_configs:
+      - targets: ["urbangreen-spark-master:8090"]
+
+  - job_name: spark-worker
+    metrics_path: /metrics/prometheus
+    static_configs:
+      - targets:
+          - "urbangreen-spark-worker-1:8081"
+          - "urbangreen-spark-worker-2:8081"
+
+  - job_name: spark-streaming
+    metrics_path: /metrics/prometheus
+    static_configs:
+      - targets: ["urbangreen-spark-streaming:4050"]
+
+  - job_name: kafka-exporter
+    static_configs:
+      - targets: ["urbangreen-kafka-exporter:9308"]
