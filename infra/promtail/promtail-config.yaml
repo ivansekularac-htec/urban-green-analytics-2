@@ -1,0 +1,47 @@
+# Promtail ships two log streams into Loki: every urbangreen-* container's
+# stdout via the Docker socket, and Airflow per-task file logs from the named
+# logs volume. Dev scope.
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://urbangreen-loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Container stdout via the Docker socket, filtered to the urbangreen- prefix.
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+    relabel_configs:
+      # Keep only our own containers.
+      - source_labels: [__meta_docker_container_name]
+        regex: "/(urbangreen-.*)"
+        action: keep
+      # service = container name without the leading slash.
+      - source_labels: [__meta_docker_container_name]
+        regex: "/(.*)"
+        target_label: service
+        replacement: "$1"
+
+  # Airflow per-task file logs from urbangreen-airflow-logs-volume (mounted
+  # read-only at /airflow-logs). The Airflow 3.x layout is
+  # dag_id=X/run_id=Y/task_id=Z/attempt=N.log.
+  - job_name: airflow
+    static_configs:
+      - targets: [localhost]
+        labels:
+          service: urbangreen-airflow
+          __path__: /airflow-logs/**/*.log
+    pipeline_stages:
+      - regex:
+          source: filename
+          expression: 'dag_id=(?P<dag>[^/]+)/run_id=(?P<run_id>[^/]+)/task_id=(?P<task>[^/]+)'
+      - labels:
+          dag:
+          run_id:
+          task:
