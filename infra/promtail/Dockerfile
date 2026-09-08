@@ -2,6 +2,8 @@
 # config rather than depending on a bind-mount.
 FROM grafana/promtail:3.2.1
 
-# Destination keeps Promtail's default config path (-config.file default), so no
-# command override is needed.
 COPY promtail-config.yaml /etc/promtail/config.yml
+
+# Point at the config explicitly (self-documenting; survives a base-image
+# default change). This is Promtail's default path, so the copy above satisfies it.
+CMD ["-config.file=/etc/promtail/config.yml"]
