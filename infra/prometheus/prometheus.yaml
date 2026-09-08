@@ -1,0 +1,56 @@
+global:
+  scrape_interval: 15s
+
+  external_labels:
+    cluster: urbangreen
+
+scrape_configs:
+  - job_name: api
+    static_configs:
+      - targets:
+          - urbangreen-api:8000
+
+  - job_name: mcp
+    static_configs:
+      - targets:
+          - urbangreen-mcp:8001
+
+  - job_name: clickhouse
+    static_configs:
+      - targets:
+          - urbangreen-clickhouse:9363
+
+  - job_name: spark-master
+    metrics_path: /metrics/master/prometheus
+    static_configs:
+      - targets:
+          - urbangreen-spark-master:8090
+
+  - job_name: spark-applications
+    metrics_path: /metrics/applications/prometheus
+    static_configs:
+      - targets:
+          - urbangreen-spark-master:8090
+
+  - job_name: spark-worker-1
+    metrics_path: /metrics/prometheus
+    static_configs:
+      - targets:
+          - urbangreen-spark-worker-1:8081
+
+  - job_name: spark-worker-2
+    metrics_path: /metrics/prometheus
+    static_configs:
+      - targets:
+          - urbangreen-spark-worker-2:8081
+
+  - job_name: spark-streaming
+    metrics_path: /metrics/prometheus
+    static_configs:
+      - targets:
+          - urbangreen-spark-streaming:4050
+
+  - job_name: kafka-exporter
+    static_configs:
+      - targets:
+          - urbangreen-kafka-exporter:9308

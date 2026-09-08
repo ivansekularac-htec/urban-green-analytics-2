@@ -764,6 +764,50 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    container_name: urbangreen-kafka-exporter
+    profiles: [ "all", "backend" ]
+    restart: unless-stopped
+
+    command:
+      - --kafka.server=urbangreen-kafka:${KAFKA_PORT_INTERNAL:-9092}
+
+    depends_on:
+      urbangreen-kafka:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  urbangreen-prometheus:
+    build:
+      context: ./infra/prometheus
+      dockerfile: Dockerfile
+    container_name: urbangreen-prometheus
+    profiles: [ "all" ]
+    restart: unless-stopped
+
+    volumes:
+      - urbangreen-prometheus-data:/prometheus
+
+    networks:
+      - urbangreen-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -788,6 +832,9 @@ volumes:
 
   urbangreen-ollama-data:
     name: urbangreen-ollama-data
+
+  urbangreen-prometheus-data:
+    name: urbangreen-prometheus-data
 
 networks:
   urbangreen-network:
