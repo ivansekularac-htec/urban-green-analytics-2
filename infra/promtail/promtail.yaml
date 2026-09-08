@@ -1,0 +1,56 @@
+server:
+  http_listen_port: ${PROMTAIL_HTTP_PORT:-9080}
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://urbangreen-loki:${LOKI_HTTP_PORT:-3100}/loki/api/v1/push
+
+scrape_configs:
+  # Every urbangreen-* container's stdout/stderr, discovered live off the
+  # Docker socket - no per-service config needed when a new container joins.
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+
+    relabel_configs:
+      # Docker's API prefixes container names with a leading slash. Keep only
+      # this project's containers - everything else on the host is dropped,
+      # not just unlabelled.
+      - source_labels: [ "__meta_docker_container_name" ]
+        regex: "/urbangreen-.*"
+        action: keep
+      - source_labels: [ "__meta_docker_container_name" ]
+        regex: "/(.*)"
+        target_label: "service"
+
+    pipeline_stages:
+      # Docker's json-file driver wraps every line as {"log":...,"stream":...,
+      # "time":...} - this stage unwraps it back to the real log content and
+      # timestamp instead of storing the raw JSON envelope.
+      - docker: {}
+
+  # Airflow doesn't log to stdout per task - each task writes its own file
+  # under a dag_id=/run_id=/task_id= tree. Static-scrape that tree directly
+  # off the same named volume Airflow writes to (read-only here).
+  - job_name: airflow
+    static_configs:
+      - targets: [ "localhost" ]
+        labels:
+          service: urbangreen-airflow
+          __path__: /var/log/airflow/**/*.log
+
+    pipeline_stages:
+      # Promtail exposes the tailed file's path as the `filename` label, so a
+      # regex stage can read it as `source: filename` even though nothing
+      # about it is in the log line content itself.
+      - regex:
+          source: filename
+          expression: ".*/dag_id=(?P<dag>[^/]+)/run_id=(?P<run_id>[^/]+)/task_id=(?P<task>[^/]+)/.*"
+      - labels:
+          dag:
+          run_id:
+          task:

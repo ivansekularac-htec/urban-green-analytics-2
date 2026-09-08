@@ -1,0 +1,38 @@
+auth_enabled: false
+
+server:
+  http_listen_port: ${LOKI_HTTP_PORT:-3100}
+  grpc_listen_port: 9096
+
+# Single-binary mode (target "all"): every Loki component in one process.
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  ingestion_rate_mb: 64
+  ingestion_burst_size_mb: 128
+
+ruler:
+  alertmanager_url: http://localhost:9093
+
+# Dev scope: don't phone home usage stats to Grafana Labs.
+analytics:
+  reporting_enabled: false

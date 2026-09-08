@@ -825,6 +825,83 @@ services:
         reservations:
           memory: 128M
 
+  urbangreen-loki:
+    build:
+      context: ./infra/loki
+      dockerfile: Dockerfile
+    container_name: urbangreen-loki
+    profiles: [ "all", "backend", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      LOKI_HTTP_PORT: ${LOKI_HTTP_PORT:-3100}
+
+    ports:
+      - "${LOKI_HTTP_PORT:-3100}:${LOKI_HTTP_PORT:-3100}"
+
+    labels:
+      service: urbangreen-loki
+
+    volumes:
+      - urbangreen-loki-volume:/loki
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD", "/bin/busybox", "sh", "-c", "/bin/busybox wget -q -T 2 -O- http://localhost:${LOKI_HTTP_PORT:-3100}/ready >/dev/null" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  urbangreen-promtail:
+    build:
+      context: ./infra/promtail
+      dockerfile: Dockerfile
+    container_name: urbangreen-promtail
+    profiles: [ "all", "backend", "analytics" ]
+    restart: unless-stopped
+
+    labels:
+      service: urbangreen-promtail
+
+    depends_on:
+      urbangreen-loki:
+        condition: service_healthy
+
+    environment:
+      PROMTAIL_HTTP_PORT: ${PROMTAIL_HTTP_PORT:-9080}
+      LOKI_HTTP_PORT: ${LOKI_HTTP_PORT:-3100}
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - urbangreen-airflow-logs-volume:/var/log/airflow:ro
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD", "/bin/busybox", "sh", "-c", "/bin/busybox wget -q -T 2 -O- http://localhost:${PROMTAIL_HTTP_PORT:-9080}/ready >/dev/null" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -852,6 +929,9 @@ volumes:
 
   urbangreen-prometheus-volume:
     name: urbangreen-prometheus-volume
+
+  urbangreen-loki-volume:
+    name: urbangreen-loki-volume
 
 networks:
   urbangreen-network:
