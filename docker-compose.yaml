@@ -764,6 +764,79 @@ services:
         reservations:
           memory: 512M
 
+  urbangreen-prometheus:
+    build:
+      context: ./infra/prometheus
+      dockerfile: Dockerfile
+    container_name: urbangreen-prometheus
+    profiles: [ "all", "backend", "analytics" ]
+    restart: unless-stopped
+
+    labels:
+      service: urbangreen-prometheus
+
+    ports:
+      - "${PROMETHEUS_UI_PORT:-9090}:9090"
+
+    volumes:
+      - urbangreen-prometheus-data:/prometheus
+
+    networks:
+      - urbangreen-network
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:9090/-/healthy || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  urbangreen-kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    container_name: urbangreen-kafka-exporter
+    profiles: [ "all", "backend" ]
+    restart: unless-stopped
+
+    # :latest has historically broken against KRaft clusters - the Kafka
+    # image this stack runs is KRaft, not ZooKeeper.
+    command: [ "--kafka.server=urbangreen-kafka:${KAFKA_PORT_INTERNAL:-9092}" ]
+
+    labels:
+      service: urbangreen-kafka-exporter
+
+    depends_on:
+      urbangreen-kafka:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data

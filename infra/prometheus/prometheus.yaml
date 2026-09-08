@@ -1,0 +1,62 @@
+global:
+  # docs/requirements.md does not exist in this repo, so this isn't sourced
+  # from a documented dashboard-refresh expectation - 15s is Prometheus's own
+  # documented default and is fine for dashboards refreshing every few
+  # seconds to a minute. Revisit if an actual requirements doc ever lands.
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  # Tags every series this server produces, so a future federated / remote-
+  # write setup can tell which cluster a metric came from without guessing.
+  external_labels:
+    cluster: urbangreen
+
+scrape_configs:
+  - job_name: api
+    static_configs:
+      - targets: [ "urbangreen-api:8000" ]
+
+  - job_name: mcp
+    static_configs:
+      - targets: [ "urbangreen-mcp:8001" ]
+
+  - job_name: minio
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: [ "urbangreen-minio:9000" ]
+
+  - job_name: clickhouse
+    static_configs:
+      - targets: [ "urbangreen-clickhouse:9363" ]
+
+  # Spark: master and applications share one process/port (8090) but need
+  # separate jobs because they're separate metric registries served at
+  # separate paths - see infra/spark/metrics.properties from T6.1.4.
+  - job_name: spark-master
+    metrics_path: /metrics/master/prometheus/
+    static_configs:
+      - targets: [ "urbangreen-spark-master:8090" ]
+
+  - job_name: spark-applications
+    metrics_path: /metrics/applications/prometheus/
+    static_configs:
+      - targets: [ "urbangreen-spark-master:8090" ]
+
+  - job_name: spark-worker-1
+    metrics_path: /metrics/prometheus/
+    static_configs:
+      - targets: [ "urbangreen-spark-worker-1:8081" ]
+
+  - job_name: spark-worker-2
+    metrics_path: /metrics/prometheus/
+    static_configs:
+      - targets: [ "urbangreen-spark-worker-2:8081" ]
+
+  - job_name: spark-streaming-driver
+    metrics_path: /metrics/prometheus/
+    static_configs:
+      - targets: [ "urbangreen-spark-streaming:4050" ]
+
+  - job_name: kafka-exporter
+    static_configs:
+      - targets: [ "urbangreen-kafka-exporter:9308" ]
