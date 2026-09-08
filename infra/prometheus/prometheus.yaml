@@ -28,29 +28,29 @@ scrape_configs:
       - targets: ["urbangreen-clickhouse:9363"]
 
   # Spark's PrometheusServlet serves each instance on its own Web UI port and
-  # path. The master answers /metrics/master/prometheus and, for the
-  # applications instance, /metrics/applications/prometheus; workers and the
-  # driver answer /metrics/prometheus. Prometheus follows the Jetty 302
-  # trailing-slash redirect by default.
+  # path. The master answers /metrics/master/prometheus/ and, for the
+  # applications instance, /metrics/applications/prometheus/; workers and the
+  # driver answer /metrics/prometheus/. The trailing slash targets the served
+  # path directly and avoids the Jetty 302 redirect.
   - job_name: spark-master
-    metrics_path: /metrics/master/prometheus
+    metrics_path: /metrics/master/prometheus/
     static_configs:
       - targets: ["urbangreen-spark-master:8090"]
 
   - job_name: spark-applications
-    metrics_path: /metrics/applications/prometheus
+    metrics_path: /metrics/applications/prometheus/
     static_configs:
       - targets: ["urbangreen-spark-master:8090"]
 
   - job_name: spark-worker
-    metrics_path: /metrics/prometheus
+    metrics_path: /metrics/prometheus/
     static_configs:
       - targets:
           - "urbangreen-spark-worker-1:8081"
           - "urbangreen-spark-worker-2:8081"
 
   - job_name: spark-streaming
-    metrics_path: /metrics/prometheus
+    metrics_path: /metrics/prometheus/
     static_configs:
       - targets: ["urbangreen-spark-streaming:4050"]
 

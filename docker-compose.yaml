@@ -773,7 +773,7 @@ services:
     restart: unless-stopped
 
     ports:
-      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+      - "127.0.0.1:${PROMETHEUS_UI_PORT:-9090}:9090"
 
     volumes:
       - urbangreen-prometheus-data:/prometheus
