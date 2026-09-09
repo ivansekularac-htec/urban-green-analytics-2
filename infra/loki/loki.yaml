@@ -5,6 +5,10 @@ server:
 
 common:
   path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
   replication_factor: 1
   ring:
     instance_addr: 127.0.0.1
@@ -20,10 +24,6 @@ schema_config:
       index:
         prefix: index_
         period: 24h
-
-storage_config:
-  filesystem:
-    directory: /loki/chunks
 
 analytics:
   reporting_enabled: false
