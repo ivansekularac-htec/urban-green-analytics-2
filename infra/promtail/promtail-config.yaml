@@ -6,7 +6,9 @@ server:
   grpc_listen_port: 0
 
 positions:
-  filename: /tmp/positions.yaml
+  # Persisted on a named volume so a restart resumes where it left off instead
+  # of re-tailing every file from the top and duplicating it in Loki.
+  filename: /promtail/positions.yaml
 
 clients:
   - url: http://urbangreen-loki:3100/loki/api/v1/push
@@ -28,15 +30,16 @@ scrape_configs:
         target_label: service
         replacement: "$1"
 
-  # Airflow per-task file logs from urbangreen-airflow-logs-volume (mounted
-  # read-only at /airflow-logs). The Airflow 3.x layout is
-  # dag_id=X/run_id=Y/task_id=Z/attempt=N.log.
+  # Airflow per-task file logs from urbangreen-airflow-logs-volume, mounted
+  # read-only at /opt/airflow/logs - the same path Airflow writes to, so the
+  # paths here match what exists inside the Airflow container. The Airflow 3.x
+  # layout is dag_id=X/run_id=Y/task_id=Z/attempt=N.log.
   - job_name: airflow
     static_configs:
       - targets: [localhost]
         labels:
           service: urbangreen-airflow
-          __path__: /airflow-logs/**/*.log
+          __path__: /opt/airflow/logs/**/*.log
     pipeline_stages:
       - regex:
           source: filename

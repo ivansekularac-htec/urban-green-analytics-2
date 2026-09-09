@@ -27,6 +27,15 @@ schema_config:
         prefix: index_
         period: 24h
 
+limits_config:
+  # The airflow-logs volume carries weeks of backlog; widen the age window to
+  # 30 days (default 168h) so first ingest is not rejected as too old, while
+  # still keeping a bound.
+  reject_old_samples_max_age: 720h
+  # Absorb the initial backlog burst without 429s (defaults are 4MB/s, 6MB).
+  ingestion_rate_mb: 64
+  ingestion_burst_size_mb: 128
+
 # Don't phone home usage stats - this is a local dev stack.
 analytics:
   reporting_enabled: false

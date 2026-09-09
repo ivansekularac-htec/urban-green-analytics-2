@@ -870,18 +870,15 @@ services:
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - urbangreen-airflow-logs-volume:/airflow-logs:ro
+      - urbangreen-airflow-logs-volume:/opt/airflow/logs:ro
+      - urbangreen-promtail-volume:/promtail
 
     networks:
       - urbangreen-network
 
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9080/ready >/dev/null || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
+    # No healthcheck: Promtail ships no wget and its /ready stays 500 until it is
+    # actively tailing, so a probe here sits permanently unhealthy. Nothing
+    # depends on Promtail's health, so the probe would be noise.
     deploy:
       resources:
         limits:
@@ -919,6 +916,9 @@ volumes:
 
   urbangreen-loki-volume:
     name: urbangreen-loki-volume
+
+  urbangreen-promtail-volume:
+    name: urbangreen-promtail-volume
 
 networks:
   urbangreen-network:
