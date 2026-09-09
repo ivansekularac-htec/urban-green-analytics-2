@@ -3,7 +3,7 @@ server:
   grpc_listen_port: 0
 
 positions:
-  filename: /tmp/positions.yaml
+  filename: /var/lib/promtail/positions.yaml
 
 clients:
   - url: http://urbangreen-loki:${LOKI_HTTP_PORT:-3100}/loki/api/v1/push
@@ -27,12 +27,6 @@ scrape_configs:
         regex: "/(.*)"
         target_label: "service"
 
-    pipeline_stages:
-      # Docker's json-file driver wraps every line as {"log":...,"stream":...,
-      # "time":...} - this stage unwraps it back to the real log content and
-      # timestamp instead of storing the raw JSON envelope.
-      - docker: {}
-
   # Airflow doesn't log to stdout per task - each task writes its own file
   # under a dag_id=/run_id=/task_id= tree. Static-scrape that tree directly
   # off the same named volume Airflow writes to (read-only here).
@@ -41,7 +35,7 @@ scrape_configs:
       - targets: [ "localhost" ]
         labels:
           service: urbangreen-airflow
-          __path__: /var/log/airflow/**/*.log
+          __path__: /opt/airflow/logs/**/*.log
 
     pipeline_stages:
       # Promtail exposes the tailed file's path as the `filename` label, so a

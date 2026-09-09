@@ -1,0 +1,3895 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="robots" content="noindex,nofollow">
+        <title>Service Discovery</title>
+        <link rel="shortcut icon" href="/static/img/favicon.ico?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <script src="/static/vendor/js/jquery-3.5.1.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+        <script src="/static/vendor/js/popper.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+        <script src="/static/vendor/bootstrap-4.1.3/js/bootstrap.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+
+        <link type="text/css" rel="stylesheet" href="/static/vendor/bootstrap-4.1.3/css/bootstrap.min.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <link type="text/css" rel="stylesheet" href="/static/css/promtail.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <link type="text/css" rel="stylesheet" href="/static/vendor/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+
+        <script>
+            var PATH_PREFIX = "";
+            var BUILD_VERSION = "(version=3.6.8, branch=release-3.6.x, revision=138c391f)";
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+        </script>
+
+        
+<link type="text/css" rel="stylesheet" href="/static/css/targets.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+<script src="/static/js/targets.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+
+    </head>
+
+    <body>
+        <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
+            <div class="container-fluid">
+
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#nav-content" aria-expanded="false" aria-controls="nav-content" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                    
+                </button>
+
+                <a class="navbar-brand" href="#">Promtail</a>
+
+
+                <div id="nav-content" class="navbar-collapse collapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="/service-discovery">Service Discovery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/targets">Targets</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/config">Config</a></li>
+                        <li class= "nav-item" >
+                            <a class ="nav-link" href="https://github.com/grafana/loki" target="_blank">Help</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        
+  <div class="container-fluid">
+
+    <h1>Service Discovery</h1>
+    <div>
+      <ul>
+        
+          <li>
+            <a href="#job-airflow">airflow</a> (1/1 active targets)
+          </li>
+        
+          <li>
+            <a href="#job-docker%2funix%3a%2f%2f%2fvar%2frun%2fdocker.sock%3a80">docker/unix:///var/run/docker.sock:80</a> (14/14 active targets)
+          </li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div class="table-container">
+      <h2 class="job_header" id="job-airflow">
+        airflow
+        <button type="button" class="targets collapsed-table btn btn-primary">show more</button>
+      </h2>
+      
+      <table class="table table-sm table-bordered table-striped table-hover" style="display:none">
+        <thead class="job_details">
+          <tr>
+            <th>Discovered Labels</th>
+            <th>Target Labels</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="localhost"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__path__="/opt/airflow/logs/**/*.log"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">service="urbangreen-airflow"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">service="urbangreen-airflow"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+    
+
+    <div class="table-container">
+      <h2 class="job_header" id="job-docker/unix:///var/run/docker.sock:80">
+        docker/unix:///var/run/docker.sock:80
+        <button type="button" class="targets collapsed-table btn btn-primary">show more</button>
+      </h2>
+      
+      <table class="table table-sm table-bordered table-striped table-hover" style="display:none">
+        <thead class="job_details">
+          <tr>
+            <th>Discovered Labels</th>
+            <th>Target Labels</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.4:8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="020fd07854f46ac63b2c3971ea4528932a35eadcf76fa257a1c0e423e9ee5f51"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_base="3.10-slim-bookworm"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_actor="sadpandajoe"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_trigger="5.0.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="5bc508d2f986ae3371a99c9e3bdfd59f0768e552375c104c5727ab73a08de682"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-clickhouse:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:177a187a80b1ee492c751879d3d8d643f45f8a52b3baec7fa54291d8f2c74002"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-superset"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_sha="465e2a9631994892cf399d13dd926c56cecd58ca"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_target="lean"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_version="5.0.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-superset"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.4:8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="020fd07854f46ac63b2c3971ea4528932a35eadcf76fa257a1c0e423e9ee5f51"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_base="3.10-slim-bookworm"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_actor="sadpandajoe"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_trigger="5.0.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="5bc508d2f986ae3371a99c9e3bdfd59f0768e552375c104c5727ab73a08de682"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-clickhouse:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:177a187a80b1ee492c751879d3d8d643f45f8a52b3baec7fa54291d8f2c74002"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-superset"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_sha="465e2a9631994892cf399d13dd926c56cecd58ca"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_target="lean"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_version="5.0.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-superset"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8088"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.3:7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="6cb76c954d915b71947f963b5d773bfbc9d46512237e0b90ac1b5ff6ec15e9b6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1ec51d8c29c2a4f44604606b54ee6eab2e836a2fd0a7208e57b9065e73e32888"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:6a153e6b09d12f51555386e2443647fb63a9e48ba9a5e8e465aca605226672c4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-master"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-master"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.3"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.3:7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="6cb76c954d915b71947f963b5d773bfbc9d46512237e0b90ac1b5ff6ec15e9b6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1ec51d8c29c2a4f44604606b54ee6eab2e836a2fd0a7208e57b9065e73e32888"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:6a153e6b09d12f51555386e2443647fb63a9e48ba9a5e8e465aca605226672c4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-master"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-master"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.3"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="7077"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.5:9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="21b7fcc2b3a68677e7c8859293b8a80142b61e845ef4cb78334adbcdf193b0e6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_architecture="x86_64"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_date="2025-08-06T08:12:37"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1c3c46ce7fcbb7e5c6838808240fc001a4b5597f0a5fd9c6b5d28089dc3c1390"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:310a2bdc5dd5597c4da2c9004bed50e06ccc80a83216d855abf55918d55f14c1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-minio"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_redhat_component="ubi9-micro-container"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_redhat_license_terms="https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_description="MinIO object storage is fundamentally different. Designed for performance and the S3 API, it is 100% open-source. MinIO is ideal for large, private cloud environments with stringent security requirements and delivers mission-critical availability across a diverse range of workloads."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_distribution_scope="public"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_buildah_version="1.40.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_k8s_description="Very small image which doesn&#39;t install the package manager."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_k8s_display_name="Red Hat Universal Base Image 9 Micro"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_openshift_expose_services=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_maintainer="MinIO Inc &lt;dev@min.io&gt;"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_name="MinIO"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_release="RELEASE.2025-09-07T16-13-09Z"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_summary="MinIO is a High Performance Object Storage, API compatible with Amazon S3 cloud storage service."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_url="https://catalog.redhat.com/en/search?searchType=containers"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vcs_ref="32d8e5209f029a1fb7235308ab32253bface1001"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vcs_type="git"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vendor="MinIO Inc &lt;dev@min.io&gt;"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_version="RELEASE.2025-09-07T16-13-09Z"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-minio"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.5"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.5:9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="21b7fcc2b3a68677e7c8859293b8a80142b61e845ef4cb78334adbcdf193b0e6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_architecture="x86_64"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_build_date="2025-08-06T08:12:37"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1c3c46ce7fcbb7e5c6838808240fc001a4b5597f0a5fd9c6b5d28089dc3c1390"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:310a2bdc5dd5597c4da2c9004bed50e06ccc80a83216d855abf55918d55f14c1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-minio"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_redhat_component="ubi9-micro-container"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_redhat_license_terms="https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_description="MinIO object storage is fundamentally different. Designed for performance and the S3 API, it is 100% open-source. MinIO is ideal for large, private cloud environments with stringent security requirements and delivers mission-critical availability across a diverse range of workloads."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_distribution_scope="public"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_buildah_version="1.40.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_k8s_description="Very small image which doesn&#39;t install the package manager."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_k8s_display_name="Red Hat Universal Base Image 9 Micro"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_io_openshift_expose_services=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_maintainer="MinIO Inc &lt;dev@min.io&gt;"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_name="MinIO"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_release="RELEASE.2025-09-07T16-13-09Z"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_summary="MinIO is a High Performance Object Storage, API compatible with Amazon S3 cloud storage service."</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_url="https://catalog.redhat.com/en/search?searchType=containers"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vcs_ref="32d8e5209f029a1fb7235308ab32253bface1001"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vcs_type="git"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_vendor="MinIO Inc &lt;dev@min.io&gt;"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_version="RELEASE.2025-09-07T16-13-09Z"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-minio"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.5"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="9000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.8:5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="0e7b4b27b3ed4cfe7a97981b4de7253492d8ffdaa3bd6eafd9f677af9ed064ce"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="a9b1f77ae30f9fd3b150be476d1dc7fe25b04342309f2d54a50f22e6794a039c"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.8:5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="0e7b4b27b3ed4cfe7a97981b4de7253492d8ffdaa3bd6eafd9f677af9ed064ce"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="a9b1f77ae30f9fd3b150be476d1dc7fe25b04342309f2d54a50f22e6794a039c"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.14:8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="24b8b365501197e95f61518a750ae5ae6642d6450baa5fb4732423e51c6f963b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="57b11497095863e82c2b8d3d24477d332d38464c74c357dde86934889999d0c0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:b7d95a274220f26a3edf1f39f0b0f845ffd83b0ba44f1f3a2fd64744d0eb65cd"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-api"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-api"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.14"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.14:8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="24b8b365501197e95f61518a750ae5ae6642d6450baa5fb4732423e51c6f963b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="57b11497095863e82c2b8d3d24477d332d38464c74c357dde86934889999d0c0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:b7d95a274220f26a3edf1f39f0b0f845ffd83b0ba44f1f3a2fd64744d0eb65cd"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-api"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-api"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.14"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.12:3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="46c3a4bc8b634f2fc04f6625f3086893cb6c2752685f560c003befc24e28b3c0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f5587b3ad937386df0c664b48a94d7e3de0c7f847c210ae18a8e5bee47ac4496"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:550c051154a371fb2d3e8d5354c1cb39cd06689d66380c650d4122abd69459e7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.12"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.12:3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="46c3a4bc8b634f2fc04f6625f3086893cb6c2752685f560c003befc24e28b3c0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f5587b3ad937386df0c664b48a94d7e3de0c7f847c210ae18a8e5bee47ac4496"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:550c051154a371fb2d3e8d5354c1cb39cd06689d66380c650d4122abd69459e7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-loki"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.12"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="3100"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.11:4050"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="9d45f35a6752accb309f3103a3ddb6c0b0eef6d68b0640f4c1dce82207214228"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="28cc765a2e99e7f7f215e704e79182bbb60e666c35b5d844749138b6592a9381"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-worker-1:service_started:false,urbangreen-kafka-init:service_completed_successfully:false,urbangreen-minio-init:service_completed_successfully:false,urbangreen-clickhouse:service_healthy:false,urbangreen-kafka:service_healthy:false,urbangreen-minio:service_healthy:false,urbangreen-spark-master:service_healthy:false,urbangreen-spark-worker-2:service_started:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:010ba9cfd90a3857fd64fceb97d1e50a1b1166a3e6aa558054aad538deec7270"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-streaming-ch"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-streaming-ch"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.11"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="4050"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="4051"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.11:4050"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="9d45f35a6752accb309f3103a3ddb6c0b0eef6d68b0640f4c1dce82207214228"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="28cc765a2e99e7f7f215e704e79182bbb60e666c35b5d844749138b6592a9381"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-worker-1:service_started:false,urbangreen-kafka-init:service_completed_successfully:false,urbangreen-minio-init:service_completed_successfully:false,urbangreen-clickhouse:service_healthy:false,urbangreen-kafka:service_healthy:false,urbangreen-minio:service_healthy:false,urbangreen-spark-master:service_healthy:false,urbangreen-spark-worker-2:service_started:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:010ba9cfd90a3857fd64fceb97d1e50a1b1166a3e6aa558054aad538deec7270"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-streaming-ch"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-streaming-ch"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.11"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="4050"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="4051"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.6:8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="9ffa8157935f00e6aa9de8c2c86c8dc124a08a6748ad300df007c8cd21cac944"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="2ad6396b9d632ee47dc71548d62eee449ac39cd9d441171f7caa5cb5f01f7f0b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false,urbangreen-kafka:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:383cd511d4ac537fd1804f996a4294035abebbb7b97e89ca297b24287c04ac56"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_component="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_distro="debian"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_image="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_build_id=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_commit_sha="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_module="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_python_version="3.10.19"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_uid="50000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_version="3.1.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="dev@airflow.apache.org"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_created=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_description="Reference, production-ready Apache Airflow image"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_documentation="https://airflow.apache.org/docs/docker-stack/index.html"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_licenses="Apache-2.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_revision="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_source="https://github.com/apache/airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_title="Production Airflow Image"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_url="https://airflow.apache.org"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_vendor="Apache Software Foundation"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="3.1.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.6:8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="9ffa8157935f00e6aa9de8c2c86c8dc124a08a6748ad300df007c8cd21cac944"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="2ad6396b9d632ee47dc71548d62eee449ac39cd9d441171f7caa5cb5f01f7f0b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false,urbangreen-kafka:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:383cd511d4ac537fd1804f996a4294035abebbb7b97e89ca297b24287c04ac56"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_component="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_distro="debian"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_image="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_build_id=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_commit_sha="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_module="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_python_version="3.10.19"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_uid="50000"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_version="3.1.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="dev@airflow.apache.org"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_created=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_description="Reference, production-ready Apache Airflow image"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_documentation="https://airflow.apache.org/docs/docker-stack/index.html"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_licenses="Apache-2.0"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_revision="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_source="https://github.com/apache/airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_title="Production Airflow Image"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_url="https://airflow.apache.org"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_vendor="Apache Software Foundation"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="3.1.1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-airflow"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.2:80"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="a907ec66ec1be5bb334271b721b5f19eb4128badf5c2268193bf5fe02b835a3c"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="0a403a14b3722e0a3fc305a551579a7ac6e18020e764bd02000ab29d058bb1d6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:785068ef32fcce90cadd5950a01e462e058b65ee793b8da048029fdd22dad0bf"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.2:80"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="a907ec66ec1be5bb334271b721b5f19eb4128badf5c2268193bf5fe02b835a3c"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="0a403a14b3722e0a3fc305a551579a7ac6e18020e764bd02000ab29d058bb1d6"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:785068ef32fcce90cadd5950a01e462e058b65ee793b8da048029fdd22dad0bf"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.9:80"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="a1b349127fbc1c1c532e678e08c388697c72ceb0d54ceed2229cc16479991ae8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="e76b6da0e6edecc0b93e0b4a799177d9127698e7b8f4fe442037321237234dbd"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:d27d790a8c6ee235eccf20e7565f8f7f6981397eb1c9d9958e309c4d3ee327fe"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.9"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.9:80"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="a1b349127fbc1c1c532e678e08c388697c72ceb0d54ceed2229cc16479991ae8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="e76b6da0e6edecc0b93e0b4a799177d9127698e7b8f4fe442037321237234dbd"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:d27d790a8c6ee235eccf20e7565f8f7f6981397eb1c9d9958e309c4d3ee327fe"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.9"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.8:5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="37731f95aa733c4de98bb42c7359b9a582cbbd8af1ffefc7079daa4983189af2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1a53bc12af7a9be7a3875c889f33c3830f45c643e972b110391c576c485cf5c3"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.8:5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="37731f95aa733c4de98bb42c7359b9a582cbbd8af1ffefc7079daa4983189af2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1a53bc12af7a9be7a3875c889f33c3830f45c643e972b110391c576c485cf5c3"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-postgres"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.8"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="5432"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.7:29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="c914961d7e69b1a64680f8a08502895a2006d4f060853ed6201237d80958852a"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="690c72014ec5615eda8d27ad5ee8456288497bd734bcde48c0b4d726178ad2c2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_build_date="2026-06-17"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_description="Apache Kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_name="kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_vcs_url="https://github.com/apache/kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="Apache Kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.7:29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="c914961d7e69b1a64680f8a08502895a2006d4f060853ed6201237d80958852a"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="690c72014ec5615eda8d27ad5ee8456288497bd734bcde48c0b4d726178ad2c2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_build_date="2026-06-17"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_description="Apache Kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_name="kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_vcs_url="https://github.com/apache/kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="Apache Kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-kafka"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="29092"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.10:8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="ee64660be0893d72ffbd0addc507b8290fd5855cba5e974f78893db202cc67ec"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_clickhouse_build_version="24.8.14.39"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="8cc83b7f43c73ac2913cdcc0c7c789ca73f84eee259ddbec8b781bef4251a9e7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:9ff352d2c7e0484992846644d9fce50aa67464b2af48a6a9d388e21e3d38e658"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-clickhouse"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="20.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-clickhouse"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.10"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.10:8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="ee64660be0893d72ffbd0addc507b8290fd5855cba5e974f78893db202cc67ec"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_clickhouse_build_version="24.8.14.39"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="8cc83b7f43c73ac2913cdcc0c7c789ca73f84eee259ddbec8b781bef4251a9e7"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:9ff352d2c7e0484992846644d9fce50aa67464b2af48a6a9d388e21e3d38e658"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-clickhouse"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="20.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-clickhouse"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.10"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="8123"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.13:9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="5dc41f1feddc0a35b6f874e9da2f2bfd53303ffe4b74b61389f964c1014cdb5a"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f168ecfa860aaa0f676f5bae603cd4f0847e59195aefa44275c1c8f50cf4c463"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-loki:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:7a41badc64da81ec534a724d9598fb5a199fad84340a2f2eaab08b0cb369f60b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="24.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.13"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+            <td class="labels">
+                
+                <ul class="list-inline" style="list-style-type:none">
+                  
+                    <li>
+                      <span class="badge badge-primary">__address__="172.18.0.13:9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_id="5dc41f1feddc0a35b6f874e9da2f2bfd53303ffe4b74b61389f964c1014cdb5a"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f168ecfa860aaa0f676f5bae603cd4f0847e59195aefa44275c1c8f50cf4c463"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-loki:service_healthy:false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:7a41badc64da81ec534a724d9598fb5a199fad84340a2f2eaab08b0cb369f60b"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="24.04"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-promtail"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.13"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_private="9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public="9080"</span>
+                    </li>
+                  
+                    <li>
+                      <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                    </li>
+                  
+                </ul>
+            </td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+
+
+    </body>
+</html>
+
+
+<style>
+  *[id]:before {
+    display: block;
+    content: " ";
+    margin-top: -65px;
+    height: 65px;
+    visibility: hidden;
+  }
+</style>
+
+

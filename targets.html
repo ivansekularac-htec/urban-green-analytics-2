@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="robots" content="noindex,nofollow">
+        <title>Targets</title>
+        <link rel="shortcut icon" href="/static/img/favicon.ico?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <script src="/static/vendor/js/jquery-3.5.1.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+        <script src="/static/vendor/js/popper.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+        <script src="/static/vendor/bootstrap-4.1.3/js/bootstrap.min.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+
+        <link type="text/css" rel="stylesheet" href="/static/vendor/bootstrap-4.1.3/css/bootstrap.min.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <link type="text/css" rel="stylesheet" href="/static/css/promtail.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+        <link type="text/css" rel="stylesheet" href="/static/vendor/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+
+        <script>
+            var PATH_PREFIX = "";
+            var BUILD_VERSION = "(version=3.6.8, branch=release-3.6.x, revision=138c391f)";
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+        </script>
+
+        
+<link type="text/css" rel="stylesheet" href="/static/css/targets.css?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29">
+<script src="/static/js/targets.js?v=%28version%3d3.6.8%2c%20branch%3drelease-3.6.x%2c%20revision%3d138c391f%29"></script>
+
+    </head>
+
+    <body>
+        <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
+            <div class="container-fluid">
+
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#nav-content" aria-expanded="false" aria-controls="nav-content" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                    
+                </button>
+
+                <a class="navbar-brand" href="#">Promtail</a>
+
+
+                <div id="nav-content" class="navbar-collapse collapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="/service-discovery">Service Discovery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/targets">Targets</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/config">Config</a></li>
+                        <li class= "nav-item" >
+                            <a class ="nav-link" href="https://github.com/grafana/loki" target="_blank">Help</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        
+  <div class="container-fluid">
+    <h1>Targets</h1>
+    <div id="showTargets" class="btn-group btn-group-toggle" data-toggle="buttons">
+      <label class="btn btn-primary">
+        <input type="radio" name="targets" id="all-targets" autocomplete="off" checked> All
+      </label>
+      <label class="btn btn-primary">
+        <input type="radio" name="targets" id="unready-targets" autocomplete="off"> Unready
+      </label>
+      </br>
+  </div>
+
+    
+    
+    
+
+    <div class="table-container">
+      <h2 class="job_header">
+        <a id="job-airflow" href="#job-airflow">airflow (1/1 ready)</a>
+        <button type="button" class="targets expanded-table btn btn-primary">show less</button>
+      </h2>
+      <table class="table table-sm table-bordered table-striped table-hover">
+        <thead class="job_details">
+          <tr>
+            <th>Type</th>
+            <th>Ready</th>
+            <th>Labels</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+        
+          <tr>
+            <td class="type">
+              <span >File</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;localhost&quot;<br>__path__=&quot;/opt/airflow/logs/**/*.log&quot;<br>service=&quot;urbangreen-airflow&quot;">
+                
+                  <span class="badge badge-primary">service="urbangreen-airflow"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+                
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Path</th>
+                        <th scope="col">Position</th>
+                      </tr>
+                    </thead>
+                  <tbody>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=manual__2026-09-08T16:34:26&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>301170</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=manual__2026-09-08T19:19:18&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:34:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>359956</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:39:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97232</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:44:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>359723</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:49:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>357828</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:54:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>359948</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T16:59:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97231</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:04:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97538</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:09:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97227</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:14:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97232</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:19:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97229</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:24:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>361188</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:29:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>357834</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:34:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>357831</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:39:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97236</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:44:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>357853</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:49:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>361198</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:54:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>360930</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T17:59:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>359675</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:04:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>362611</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:09:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>363588</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:14:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>363576</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:19:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>361815</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:24:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>364367</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:29:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97248</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:34:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>365293</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:39:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>357336</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:44:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>353177</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T18:49:26.705357&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:19:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:24:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352237</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:29:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352836</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:34:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97250</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:39:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:44:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97246</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:49:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352221</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:54:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352214</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T19:59:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>351948</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:04:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352831</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:09:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97249</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:14:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97246</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:19:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:24:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97246</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:29:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97248</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:34:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97245</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:39:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97248</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:44:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:49:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97248</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:54:11.324940&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97249</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T20:59:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:04:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97248</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:09:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97245</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:14:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97249</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:19:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97245</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:24:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>353173</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:29:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>352206</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-08T21:34:11.779086&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T07:52:16.401670&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T07:57:16.401670&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97245</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T08:59:10.875788&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97245</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T09:04:10.875788&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T09:09:10.875788&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97246</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T09:14:10.875788&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97249</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=experiment_batch/run_id=scheduled__2026-09-09T09:19:10.875788&#43;00:00/task_id=load_fact_sensor_readings_batch/attempt=1.log</td>
+                    <td>97247</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crop_categories/run_id=manual__2026-09-08T16:17:32&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1130</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crop_categories/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1941</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crop_categories/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crops/run_id=manual__2026-09-08T16:17:35&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1110</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crops/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1903</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_crops/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_crops/run_id=manual__2026-09-08T16:17:36&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1120</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_crops/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1927</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_crops/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_infrastructure_types/run_id=manual__2026-09-08T16:17:38&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1150</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_infrastructure_types/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1981</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farm_infrastructure_types/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farms/run_id=manual__2026-09-08T16:17:40&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1903</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farms/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1110</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_farms/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_growing_system_types/run_id=manual__2026-09-08T16:17:42&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1140</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_growing_system_types/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1961</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_growing_system_types/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=manual__2026-09-08T16:17:44&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T16:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1294899</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T19:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T20:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T21:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-08T22:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-09T07:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-09T08:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_harvests/run_id=scheduled__2026-09-09T09:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1116</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_quality_grades/run_id=manual__2026-09-08T16:17:45&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1128</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_quality_grades/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1937</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_quality_grades/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_roles/run_id=manual__2026-09-08T16:17:47&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1110</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_roles/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1901</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_roles/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensor_types/run_id=manual__2026-09-08T16:17:49&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1124</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensor_types/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1929</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensor_types/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensors/run_id=manual__2026-09-08T16:17:51&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1114</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensors/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1913</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_sensors/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_user_roles/run_id=manual__2026-09-08T16:17:53&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1120</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_user_roles/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1923</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_user_roles/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_users/run_id=manual__2026-09-08T16:20:05&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1110</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_users/run_id=scheduled__2026-09-08T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1901</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=extract_users/run_id=scheduled__2026-09-09T00:00:00&#43;00:00/task_id=extract/attempt=1.log</td>
+                    <td>1386</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_crop/attempt=1.log</td>
+                    <td>210375</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_farm/attempt=1.log</td>
+                    <td>349528</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_quality_grade/attempt=1.log</td>
+                    <td>160519</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_role/attempt=1.log</td>
+                    <td>160428</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_sensor/attempt=1.log</td>
+                    <td>217457</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_sensor_type/attempt=1.log</td>
+                    <td>210750</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_user/attempt=1.log</td>
+                    <td>160432</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_dim_user_farm_role/attempt=1.log</td>
+                    <td>306035</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_daily_farm_metrics/attempt=1.log</td>
+                    <td>174652</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_daily_farm_quality_metrics/attempt=1.log</td>
+                    <td>121293</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_daily_sensor_metrics/attempt=1.log</td>
+                    <td>121241</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_farm_leaderboard/attempt=1.log</td>
+                    <td>121951</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_harvests/attempt=1.log</td>
+                    <td>3721635</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=manual__2026-09-08T16:20:31&#43;00:00/task_id=load_fact_sensor_readings/attempt=1.log</td>
+                    <td>304548</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_crop/attempt=1.log</td>
+                    <td>210357</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_farm/attempt=1.log</td>
+                    <td>275161</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_quality_grade/attempt=1.log</td>
+                    <td>160518</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_role/attempt=1.log</td>
+                    <td>160420</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_sensor/attempt=1.log</td>
+                    <td>143176</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_sensor_type/attempt=1.log</td>
+                    <td>136112</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_user/attempt=1.log</td>
+                    <td>160428</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_dim_user_farm_role/attempt=1.log</td>
+                    <td>227219</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_daily_farm_metrics/attempt=1.log</td>
+                    <td>174671</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_daily_farm_quality_metrics/attempt=1.log</td>
+                    <td>121293</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_daily_sensor_metrics/attempt=1.log</td>
+                    <td>121242</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_farm_leaderboard/attempt=1.log</td>
+                    <td>121936</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_harvests/attempt=1.log</td>
+                    <td>3449128</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T17:00:00&#43;00:00/task_id=load_fact_sensor_readings/attempt=1.log</td>
+                    <td>360234</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_crop/attempt=1.log</td>
+                    <td>210361</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_farm/attempt=1.log</td>
+                    <td>275177</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_quality_grade/attempt=1.log</td>
+                    <td>160517</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_role/attempt=1.log</td>
+                    <td>160422</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_sensor/attempt=1.log</td>
+                    <td>136063</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_sensor_type/attempt=1.log</td>
+                    <td>136115</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_user/attempt=1.log</td>
+                    <td>160429</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_dim_user_farm_role/attempt=1.log</td>
+                    <td>231608</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_daily_farm_metrics/attempt=1.log</td>
+                    <td>174374</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_daily_farm_quality_metrics/attempt=1.log</td>
+                    <td>121289</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_daily_sensor_metrics/attempt=1.log</td>
+                    <td>121240</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_farm_leaderboard/attempt=1.log</td>
+                    <td>121940</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_harvests/attempt=1.log</td>
+                    <td>3449396</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_id=warehouse_load/run_id=scheduled__2026-09-08T18:00:00&#43;00:00/task_id=load_fact_sensor_readings/attempt=1.log</td>
+                    <td>362261</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-08/dags-folder/dag_extract.py.log</td>
+                    <td>124230</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-08/dags-folder/experiment_batch.py.log</td>
+                    <td>131460</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-08/dags-folder/warehouse_load.py.log</td>
+                    <td>130208</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-09/dags-folder/dag_extract.py.log</td>
+                    <td>9020</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-09/dags-folder/experiment_batch.py.log</td>
+                    <td>9660</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/2026-09-09/dags-folder/warehouse_load.py.log</td>
+                    <td>9568</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/latest/dags-folder/dag_extract.py.log</td>
+                    <td>9020</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/latest/dags-folder/experiment_batch.py.log</td>
+                    <td>9660</td>
+                  </tr>
+                
+                  <tr>
+                    <td>/opt/airflow/logs/dag_processor/latest/dags-folder/warehouse_load.py.log</td>
+                    <td>9568</td>
+                  </tr>
+                
+                </tbody>
+              </table>
+              
+            </td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+    
+    
+    
+
+    <div class="table-container">
+      <h2 class="job_header">
+        <a id="job-docker/unix:///var/run/docker.sock:80" href="#job-docker%2funix%3a%2f%2f%2fvar%2frun%2fdocker.sock%3a80">docker/unix:///var/run/docker.sock:80 (13/13 ready)</a>
+        <button type="button" class="targets expanded-table btn btn-primary">show less</button>
+      </h2>
+      <table class="table table-sm table-bordered table-striped table-hover">
+        <thead class="job_details">
+          <tr>
+            <th>Type</th>
+            <th>Ready</th>
+            <th>Labels</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.3:7077&quot;<br>__meta_docker_container_id=&quot;6cb76c954d915b71947f963b5d773bfbc9d46512237e0b90ac1b5ff6ec15e9b6&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;1ec51d8c29c2a4f44604606b54ee6eab2e836a2fd0a7208e57b9065e73e32888&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:6a153e6b09d12f51555386e2443647fb63a9e48ba9a5e8e465aca605226672c4&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-spark-master&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;22.04&quot;<br>__meta_docker_container_name=&quot;/urbangreen-spark-master&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.3&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;7077&quot;<br>__meta_docker_port_public=&quot;7077&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.3:7077"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="6cb76c954d915b71947f963b5d773bfbc9d46512237e0b90ac1b5ff6ec15e9b6"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1ec51d8c29c2a4f44604606b54ee6eab2e836a2fd0a7208e57b9065e73e32888"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:6a153e6b09d12f51555386e2443647fb63a9e48ba9a5e8e465aca605226672c4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-master"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-master"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.3"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="7077"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="7077"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.5:9000&quot;<br>__meta_docker_container_id=&quot;21b7fcc2b3a68677e7c8859293b8a80142b61e845ef4cb78334adbcdf193b0e6&quot;<br>__meta_docker_container_label_architecture=&quot;x86_64&quot;<br>__meta_docker_container_label_build_date=&quot;2025-08-06T08:12:37&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;1c3c46ce7fcbb7e5c6838808240fc001a4b5597f0a5fd9c6b5d28089dc3c1390&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:310a2bdc5dd5597c4da2c9004bed50e06ccc80a83216d855abf55918d55f14c1&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-minio&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_com_redhat_component=&quot;ubi9-micro-container&quot;<br>__meta_docker_container_label_com_redhat_license_terms=&quot;https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI&quot;<br>__meta_docker_container_label_description=&quot;MinIO object storage is fundamentally different. Designed for performance and the S3 API, it is 100% open-source. MinIO is ideal for large, private cloud environments with stringent security requirements and delivers mission-critical availability across a diverse range of workloads.&quot;<br>__meta_docker_container_label_distribution_scope=&quot;public&quot;<br>__meta_docker_container_label_io_buildah_version=&quot;1.40.1&quot;<br>__meta_docker_container_label_io_k8s_description=&quot;Very small image which doesn&amp;#39;t install the package manager.&quot;<br>__meta_docker_container_label_io_k8s_display_name=&quot;Red Hat Universal Base Image 9 Micro&quot;<br>__meta_docker_container_label_io_openshift_expose_services=&quot;&quot;<br>__meta_docker_container_label_maintainer=&quot;MinIO Inc &amp;lt;dev@min.io&amp;gt;&quot;<br>__meta_docker_container_label_name=&quot;MinIO&quot;<br>__meta_docker_container_label_release=&quot;RELEASE.2025-09-07T16-13-09Z&quot;<br>__meta_docker_container_label_summary=&quot;MinIO is a High Performance Object Storage, API compatible with Amazon S3 cloud storage service.&quot;<br>__meta_docker_container_label_url=&quot;https://catalog.redhat.com/en/search?searchType=containers&quot;<br>__meta_docker_container_label_vcs_ref=&quot;32d8e5209f029a1fb7235308ab32253bface1001&quot;<br>__meta_docker_container_label_vcs_type=&quot;git&quot;<br>__meta_docker_container_label_vendor=&quot;MinIO Inc &amp;lt;dev@min.io&amp;gt;&quot;<br>__meta_docker_container_label_version=&quot;RELEASE.2025-09-07T16-13-09Z&quot;<br>__meta_docker_container_name=&quot;/urbangreen-minio&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.5&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;9000&quot;<br>__meta_docker_port_public=&quot;9000&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.5:9000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="21b7fcc2b3a68677e7c8859293b8a80142b61e845ef4cb78334adbcdf193b0e6"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_architecture="x86_64"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_build_date="2025-08-06T08:12:37"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="1c3c46ce7fcbb7e5c6838808240fc001a4b5597f0a5fd9c6b5d28089dc3c1390"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:310a2bdc5dd5597c4da2c9004bed50e06ccc80a83216d855abf55918d55f14c1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-minio"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_redhat_component="ubi9-micro-container"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_redhat_license_terms="https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_description="MinIO object storage is fundamentally different. Designed for performance and the S3 API, it is 100% open-source. MinIO is ideal for large, private cloud environments with stringent security requirements and delivers mission-critical availability across a diverse range of workloads."</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_distribution_scope="public"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_io_buildah_version="1.40.1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_io_k8s_description="Very small image which doesn&#39;t install the package manager."</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_io_k8s_display_name="Red Hat Universal Base Image 9 Micro"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_io_openshift_expose_services=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_maintainer="MinIO Inc &lt;dev@min.io&gt;"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_name="MinIO"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_release="RELEASE.2025-09-07T16-13-09Z"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_summary="MinIO is a High Performance Object Storage, API compatible with Amazon S3 cloud storage service."</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_url="https://catalog.redhat.com/en/search?searchType=containers"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_vcs_ref="32d8e5209f029a1fb7235308ab32253bface1001"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_vcs_type="git"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_vendor="MinIO Inc &lt;dev@min.io&gt;"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_version="RELEASE.2025-09-07T16-13-09Z"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-minio"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.5"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="9000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="9000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.8:5432&quot;<br>__meta_docker_container_id=&quot;0e7b4b27b3ed4cfe7a97981b4de7253492d8ffdaa3bd6eafd9f677af9ed064ce&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;a9b1f77ae30f9fd3b150be476d1dc7fe25b04342309f2d54a50f22e6794a039c&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_replace=&quot;urbangreen-postgres&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-postgres&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_name=&quot;/urbangreen-postgres&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.8&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;5432&quot;<br>__meta_docker_port_public=&quot;5432&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.8:5432"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="0e7b4b27b3ed4cfe7a97981b4de7253492d8ffdaa3bd6eafd9f677af9ed064ce"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="a9b1f77ae30f9fd3b150be476d1dc7fe25b04342309f2d54a50f22e6794a039c"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-postgres"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-postgres"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-postgres"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.8"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="5432"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="5432"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.14:8000&quot;<br>__meta_docker_container_id=&quot;24b8b365501197e95f61518a750ae5ae6642d6450baa5fb4732423e51c6f963b&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;57b11497095863e82c2b8d3d24477d332d38464c74c357dde86934889999d0c0&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-postgres:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:b7d95a274220f26a3edf1f39f0b0f845ffd83b0ba44f1f3a2fd64744d0eb65cd&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-api&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_name=&quot;/urbangreen-api&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.14&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;8000&quot;<br>__meta_docker_port_public=&quot;8000&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.14:8000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="24b8b365501197e95f61518a750ae5ae6642d6450baa5fb4732423e51c6f963b"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="57b11497095863e82c2b8d3d24477d332d38464c74c357dde86934889999d0c0"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:b7d95a274220f26a3edf1f39f0b0f845ffd83b0ba44f1f3a2fd64744d0eb65cd"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-api"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-api"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.14"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="8000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="8000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.12:3100&quot;<br>__meta_docker_container_id=&quot;46c3a4bc8b634f2fc04f6625f3086893cb6c2752685f560c003befc24e28b3c0&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;f5587b3ad937386df0c664b48a94d7e3de0c7f847c210ae18a8e5bee47ac4496&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:550c051154a371fb2d3e8d5354c1cb39cd06689d66380c650d4122abd69459e7&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-loki&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_service=&quot;urbangreen-loki&quot;<br>__meta_docker_container_name=&quot;/urbangreen-loki&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.12&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;3100&quot;<br>__meta_docker_port_public=&quot;3100&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.12:3100"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="46c3a4bc8b634f2fc04f6625f3086893cb6c2752685f560c003befc24e28b3c0"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f5587b3ad937386df0c664b48a94d7e3de0c7f847c210ae18a8e5bee47ac4496"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:550c051154a371fb2d3e8d5354c1cb39cd06689d66380c650d4122abd69459e7"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-loki"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-loki"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-loki"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.12"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="3100"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="3100"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.11:4050&quot;<br>__meta_docker_container_id=&quot;9d45f35a6752accb309f3103a3ddb6c0b0eef6d68b0640f4c1dce82207214228&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;28cc765a2e99e7f7f215e704e79182bbb60e666c35b5d844749138b6592a9381&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-spark-worker-1:service_started:false,urbangreen-kafka-init:service_completed_successfully:false,urbangreen-minio-init:service_completed_successfully:false,urbangreen-clickhouse:service_healthy:false,urbangreen-kafka:service_healthy:false,urbangreen-minio:service_healthy:false,urbangreen-spark-master:service_healthy:false,urbangreen-spark-worker-2:service_started:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:010ba9cfd90a3857fd64fceb97d1e50a1b1166a3e6aa558054aad538deec7270&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-spark-streaming-ch&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;22.04&quot;<br>__meta_docker_container_name=&quot;/urbangreen-spark-streaming-ch&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.11&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;4050&quot;<br>__meta_docker_port_public=&quot;4051&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.11:4050"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="9d45f35a6752accb309f3103a3ddb6c0b0eef6d68b0640f4c1dce82207214228"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="28cc765a2e99e7f7f215e704e79182bbb60e666c35b5d844749138b6592a9381"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-worker-1:service_started:false,urbangreen-kafka-init:service_completed_successfully:false,urbangreen-minio-init:service_completed_successfully:false,urbangreen-clickhouse:service_healthy:false,urbangreen-kafka:service_healthy:false,urbangreen-minio:service_healthy:false,urbangreen-spark-master:service_healthy:false,urbangreen-spark-worker-2:service_started:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:010ba9cfd90a3857fd64fceb97d1e50a1b1166a3e6aa558054aad538deec7270"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-streaming-ch"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-streaming-ch"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.11"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="4050"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="4051"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.6:8080&quot;<br>__meta_docker_container_id=&quot;9ffa8157935f00e6aa9de8c2c86c8dc124a08a6748ad300df007c8cd21cac944&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;2ad6396b9d632ee47dc71548d62eee449ac39cd9d441171f7caa5cb5f01f7f0b&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-postgres:service_healthy:false,urbangreen-kafka:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:383cd511d4ac537fd1804f996a4294035abebbb7b97e89ca297b24287c04ac56&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-airflow&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_apache_airflow_component=&quot;airflow&quot;<br>__meta_docker_container_label_org_apache_airflow_distro=&quot;debian&quot;<br>__meta_docker_container_label_org_apache_airflow_image=&quot;airflow&quot;<br>__meta_docker_container_label_org_apache_airflow_main_image_build_id=&quot;&quot;<br>__meta_docker_container_label_org_apache_airflow_main_image_commit_sha=&quot;08c317dd323a8b509c59fdfa65078fa8150bbbef&quot;<br>__meta_docker_container_label_org_apache_airflow_module=&quot;airflow&quot;<br>__meta_docker_container_label_org_apache_airflow_python_version=&quot;3.10.19&quot;<br>__meta_docker_container_label_org_apache_airflow_uid=&quot;50000&quot;<br>__meta_docker_container_label_org_apache_airflow_version=&quot;3.1.1&quot;<br>__meta_docker_container_label_org_opencontainers_image_authors=&quot;dev@airflow.apache.org&quot;<br>__meta_docker_container_label_org_opencontainers_image_created=&quot;&quot;<br>__meta_docker_container_label_org_opencontainers_image_description=&quot;Reference, production-ready Apache Airflow image&quot;<br>__meta_docker_container_label_org_opencontainers_image_documentation=&quot;https://airflow.apache.org/docs/docker-stack/index.html&quot;<br>__meta_docker_container_label_org_opencontainers_image_licenses=&quot;Apache-2.0&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;airflow&quot;<br>__meta_docker_container_label_org_opencontainers_image_revision=&quot;08c317dd323a8b509c59fdfa65078fa8150bbbef&quot;<br>__meta_docker_container_label_org_opencontainers_image_source=&quot;https://github.com/apache/airflow&quot;<br>__meta_docker_container_label_org_opencontainers_image_title=&quot;Production Airflow Image&quot;<br>__meta_docker_container_label_org_opencontainers_image_url=&quot;https://airflow.apache.org&quot;<br>__meta_docker_container_label_org_opencontainers_image_vendor=&quot;Apache Software Foundation&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;3.1.1&quot;<br>__meta_docker_container_name=&quot;/urbangreen-airflow&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.6&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;8080&quot;<br>__meta_docker_port_public=&quot;8080&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.6:8080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="9ffa8157935f00e6aa9de8c2c86c8dc124a08a6748ad300df007c8cd21cac944"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="2ad6396b9d632ee47dc71548d62eee449ac39cd9d441171f7caa5cb5f01f7f0b"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-postgres:service_healthy:false,urbangreen-kafka:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:383cd511d4ac537fd1804f996a4294035abebbb7b97e89ca297b24287c04ac56"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_component="airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_distro="debian"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_image="airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_build_id=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_main_image_commit_sha="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_module="airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_python_version="3.10.19"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_uid="50000"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_apache_airflow_version="3.1.1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="dev@airflow.apache.org"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_created=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_description="Reference, production-ready Apache Airflow image"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_documentation="https://airflow.apache.org/docs/docker-stack/index.html"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_licenses="Apache-2.0"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_revision="08c317dd323a8b509c59fdfa65078fa8150bbbef"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_source="https://github.com/apache/airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_title="Production Airflow Image"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_url="https://airflow.apache.org"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_vendor="Apache Software Foundation"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="3.1.1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-airflow"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.6"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="8080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="8080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.2:80&quot;<br>__meta_docker_container_id=&quot;a907ec66ec1be5bb334271b721b5f19eb4128badf5c2268193bf5fe02b835a3c&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;0a403a14b3722e0a3fc305a551579a7ac6e18020e764bd02000ab29d058bb1d6&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-spark-master:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:785068ef32fcce90cadd5950a01e462e058b65ee793b8da048029fdd22dad0bf&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-spark-worker-2&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;22.04&quot;<br>__meta_docker_container_name=&quot;/urbangreen-spark-worker-2&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.2&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.2:80"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="a907ec66ec1be5bb334271b721b5f19eb4128badf5c2268193bf5fe02b835a3c"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="0a403a14b3722e0a3fc305a551579a7ac6e18020e764bd02000ab29d058bb1d6"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:785068ef32fcce90cadd5950a01e462e058b65ee793b8da048029fdd22dad0bf"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.9:80&quot;<br>__meta_docker_container_id=&quot;a1b349127fbc1c1c532e678e08c388697c72ceb0d54ceed2229cc16479991ae8&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;e76b6da0e6edecc0b93e0b4a799177d9127698e7b8f4fe442037321237234dbd&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-spark-master:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:d27d790a8c6ee235eccf20e7565f8f7f6981397eb1c9d9958e309c4d3ee327fe&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-spark-worker-1&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;22.04&quot;<br>__meta_docker_container_name=&quot;/urbangreen-spark-worker-1&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.9&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.9:80"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="a1b349127fbc1c1c532e678e08c388697c72ceb0d54ceed2229cc16479991ae8"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="e76b6da0e6edecc0b93e0b4a799177d9127698e7b8f4fe442037321237234dbd"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-spark-master:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:d27d790a8c6ee235eccf20e7565f8f7f6981397eb1c9d9958e309c4d3ee327fe"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-spark-worker-1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="22.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-spark-worker-1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.9"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.7:29092&quot;<br>__meta_docker_container_id=&quot;c914961d7e69b1a64680f8a08502895a2006d4f060853ed6201237d80958852a&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;690c72014ec5615eda8d27ad5ee8456288497bd734bcde48c0b4d726178ad2c2&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-kafka&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_label_schema_build_date=&quot;2026-06-17&quot;<br>__meta_docker_container_label_org_label_schema_description=&quot;Apache Kafka&quot;<br>__meta_docker_container_label_org_label_schema_name=&quot;kafka&quot;<br>__meta_docker_container_label_org_label_schema_vcs_url=&quot;https://github.com/apache/kafka&quot;<br>__meta_docker_container_label_org_opencontainers_image_authors=&quot;Apache Kafka&quot;<br>__meta_docker_container_name=&quot;/urbangreen-kafka&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.7&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;29092&quot;<br>__meta_docker_port_public=&quot;29092&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.7:29092"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="c914961d7e69b1a64680f8a08502895a2006d4f060853ed6201237d80958852a"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="690c72014ec5615eda8d27ad5ee8456288497bd734bcde48c0b4d726178ad2c2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_build_date="2026-06-17"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_description="Apache Kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_name="kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_label_schema_vcs_url="https://github.com/apache/kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_authors="Apache Kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-kafka"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.7"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="29092"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="29092"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.10:8123&quot;<br>__meta_docker_container_id=&quot;ee64660be0893d72ffbd0addc507b8290fd5855cba5e974f78893db202cc67ec&quot;<br>__meta_docker_container_label_com_clickhouse_build_version=&quot;24.8.14.39&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;8cc83b7f43c73ac2913cdcc0c7c789ca73f84eee259ddbec8b781bef4251a9e7&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:9ff352d2c7e0484992846644d9fce50aa67464b2af48a6a9d388e21e3d38e658&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-clickhouse&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;20.04&quot;<br>__meta_docker_container_name=&quot;/urbangreen-clickhouse&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.10&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;8123&quot;<br>__meta_docker_port_public=&quot;8123&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.10:8123"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="ee64660be0893d72ffbd0addc507b8290fd5855cba5e974f78893db202cc67ec"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_clickhouse_build_version="24.8.14.39"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="8cc83b7f43c73ac2913cdcc0c7c789ca73f84eee259ddbec8b781bef4251a9e7"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on=""</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:9ff352d2c7e0484992846644d9fce50aa67464b2af48a6a9d388e21e3d38e658"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-clickhouse"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="20.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-clickhouse"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.10"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="8123"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="8123"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.13:9080&quot;<br>__meta_docker_container_id=&quot;5dc41f1feddc0a35b6f874e9da2f2bfd53303ffe4b74b61389f964c1014cdb5a&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;f168ecfa860aaa0f676f5bae603cd4f0847e59195aefa44275c1c8f50cf4c463&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-loki:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:7a41badc64da81ec534a724d9598fb5a199fad84340a2f2eaab08b0cb369f60b&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_replace=&quot;urbangreen-promtail&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-promtail&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_org_opencontainers_image_ref_name=&quot;ubuntu&quot;<br>__meta_docker_container_label_org_opencontainers_image_version=&quot;24.04&quot;<br>__meta_docker_container_label_service=&quot;urbangreen-promtail&quot;<br>__meta_docker_container_name=&quot;/urbangreen-promtail&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.13&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;9080&quot;<br>__meta_docker_port_public=&quot;9080&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.13:9080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="5dc41f1feddc0a35b6f874e9da2f2bfd53303ffe4b74b61389f964c1014cdb5a"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="f168ecfa860aaa0f676f5bae603cd4f0847e59195aefa44275c1c8f50cf4c463"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-loki:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:7a41badc64da81ec534a724d9598fb5a199fad84340a2f2eaab08b0cb369f60b"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/urban-green-analytics/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_replace="urbangreen-promtail"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-promtail"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_ref_name="ubuntu"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_org_opencontainers_image_version="24.04"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_service="urbangreen-promtail"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-promtail"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.13"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="9080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="9080"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+          <tr>
+            <td class="type">
+              <span >Docker</a><br>
+            </td>
+            <td class="state">
+              <span class="alert alert-success state_indicator text-uppercase">
+                true
+              </span>
+            </td>
+            <td class="labels">
+              <span class="cursor-pointer" data-toggle="tooltip" title="" data-html=true data-original-title="<b>Before relabeling:</b><br>__address__=&quot;172.18.0.4:8088&quot;<br>__meta_docker_container_id=&quot;020fd07854f46ac63b2c3971ea4528932a35eadcf76fa257a1c0e423e9ee5f51&quot;<br>__meta_docker_container_label_base=&quot;3.10-slim-bookworm&quot;<br>__meta_docker_container_label_build_actor=&quot;sadpandajoe&quot;<br>__meta_docker_container_label_build_trigger=&quot;5.0.0&quot;<br>__meta_docker_container_label_com_docker_compose_config_hash=&quot;5bc508d2f986ae3371a99c9e3bdfd59f0768e552375c104c5727ab73a08de682&quot;<br>__meta_docker_container_label_com_docker_compose_container_number=&quot;1&quot;<br>__meta_docker_container_label_com_docker_compose_depends_on=&quot;urbangreen-clickhouse:service_healthy:false&quot;<br>__meta_docker_container_label_com_docker_compose_image=&quot;sha256:177a187a80b1ee492c751879d3d8d643f45f8a52b3baec7fa54291d8f2c74002&quot;<br>__meta_docker_container_label_com_docker_compose_oneoff=&quot;False&quot;<br>__meta_docker_container_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_project_config_files=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml&quot;<br>__meta_docker_container_label_com_docker_compose_project_working_dir=&quot;/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2&quot;<br>__meta_docker_container_label_com_docker_compose_service=&quot;urbangreen-superset&quot;<br>__meta_docker_container_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_container_label_sha=&quot;465e2a9631994892cf399d13dd926c56cecd58ca&quot;<br>__meta_docker_container_label_target=&quot;lean&quot;<br>__meta_docker_container_label_version=&quot;5.0.0&quot;<br>__meta_docker_container_name=&quot;/urbangreen-superset&quot;<br>__meta_docker_container_network_mode=&quot;urbangreen-network&quot;<br>__meta_docker_network_id=&quot;842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09&quot;<br>__meta_docker_network_ingress=&quot;false&quot;<br>__meta_docker_network_internal=&quot;false&quot;<br>__meta_docker_network_ip=&quot;172.18.0.4&quot;<br>__meta_docker_network_label_com_docker_compose_config_hash=&quot;c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1&quot;<br>__meta_docker_network_label_com_docker_compose_network=&quot;urbangreen-network&quot;<br>__meta_docker_network_label_com_docker_compose_project=&quot;urban-green-analytics-2&quot;<br>__meta_docker_network_label_com_docker_compose_version=&quot;5.1.4&quot;<br>__meta_docker_network_name=&quot;urbangreen-network&quot;<br>__meta_docker_network_scope=&quot;local&quot;<br>__meta_docker_port_private=&quot;8088&quot;<br>__meta_docker_port_public=&quot;8088&quot;<br>__meta_docker_port_public_ip=&quot;0.0.0.0&quot;">
+                
+                  <span class="badge badge-primary">__address__="172.18.0.4:8088"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_id="020fd07854f46ac63b2c3971ea4528932a35eadcf76fa257a1c0e423e9ee5f51"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_base="3.10-slim-bookworm"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_build_actor="sadpandajoe"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_build_trigger="5.0.0"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_config_hash="5bc508d2f986ae3371a99c9e3bdfd59f0768e552375c104c5727ab73a08de682"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_container_number="1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_depends_on="urbangreen-clickhouse:service_healthy:false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_image="sha256:177a187a80b1ee492c751879d3d8d643f45f8a52b3baec7fa54291d8f2c74002"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_oneoff="False"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_config_files="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2/docker-compose.yaml"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_project_working_dir="/mnt/c/Users/MarijaBjelanovic/Desktop/master-rad/urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_service="urbangreen-superset"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_sha="465e2a9631994892cf399d13dd926c56cecd58ca"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_target="lean"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_label_version="5.0.0"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_name="/urbangreen-superset"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_container_network_mode="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_id="842c845f32accb5d30d0ec8332b31e623fff8befa35e7c9fbfbae7ac01863a09"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ingress="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_internal="false"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_ip="172.18.0.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_config_hash="c572053508504007a6cb56b2743d06de8fb4c8312d5c16a58497d53c84ece0f1"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_network="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_project="urban-green-analytics-2"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_label_com_docker_compose_version="5.1.4"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_name="urbangreen-network"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_network_scope="local"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_private="8088"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public="8088"</span>
+                
+                  <span class="badge badge-primary">__meta_docker_port_public_ip="0.0.0.0"</span>
+                
+              </span>
+            </td>
+            <td class="details">
+              
+            </td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+
+    </body>
+</html>
+
+
+
+

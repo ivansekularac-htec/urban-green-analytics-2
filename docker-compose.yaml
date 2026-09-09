@@ -873,6 +873,9 @@ services:
     labels:
       service: urbangreen-promtail
 
+    ports:
+      - "${PROMTAIL_HTTP_PORT:-9080}:${PROMTAIL_HTTP_PORT:-9080}"
+
     depends_on:
       urbangreen-loki:
         condition: service_healthy
@@ -883,7 +886,9 @@ services:
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - urbangreen-airflow-logs-volume:/var/log/airflow:ro
+      - urbangreen-airflow-logs-volume:/opt/airflow/logs:ro
+      # Persists positions.yaml across restarts
+      - urbangreen-promtail-positions:/var/lib/promtail
 
     networks:
       - urbangreen-network
@@ -932,6 +937,9 @@ volumes:
 
   urbangreen-loki-volume:
     name: urbangreen-loki-volume
+
+  urbangreen-promtail-positions:
+    name: urbangreen-promtail-positions
 
 networks:
   urbangreen-network:
