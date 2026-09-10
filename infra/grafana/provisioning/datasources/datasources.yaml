@@ -11,6 +11,9 @@ datasources:
   - name: Loki
     type: loki
     access: proxy
-    url: http://urbangreen-loki:${LOKI_PORT:-3100}
+    # No :-default here - Grafana's own ${...} substitution doesn't support
+    # bash-style fallback syntax, it treats everything inside the braces as
+    # one literal env var name.
+    url: http://urbangreen-loki:${LOKI_PORT}
     isDefault: false
     editable: false
