@@ -897,16 +897,12 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
-      LOKI_PORT: ${LOKI_PORT:-3100}
-
-    labels:
-      service: urbangreen-grafana
 
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
 
     volumes:
-      - urbangreen-grafana-data:/var/lib/grafana
+      - urbangreen-grafana-volume:/var/lib/grafana
       # Bind mount over the same paths baked into the image at build
       # time - local edits to provisioning/dashboards apply without a
       # rebuild. Neither path is under /var/lib/grafana, so the volume
