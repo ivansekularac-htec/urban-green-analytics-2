@@ -1,0 +1,17 @@
+# Dashboard provider. Dashboards live under /etc/grafana/dashboards, NOT under
+# /var/lib/grafana - the named Grafana volume mounts at /var/lib/grafana and
+# would shadow baked-in image content after the first boot. Rescans every 30s so
+# JSON edits show up without a UI round-trip. No dashboards yet (T6.2.2-T6.2.4).
+apiVersion: 1
+
+providers:
+  - name: urbangreen
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true

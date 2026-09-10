@@ -1,0 +1,17 @@
+# Datasources provisioned on first boot - no manual UI wiring. Both are
+# read-only (editable: false) and reached by service name over urbangreen-network.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://urbangreen-prometheus:9090
+    isDefault: true
+    editable: false
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://urbangreen-loki:3100
+    editable: false
