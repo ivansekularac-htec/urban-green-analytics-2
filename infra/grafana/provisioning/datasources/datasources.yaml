@@ -5,6 +5,9 @@ apiVersion: 1
 datasources:
   - name: Prometheus
     type: prometheus
+    # Pinned uid so dashboard JSON that references it resolves on every machine,
+    # not only the one whose Grafana minted a random uid at provisioning time.
+    uid: prometheus
     access: proxy
     url: http://urbangreen-prometheus:9090
     isDefault: true
@@ -12,6 +15,7 @@ datasources:
 
   - name: Loki
     type: loki
+    uid: loki
     access: proxy
     url: http://urbangreen-loki:3100
     editable: false
