@@ -1,0 +1,22 @@
+# Grafana's own ${...} substitution doesn't support bash-style 
+# fallback syntax, it treats everything inside the braces as
+# one literal env var name.
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://urbangreen-prometheus:9090
+    isDefault: true
+    editable: false
+
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://urbangreen-loki:3100
+    isDefault: false
+    editable: false
