@@ -883,6 +883,60 @@ services:
         reservations:
           memory: 128M
 
+  urbangreen-grafana:
+    build:
+      context: ./infra/grafana
+      dockerfile: Dockerfile
+    container_name: urbangreen-grafana
+    profiles: [ "all", "backend", "analytics" ]
+    restart: unless-stopped
+
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      LOKI_PORT: ${LOKI_PORT:-3100}
+
+    labels:
+      service: urbangreen-grafana
+
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+
+    volumes:
+      - urbangreen-grafana-data:/var/lib/grafana
+      # Bind mount over the same paths baked into the image at build
+      # time - local edits to provisioning/dashboards apply without a
+      # rebuild. Neither path is under /var/lib/grafana, so the volume
+      # above never shadows them.
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/etc/grafana/dashboards:ro
+
+    depends_on:
+      urbangreen-prometheus:
+        condition: service_healthy
+      urbangreen-loki:
+        condition: service_healthy
+
+    networks:
+      - urbangreen-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
 volumes:
   urbangreen-postgres-data:
     name: urbangreen-postgres-data
@@ -916,6 +970,9 @@ volumes:
 
   urbangreen-promtail-volume:
     name: urbangreen-promtail-volume
+
+  urbangreen-grafana-volume:
+    name: urbangreen-grafana-volume
 
 networks:
   urbangreen-network:

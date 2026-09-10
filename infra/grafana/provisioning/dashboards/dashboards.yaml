@@ -1,0 +1,19 @@
+apiVersion: 1
+
+providers:
+  - name: urbangreen
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    # >10s means Grafana polls the folder instead of relying on filesystem
+    # watch events - those aren't guaranteed to propagate through a Docker
+    # bind mount, which is exactly what dashboards will be edited through.
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      # NOT /var/lib/grafana/dashboards - that path sits inside the named
+      # volume mounted over /var/lib/grafana, which would shadow anything
+      # baked into the image there after the very first boot.
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
