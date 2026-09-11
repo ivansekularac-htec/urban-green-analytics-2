@@ -1,0 +1,464 @@
+{
+    "uid": "system-overview",
+    "title": "System Overview",
+    "description": "At-a-glance platform health: per-service up/down, flapping services, and log volume by service.",
+    "tags": [
+        "urbangreen",
+        "observability"
+    ],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "schemaVersion": 39,
+    "version": 9,
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": [
+            {
+                "name": "service",
+                "type": "query",
+                "label": "Service",
+                "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                },
+                "query": "label_values({service=~\"urbangreen-.*\"}, service)",
+                "refresh": 1,
+                "multi": true,
+                "includeAll": true,
+                "current": {
+                    "selected": true,
+                    "text": [
+                        "All"
+                    ],
+                    "value": [
+                        "$__all"
+                    ]
+                },
+                "sort": 1,
+                "hide": 0
+            }
+        ]
+    },
+    "annotations": {
+        "list": []
+    },
+    "links": [],
+    "panels": [
+        {
+            "id": 0,
+            "type": "stat",
+            "title": "Services Down",
+            "description": "count(up == 0) - how many Prometheus targets are currently down. 0 means everything is healthy.",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "count(up == 0) OR vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "#4CBB8A"
+                            },
+                            {
+                                "value": 1,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 5,
+            "type": "stat",
+            "title": "Errors (selected range)",
+            "description": "Total detected_level=\"error\" log lines across all urbangreen-* services in the current time range.",
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum(count_over_time({service=~\"urbangreen-.*\"} | detected_level=\"error\" [$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "#4CBB8A"
+                            },
+                            {
+                                "value": 1,
+                                "color": "#28594F"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 6,
+            "type": "stat",
+            "title": "Total Log Volume (selected range)",
+            "description": "Total log lines across all urbangreen-* services in the current time range - context for the error count, and a signal if something stops logging entirely.",
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum(count_over_time({service=~\"urbangreen-.*\"}[$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#89BDB0"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 1,
+            "type": "stat",
+            "title": "Service Status (up/down by Prometheus job)",
+            "description": "One tile per Prometheus job, from the up metric. Green = last scrape succeeded, red = it failed or the target is unreachable.",
+            "gridPos": {
+                "x": 0,
+                "y": 4,
+                "w": 24,
+                "h": 6
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "up",
+                    "legendFormat": "{{job}}",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": true
+                },
+                "orientation": "auto",
+                "textMode": "value_and_name",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "0": {
+                                    "text": "DOWN",
+                                    "color": "red"
+                                },
+                                "1": {
+                                    "text": "UP",
+                                    "color": "#4CBB8A"
+                                }
+                            }
+                        }
+                    ],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "red"
+                            },
+                            {
+                                "value": 1,
+                                "color": "#4CBB8A"
+                            }
+                        ]
+                    },
+                    "min": 0,
+                    "max": 1,
+                    "noValue": "NO DATA"
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 2,
+            "type": "bargauge",
+            "title": "Flap Rate (up/down transitions in the selected time range)",
+            "description": "changes(up[range]) per job - how many times each target's up/down state changed. High values mean an unstable target, not just a currently-down one.",
+            "gridPos": {
+                "x": 0,
+                "y": 10,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "changes(up[$__range])",
+                    "legendFormat": "{{job}}",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "orientation": "horizontal",
+                "displayMode": "gradient",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "max": 10
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 3,
+            "type": "timeseries",
+            "title": "Log Volume by Service",
+            "description": "Log lines per second, per urbangreen-* service, from Loki.",
+            "gridPos": {
+                "x": 0,
+                "y": 18,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum by (service) (count_over_time({service=~\"$service\"}[$__interval]))",
+                    "legendFormat": "{{service}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "width": 220,
+                    "calcs": [
+                        "max"
+                    ],
+                    "sortBy": "Max",
+                    "sortDesc": true
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "fillOpacity": 60,
+                        "stacking": {
+                            "mode": "normal"
+                        },
+                        "lineWidth": 1
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 4,
+            "type": "timeseries",
+            "title": "Error Log Rate by Service",
+            "description": "Log lines with detected_level=\"error\" per second, per urbangreen-* service, from Loki. detected_level is Loki's own automatic level detection - not something this project configured.",
+            "gridPos": {
+                "x": 0,
+                "y": 26,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum by (service) (count_over_time({service=~\"$service\"} | detected_level=\"error\" [$__interval]))",
+                    "legendFormat": "{{service}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "width": 220,
+                    "calcs": [
+                        "max"
+                    ],
+                    "sortBy": "Max",
+                    "sortDesc": true
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "fillOpacity": 60,
+                        "stacking": {
+                            "mode": "normal"
+                        },
+                        "lineWidth": 1
+                    },
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#28594F"
+                    }
+                },
+                "overrides": []
+            }
+        }
+    ]
+}
