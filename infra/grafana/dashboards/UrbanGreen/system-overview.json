@@ -1,0 +1,300 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": false,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "description": "Current Prometheus scrape status for every job. DOWN services are shown first.",
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "#F2495C",
+                                "value": null
+                            },
+                            {
+                                "color": "#73BF69",
+                                "value": 1
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Service"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 360
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Status"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "0": {
+                                                "color": "#F2495C",
+                                                "index": 0,
+                                                "text": "DOWN"
+                                            },
+                                            "1": {
+                                                "color": "#73BF69",
+                                                "index": 1,
+                                                "text": "UP"
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "thresholds",
+                                "value": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "#F2495C",
+                                            "value": null
+                                        },
+                                        {
+                                            "color": "#73BF69",
+                                            "value": 1
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "center"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 120
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 12,
+                "w": 9,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": []
+            },
+            "targets": [
+                {
+                    "editorMode": "code",
+                    "expr": "sort(min by (job) (up))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "{{job}}",
+                    "range": false,
+                    "refId": "A"
+                }
+            ],
+            "title": "Service Health",
+            "transformations": [
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "Time": true
+                        },
+                        "indexByName": {
+                            "job": 0,
+                            "Value": 1
+                        },
+                        "renameByName": {
+                            "job": "Service",
+                            "Value": "Status"
+                        }
+                    }
+                }
+            ],
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "description": "Number of Prometheus UP/DOWN transitions per job during the selected time range. Higher values indicate instability.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "#73BF69",
+                                "value": null
+                            },
+                            {
+                                "color": "#FF9830",
+                                "value": 1
+                            },
+                            {
+                                "color": "#F2495C",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 12,
+                "w": 15,
+                "x": 9,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "displayMode": "basic",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "editorMode": "code",
+                    "expr": "sort_desc(sum by (job) (changes(up[$__range])))",
+                    "instant": true,
+                    "legendFormat": "{{job}}",
+                    "range": false,
+                    "refId": "A"
+                }
+            ],
+            "title": "Container Flap Rate",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "description": "Total log lines produced by each UrbanGreen service during the selected time range.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "#5794F2",
+                        "mode": "fixed"
+                    },
+                    "decimals": 0,
+                    "min": 0,
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 17,
+                "w": 24,
+                "x": 0,
+                "y": 12
+            },
+            "id": 3,
+            "options": {
+                "displayMode": "basic",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 100,
+                    "values": true
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "editorMode": "code",
+                    "expr": "sort_desc(sum by (service) (count_over_time({service=~\"urbangreen-.*\"}[$__range])))",
+                    "legendFormat": "{{service}}",
+                    "queryType": "instant",
+                    "refId": "A"
+                }
+            ],
+            "title": "Log Volume by Service",
+            "type": "bargauge"
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 41,
+    "tags": [
+        "urbangreen",
+        "system"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "System Overview",
+    "uid": "urbangreen-system-overview",
+    "version": 1,
+    "weekStart": ""
+}
