@@ -1,0 +1,175 @@
+{
+    "uid": "urbangreen-system-overview",
+    "title": "System Overview",
+    "tags": ["urbangreen", "overview"],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "refresh": "30s",
+    "schemaVersion": 39,
+    "version": 1,
+    "time": { "from": "now-1h", "to": "now" },
+    "timepicker": {},
+    "templating": { "list": [] },
+    "annotations": { "list": [] },
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Service health",
+        "description": "Prometheus scrape up/down by job. Green = up, red = down.",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "min by (job) (up)",
+            "legendFormat": "{{job}}",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "color": { "mode": "thresholds" },
+            "mappings": [
+              {
+                "type": "value",
+                "options": {
+                  "0": { "text": "DOWN", "color": "red", "index": 0 },
+                  "1": { "text": "UP", "color": "green", "index": 1 }
+                }
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+          "orientation": "auto",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "wideLayout": true
+        }
+      },
+      {
+        "id": 2,
+        "type": "bargauge",
+        "title": "Container flap rate (last 1h)",
+        "description": "How many times each scrape target flipped between up and down in the last hour. Unstable services sort to the top.",
+        "gridPos": { "h": 14, "w": 12, "x": 0, "y": 8 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "sum by (job) (changes(up[1h]))",
+            "legendFormat": "{{job}}",
+            "instant": true,
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time": true }
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": {},
+              "sort": [{ "field": "Value", "desc": true }]
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "decimals": 0,
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 2 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": {
+            "values": true,
+            "calcs": [],
+            "fields": "/^Value$/"
+          },
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "valueMode": "color",
+          "showUnfilled": true,
+          "namePlacement": "auto",
+          "sizing": "auto"
+        }
+      },
+      {
+        "id": 3,
+        "type": "timeseries",
+        "title": "Log volume by service",
+        "description": "Loki log count per service, scoped to the urbangreen- prefix.",
+        "gridPos": { "h": 14, "w": 12, "x": 12, "y": 8 },
+        "datasource": { "type": "loki", "uid": "loki" },
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": { "type": "loki", "uid": "loki" },
+            "editorMode": "code",
+            "expr": "sum by (service) (count_over_time({service=~\"urbangreen-.*\"}[$__auto]))",
+            "legendFormat": "{{service}}",
+            "queryType": "range"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "palette-classic" },
+            "custom": {
+              "drawStyle": "bars",
+              "stacking": { "mode": "normal", "group": "A" },
+              "fillOpacity": 80,
+              "lineWidth": 0,
+              "showPoints": "never",
+              "pointSize": 5,
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "gradientMode": "none",
+              "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "scaleDistribution": { "type": "linear" },
+              "spanNulls": false,
+              "thresholdsStyle": { "mode": "off" }
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "right", "showLegend": true, "calcs": [] },
+          "tooltip": { "mode": "multi", "sort": "desc" }
+        }
+      }
+    ]
+  }
