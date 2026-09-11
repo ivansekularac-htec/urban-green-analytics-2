@@ -3,7 +3,7 @@ apiVersion: 1
 providers:
   - name: urbangreen
     orgId: 1
-    folder: ''
+    folder: Urban Green
     type: file
     disableDeletion: false
     # >10s means Grafana polls the folder instead of relying on filesystem
@@ -17,4 +17,3 @@ providers:
       # baked into the image there after the very first boot.
       path: /etc/grafana/dashboards
       foldersFromFilesStructure: true
-      
