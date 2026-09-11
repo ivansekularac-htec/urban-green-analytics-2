@@ -17,4 +17,3 @@ providers:
       # baked into the image there after the very first boot.
       path: /etc/grafana/dashboards
       foldersFromFilesStructure: true
-      
