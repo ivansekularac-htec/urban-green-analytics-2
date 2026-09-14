@@ -15,6 +15,7 @@ resource reader instead receives FastMCP's request context, which is also hidden
 from its schema, and delegates to the resources already registered here.
 """
 
+import logging
 from functools import lru_cache
 
 from clickhouse_connect.driver.client import Client
@@ -39,6 +40,8 @@ from app.resources import (
     load_schema_markdown,
     metrics_resource,
 )
+
+logger = logging.getLogger(__name__)
 
 # Sent to the MCP client during initialization. Whether and how the client
 # includes these instructions in model context is controlled by the client.
@@ -121,13 +124,21 @@ def create_server(client: Client | None = None) -> FastMCP:
             limit: Optional lower ceiling on the rows returned.
         """
 
-        return tools.execute_query(
+        result = tools.execute_query(
             client,
             sql,
             default_limit=settings.default_row_limit,
             max_limit=settings.max_row_limit,
             limit=limit,
         )
+
+        # Surface the exact SQL sent to ClickHouse in the logs so the App
+        # Performance dashboard's "AI-generated SQL" Loki panel can show it.
+        # Rejected/failed queries carry no `sql`, so nothing is logged for them.
+        if "sql" in result:
+            logger.info(f"execute_query SQL: {result['sql']}")
+
+        return result
 
     @mcp.tool
     @track_tool("read_warehouse_resource")

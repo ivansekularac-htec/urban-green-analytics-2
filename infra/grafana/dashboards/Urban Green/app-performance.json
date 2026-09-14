@@ -1,0 +1,515 @@
+{
+    "uid": "app-performance",
+    "title": "App Performance",
+    "description": "FastAPI request performance and MCP AI-generated-SQL activity in one operator view. FastAPI metrics come from the T6.1.1 instrumentator (http_requests_total, http_request_duration_seconds); MCP metrics from the T6.1.2 instrumentation (mcp_tool_calls_total, mcp_tool_duration_seconds).",
+    "tags": [
+        "urbangreen",
+        "observability",
+        "app"
+    ],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": []
+    },
+    "annotations": {
+        "list": []
+    },
+    "links": [],
+    "panels": [
+        {
+            "id": 100,
+            "type": "row",
+            "title": "FastAPI  (urbangreen-api)",
+            "collapsed": false,
+            "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+        },
+        {
+            "id": 1,
+            "type": "stat",
+            "title": "Request Rate",
+            "description": "Requests per second across all routes, from http_requests_total.",
+            "gridPos": { "x": 0, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate(http_requests_total{job=\"urbangreen-api\"}[$__rate_interval]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "area",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "decimals": 2,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 2,
+            "type": "stat",
+            "title": "p95 Latency",
+            "description": "95th-percentile request latency across all routes. Amber above 1s, red above the 1.5s SLA.",
+            "gridPos": { "x": 8, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])) by (le))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "decimals": 3,
+                    "noValue": "no data",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 1, "color": "yellow" },
+                            { "value": 1.5, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "5xx (selected range)",
+            "description": "Total 5xx responses in the selected time range. Anything above 0 is red.",
+            "gridPos": { "x": 16, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(increase(http_requests_total{job=\"urbangreen-api\", status=\"5xx\"}[$__range])) OR vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "decimals": 0,
+                    "min": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 1, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 4,
+            "type": "timeseries",
+            "title": "Request Rate by Route",
+            "description": "Per-second request rate per route (the instrumentator's handler label = the matched route template).",
+            "gridPos": { "x": 0, "y": 5, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (handler) (rate(http_requests_total{job=\"urbangreen-api\"}[$__rate_interval]))",
+                    "legendFormat": "{{handler}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["mean", "max"] },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineWidth": 1,
+                        "fillOpacity": 20,
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 5,
+            "type": "timeseries",
+            "title": "Request Latency p50 / p95 / p99  (SLA 1.5s)",
+            "description": "Request-latency percentiles across all routes, from http_request_duration_seconds. The dashed red line marks the 1.5s SLA.",
+            "gridPos": { "x": 12, "y": 5, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])) by (le))",
+                    "legendFormat": "p50"
+                },
+                {
+                    "refId": "B",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])) by (le))",
+                    "legendFormat": "p95"
+                },
+                {
+                    "refId": "C",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])) by (le))",
+                    "legendFormat": "p99"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineWidth": 2,
+                        "fillOpacity": 0,
+                        "showPoints": "never",
+                        "thresholdsStyle": { "mode": "line" }
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "transparent" },
+                            { "value": 1.5, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 6,
+            "type": "timeseries",
+            "title": "Error Rate 4xx / 5xx",
+            "description": "Per-second rate of client (4xx) and server (5xx) responses, using the instrumentator's bucketed status label.",
+            "gridPos": { "x": 0, "y": 13, "w": 12, "h": 7 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (status) (rate(http_requests_total{job=\"urbangreen-api\", status=~\"4xx|5xx\"}[$__rate_interval]))",
+                    "legendFormat": "{{status}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineWidth": 2,
+                        "fillOpacity": 25,
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": { "id": "byName", "options": "5xx" },
+                        "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ]
+                    },
+                    {
+                        "matcher": { "id": "byName", "options": "4xx" },
+                        "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 7,
+            "type": "timeseries",
+            "title": "Requests by Status Class",
+            "description": "Traffic mix by bucketed status class (2xx / 3xx / 4xx / 5xx) - context for the error panel and a quick read on overall health.",
+            "gridPos": { "x": 12, "y": 13, "w": 12, "h": 7 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (status) (rate(http_requests_total{job=\"urbangreen-api\"}[$__rate_interval]))",
+                    "legendFormat": "{{status}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "lineWidth": 1,
+                        "fillOpacity": 70,
+                        "stacking": { "mode": "normal" },
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": { "id": "byName", "options": "2xx" },
+                        "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ]
+                    },
+                    {
+                        "matcher": { "id": "byName", "options": "5xx" },
+                        "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ]
+                    },
+                    {
+                        "matcher": { "id": "byName", "options": "4xx" },
+                        "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 200,
+            "type": "row",
+            "title": "MCP Server  -  AI-generated SQL  (urbangreen-mcp)",
+            "collapsed": false,
+            "gridPos": { "x": 0, "y": 20, "w": 24, "h": 1 }
+        },
+        {
+            "id": 8,
+            "type": "stat",
+            "title": "Tool Call Rate",
+            "description": "MCP tool calls per second across all tools, from mcp_tool_calls_total.",
+            "gridPos": { "x": 0, "y": 21, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[$__rate_interval]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "area",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "decimals": 3,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 9,
+            "type": "stat",
+            "title": "p95 Tool Latency",
+            "description": "95th-percentile MCP tool duration across all tools, from mcp_tool_duration_seconds.",
+            "gridPos": { "x": 8, "y": 21, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.95, sum(rate(mcp_tool_duration_seconds_bucket{job=\"urbangreen-mcp\"}[$__rate_interval])) by (le))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "decimals": 3,
+                    "noValue": "no data",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 10,
+            "type": "gauge",
+            "title": "Tool Error Ratio (5m)",
+            "description": "Share of MCP tool calls with outcome=\"error\" over the last 5 minutes. The denominator is clamp_min'd so the panel reads 0 - not NaN - when there is no traffic.",
+            "gridPos": { "x": 16, "y": 21, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate(mcp_tool_calls_total{job=\"urbangreen-mcp\", outcome=\"error\"}[5m])) / clamp_min(sum(rate(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[5m])), 1e-9)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "decimals": 1,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 0.05, "color": "yellow" },
+                            { "value": 0.2, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 11,
+            "type": "timeseries",
+            "title": "Tool Call Rate by Tool",
+            "description": "Per-second call rate per MCP tool, split by the tool label.",
+            "gridPos": { "x": 0, "y": 25, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (tool) (rate(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[$__rate_interval]))",
+                    "legendFormat": "{{tool}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["sum", "max"] },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineWidth": 1,
+                        "fillOpacity": 20,
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 12,
+            "type": "timeseries",
+            "title": "p95 Tool Latency by Tool",
+            "description": "95th-percentile duration per MCP tool. execute_query is expected to be the slowest - it hits ClickHouse.",
+            "gridPos": { "x": 12, "y": 25, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "histogram_quantile(0.95, sum by (le, tool) (rate(mcp_tool_duration_seconds_bucket{job=\"urbangreen-mcp\"}[$__rate_interval])))",
+                    "legendFormat": "{{tool}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["max"] },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineWidth": 2,
+                        "fillOpacity": 0,
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 13,
+            "type": "logs",
+            "title": "AI-generated SQL (executed by execute_query)",
+            "description": "The exact SQL the model ran against the warehouse, logged by the MCP server on each execute_query call and read from Loki.",
+            "gridPos": { "x": 0, "y": 33, "w": 24, "h": 10 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "{service=\"urbangreen-mcp\"} |= \"execute_query SQL:\"",
+                    "queryType": "range"
+                }
+            ],
+            "options": {
+                "showTime": true,
+                "wrapLogMessage": true,
+                "prettifyLogMessage": false,
+                "enableLogDetails": true,
+                "dedupStrategy": "none",
+                "sortOrder": "Descending"
+            }
+        }
+    ]
+}
