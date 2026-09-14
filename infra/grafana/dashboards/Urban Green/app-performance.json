@@ -113,7 +113,7 @@
                         "type": "prometheus",
                         "uid": "prometheus"
                     },
-                    "expr": "sum(increase(http_requests_total[$__range])) or vector(0)",
+                    "expr": "round(sum(increase(http_requests_total[$__range]))) or vector(0)",
                     "instant": true
                 }
             ],
@@ -857,8 +857,8 @@
         },
         {
             "id": 14,
-            "type": "stat",
-            "title": "5m Error Ratio",
+            "type": "gauge",
+            "title": "Error Ratio (last 5m)",
             "description": "MCP tool error ratio over the last 5 minutes: outcome=\"error\" divided by all tool calls, with a guarded denominator.",
             "gridPos": {
                 "x": 16,
@@ -889,15 +889,15 @@
                     "fields": "",
                     "values": false
                 },
-                "colorMode": "background",
-                "graphMode": "none",
-                "textMode": "value",
-                "justifyMode": "center"
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
             },
             "fieldConfig": {
                 "defaults": {
                     "unit": "percentunit",
                     "min": 0,
+                    "max": 1,
                     "noValue": "0",
                     "decimals": 2,
                     "thresholds": {
@@ -943,7 +943,7 @@
                         "type": "prometheus",
                         "uid": "prometheus"
                     },
-                    "expr": "sort_desc(60 * sum by (tool) (rate(mcp_tool_calls_total[$__range])))",
+                    "expr": "sort_desc(60 * sum by (tool) (rate(mcp_tool_calls_total[$__range]))) > 0",
                     "legendFormat": "{{tool}}",
                     "instant": true
                 }
@@ -982,7 +982,7 @@
             "gridPos": {
                 "x": 0,
                 "y": 37,
-                "w": 24,
+                "w": 12,
                 "h": 6
             },
             "datasource": {
@@ -996,7 +996,7 @@
                         "type": "prometheus",
                         "uid": "prometheus"
                     },
-                    "expr": "sort_desc(histogram_quantile(0.95, sum by (le, tool) (increase(mcp_tool_duration_seconds_bucket[$__range]))))",
+                    "expr": "sort_desc(histogram_quantile(0.95, sum by (le, tool) (increase(mcp_tool_duration_seconds_bucket[$__range]))) > 0)",
                     "legendFormat": "{{tool}}",
                     "instant": true
                 }
@@ -1021,6 +1021,59 @@
                     "color": {
                         "mode": "fixed",
                         "fixedColor": "#1F7A8C"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 18,
+            "type": "bargauge",
+            "title": "MCP Errors by Tool (selected range)",
+            "description": "MCP tool calls with outcome=\"error\" during the selected dashboard time range, grouped by tool.",
+            "gridPos": {
+                "x": 12,
+                "y": 37,
+                "w": 12,
+                "h": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sort_desc(sum by (tool) (increase(mcp_tool_calls_total{outcome=\"error\"}[$__range])) > 0)",
+                    "legendFormat": "{{tool}}",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "decimals": 0,
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#28594F"
                     }
                 },
                 "overrides": []
