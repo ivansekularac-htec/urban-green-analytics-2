@@ -10,10 +10,14 @@ Errors are returned as structured dictionaries instead of being raised so that
 LLM callers can inspect the failure and attempt to correct their request.
 """
 
+import logging
+
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 
 from app.sql_safety import SQLSafetyError, validate_and_rewrite_sql
+
+logger = logging.getLogger(__name__)
 
 ALLOWED_DATABASES = {"urbangreen_dw", "etl"}
 
@@ -200,6 +204,7 @@ def execute_query(
         return {"error": str(exc)}
 
     try:
+        logger.info(f"Executing query: {rewritten_sql}")
         result = client.query(rewritten_sql)
     except ClickHouseError as exc:
         return {"error": f"ClickHouse error: {exc}"}
