@@ -10,6 +10,8 @@ Errors are returned as structured dictionaries instead of being raised so that
 LLM callers can inspect the failure and attempt to correct their request.
 """
 
+from asyncio.log import logger
+
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 
@@ -198,6 +200,8 @@ def execute_query(
         )
     except SQLSafetyError as exc:
         return {"error": str(exc)}
+
+    logger.info("Executing SQL: %s", rewritten_sql)
 
     try:
         result = client.query(rewritten_sql)

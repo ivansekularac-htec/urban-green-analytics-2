@@ -1,0 +1,1073 @@
+{
+    "uid": "app-performance",
+    "title": "App Performance",
+    "description": "FastAPI request/latency/error health and MCP tool performance, including the AI-generated SQL the model actually ran.",
+    "tags": [
+        "urbangreen",
+        "observability"
+    ],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "schemaVersion": 39,
+    "version": 8,
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": []
+    },
+    "annotations": {
+        "list": []
+    },
+    "links": [],
+    "panels": [
+        {
+            "id": 1,
+            "type": "stat",
+            "title": "API Requests (selected range)",
+            "description": "increase(http_requests_total[range]) - total FastAPI requests served in the current time range.",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(increase(http_requests_total{job=\"urbangreen-api\"}[$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#4CBB8A"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 2,
+            "type": "stat",
+            "title": "API p99 Latency (current)",
+            "description": "histogram_quantile(0.99, ...) over the high-resolution histogram (http_request_duration_highr_seconds) - the coarse per-handler histogram doesn't have a bucket boundary anywhere near the 1.5s SLA, so it can't estimate this accurately.",
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\"}[5m])))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "min": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "#4CBB8A"
+                            },
+                            {
+                                "value": 1.5,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "MCP Tool Calls (selected range)",
+            "description": "increase(mcp_tool_calls_total[range]) - total MCP tool calls in the current time range.",
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(increase(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#89BDB0"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 10,
+            "type": "row",
+            "title": "FastAPI",
+            "gridPos": {
+                "x": 0,
+                "y": 4,
+                "w": 24,
+                "h": 1
+            },
+            "collapsed": false,
+            "panels": []
+        },
+        {
+            "id": 4,
+            "type": "timeseries",
+            "title": "Request Rate by Route",
+            "description": "sum by (handler) (rate(http_requests_total[$__rate_interval])) - requests/sec per FastAPI route.",
+            "gridPos": {
+                "x": 0,
+                "y": 5,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (handler) (rate(http_requests_total{job=\"urbangreen-api\"}[$__rate_interval]))",
+                    "legendFormat": "{{handler}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "width": 220,
+                    "calcs": [
+                        "max"
+                    ],
+                    "sortBy": "Max",
+                    "sortDesc": true
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "lineWidth": 2,
+                        "spanNulls": true
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 15,
+            "type": "bargauge",
+            "title": "Request Duration Bands",
+            "description": "Requests/sec falling into each duration band, split at the same 1.5s SLA line used elsewhere - shows how close traffic runs to the boundary, not just the current percentile.",
+            "gridPos": {
+                "x": 0,
+                "y": 13,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"0.5\"}[$__rate_interval]))",
+                    "legendFormat": "< 0.5s",
+                    "instant": true
+                },
+                {
+                    "refId": "B",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "(sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"1.0\"}[$__rate_interval])) - sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"0.5\"}[$__rate_interval])))",
+                    "legendFormat": "0.5s - 1.0s",
+                    "instant": true
+                },
+                {
+                    "refId": "C",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "(sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"1.5\"}[$__rate_interval])) - sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"1.0\"}[$__rate_interval])))",
+                    "legendFormat": "1.0s - 1.5s",
+                    "instant": true
+                },
+                {
+                    "refId": "D",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "(sum(rate(http_request_duration_highr_seconds_count{job=\"urbangreen-api\"}[$__rate_interval])) - sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"1.5\"}[$__rate_interval])))",
+                    "legendFormat": "> 1.5s (SLA breach)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "orientation": "horizontal",
+                "displayMode": "gradient",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": true
+                },
+                "showUnfilled": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "min": 0
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "< 0.5s"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "0.5s - 1.0s"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "1.0s - 1.5s"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#28594F"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "> 1.5s (SLA breach)"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "red"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 5,
+            "type": "timeseries",
+            "title": "Latency p50 / p95 / p99 (1.5s SLA)",
+            "description": "histogram_quantile() over http_request_duration_highr_seconds - global across all routes, not per-handler. That histogram has a bucket boundary at exactly 1.5s (the SLA), which the coarser per-handler histogram doesn't, so this is the one that gives a meaningful reading near the line that matters.",
+            "gridPos": {
+                "x": 0,
+                "y": 22,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])))",
+                    "legendFormat": "p50"
+                },
+                {
+                    "refId": "B",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])))",
+                    "legendFormat": "p95"
+                },
+                {
+                    "refId": "C",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\"}[$__rate_interval])))",
+                    "legendFormat": "p99"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "lineWidth": 2,
+                        "spanNulls": true,
+                        "thresholdsStyle": {
+                            "mode": "line"
+                        }
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "transparent"
+                            },
+                            {
+                                "value": 1.5,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "p50"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            },
+                            {
+                                "id": "custom.fillOpacity",
+                                "value": 20
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "p95"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "p99"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#28594F"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "type": "timeseries",
+            "title": "4xx / 5xx Error Rate",
+            "description": "sum by (status) (rate(http_requests_total{status=~\"4xx|5xx\"}[$__rate_interval])) - status is already bucketed by the instrumentator (2xx/4xx/5xx), not a raw HTTP code.",
+            "gridPos": {
+                "x": 0,
+                "y": 30,
+                "w": 16,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (status) (rate(http_requests_total{job=\"urbangreen-api\", status=~\"4xx|5xx\"}[$__rate_interval]))",
+                    "legendFormat": "{{status}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "fillOpacity": 60,
+                        "stacking": {
+                            "mode": "normal"
+                        },
+                        "lineWidth": 1
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "4xx"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "5xx"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "red"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 13,
+            "type": "gauge",
+            "title": "SLA Compliance (< 1.5s)",
+            "description": "rate(bucket{le=\"1.5\"}) / rate(count) - exact, not a histogram_quantile estimate, because http_request_duration_highr_seconds has a real bucket boundary at exactly 1.5s.",
+            "gridPos": {
+                "x": 16,
+                "y": 30,
+                "w": 8,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(http_request_duration_highr_seconds_bucket{job=\"urbangreen-api\", le=\"1.5\"}[$__rate_interval])) / sum(rate(http_request_duration_highr_seconds_count{job=\"urbangreen-api\"}[$__rate_interval])) OR vector(1)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "decimals": 1,
+                    "noValue": "100%",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "red"
+                            },
+                            {
+                                "value": 0.95,
+                                "color": "#89BDB0"
+                            },
+                            {
+                                "value": 0.99,
+                                "color": "#4CBB8A"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 11,
+            "type": "row",
+            "title": "MCP Server (AI-Generated SQL)",
+            "gridPos": {
+                "x": 0,
+                "y": 38,
+                "w": 24,
+                "h": 1
+            },
+            "collapsed": false,
+            "panels": []
+        },
+        {
+            "id": 9,
+            "type": "gauge",
+            "title": "MCP Error Ratio (5m)",
+            "description": "rate(outcome=\"error\")/rate(total), clamp_min on the denominator so this shows 0% instead of NaN when there's no traffic in the window.",
+            "gridPos": {
+                "x": 0,
+                "y": 39,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(mcp_tool_calls_total{job=\"urbangreen-mcp\", outcome=\"error\"}[5m])) / clamp_min(sum(rate(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[5m])), 1e-9)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 0.3,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "decimals": 0
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 14,
+            "type": "stat",
+            "title": "SQL Queries (selected range)",
+            "description": "increase(mcp_tool_calls_total{tool=\"execute_query\"}[range]) - the AI-generated SQL queries specifically, not all MCP tool calls.",
+            "gridPos": {
+                "x": 12,
+                "y": 39,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(increase(mcp_tool_calls_total{job=\"urbangreen-mcp\", tool=\"execute_query\"}[$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#28594F"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 7,
+            "type": "timeseries",
+            "title": "Tool Call Rate by Tool",
+            "description": "sum by (tool) (rate(mcp_tool_calls_total[$__rate_interval])) - calls/sec per MCP tool.",
+            "gridPos": {
+                "x": 0,
+                "y": 47,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (tool) (rate(mcp_tool_calls_total{job=\"urbangreen-mcp\"}[$__rate_interval]))",
+                    "legendFormat": "{{tool}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "width": 220,
+                    "calcs": [
+                        "max"
+                    ],
+                    "sortBy": "Max",
+                    "sortDesc": true
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "bars",
+                        "fillOpacity": 70,
+                        "stacking": {
+                            "mode": "normal"
+                        },
+                        "lineWidth": 1
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "list_tables"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#7EFFC6"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "describe_table"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "read_warehouse_resource"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "execute_query"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#28594F"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 8,
+            "type": "timeseries",
+            "title": "p95 Tool Latency by Tool",
+            "description": "histogram_quantile(0.95, ...) over mcp_tool_duration_seconds, per tool.",
+            "gridPos": {
+                "x": 0,
+                "y": 55,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "histogram_quantile(0.95, sum by (tool, le) (rate(mcp_tool_duration_seconds_bucket{job=\"urbangreen-mcp\"}[$__rate_interval])))",
+                    "legendFormat": "{{tool}}"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "width": 220,
+                    "calcs": [
+                        "max"
+                    ],
+                    "sortBy": "Max",
+                    "sortDesc": true
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "lineWidth": 2,
+                        "spanNulls": true
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "list_tables"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#7EFFC6"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "describe_table"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "read_warehouse_resource"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "execute_query"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#28594F"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "type": "logs",
+            "title": "AI-Generated SQL Queries",
+            "description": "Raw log lines from the MCP server showing the exact SQL executed against ClickHouse, post safety-rewrite (includes the applied LIMIT).",
+            "gridPos": {
+                "x": 0,
+                "y": 63,
+                "w": 24,
+                "h": 10
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "{service=\"urbangreen-mcp\"} |= \"Executing SQL:\""
+                }
+            ],
+            "options": {
+                "showTime": true,
+                "showLabels": false,
+                "showCommonLabels": false,
+                "wrapLogMessage": true,
+                "sortOrder": "Descending",
+                "enableLogDetails": true
+            },
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            }
+        }
+    ]
+}
