@@ -10,12 +10,33 @@ Errors are returned as structured dictionaries instead of being raised so that
 LLM callers can inspect the failure and attempt to correct their request.
 """
 
+import json
+import logging
+
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import ClickHouseError
 
 from app.sql_safety import SQLSafetyError, validate_and_rewrite_sql
 
 ALLOWED_DATABASES = {"urbangreen_dw", "etl"}
+logger = logging.getLogger(__name__)
+
+
+def _log_executed_query(sql: str, outcome: str) -> None:
+    """Emit one structured, single-line event for the SQL sent to ClickHouse."""
+
+    logger.info(
+        json.dumps(
+            {
+                "event": "mcp_sql_executed",
+                "tool": "execute_query",
+                "outcome": outcome,
+                "sql": sql,
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+    )
 
 
 def _validate_database(database: str) -> dict[str, str] | None:
@@ -202,7 +223,10 @@ def execute_query(
     try:
         result = client.query(rewritten_sql)
     except ClickHouseError as exc:
+        _log_executed_query(rewritten_sql, "error")
         return {"error": f"ClickHouse error: {exc}"}
+
+    _log_executed_query(rewritten_sql, "ok")
 
     rows = result.result_rows
     row_count = len(rows)
