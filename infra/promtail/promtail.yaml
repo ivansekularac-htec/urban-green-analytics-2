@@ -32,6 +32,7 @@ scrape_configs:
           - localhost
         labels:
           service: urbangreen-airflow
+          container: urbangreen-airflow
           __path__: /opt/airflow/logs/dag_id=*/run_id=*/task_id=*/*.log
 
     pipeline_stages:
