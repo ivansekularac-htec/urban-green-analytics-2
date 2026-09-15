@@ -19,6 +19,7 @@ exec /opt/spark/bin/spark-submit \
   --conf spark.driver.bindAddress=0.0.0.0 \
   --conf spark.executor.cores=1 \
   --conf spark.cores.max=1 \
+  --conf spark.sql.streaming.metricsEnabled=true \
   --conf spark.ui.port=4050 \
   --conf spark.sql.session.timeZone=UTC \
   /opt/spark/work-dir/ingestion/sensor_readings_stream.py
