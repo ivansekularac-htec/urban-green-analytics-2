@@ -14,7 +14,7 @@
     "editable": true,
     "graphTooltip": 1,
     "schemaVersion": 39,
-    "version": 12,
+    "version": 14,
     "refresh": "30s",
     "time": {
         "from": "now-6h",
@@ -120,7 +120,7 @@
         },
         {
             "id": 3,
-            "type": "stat",
+            "type": "gauge",
             "title": "Current Consumer Lag",
             "description": "Current unconsumed Kafka records across all consumer groups and topics. A rising value indicates downstream consumption is falling behind ingestion.",
             "gridPos": {
@@ -152,10 +152,9 @@
                     "fields": "",
                     "values": false
                 },
-                "colorMode": "background",
-                "graphMode": "none",
-                "textMode": "value",
-                "justifyMode": "center"
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
             },
             "fieldConfig": {
                 "defaults": {
@@ -179,7 +178,8 @@
                                 "color": "#28594F"
                             }
                         ]
-                    }
+                    },
+                    "max": 2000
                 },
                 "overrides": []
             }
@@ -336,7 +336,7 @@
         },
         {
             "id": 8,
-            "type": "timeseries",
+            "type": "state-timeline",
             "title": "Active Executors by Worker",
             "description": "Active Spark executors reported by each worker. This is the cluster-activity panel for batch and streaming applications; a warehouse_load run should create visible worker executor activity while it is executing.",
             "gridPos": {
@@ -362,65 +362,39 @@
                 }
             ],
             "options": {
+                "mergeValues": true,
+                "showValue": "never",
+                "alignValue": "left",
+                "rowHeight": 0.7,
                 "legend": {
-                    "displayMode": "table",
-                    "placement": "bottom",
-                    "calcs": [
-                        "lastNotNull",
-                        "max"
-                    ]
+                    "displayMode": "list",
+                    "placement": "bottom"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "single"
                 }
             },
             "fieldConfig": {
                 "defaults": {
                     "unit": "short",
-                    "min": 0,
                     "noValue": "NO DATA",
-                    "custom": {
-                        "drawStyle": "line",
-                        "lineWidth": 2,
-                        "fillOpacity": 12,
-                        "spanNulls": false
-                    },
-                    "color": {
-                        "mode": "palette-classic"
-                    }
+                    "mappings": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "0": {
+                                    "text": "Idle",
+                                    "color": "#28594F"
+                                },
+                                "1": {
+                                    "text": "Active",
+                                    "color": "#4CBB8A"
+                                }
+                            }
+                        }
+                    ]
                 },
-                "overrides": [
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "urbangreen-spark-worker-1"
-                        },
-                        "properties": [
-                            {
-                                "id": "color",
-                                "value": {
-                                    "mode": "fixed",
-                                    "fixedColor": "#4CBB8A"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "urbangreen-spark-worker-2"
-                        },
-                        "properties": [
-                            {
-                                "id": "color",
-                                "value": {
-                                    "mode": "fixed",
-                                    "fixedColor": "#28594F"
-                                }
-                            }
-                        ]
-                    }
-                ]
+                "overrides": []
             }
         },
         {
@@ -691,9 +665,13 @@
                     "min": 0,
                     "noValue": "NO DATA",
                     "custom": {
-                        "drawStyle": "line",
-                        "lineWidth": 2,
-                        "fillOpacity": 12,
+                        "drawStyle": "bars",
+                        "lineWidth": 1,
+                        "fillOpacity": 65,
+                        "stacking": {
+                            "mode": "normal",
+                            "group": "A"
+                        },
                         "spanNulls": false
                     }
                 },
@@ -777,8 +755,12 @@
                     "noValue": "NO DATA",
                     "custom": {
                         "drawStyle": "line",
-                        "lineWidth": 2,
-                        "fillOpacity": 10,
+                        "lineWidth": 1,
+                        "fillOpacity": 40,
+                        "stacking": {
+                            "mode": "normal",
+                            "group": "A"
+                        },
                         "spanNulls": false
                     }
                 },
