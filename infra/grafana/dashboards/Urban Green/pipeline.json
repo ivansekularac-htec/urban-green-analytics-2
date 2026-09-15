@@ -1082,7 +1082,7 @@
             "id": 18,
             "type": "stat",
             "title": "Successful Tasks (selected range)",
-            "description": "Successful warehouse_load SparkSubmitOperator tasks derived from the Spark driver shutdown message \"SparkContext is stopping with exitCode 0\" in Airflow task logs. The exact log text depends on the upstream Airflow 3.x / Spark provider message format; update this LogQL filter if it changes.",
+            "description": "All Airflow task instances that finished with state=success during the selected range, across every DAG. Derived from Airflow 3.x scheduler 'TaskInstance Finished:' log messages. If the upstream message format changes, update this LogQL filter.",
             "gridPos": {
                 "x": 0,
                 "y": 46,
@@ -1100,7 +1100,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\", dag=\"warehouse_load\"} |= \"SparkContext is stopping with exitCode 0\" [$__range]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\" |= \"state=success,\" [$__range]))",
                     "queryType": "instant"
                 }
             ],
@@ -1135,7 +1135,7 @@
             "id": 19,
             "type": "stat",
             "title": "Failed Tasks (selected range)",
-            "description": "Failed warehouse_load SparkSubmitOperator tasks derived from a non-zero SparkContext exitCode in Airflow task logs. The exact log text depends on the upstream Airflow 3.x / Spark provider message format; update this LogQL filter if it changes.",
+            "description": "All Airflow task instances that finished with state=failed during the selected range, across every DAG. Derived from Airflow 3.x scheduler 'TaskInstance Finished:' log messages. If the upstream message format changes, update this LogQL filter.",
             "gridPos": {
                 "x": 12,
                 "y": 46,
@@ -1153,7 +1153,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\", dag=\"warehouse_load\"} |~ \"SparkContext is stopping with exitCode [1-9][0-9]*\" [$__range]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\" |= \"state=failed,\" [$__range]))",
                     "queryType": "instant"
                 }
             ],
@@ -1188,7 +1188,7 @@
             "id": 20,
             "type": "timeseries",
             "title": "Task Outcomes Over Time (5m)",
-            "description": "warehouse_load SparkSubmitOperator outcomes in a trailing 5-minute window, derived from Spark driver exit codes present in Airflow task logs: exitCode 0 = SUCCESS and non-zero exitCode = FAILED. The exact strings depend on the upstream Airflow 3.x / Spark provider log format; update these LogQL filters if that format changes.",
+            "description": "All Airflow task completions across every DAG, grouped into SUCCESS and FAILED trailing 5-minute windows. Derived from Airflow 3.x scheduler 'TaskInstance Finished:' messages; update the LogQL filters if that upstream message format changes.",
             "gridPos": {
                 "x": 0,
                 "y": 50,
@@ -1206,7 +1206,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\", dag=\"warehouse_load\"} |= \"SparkContext is stopping with exitCode 0\" [5m]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\" |= \"state=success,\" [5m]))",
                     "legendFormat": "SUCCESS"
                 },
                 {
@@ -1215,7 +1215,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\", dag=\"warehouse_load\"} |~ \"SparkContext is stopping with exitCode [1-9][0-9]*\" [5m]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\" |= \"state=failed,\" [5m]))",
                     "legendFormat": "FAILED"
                 }
             ],
@@ -1287,13 +1287,82 @@
             }
         },
         {
-            "id": 22,
-            "type": "logs",
-            "title": "Airflow Task Logs",
-            "description": "All warehouse_load task logs shipped to Loki. Use this panel to confirm Airflow/Loki ingestion during healthy runs; the separate Errors and Tracebacks panel remains intentionally empty when there are no failures.",
+            "id": 21,
+            "type": "table",
+            "title": "Task Outcomes by DAG (selected range)",
+            "description": "Completed Airflow task instances grouped by DAG and final state during the selected range. Derived from Airflow 3.x scheduler 'TaskInstance Finished:' messages.",
             "gridPos": {
                 "x": 0,
                 "y": 57,
+                "w": 24,
+                "h": 6
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum by (dag, state) (count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\" | regexp \"dag_id=(?P<dag>[^,]+),.*state=(?P<state>[^,]+),\" [$__range]))",
+                    "queryType": "instant",
+                    "legendFormat": "{{dag}} / {{state}}"
+                }
+            ],
+            "transformations": [
+                {
+                    "id": "labelsToFields",
+                    "options": {}
+                },
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "Time": true
+                        },
+                        "indexByName": {
+                            "dag": 0,
+                            "state": 1,
+                            "Value": 2
+                        },
+                        "renameByName": {
+                            "dag": "DAG",
+                            "state": "State",
+                            "Value": "Tasks"
+                        }
+                    }
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "decimals": 0
+                },
+                "overrides": []
+            },
+            "options": {
+                "showHeader": true,
+                "cellHeight": "sm",
+                "sortBy": [
+                    {
+                        "displayName": "Tasks",
+                        "desc": true
+                    }
+                ]
+            }
+        },
+        {
+            "id": 23,
+            "type": "logs",
+            "title": "Airflow Task Transitions",
+            "description": "Airflow 3.x scheduler task-completion messages across all DAGs. These lines include dag_id, task_id, run_id, operator, duration and final task state.",
+            "gridPos": {
+                "x": 0,
+                "y": 63,
                 "w": 24,
                 "h": 8
             },
@@ -1308,7 +1377,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "{service=\"urbangreen-airflow\", dag=\"warehouse_load\"}"
+                    "expr": "{service=\"urbangreen-airflow\"} |= \"TaskInstance Finished:\""
                 }
             ],
             "options": {
@@ -1323,13 +1392,13 @@
             }
         },
         {
-            "id": 21,
+            "id": 24,
             "type": "logs",
             "title": "Airflow Errors and Tracebacks (empty = healthy)",
-            "description": "Only real warehouse_load task errors are shown here: structured JSON level error/critical, Python traceback starts, or non-zero Spark exit codes. An empty panel is expected after a clean run. Spark INFO/WARN text such as DAGScheduler 'failed: HashSet()' is intentionally excluded.",
+            "description": "Airflow errors, Python tracebacks and failed task/run transitions across all DAGs. An empty panel is expected when Airflow is healthy. The exact matching strings depend on the upstream Airflow 3.x log format; update the LogQL filter if those messages change.",
             "gridPos": {
                 "x": 0,
-                "y": 65,
+                "y": 71,
                 "w": 24,
                 "h": 8
             },
@@ -1344,7 +1413,7 @@
                         "type": "loki",
                         "uid": "loki"
                     },
-                    "expr": "{service=\"urbangreen-airflow\", dag=\"warehouse_load\"} |~ \"(?i)(\\\\\\\"level\\\\\\\":\\\\\\\"(error|critical)\\\\\\\"|traceback \\\\(most recent call last\\\\):|SparkContext is stopping with exitCode [1-9][0-9]*)\""
+                    "expr": "{service=\"urbangreen-airflow\"} |~ \"(?i)(\\\\[error\\\\]|\\\\\\\"level\\\\\\\":\\\\\\\"(error|critical)\\\\\\\"|traceback \\\\(most recent call last\\\\):|final_state=failed|TaskInstance Finished:.*state=failed,|DagRun Finished:.*state=failed,)\""
                 }
             ],
             "options": {
