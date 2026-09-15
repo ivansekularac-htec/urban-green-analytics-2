@@ -62,9 +62,7 @@ class BatchLogger(StreamingQueryListener):
 
     def onQueryProgress(self, event):
         """Log completed micro-batches."""
-        logger.info(
-            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}"
-        )
+        logger.info(f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}")
 
     def onQueryTerminated(self, event):
         """Log query termination."""
@@ -89,6 +87,7 @@ def build_spark():
             "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
         )
         .config("spark.sql.streaming.schemaInference", "false")
+        .config("spark.sql.streaming.metricsEnabled", "true")
         .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )
