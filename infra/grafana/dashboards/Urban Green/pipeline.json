@@ -378,22 +378,22 @@
         {
             "id": 11,
             "type": "timeseries",
-            "title": "Job Activity (succeeded / failed)",
-            "description": "Spark driver job completion rate from appStatus counters. failed > 0 flags a struggling job.",
+            "title": "Jobs Completed (cumulative)",
+            "description": "Cumulative succeeded / failed Spark jobs on the streaming driver (appStatus counters). Steps up as micro-batches run; resets to 0 when the streaming app restarts.",
             "gridPos": { "x": 0, "y": 26, "w": 12, "h": 7 },
             "datasource": { "type": "prometheus", "uid": "prometheus" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "prometheus", "uid": "prometheus" },
-                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_appStatus_jobs_succeededJobs_Count\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
-                    "legendFormat": "succeeded/s"
+                    "expr": "max({__name__=~\"metrics_app_.*_driver_appStatus_jobs_succeededJobs_Count\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "succeeded"
                 },
                 {
                     "refId": "B",
                     "datasource": { "type": "prometheus", "uid": "prometheus" },
-                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_appStatus_jobs_failedJobs_Count\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
-                    "legendFormat": "failed/s"
+                    "expr": "max({__name__=~\"metrics_app_.*_driver_appStatus_jobs_failedJobs_Count\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "failed"
                 }
             ],
             "options": {
@@ -406,24 +406,24 @@
                     "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "showPoints": "never" }
                 },
                 "overrides": [
-                    { "matcher": { "id": "byName", "options": "failed/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
-                    { "matcher": { "id": "byName", "options": "succeeded/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ] }
+                    { "matcher": { "id": "byName", "options": "failed" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+                    { "matcher": { "id": "byName", "options": "succeeded" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ] }
                 ]
             }
         },
         {
             "id": 12,
             "type": "timeseries",
-            "title": "Executor GC Time",
-            "description": "JVM garbage-collection time rate on the driver (ms of GC per second), from ExecutorMetrics_TotalGCTime. Rising GC pressure often precedes latency spikes.",
+            "title": "Executor GC Time (total)",
+            "description": "Cumulative JVM garbage-collection time on the streaming driver (ExecutorMetrics_TotalGCTime, ms). A rising slope signals GC pressure; resets when the app restarts.",
             "gridPos": { "x": 12, "y": 26, "w": 12, "h": 7 },
             "datasource": { "type": "prometheus", "uid": "prometheus" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "prometheus", "uid": "prometheus" },
-                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_ExecutorMetrics_TotalGCTime_Value\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
-                    "legendFormat": "GC ms/s"
+                    "expr": "max({__name__=~\"metrics_app_.*_driver_ExecutorMetrics_TotalGCTime_Value\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "GC time"
                 }
             ],
             "options": {
@@ -450,14 +450,14 @@
             "id": 13,
             "type": "stat",
             "title": "Tasks SUCCEEDED (range)",
-            "description": "Count of 'Marking task as SUCCESS' log lines in the selected range. The exact string is Airflow 3.x's task-state message - update the filter if a future version changes it.",
+            "description": "Count of scheduler 'TaskInstance Finished ... state=success' lines in the selected range. This is Airflow 3.x's scheduler completion message - update the filter if a future version changes it.",
             "gridPos": { "x": 0, "y": 34, "w": 8, "h": 4 },
             "datasource": { "type": "loki", "uid": "loki" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "loki", "uid": "loki" },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__range]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished\" |= \"state=success\" [$__range]))",
                     "instant": true
                 }
             ],
@@ -483,14 +483,14 @@
             "id": 14,
             "type": "stat",
             "title": "Tasks FAILED (range)",
-            "description": "Count of 'Marking task as FAILED' log lines in the selected range. Airflow 3.x string - update the filter if it changes upstream.",
+            "description": "Count of scheduler 'TaskInstance Finished ... state=failed' lines in the selected range. Airflow 3.x string - update the filter if it changes upstream.",
             "gridPos": { "x": 8, "y": 34, "w": 8, "h": 4 },
             "datasource": { "type": "loki", "uid": "loki" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "loki", "uid": "loki" },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as FAILED\" [$__range]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished\" |= \"state=failed\" [$__range]))",
                     "instant": true
                 }
             ],
@@ -521,15 +521,15 @@
         {
             "id": 15,
             "type": "stat",
-            "title": "Task Success Ratio (range)",
-            "description": "SUCCESS / (SUCCESS + FAILED) over the selected range. Denominator is clamp_min'd so the panel reads 0 instead of NaN when no tasks ran.",
+            "title": "Tasks Finished (range)",
+            "description": "Total tasks that reached a terminal state (scheduler 'TaskInstance Finished' lines) in the selected range.",
             "gridPos": { "x": 16, "y": 34, "w": 8, "h": 4 },
             "datasource": { "type": "loki", "uid": "loki" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "loki", "uid": "loki" },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__range])) / clamp_min(sum(count_over_time({service=\"urbangreen-airflow\"} |~ \"Marking task as (SUCCESS|FAILED)\" [$__range])), 1)",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished\" [$__range]))",
                     "instant": true
                 }
             ],
@@ -542,19 +542,11 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percentunit",
+                    "unit": "short",
                     "min": 0,
-                    "max": 1,
-                    "decimals": 1,
+                    "decimals": 0,
                     "noValue": "0",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            { "value": null, "color": "red" },
-                            { "value": 0.8, "color": "yellow" },
-                            { "value": 0.99, "color": "#4CBB8A" }
-                        ]
-                    }
+                    "color": { "mode": "fixed", "fixedColor": "#89BDB0" }
                 },
                 "overrides": []
             }
@@ -563,20 +555,20 @@
             "id": 16,
             "type": "timeseries",
             "title": "Task Outcomes over Time",
-            "description": "SUCCESS vs FAILED task-state transitions per interval, from Airflow logs. Strings follow the Airflow 3.x message format; update the LogQL if they shift in a future release.",
+            "description": "SUCCESS vs FAILED task completions per interval, from the scheduler's 'TaskInstance Finished ... state=<state>' log lines. Strings follow the Airflow 3.x message format; update the LogQL if they shift in a future release.",
             "gridPos": { "x": 0, "y": 38, "w": 24, "h": 8 },
             "datasource": { "type": "loki", "uid": "loki" },
             "targets": [
                 {
                     "refId": "A",
                     "datasource": { "type": "loki", "uid": "loki" },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__interval]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished\" |= \"state=success\" [$__interval]))",
                     "legendFormat": "SUCCESS"
                 },
                 {
                     "refId": "B",
                     "datasource": { "type": "loki", "uid": "loki" },
-                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as FAILED\" [$__interval]))",
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"TaskInstance Finished\" |= \"state=failed\" [$__interval]))",
                     "legendFormat": "FAILED"
                 }
             ],
