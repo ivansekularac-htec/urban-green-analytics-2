@@ -89,6 +89,10 @@ def build_spark():
             "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
         )
         .config("spark.sql.streaming.schemaInference", "false")
+        # Exposes Structured Streaming progress (input/processing rate, batch
+        # latency, scheduling delay) through the PrometheusServlet sink so the
+        # Pipeline dashboard's Spark streaming panels have data.
+        .config("spark.sql.streaming.metricsEnabled", "true")
         .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )

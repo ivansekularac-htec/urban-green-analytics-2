@@ -1,0 +1,629 @@
+{
+    "uid": "pipeline",
+    "title": "Pipeline",
+    "description": "End-to-end data-flow health: Kafka consumer lag and offset growth (kafka-exporter, T6.1.6), Spark cluster + streaming state (PrometheusServlet, T6.1.4), and Airflow task outcomes derived from Loki logs (no Airflow exporter exists).",
+    "tags": [
+        "urbangreen",
+        "observability",
+        "pipeline"
+    ],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": []
+    },
+    "annotations": {
+        "list": []
+    },
+    "links": [],
+    "panels": [
+        {
+            "id": 100,
+            "type": "row",
+            "title": "Kafka  (urbangreen-kafka-exporter)",
+            "collapsed": false,
+            "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+        },
+        {
+            "id": 1,
+            "type": "stat",
+            "title": "Total Consumer Lag",
+            "description": "Sum of kafka_consumergroup_lag across all groups/topics. Reads 0 when no consumer group has committed offsets - the Spark Structured Streaming job manages offsets in its checkpoint and does not commit a Kafka consumer group, so lag only appears if a committing consumer runs.",
+            "gridPos": { "x": 0, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(kafka_consumergroup_lag{job=\"urbangreen-kafka-exporter\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 1000, "color": "yellow" },
+                            { "value": 100000, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 2,
+            "type": "stat",
+            "title": "Brokers Up",
+            "description": "Number of Kafka brokers the exporter can reach (kafka_brokers).",
+            "gridPos": { "x": 8, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "max(kafka_brokers{job=\"urbangreen-kafka-exporter\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "sensor_readings Partitions",
+            "description": "Partition count of the sensor_readings topic (kafka_topic_partitions).",
+            "gridPos": { "x": 16, "y": 1, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(kafka_topic_partitions{job=\"urbangreen-kafka-exporter\", topic=\"sensor_readings\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#89BDB0" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 4,
+            "type": "timeseries",
+            "title": "Consumer Lag by Group / Topic",
+            "description": "kafka_consumergroup_lag summed by consumer group and topic. Empty until a committing consumer group exists (see the Total Consumer Lag note).",
+            "gridPos": { "x": 0, "y": 5, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (consumergroup, topic) (kafka_consumergroup_lag{job=\"urbangreen-kafka-exporter\"})",
+                    "legendFormat": "{{consumergroup}} / {{topic}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "table", "placement": "right", "width": 260, "calcs": ["lastNotNull", "max"] },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "showPoints": "never" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 5,
+            "type": "timeseries",
+            "title": "Topic Offset Growth (msgs/s)",
+            "description": "Per-second growth of each topic's current offset - the ingest rate into Kafka. deriv() over the current offset, clamped at 0 so partition churn never shows negative.",
+            "gridPos": { "x": 12, "y": 5, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum by (topic) (clamp_min(deriv(kafka_topic_partition_current_offset{job=\"urbangreen-kafka-exporter\"}[$__rate_interval]), 0))",
+                    "legendFormat": "{{topic}}"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "table", "placement": "right", "width": 200, "calcs": ["mean", "max"] },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "cps",
+                    "custom": { "drawStyle": "bars", "lineWidth": 1, "fillOpacity": 60, "showPoints": "never" },
+                    "color": { "mode": "palette-classic" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 200,
+            "type": "row",
+            "title": "Spark  (master + streaming)",
+            "collapsed": false,
+            "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 }
+        },
+        {
+            "id": 6,
+            "type": "stat",
+            "title": "Alive Workers",
+            "description": "Spark master's live worker count (metrics_master_aliveWorkers_Value).",
+            "gridPos": { "x": 0, "y": 14, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "max(metrics_master_aliveWorkers_Value{job=\"urbangreen-spark-master\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "red" },
+                            { "value": 1, "color": "#4CBB8A" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 7,
+            "type": "stat",
+            "title": "Running Apps",
+            "description": "Applications currently registered with the master (metrics_master_apps_Value).",
+            "gridPos": { "x": 8, "y": 14, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "max(metrics_master_apps_Value{job=\"urbangreen-spark-master\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 8,
+            "type": "stat",
+            "title": "Waiting Apps",
+            "description": "Applications waiting for resources (metrics_master_waitingApps_Value). Sustained non-zero means the cluster is saturated.",
+            "gridPos": { "x": 16, "y": 14, "w": 8, "h": 4 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "max(metrics_master_waitingApps_Value{job=\"urbangreen-spark-master\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 1, "color": "yellow" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 9,
+            "type": "timeseries",
+            "title": "Streaming Input vs Processing Rate",
+            "description": "Structured Streaming input rate vs processing rate (rows/s) from the driver, exposed via spark.sql.streaming.metricsEnabled. Processing rate staying below input rate for a sustained period means the stream is falling behind.",
+            "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum({__name__=~\"metrics_app_.*_driver_spark_streaming_.*_inputRate_total_Value\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "input rows/s"
+                },
+                {
+                    "refId": "B",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum({__name__=~\"metrics_app_.*_driver_spark_streaming_.*_processingRate_total_Value\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "processing rows/s"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "rps",
+                    "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
+                },
+                "overrides": [
+                    { "matcher": { "id": "byName", "options": "input rows/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#89BDB0" } } ] },
+                    { "matcher": { "id": "byName", "options": "processing rows/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ] }
+                ]
+            }
+        },
+        {
+            "id": 10,
+            "type": "timeseries",
+            "title": "Streaming Batch Latency",
+            "description": "Structured Streaming batch latency (ms) - end-to-end time to process a micro-batch. Exact metric depends on the streaming query; matched by name suffix _latency_Value.",
+            "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "max({__name__=~\"metrics_app_.*_driver_spark_streaming_.*_latency_Value\", job=\"urbangreen-spark-streaming\"})",
+                    "legendFormat": "batch latency"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "single" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "showPoints": "never" },
+                    "color": { "mode": "fixed", "fixedColor": "#5FAF72" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 11,
+            "type": "timeseries",
+            "title": "Job Activity (succeeded / failed)",
+            "description": "Spark driver job completion rate from appStatus counters. failed > 0 flags a struggling job.",
+            "gridPos": { "x": 0, "y": 26, "w": 12, "h": 7 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_appStatus_jobs_succeededJobs_Count\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
+                    "legendFormat": "succeeded/s"
+                },
+                {
+                    "refId": "B",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_appStatus_jobs_failedJobs_Count\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
+                    "legendFormat": "failed/s"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "showPoints": "never" }
+                },
+                "overrides": [
+                    { "matcher": { "id": "byName", "options": "failed/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+                    { "matcher": { "id": "byName", "options": "succeeded/s" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ] }
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "type": "timeseries",
+            "title": "Executor GC Time",
+            "description": "JVM garbage-collection time rate on the driver (ms of GC per second), from ExecutorMetrics_TotalGCTime. Rising GC pressure often precedes latency spikes.",
+            "gridPos": { "x": 12, "y": 26, "w": 12, "h": 7 },
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "sum(rate({__name__=~\"metrics_app_.*_driver_ExecutorMetrics_TotalGCTime_Value\", job=\"urbangreen-spark-streaming\"}[$__rate_interval]))",
+                    "legendFormat": "GC ms/s"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "single" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "showPoints": "never" },
+                    "color": { "mode": "fixed", "fixedColor": "#B7D3C0" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 300,
+            "type": "row",
+            "title": "Airflow  (from Loki logs)",
+            "collapsed": false,
+            "gridPos": { "x": 0, "y": 33, "w": 24, "h": 1 }
+        },
+        {
+            "id": 13,
+            "type": "stat",
+            "title": "Tasks SUCCEEDED (range)",
+            "description": "Count of 'Marking task as SUCCESS' log lines in the selected range. The exact string is Airflow 3.x's task-state message - update the filter if a future version changes it.",
+            "gridPos": { "x": 0, "y": 34, "w": 8, "h": 4 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "color": { "mode": "fixed", "fixedColor": "#4CBB8A" }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 14,
+            "type": "stat",
+            "title": "Tasks FAILED (range)",
+            "description": "Count of 'Marking task as FAILED' log lines in the selected range. Airflow 3.x string - update the filter if it changes upstream.",
+            "gridPos": { "x": 8, "y": 34, "w": 8, "h": 4 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as FAILED\" [$__range]))",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "#4CBB8A" },
+                            { "value": 1, "color": "red" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 15,
+            "type": "stat",
+            "title": "Task Success Ratio (range)",
+            "description": "SUCCESS / (SUCCESS + FAILED) over the selected range. Denominator is clamp_min'd so the panel reads 0 instead of NaN when no tasks ran.",
+            "gridPos": { "x": 16, "y": 34, "w": 8, "h": 4 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__range])) / clamp_min(sum(count_over_time({service=\"urbangreen-airflow\"} |~ \"Marking task as (SUCCESS|FAILED)\" [$__range])), 1)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "decimals": 1,
+                    "noValue": "0",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            { "value": null, "color": "red" },
+                            { "value": 0.8, "color": "yellow" },
+                            { "value": 0.99, "color": "#4CBB8A" }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 16,
+            "type": "timeseries",
+            "title": "Task Outcomes over Time",
+            "description": "SUCCESS vs FAILED task-state transitions per interval, from Airflow logs. Strings follow the Airflow 3.x message format; update the LogQL if they shift in a future release.",
+            "gridPos": { "x": 0, "y": 38, "w": 24, "h": 8 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as SUCCESS\" [$__interval]))",
+                    "legendFormat": "SUCCESS"
+                },
+                {
+                    "refId": "B",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\"} |= \"Marking task as FAILED\" [$__interval]))",
+                    "legendFormat": "FAILED"
+                }
+            ],
+            "options": {
+                "legend": { "displayMode": "list", "placement": "bottom" },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "lineWidth": 1,
+                        "fillOpacity": 70,
+                        "stacking": { "mode": "normal" },
+                        "showPoints": "never"
+                    }
+                },
+                "overrides": [
+                    { "matcher": { "id": "byName", "options": "SUCCESS" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#4CBB8A" } } ] },
+                    { "matcher": { "id": "byName", "options": "FAILED" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] }
+                ]
+            }
+        },
+        {
+            "id": 17,
+            "type": "logs",
+            "title": "Airflow Errors & Tracebacks",
+            "description": "Airflow log lines matching error or traceback, from Loki. Case-insensitive match on the Airflow 3.x log text - adjust if the upstream format changes.",
+            "gridPos": { "x": 0, "y": 46, "w": 24, "h": 10 },
+            "datasource": { "type": "loki", "uid": "loki" },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "{service=\"urbangreen-airflow\"} |~ \"(?i)traceback|error\"",
+                    "queryType": "range"
+                }
+            ],
+            "options": {
+                "showTime": true,
+                "wrapLogMessage": true,
+                "prettifyLogMessage": false,
+                "enableLogDetails": true,
+                "dedupStrategy": "none",
+                "sortOrder": "Descending"
+            }
+        }
+    ]
+}
