@@ -13,6 +13,11 @@ scrape_configs:
     static_configs:
       - targets: ["urbangreen-mcp:8001"]
 
+  - job_name: urbangreen-minio
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: ["urbangreen-minio:9000"]
+
   - job_name: urbangreen-clickhouse
     static_configs:
       - targets: ["urbangreen-clickhouse:9363"]

@@ -11,7 +11,7 @@
     "editable": false,
     "graphTooltip": 1,
     "schemaVersion": 39,
-    "version": 1,
+    "version": 4,
     "refresh": "30s",
     "time": {
         "from": "now-6h",
@@ -179,13 +179,245 @@
             }
         },
         {
+            "id": 30,
+            "type": "row",
+            "title": "MinIO",
+            "collapsed": false,
+            "gridPos": {
+                "x": 0,
+                "y": 9,
+                "w": 24,
+                "h": 1
+            },
+            "panels": []
+        },
+        {
+            "id": 31,
+            "type": "stat",
+            "title": "Objects in Cluster",
+            "description": "minio_cluster_usage_object_total - confirmed live against this deployment via /minio/v2/metrics/cluster.",
+            "gridPos": {
+                "x": 0,
+                "y": 10,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(minio_cluster_usage_object_total{job=\"urbangreen-minio\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "0",
+                    "decimals": 0,
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#89BDB0"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 32,
+            "type": "stat",
+            "title": "Cluster Usage",
+            "description": "minio_cluster_usage_total_bytes - total storage consumed across all buckets.",
+            "gridPos": {
+                "x": 8,
+                "y": 10,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(minio_cluster_usage_total_bytes{job=\"urbangreen-minio\"}) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "bytes",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#4CBB8A"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 33,
+            "type": "stat",
+            "title": "S3 Request Errors",
+            "description": "sum(rate(minio_s3_requests_errors_total[range])) - combined 4xx+5xx S3 request error rate.",
+            "gridPos": {
+                "x": 16,
+                "y": 10,
+                "w": 8,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(minio_s3_requests_errors_total{job=\"urbangreen-minio\"}[$__rate_interval])) or vector(0)",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "min": 0,
+                    "noValue": "0",
+                    "decimals": 2,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "#4CBB8A"
+                            },
+                            {
+                                "value": 0.01,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 34,
+            "type": "bargauge",
+            "title": "S3 Requests by API",
+            "description": "sort_desc(sum by (api) (rate(minio_s3_requests_total[range])) > 0) - which S3 operations (putobject, getobject, listobjectsv2, etc.) Spark/Airflow are actually driving. Confirmed labels on this deployment: copyobject, deleteobject, getbucketlocation, getobject, headobject, listobjectsv2, putbucket, putobject.",
+            "gridPos": {
+                "x": 0,
+                "y": 14,
+                "w": 24,
+                "h": 7
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sort_desc(sum by (api) (rate(minio_s3_requests_total{job=\"urbangreen-minio\"}[$__rate_interval])) > 0)",
+                    "legendFormat": "{{api}}",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "min": 0,
+                    "noValue": "0",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#1F7A8C"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
             "id": 4,
             "type": "row",
             "title": "Spark",
             "collapsed": false,
             "gridPos": {
                 "x": 0,
-                "y": 9,
+                "y": 21,
                 "w": 24,
                 "h": 1
             },
@@ -198,7 +430,7 @@
             "description": "Workers known to the Spark master, including workers that are no longer alive.",
             "gridPos": {
                 "x": 0,
-                "y": 10,
+                "y": 22,
                 "w": 6,
                 "h": 4
             },
@@ -253,7 +485,7 @@
             "description": "Workers in ALIVE state, from the master PrometheusServlet. NO DATA means that the metric is unavailable.",
             "gridPos": {
                 "x": 6,
-                "y": 10,
+                "y": 22,
                 "w": 6,
                 "h": 4
             },
@@ -317,7 +549,7 @@
             "description": "Registered applications minus WAITING applications, from the master PrometheusServlet. warehouse_load submits Spark applications and should change this value while they run; short apps may finish between the 15-second scrapes.",
             "gridPos": {
                 "x": 12,
-                "y": 10,
+                "y": 22,
                 "w": 6,
                 "h": 4
             },
@@ -372,7 +604,7 @@
             "description": "Applications in WAITING state, from the master PrometheusServlet.",
             "gridPos": {
                 "x": 18,
-                "y": 10,
+                "y": 22,
                 "w": 6,
                 "h": 4
             },
@@ -440,7 +672,7 @@
             "description": "Duration in milliseconds of the latest completed Structured Streaming trigger (durationMs.triggerExecution). This includes the entire micro-batch, rather than only executor processing. Enabled by spark.sql.streaming.metricsEnabled; exposed by PrometheusServlet. The last batch value remains visible between batches.",
             "gridPos": {
                 "x": 0,
-                "y": 14,
+                "y": 26,
                 "w": 12,
                 "h": 8
             },
@@ -503,7 +735,7 @@
             "description": "Estimate only: max(latest completed trigger duration - configured trigger interval, 0), in milliseconds. This is not a measured scheduler delay; Spark 4.0.2 Structured Streaming does not expose a separate scheduling-delay gauge. The Trigger interval (ms) dashboard input defaults to 60000, matching sensor_readings_stream.py's 60-second default. Update this input to match STREAM_TRIGGER_INTERVAL whenever that setting changes. warehouse_load is a separate batch DAG and does not produce these streaming measurements.",
             "gridPos": {
                 "x": 12,
-                "y": 14,
+                "y": 26,
                 "w": 12,
                 "h": 8
             },
@@ -566,7 +798,7 @@
             "description": "Input and processing rates of the latest completed streaming batch, exposed by the Structured Streaming metrics source. Metric names include the application ID and query UUID, so queries match the stable suffix. Value is selected once; the duplicate Number gauge is excluded.",
             "gridPos": {
                 "x": 0,
-                "y": 22,
+                "y": 34,
                 "w": 12,
                 "h": 8
             },
@@ -671,7 +903,7 @@
             "description": "Active executors per Spark worker, from each worker's PrometheusServlet. Includes both sensor_readings_stream and warehouse_load applications, so triggering warehouse_load should populate cluster activity. Driver job counters below are scoped to the separately scraped streaming driver.",
             "gridPos": {
                 "x": 12,
-                "y": 22,
+                "y": 34,
                 "w": 12,
                 "h": 8
             },
@@ -734,7 +966,7 @@
             "description": "Succeeded and failed Spark jobs per second from the streaming driver's appStatus counters, using rate to handle application restarts. These are Spark jobs, not Airflow task outcomes. warehouse_load runs client-mode drivers inside Airflow, which are not scraped by the existing Prometheus configuration.",
             "gridPos": {
                 "x": 0,
-                "y": 30,
+                "y": 42,
                 "w": 12,
                 "h": 8
             },
@@ -839,7 +1071,7 @@
             "description": "Garbage-collection time in milliseconds per second, summed across collectors in each scraped Spark JVM: master, workers, and streaming driver. GC collection times are cumulative even though PrometheusServlet exports them as gauges; rate handles resets. Only the Value copy is selected, and negative/unavailable JVM collection times are excluded. These are process JVM measurements, not warehouse_load executor GC measurements.",
             "gridPos": {
                 "x": 12,
-                "y": 30,
+                "y": 42,
                 "w": 12,
                 "h": 8
             },
@@ -902,7 +1134,7 @@
             "collapsed": false,
             "gridPos": {
                 "x": 0,
-                "y": 38,
+                "y": 50,
                 "w": 24,
                 "h": 1
             },
@@ -915,7 +1147,7 @@
             "description": "Log-derived counts per time bucket of Airflow 3.x supervisor 'Task finished' events with final_state SUCCESS or FAILED. Docker logs are selected by absent dag and filename labels to avoid counting file-scraped task logs again. Counts cover all DAGs: the supervisor event contains a task-instance UUID but no DAG/task/run labels. Tasks completed without a supervisor event, such as optimized EmptyOperator barriers, are not counted. Retry and skipped states are excluded; retries that eventually finish produce their own outcomes. A zero means no matching event in that bucket, and is not a health check for log ingestion. Exact log strings depend on the upstream Airflow 3.x message format. If they shift in a future version, update the LogQL filters.",
             "gridPos": {
                 "x": 0,
-                "y": 39,
+                "y": 51,
                 "w": 24,
                 "h": 8
             },
@@ -1017,7 +1249,7 @@
             "description": "Airflow errors and traceback-bearing log lines from Loki, including Docker service logs and file-scraped task logs. File streams carry dag, task, and run_id labels when Promtail extracts them. JSON task logs can contain escaped multiline tracebacks in one log entry; this query filters raw content without assuming JSON for every stream. Exact log strings depend on the upstream Airflow 3.x message format. If they shift in a future version, update the LogQL filters.",
             "gridPos": {
                 "x": 0,
-                "y": 47,
+                "y": 59,
                 "w": 24,
                 "h": 10
             },
