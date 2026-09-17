@@ -11,7 +11,7 @@
     "editable": false,
     "graphTooltip": 1,
     "schemaVersion": 39,
-    "version": 1,
+    "version": 2,
     "refresh": "30s",
     "time": {
         "from": "now-6h",
@@ -56,7 +56,7 @@
             "id": 2,
             "type": "timeseries",
             "title": "Consumer Lag by Group / Topic",
-            "description": "Unconsumed records, summed over partitions for each consumer group and topic. kafka-exporter reports lag only for groups with committed Kafka offsets. Spark Structured Streaming tracks offsets in its checkpoint and does not commit them to Kafka, so its lag may have no series. Missing exporter data is not shown as zero.",
+            "description": "Unconsumed records, summed over partitions for each consumer group and topic. After each successful micro-batch, the streaming driver mirrors its completed offsets to the monitoring-only urbangreen-spark-streaming group so kafka-exporter can report real pipeline lag. Spark's MinIO checkpoint remains authoritative for recovery. Missing exporter data is not shown as zero.",
             "gridPos": {
                 "x": 0,
                 "y": 1,

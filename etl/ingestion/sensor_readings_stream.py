@@ -13,6 +13,7 @@ Config is read from the environment so the same script runs unchanged across
 environments; the defaults target the compose stack.
 """
 
+import json
 import logging
 import os
 
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 KAFKA_BOOTSTRAP = os.environ.get("SIMULATOR_KAFKA_BOOTSTRAP", "urbangreen-kafka:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC_SENSOR_READINGS", "sensor_readings")
+KAFKA_CONSUMER_GROUP = os.environ.get("KAFKA_CONSUMER_GROUP", "urbangreen-spark-streaming")
 STARTING_OFFSETS = os.environ.get("STREAM_STARTING_OFFSETS", "earliest")
 TRIGGER_INTERVAL = os.environ.get("STREAM_TRIGGER_INTERVAL", "60 seconds")
 
@@ -54,21 +56,72 @@ SENSOR_SCHEMA = StructType(
 
 
 class BatchLogger(StreamingQueryListener):
-    """Logs streaming lifecycle and batch progress."""
+    """Log batch progress and mirror completed offsets for lag monitoring.
+
+    Structured Streaming recovers from its checkpoint and deliberately does not
+    commit source offsets to Kafka. kafka-exporter can only calculate consumer
+    lag for committed groups, so completed end offsets are mirrored to a
+    monitoring-only group after Spark has committed each output batch.
+    """
+
+    def __init__(self, jvm):
+        """Create a Kafka Admin client from jars already loaded by Spark."""
+        super().__init__()
+        self._jvm = jvm
+        properties = jvm.java.util.Properties()
+        properties.put("bootstrap.servers", KAFKA_BOOTSTRAP)
+        properties.put("client.id", "urbangreen-spark-offset-reporter")
+        properties.put("default.api.timeout.ms", "10000")
+        self._admin = jvm.org.apache.kafka.clients.admin.AdminClient.create(properties)
 
     def onQueryStarted(self, event):
         """Log query start."""
         logger.info(f"stream started; query id={event.id}")
 
     def onQueryProgress(self, event):
-        """Log completed micro-batches."""
-        logger.info(
-            f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}"
+        """Log a completed micro-batch and publish its next Kafka offsets."""
+        logger.info(f"Batch: {event.progress.batchId}, inputRows={event.progress.numInputRows}")
+        try:
+            self._commit_offsets(event.progress.sources)
+        except Exception:
+            # Monitoring must never stop the data pipeline. The next completed
+            # batch retries with a newer offset and closes any temporary gap.
+            logger.exception(
+                "failed to mirror Kafka offsets for consumer group=%s",
+                KAFKA_CONSUMER_GROUP,
+            )
+
+    def _commit_offsets(self, sources):
+        """Commit Spark's completed end offsets to the monitoring consumer group."""
+        java_offsets = self._jvm.java.util.HashMap()
+
+        for source in sources:
+            end_offset = source.get("endOffset") if isinstance(source, dict) else source.endOffset
+            if not end_offset:
+                continue
+
+            for topic, partitions in json.loads(end_offset).items():
+                for partition, offset in partitions.items():
+                    topic_partition = self._jvm.org.apache.kafka.common.TopicPartition(
+                        topic, int(partition)
+                    )
+                    offset_metadata = self._jvm.org.apache.kafka.clients.consumer.OffsetAndMetadata(
+                        int(offset)
+                    )
+                    java_offsets.put(topic_partition, offset_metadata)
+
+        if java_offsets.isEmpty():
+            return
+
+        self._admin.alterConsumerGroupOffsets(KAFKA_CONSUMER_GROUP, java_offsets).all().get(
+            10, self._jvm.java.util.concurrent.TimeUnit.SECONDS
         )
+        logger.info("mirrored Kafka offsets; group=%s", KAFKA_CONSUMER_GROUP)
 
     def onQueryTerminated(self, event):
         """Log query termination."""
         logger.info(f"stream terminated; query id={event.id}")
+        self._admin.close()
 
 
 def build_spark():
@@ -138,7 +191,7 @@ def main():
 
     spark = build_spark()
     spark.sparkContext.setLogLevel("WARN")
-    spark.streams.addListener(BatchLogger())
+    spark.streams.addListener(BatchLogger(spark.sparkContext._jvm))
     query = sink(parse(read_source(spark)))
     query.awaitTermination()
 

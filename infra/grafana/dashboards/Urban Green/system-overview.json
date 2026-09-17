@@ -1,7 +1,7 @@
 {
     "uid": "system-overview",
     "title": "System Overview",
-    "description": "At-a-glance platform health: per-service up/down, flapping services, and log volume by service.",
+    "description": "At-a-glance platform health: per-service up/down, 24-hour availability, flapping services, and log volume by service.",
     "tags": [
         "urbangreen",
         "observability"
@@ -10,7 +10,7 @@
     "editable": false,
     "graphTooltip": 1,
     "schemaVersion": 39,
-    "version": 9,
+    "version": 10,
     "refresh": "30s",
     "time": {
         "from": "now-6h",
@@ -294,13 +294,80 @@
             }
         },
         {
+            "id": 7,
+            "type": "bargauge",
+            "title": "Target Uptime (last 24h)",
+            "description": "Successful Prometheus scrapes as a percentage of all scrapes in the last 24 hours. A continuously reachable target is green at 100%; recent targets are calculated over the samples available since they first appeared.",
+            "gridPos": {
+                "x": 0,
+                "y": 10,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "100 * avg_over_time(up[24h])",
+                    "legendFormat": "{{job}}",
+                    "instant": true
+                }
+            ],
+            "options": {
+                "orientation": "horizontal",
+                "displayMode": "gradient",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "decimals": 2,
+                    "min": 0,
+                    "max": 100,
+                    "noValue": "NO DATA",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "red"
+                            },
+                            {
+                                "value": 99,
+                                "color": "orange"
+                            },
+                            {
+                                "value": 99.9,
+                                "color": "#4CBB8A"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
             "id": 2,
             "type": "bargauge",
             "title": "Flap Rate (up/down transitions in the selected time range)",
             "description": "changes(up[range]) per job - how many times each target's up/down state changed. High values mean an unstable target, not just a currently-down one.",
             "gridPos": {
                 "x": 0,
-                "y": 10,
+                "y": 18,
                 "w": 24,
                 "h": 8
             },
@@ -351,7 +418,7 @@
             "description": "Log lines per second, per urbangreen-* service, from Loki.",
             "gridPos": {
                 "x": 0,
-                "y": 18,
+                "y": 26,
                 "w": 24,
                 "h": 8
             },
@@ -407,7 +474,7 @@
             "description": "Log lines with detected_level=\"error\" per second, per urbangreen-* service, from Loki. detected_level is Loki's own automatic level detection - not something this project configured.",
             "gridPos": {
                 "x": 0,
-                "y": 26,
+                "y": 34,
                 "w": 24,
                 "h": 8
             },
