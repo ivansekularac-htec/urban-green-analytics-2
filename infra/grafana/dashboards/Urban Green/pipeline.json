@@ -1,0 +1,1051 @@
+{
+    "uid": "pipeline",
+    "title": "Pipeline",
+    "description": "Kafka consumer lag and topic offset growth, Spark cluster and Structured Streaming activity, and Airflow task outcomes derived from Loki logs. Streaming scheduling delay is shown as a trigger-overrun estimate.",
+    "tags": [
+        "urbangreen",
+        "observability",
+        "pipeline"
+    ],
+    "timezone": "browser",
+    "editable": false,
+    "graphTooltip": 1,
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "templating": {
+        "list": [
+            {
+                "name": "trigger_interval_ms",
+                "type": "textbox",
+                "label": "Trigger interval (ms)",
+                "description": "Positive numeric trigger interval in milliseconds for the scheduling overrun estimate. Match STREAM_TRIGGER_INTERVAL; the streaming job defaults to 60 seconds (60000 ms).",
+                "query": "60000",
+                "current": {
+                    "selected": true,
+                    "text": "60000",
+                    "value": "60000"
+                },
+                "hide": 0
+            }
+        ]
+    },
+    "annotations": {
+        "list": []
+    },
+    "links": [],
+    "panels": [
+        {
+            "id": 1,
+            "type": "row",
+            "title": "Kafka",
+            "collapsed": false,
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 24,
+                "h": 1
+            },
+            "panels": []
+        },
+        {
+            "id": 2,
+            "type": "timeseries",
+            "title": "Consumer Lag by Group / Topic",
+            "description": "Unconsumed records, summed over partitions for each consumer group and topic. kafka-exporter reports lag only for groups with committed Kafka offsets. Spark Structured Streaming tracks offsets in its checkpoint and does not commit them to Kafka, so its lag may have no series. Missing exporter data is not shown as zero.",
+            "gridPos": {
+                "x": 0,
+                "y": 1,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (consumergroup, topic) (kafka_consumergroup_lag{job=\"urbangreen-kafka-exporter\"})",
+                    "legendFormat": "{{consumergroup}} / {{topic}}",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 3,
+            "type": "timeseries",
+            "title": "Topic Offset Growth",
+            "description": "Growth of each topic's latest offsets in records per second, summed over partitions. Latest offsets are gauges, so deriv is used instead of counter-only increase. Negative slopes after a topic reset are clamped to zero. Requires at least two samples.",
+            "gridPos": {
+                "x": 12,
+                "y": 1,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (topic) (clamp_min(deriv(kafka_topic_partition_current_offset{job=\"urbangreen-kafka-exporter\"}[$__rate_interval]), 0))",
+                    "legendFormat": "{{topic}}",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "recps",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 4,
+            "type": "row",
+            "title": "Spark",
+            "collapsed": false,
+            "gridPos": {
+                "x": 0,
+                "y": 9,
+                "w": 24,
+                "h": 1
+            },
+            "panels": []
+        },
+        {
+            "id": 5,
+            "type": "stat",
+            "title": "Registered Workers",
+            "description": "Workers known to the Spark master, including workers that are no longer alive.",
+            "gridPos": {
+                "x": 0,
+                "y": 10,
+                "w": 6,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "metrics_master_workers_Value{job=\"urbangreen-spark-master\"}",
+                    "legendFormat": "Registered Workers",
+                    "instant": true,
+                    "range": false
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#89BDB0"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 6,
+            "type": "stat",
+            "title": "Alive Workers",
+            "description": "Workers in ALIVE state, from the master PrometheusServlet. NO DATA means that the metric is unavailable.",
+            "gridPos": {
+                "x": 6,
+                "y": 10,
+                "w": 6,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "metrics_master_aliveWorkers_Value{job=\"urbangreen-spark-master\"}",
+                    "legendFormat": "Alive Workers",
+                    "instant": true,
+                    "range": false
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "NO DATA",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "red"
+                            },
+                            {
+                                "value": 1,
+                                "color": "#4CBB8A"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 7,
+            "type": "stat",
+            "title": "Running Apps",
+            "description": "Registered applications minus WAITING applications, from the master PrometheusServlet. warehouse_load submits Spark applications and should change this value while they run; short apps may finish between the 15-second scrapes.",
+            "gridPos": {
+                "x": 12,
+                "y": 10,
+                "w": 6,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "clamp_min(metrics_master_apps_Value{job=\"urbangreen-spark-master\"} - metrics_master_waitingApps_Value{job=\"urbangreen-spark-master\"}, 0)",
+                    "legendFormat": "Running Apps",
+                    "instant": true,
+                    "range": false
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "fixed",
+                        "fixedColor": "#89BDB0"
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 8,
+            "type": "stat",
+            "title": "Waiting Apps",
+            "description": "Applications in WAITING state, from the master PrometheusServlet.",
+            "gridPos": {
+                "x": 18,
+                "y": 10,
+                "w": 6,
+                "h": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "metrics_master_waitingApps_Value{job=\"urbangreen-spark-master\"}",
+                    "legendFormat": "Waiting Apps",
+                    "instant": true,
+                    "range": false
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "decimals": 0,
+                    "noValue": "NO DATA",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "value": null,
+                                "color": "#4CBB8A"
+                            },
+                            {
+                                "value": 1,
+                                "color": "#5C9E8A"
+                            },
+                            {
+                                "value": 3,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 9,
+            "type": "timeseries",
+            "title": "Streaming Batch Processing Time",
+            "description": "Duration in milliseconds of the latest completed Structured Streaming trigger (durationMs.triggerExecution). This includes the entire micro-batch, rather than only executor processing. Enabled by spark.sql.streaming.metricsEnabled; exposed by PrometheusServlet. The last batch value remains visible between batches.",
+            "gridPos": {
+                "x": 0,
+                "y": 14,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "{__name__=~\"metrics_.*_driver_spark_streaming_.*_latency_Value\",job=\"urbangreen-spark-streaming\"}",
+                    "legendFormat": "Latest batch",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 10,
+            "type": "timeseries",
+            "title": "Scheduling Delay Estimate (Trigger Overrun)",
+            "description": "Estimate only: max(latest completed trigger duration - configured trigger interval, 0), in milliseconds. This is not a measured scheduler delay; Spark 4.0.2 Structured Streaming does not expose a separate scheduling-delay gauge. The Trigger interval (ms) dashboard input defaults to 60000, matching sensor_readings_stream.py's 60-second default. Update this input to match STREAM_TRIGGER_INTERVAL whenever that setting changes. warehouse_load is a separate batch DAG and does not produce these streaming measurements.",
+            "gridPos": {
+                "x": 12,
+                "y": 14,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "clamp_min({__name__=~\"metrics_.*_driver_spark_streaming_.*_latency_Value\",job=\"urbangreen-spark-streaming\"} - ${trigger_interval_ms:raw}, 0)",
+                    "legendFormat": "Estimated overrun",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 11,
+            "type": "timeseries",
+            "title": "Streaming Input / Processing Rate",
+            "description": "Input and processing rates of the latest completed streaming batch, exposed by the Structured Streaming metrics source. Metric names include the application ID and query UUID, so queries match the stable suffix. Value is selected once; the duplicate Number gauge is excluded.",
+            "gridPos": {
+                "x": 0,
+                "y": 22,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "{__name__=~\"metrics_.*_driver_spark_streaming_.*_inputRate_total_Value\",job=\"urbangreen-spark-streaming\"}",
+                    "legendFormat": "Input",
+                    "instant": false,
+                    "range": true
+                },
+                {
+                    "refId": "B",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "{__name__=~\"metrics_.*_driver_spark_streaming_.*_processingRate_total_Value\",job=\"urbangreen-spark-streaming\"}",
+                    "legendFormat": "Processing",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "recps",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Input"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#89BDB0"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Processing"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "type": "timeseries",
+            "title": "Active Executors by Worker",
+            "description": "Active executors per Spark worker, from each worker's PrometheusServlet. Includes both sensor_readings_stream and warehouse_load applications, so triggering warehouse_load should populate cluster activity. Driver job counters below are scoped to the separately scraped streaming driver.",
+            "gridPos": {
+                "x": 12,
+                "y": 22,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "metrics_worker_executors_Value{job=~\"urbangreen-spark-worker-[12]\"}",
+                    "legendFormat": "{{job}}",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 13,
+            "type": "timeseries",
+            "title": "Streaming Job Outcomes",
+            "description": "Succeeded and failed Spark jobs per second from the streaming driver's appStatus counters, using rate to handle application restarts. These are Spark jobs, not Airflow task outcomes. warehouse_load runs client-mode drivers inside Airflow, which are not scraped by the existing Prometheus configuration.",
+            "gridPos": {
+                "x": 0,
+                "y": 30,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(label_replace({__name__=~\"metrics_.*_driver_appStatus_jobs_succeededJobs_Count\",job=\"urbangreen-spark-streaming\"}, \"spark_metric\", \"$1\", \"__name__\", \"(.+)\")[$__rate_interval:15s]))",
+                    "legendFormat": "Succeeded",
+                    "instant": false,
+                    "range": true
+                },
+                {
+                    "refId": "B",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum(rate(label_replace({__name__=~\"metrics_.*_driver_appStatus_jobs_failedJobs_Count\",job=\"urbangreen-spark-streaming\"}, \"spark_metric\", \"$1\", \"__name__\", \"(.+)\")[$__rate_interval:15s]))",
+                    "legendFormat": "Failed",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ops",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Succeeded"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Failed"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "red"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 14,
+            "type": "timeseries",
+            "title": "JVM GC Time by Spark Process",
+            "description": "Garbage-collection time in milliseconds per second, summed across collectors in each scraped Spark JVM: master, workers, and streaming driver. GC collection times are cumulative even though PrometheusServlet exports them as gauges; rate handles resets. Only the Value copy is selected, and negative/unavailable JVM collection times are excluded. These are process JVM measurements, not warehouse_load executor GC measurements.",
+            "gridPos": {
+                "x": 12,
+                "y": 30,
+                "w": 12,
+                "h": 8
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "prometheus"
+                    },
+                    "expr": "sum by (job) (rate(label_replace({__name__=~\"metrics_.*jvm_.*_time_Value\",job=~\"urbangreen-spark-(master|worker-[12]|streaming)\"} >= 0, \"spark_metric\", \"$1\", \"__name__\", \"(.+)\")[$__rate_interval:15s]))",
+                    "legendFormat": "{{job}}",
+                    "instant": false,
+                    "range": true
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ms",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "spanNulls": false,
+                        "stacking": {
+                            "mode": "none"
+                        }
+                    }
+                },
+                "overrides": []
+            }
+        },
+        {
+            "id": 15,
+            "type": "row",
+            "title": "Airflow (from logs)",
+            "collapsed": false,
+            "gridPos": {
+                "x": 0,
+                "y": 38,
+                "w": 24,
+                "h": 1
+            },
+            "panels": []
+        },
+        {
+            "id": 16,
+            "type": "timeseries",
+            "title": "Task Transitions: SUCCESS / FAILED",
+            "description": "Log-derived counts per time bucket of Airflow 3.x supervisor 'Task finished' events with final_state SUCCESS or FAILED. Docker logs are selected by absent dag and filename labels to avoid counting file-scraped task logs again. Counts cover all DAGs: the supervisor event contains a task-instance UUID but no DAG/task/run labels. Tasks completed without a supervisor event, such as optimized EmptyOperator barriers, are not counted. Retry and skipped states are excluded; retries that eventually finish produce their own outcomes. A zero means no matching event in that bucket, and is not a health check for log ingestion. Exact log strings depend on the upstream Airflow 3.x message format. If they shift in a future version, update the LogQL filters.",
+            "gridPos": {
+                "x": 0,
+                "y": 39,
+                "w": 24,
+                "h": 8
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\",dag=\"\",filename=\"\"} |= \"Task finished\" | decolorize |~ \"(?i)final_state[\\\"'[:space:]]*[:=][\\\"'[:space:]]*<?(TaskInstanceState[.])?success\\\\b\" [$__interval])) or vector(0)",
+                    "legendFormat": "SUCCESS",
+                    "queryType": "range"
+                },
+                {
+                    "refId": "B",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "sum(count_over_time({service=\"urbangreen-airflow\",dag=\"\",filename=\"\"} |= \"Task finished\" | decolorize |~ \"(?i)final_state[\\\"'[:space:]]*[:=][\\\"'[:space:]]*<?(TaskInstanceState[.])?failed\\\\b\" [$__interval])) or vector(0)",
+                    "legendFormat": "FAILED",
+                    "queryType": "range"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "min": 0,
+                    "noValue": "NO DATA",
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "drawStyle": "bars",
+                        "lineWidth": 1,
+                        "fillOpacity": 60,
+                        "stacking": {
+                            "mode": "normal"
+                        },
+                        "spanNulls": false
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "SUCCESS"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "#4CBB8A"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "FAILED"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "fixed",
+                                    "fixedColor": "red"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 17,
+            "type": "logs",
+            "title": "Airflow Errors / Tracebacks",
+            "description": "Airflow errors and traceback-bearing log lines from Loki, including Docker service logs and file-scraped task logs. File streams carry dag, task, and run_id labels when Promtail extracts them. JSON task logs can contain escaped multiline tracebacks in one log entry; this query filters raw content without assuming JSON for every stream. Exact log strings depend on the upstream Airflow 3.x message format. If they shift in a future version, update the LogQL filters.",
+            "gridPos": {
+                "x": 0,
+                "y": 47,
+                "w": 24,
+                "h": 10
+            },
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "expr": "{service=\"urbangreen-airflow\"} | decolorize |~ \"(?i)\\\\berror\\\\b|\\\\bcritical\\\\b|traceback|task failed with exception\"",
+                    "queryType": "range"
+                }
+            ],
+            "options": {
+                "showTime": true,
+                "showLabels": true,
+                "showCommonLabels": false,
+                "wrapLogMessage": true,
+                "prettifyLogMessage": true,
+                "enableLogDetails": true,
+                "dedupStrategy": "none",
+                "sortOrder": "Descending"
+            }
+        }
+    ]
+}
