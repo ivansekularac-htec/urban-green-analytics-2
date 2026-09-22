@@ -129,7 +129,7 @@ services:
           memory: 512M
 
   urbangreen-minio-init:
-    image: quay.io/minio/mc:latest
+    image: minio/mc:latest
     container_name: urbangreen-minio-init
     profiles: [ "all", "backend" ]
 

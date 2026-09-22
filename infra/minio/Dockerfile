@@ -1,4 +1,4 @@
-FROM quay.io/minio/minio:latest
+FROM minio/minio:latest
 
 EXPOSE 9000 9001
 
