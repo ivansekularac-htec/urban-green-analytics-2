@@ -60,11 +60,13 @@ def test_user_response_round_trip():
         email="alice@example.com",
         full_name="Alice",
         is_active=True,
+        roles=["Admin"],
         created_at=1,
         updated_at=2,
     )
 
     assert response.id == 1
+    assert response.roles == ["Admin"]
 
 
 def test_role_create_update_response():
