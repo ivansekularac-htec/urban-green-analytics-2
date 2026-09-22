@@ -1,0 +1,114 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Urban Green
+    folder: Urban Green Alerts
+    interval: 1m
+    rules:
+      - uid: urbangreen_instance_down
+        title: InstanceDown
+        condition: B
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: up == 0
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $A == 0
+              type: math
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+        for: 2m
+        noDataState: OK
+        execErrState: Error
+
+      - uid: urbangreen_airflow_task_failed
+        title: AirflowTaskFailed
+        condition: B
+        data:
+          - refId: A
+            datasourceUid: loki
+            queryType: instant
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              datasource:
+                type: loki
+                uid: loki
+              editorMode: code
+              expr: 'sum(count_over_time({service="urbangreen-airflow"} |~ "(?i)(Task finished.*final_state[=:] ?failed|Marking task as FAILED)" [5m])) or vector(0)'
+              instant: true
+              queryType: instant
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $A > 0
+              type: math
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+        for: 2m
+        noDataState: OK
+        execErrState: Error
+
+      - uid: urbangreen_spark_workers_dead
+        title: SparkWorkersDead
+        condition: B
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: metrics_master_aliveWorkers_Number == 0
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $A == 0
+              type: math
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+        for: 2m
+        noDataState: OK
+        execErrState: Error

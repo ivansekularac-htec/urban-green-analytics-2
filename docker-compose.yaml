@@ -129,7 +129,7 @@ services:
           memory: 512M
 
   urbangreen-minio-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:latest
     container_name: urbangreen-minio-init
     profiles: [ "all", "backend" ]
 
@@ -898,6 +898,9 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: urbangreen-mailpit:1025
+      GF_SMTP_FROM_ADDRESS: grafana@urbangreen.local
 
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
