@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
     const [user, setUser] = useState<CurrentUser | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(() => localStorage.getItem('token') !== null);
 
     const fetchUser = useCallback(async () => {
         try {
@@ -30,12 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
-        if (!token) {
-            setIsLoading(false);
-            return;
-        }
-        setIsLoading(true);
-        fetchUser().finally(() => setIsLoading(false));
+        if (!token) return;
+        apiFetch<CurrentUser>('/auth/me')
+            .then((me) => {
+                setUser(me);
+            })
+            .catch(() => {
+                localStorage.removeItem('token');
+                setToken(null);
+                setUser(null);
+            })
+            .finally(() => setIsLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const login = useCallback(async (newToken: string) => {
@@ -57,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error('useAuth must be used within AuthProvider');

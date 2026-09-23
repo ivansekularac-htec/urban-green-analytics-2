@@ -7,7 +7,7 @@ user is assigned to (Admin sees everything). Writes are Admin only.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.database import DatabaseSession
 from app.repositories.crops.farm_crop import FarmCropRepository
@@ -38,10 +38,17 @@ FarmCropServiceDep = Annotated[FarmCropService, Depends(get_farm_crop_service)]
 
 
 @router.get("", response_model=list[FarmCropResponse])
-def list_farm_crops(service: FarmCropServiceDep, pagination: PaginationDep, farms: AccessibleFarms):
+def list_farm_crops(
+    service: FarmCropServiceDep,
+    pagination: PaginationDep,
+    farms: AccessibleFarms,
+    farm_id: Annotated[int | None, Query()] = None,
+):
     """List farm crop records visible to the current user."""
+    if farm_id is not None:
+        assert_farm_in_scope(farm_id, farms)
+        farms = {farm_id}
     return service.list(skip=pagination.skip, limit=pagination.limit, farm_ids=farms)
-
 
 @router.get("/{farm_crop_id}", response_model=FarmCropResponse)
 def get_farm_crop(farm_crop_id: int, service: FarmCropServiceDep, farms: AccessibleFarms):
