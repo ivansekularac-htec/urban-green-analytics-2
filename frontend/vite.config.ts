@@ -10,6 +10,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    env: {
+      VITE_SUPERSET_URL: 'http://localhost:8088',
+      VITE_GRAFANA_URL: 'http://localhost:3000',
+    },
   },
   server: {
     proxy: {
