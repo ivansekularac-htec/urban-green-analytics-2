@@ -1,0 +1,42 @@
+name: Urban Green Analytics Frontend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Run eslint
+        run: npm run lint
+        working-directory: ./frontend
+
+      - name: Run tests
+        run: npm test
+        working-directory: ./frontend
+
+      - name: Typecheck and build
+        run: npm run build
+        working-directory: ./frontend

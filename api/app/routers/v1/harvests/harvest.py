@@ -8,7 +8,7 @@ Operations Team — Operations Team only on farms they're assigned to.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.database import DatabaseSession
 from app.models.users.user import User
@@ -48,8 +48,16 @@ HarvestWriter = Annotated[
 
 
 @router.get("", response_model=list[HarvestResponse])
-def list_harvests(service: HarvestServiceDep, pagination: PaginationDep, farms: AccessibleFarms):
+def list_harvests(
+    service: HarvestServiceDep,
+    pagination: PaginationDep,
+    farms: AccessibleFarms,
+    farm_id: Annotated[int | None, Query()] = None,
+):
     """List harvest records visible to the current user."""
+    if farm_id is not None:
+        assert_farm_in_scope(farm_id, farms)
+        farms = {farm_id}
     return service.list(skip=pagination.skip, limit=pagination.limit, farm_ids=farms)
 
 

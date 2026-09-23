@@ -21,7 +21,7 @@ export function Navbar() {
     }
 
     return (
-        <nav className="flex w-64 shrink-0 flex-col bg-brand-dark px-4 py-6">
+        <nav className="flex h-full w-64 shrink-0 flex-col bg-brand-dark px-4 py-6">
             <img src={logo} alt="Urban Green Analytics" className="mx-auto w-36" />
 
             <div className="mt-10 flex flex-1 flex-col gap-1">
