@@ -69,5 +69,6 @@ class UserResponse(UserBase, AuditSchema):
     """
 
     id: int
+    roles: list[str]
 
     model_config = ConfigDict(from_attributes=True)

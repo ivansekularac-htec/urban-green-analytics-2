@@ -16,6 +16,12 @@ from app.security.roles import RoleName
 
 
 def _make_active_user(email: str = "alice@example.com", password: str = "hunter2hunter"):
+    user_roles = [
+        SimpleNamespace(
+            role=SimpleNamespace(name=RoleName.ADMIN.value),
+            farm_id=None,
+        )
+    ]
     return SimpleNamespace(
         id=1,
         email=email,
@@ -24,12 +30,8 @@ def _make_active_user(email: str = "alice@example.com", password: str = "hunter2
         is_active=True,
         created_at=1,
         updated_at=2,
-        user_roles=[
-            SimpleNamespace(
-                role=SimpleNamespace(name=RoleName.ADMIN.value),
-                farm_id=None,
-            )
-        ],
+        user_roles=user_roles,
+        roles=[ur.role.name for ur in user_roles],
     )
 
 

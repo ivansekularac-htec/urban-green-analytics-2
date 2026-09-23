@@ -57,3 +57,8 @@ class User(Base, AuditMixin):
     user_roles: Mapped[list[UserRole]] = relationship(
         back_populates="user",
     )
+
+    @property
+    def roles(self) -> list[str]:
+        """Role names currently assigned to this user (e.g. 'Admin', 'Farm Manager')."""
+        return [ur.role.name for ur in self.user_roles]

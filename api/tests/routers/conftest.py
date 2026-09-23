@@ -12,7 +12,7 @@ Authorization-specific behaviour is covered separately in
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -60,6 +60,10 @@ class RouteCase:
     scoped: bool = False
     """When True, the list endpoint takes a farm-scope filter
     (``farm_ids=None`` for Admin) and the assertions account for that."""
+    extra_response_fields: dict = field(default_factory=dict)
+    """Attributes the mock's representative object needs for response
+    serialization but that don't come from ``create_payload`` — e.g.
+    computed fields like ``User.roles``."""
 
 
 @pytest.fixture
@@ -109,7 +113,13 @@ def assert_crud_endpoints(client: TestClient, service: MagicMock, case: RouteCas
 
     app.dependency_overrides[case.dependency] = lambda: service
 
-    representative_dict = {**case.create_payload, "id": 1, "created_at": 1, "updated_at": 2}
+    representative_dict = {
+        **case.create_payload,
+        "id": 1,
+        "created_at": 1,
+        "updated_at": 2,
+        **case.extra_response_fields,
+    }
     # SimpleNamespace supports attribute access (needed by routers that
     # post-fetch the row to enforce farm scoping) while still being
     # serializable by ``from_attributes=True`` response models.

@@ -95,6 +95,7 @@ def _mock_service_for(dependency, *, scoped_id_returns_farm: int | None = None):
         full_name="x",
         is_active=True,
         password_hash="x",
+        roles=["Admin"],
         created_at=1,
         updated_at=1,
     )

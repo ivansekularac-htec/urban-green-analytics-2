@@ -29,6 +29,7 @@ CASES = [
             "password": "supersecret",
         },
         update_payload={"full_name": "Alice B."},
+        extra_response_fields={"roles": ["Admin"]},
     ),
     RouteCase(
         name="roles",
