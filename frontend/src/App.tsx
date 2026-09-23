@@ -27,10 +27,8 @@ export default function App() {
           <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
             <Route path="/" element={<Home />} />
             <Route path="/farms/:farmId" element={<FarmDetail />} />
-            <Route path="/dashboards" element={<div>Dashboards</div>} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/users" element={<div>Users</div>} />
-            <Route path="/monitoring" element={<div>Monitoring</div>} />
           </Route>
         </Routes>
       </BrowserRouter>

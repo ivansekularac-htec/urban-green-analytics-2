@@ -5,10 +5,15 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  envDir: '../',
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    env: {
+      VITE_SUPERSET_URL: 'http://localhost:8088',
+      VITE_GRAFANA_URL: 'http://localhost:3000',
+    },
   },
   server: {
     proxy: {

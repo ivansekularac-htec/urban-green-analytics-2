@@ -18,7 +18,9 @@ describe('Navbar', () => {
       </MemoryRouter>,
     )
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Dashboards' })).toBeInTheDocument()
+    const dashboards = screen.getByRole('link', { name: 'Dashboards' })
+    expect(dashboards).toHaveAttribute('href', 'http://localhost:8088')
+    expect(dashboards).toHaveAttribute('target', '_blank')
     expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Monitoring' })).not.toBeInTheDocument()
   })

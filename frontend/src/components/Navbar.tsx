@@ -6,6 +6,8 @@ import logo from '../assets/logo.png';
 const linkBase = 'flex items-center rounded-md px-4 py-2.5 text-sm font-medium transition-colors';
 const linkInactive = 'text-white/80 hover:bg-white/10 hover:text-white';
 const linkActive = 'bg-brand text-white';
+const supersetUrl = import.meta.env.VITE_SUPERSET_URL;
+const grafanaUrl = import.meta.env.VITE_GRAFANA_URL;
 
 export function Navbar() {
     const { user, logout } = useAuth();
@@ -26,11 +28,25 @@ export function Navbar() {
 
             <div className="mt-10 flex flex-1 flex-col gap-1">
                 <NavLink to="/" end className={linkClass}>Home</NavLink>
-                <NavLink to="/dashboards" className={linkClass}>Dashboards</NavLink>
+                <a
+                    href={supersetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${linkBase} ${linkInactive}`}
+                >
+                    Dashboards
+                </a>
                 {isAdmin && (
                     <>
                         <NavLink to="/users" className={linkClass}>Users</NavLink>
-                        <NavLink to="/monitoring" className={linkClass}>Monitoring</NavLink>
+                        <a
+                            href={grafanaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`${linkBase} ${linkInactive}`}
+                        >
+                            Monitoring
+                        </a>
                     </>
                 )}
             </div>
