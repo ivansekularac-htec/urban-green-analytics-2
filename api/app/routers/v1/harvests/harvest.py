@@ -60,6 +60,7 @@ def list_harvests(
         farms = {farm_id}
     return service.list(skip=pagination.skip, limit=pagination.limit, farm_ids=farms)
 
+
 @router.get("/{harvest_id}", response_model=HarvestResponse)
 def get_harvest(harvest_id: int, service: HarvestServiceDep, farms: AccessibleFarms):
     """Get a harvest record by ID, scoped to the user's farms."""

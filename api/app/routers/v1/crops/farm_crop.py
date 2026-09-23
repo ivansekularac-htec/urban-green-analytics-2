@@ -50,6 +50,7 @@ def list_farm_crops(
         farms = {farm_id}
     return service.list(skip=pagination.skip, limit=pagination.limit, farm_ids=farms)
 
+
 @router.get("/{farm_crop_id}", response_model=FarmCropResponse)
 def get_farm_crop(farm_crop_id: int, service: FarmCropServiceDep, farms: AccessibleFarms):
     """Get a farm crop record by ID, scoped to the user's farms."""
