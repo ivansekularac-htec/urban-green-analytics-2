@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
+import { ADMIN_ROLE } from '../types/user';
 
 const linkBase = 'flex items-center rounded-md px-4 py-2.5 text-sm font-medium transition-colors';
 const linkInactive = 'text-white/80 hover:bg-white/10 hover:text-white';
@@ -12,7 +13,7 @@ const grafanaUrl = import.meta.env.VITE_GRAFANA_URL;
 export function Navbar() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const isAdmin = user?.roles.includes('Admin') ?? false;
+    const isAdmin = user?.roles.includes(ADMIN_ROLE) ?? false;
 
     const linkClass = ({ isActive }: { isActive: boolean }) =>
         `${linkBase} ${isActive ? linkActive : linkInactive}`;

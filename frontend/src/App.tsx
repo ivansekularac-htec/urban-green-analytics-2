@@ -1,11 +1,14 @@
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { RequireAuth } from './components/RequireAuth';
+import { RequireRole } from './components/RequireRole';
 import { Navbar } from './components/Navbar';
 import { Login } from './pages/Login';
 import { Profile } from './pages/Profile';
 import { Home } from './pages/Home';
 import { FarmDetail } from './pages/FarmDetail';
+import { Users } from './pages/Users';
+import { ADMIN_ROLE } from './types/user';
 
 function AppLayout() {
   return (
@@ -28,7 +31,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/farms/:farmId" element={<FarmDetail />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/users" element={<div>Users</div>} />
+            <Route path="/users" element={<RequireRole role={ADMIN_ROLE}><Users /></RequireRole>} />
           </Route>
         </Routes>
       </BrowserRouter>
