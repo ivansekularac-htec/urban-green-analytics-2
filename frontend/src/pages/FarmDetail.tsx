@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { apiFetch } from '../lib/api';
+import { apiFetch, fetchAll } from '../lib/api';
 
 interface Farm {
     id: number;
@@ -26,18 +26,6 @@ interface Harvest {
     crop_id: number;
     weight_kg: string;
     created_at: number;
-}
-
-const PAGE = 200;
-
-async function fetchAll<T>(path: string, farmId?: number): Promise<T[]> {
-    const rows: T[] = [];
-    for (let skip = 0; ; skip += PAGE) {
-        const farm = farmId === undefined ? '' : `farm_id=${farmId}&`;
-        const page = await apiFetch<T[]>(`${path}?${farm}skip=${skip}&limit=${PAGE}`);
-        rows.push(...page);
-        if (page.length < PAGE) return rows;
-    }
 }
 
 function uniqueById<T extends { id: number }>(rows: T[]): T[] {

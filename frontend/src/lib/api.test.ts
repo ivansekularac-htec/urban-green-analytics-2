@@ -33,4 +33,18 @@ describe('apiFetch', () => {
       message: 'Nope',
     } satisfies Partial<ApiError>)
   })
+
+  it('turns a validation error list into a readable message', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({ detail: [{ loc: ['body', 'email'], msg: 'invalid email' }] }),
+        { status: 422 },
+      ),
+    )
+
+    await expect(apiFetch('/users')).rejects.toMatchObject({
+      status: 422,
+      message: 'invalid email',
+    } satisfies Partial<ApiError>)
+  })
 })
